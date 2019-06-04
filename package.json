@@ -1,0 +1,19 @@
+{
+  "name": "sc4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:cpp": "node-gyp rebuild --dir=src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "node-addon-api": "^1.6.3",
+    "node-gyp": "^4.0.0"
+  }
+}

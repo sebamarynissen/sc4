@@ -1,0 +1,8 @@
+**/node_modules/**
+*.sc4lot
+*.dat
+
+package-lock.json
+*.sublime-workspace
+
+src/build/**
