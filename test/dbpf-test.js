@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DBPF = require('../lib/dbpf');
+const Exemplar = require('../lib/exemplar');
 
 describe('A DBPF file', function() {
 
@@ -16,12 +17,10 @@ describe('A DBPF file', function() {
 
 		// Parse the dbpf.
 		let dbpf = new DBPF(buff);
-		// console.log(dbpf);
 
 		let entry = dbpf.entries.find(entry => entry.compressed);
-		let exemplar = entry.get();
-
-		// console.log('exemplar', exemplar.byteLength, exemplar);
+		let exmp = new Exemplar(entry.get());
+		console.log(...exmp.props);
 
 	});
 
