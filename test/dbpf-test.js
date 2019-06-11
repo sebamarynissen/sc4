@@ -18,10 +18,20 @@ describe('A DBPF file', function() {
 		// Parse the dbpf.
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find(entry => entry.compressed);
-		let exmp = new Exemplar(entry.get());
-		console.log(...exmp.props);
+		let entries = dbpf.entries.filter(entry => entry.compressed);
+		for (let entry of entries) {
+			let exmp = new Exemplar(entry.get());
+			console.log(exmp.toBuffer());
+			// console.log(...exmp.props.map(x => {
+			// 	x.name = hex(x.name);
+			// 	return x;
+			// }));
+		}
 
 	});
 
 });
+
+function hex(nr) {
+	return '0x'+(Number(nr).toString(16).padStart(8, '0'));
+}
