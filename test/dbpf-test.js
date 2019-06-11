@@ -20,8 +20,13 @@ describe('A DBPF file', function() {
 
 		let entries = dbpf.entries.filter(entry => entry.compressed);
 		for (let entry of entries) {
-			let exmp = new Exemplar(entry.get());
-			console.log(exmp.toBuffer());
+			let source = entry.get();
+			let exmp = new Exemplar(source);
+			let bin = exmp.toBuffer().toString('hex');
+			let check = source.toString('hex');
+			expect(bin).to.equal(check);
+
+			// console.log(exmp.toBuffer());
 			// console.log(...exmp.props.map(x => {
 			// 	x.name = hex(x.name);
 			// 	return x;
