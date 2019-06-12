@@ -20,6 +20,27 @@ describe('A DBPF file', function() {
 
 	});
 
+	it('should be serialized to a buffer', function() {
+		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let dbpf = new DBPF(fs.readFileSync(file));
+
+		// Serialize the DBPF into a buffer and immediately parse again so 
+		// that we can compare.
+		let buff = dbpf.toBuffer();
+		let my = new DBPF(buff);
+		
+		expect(my.created).to.eql(dbpf.created);
+		expect(my.modified).to.eql(dbpf.modified);
+		for (let entry of my.exemplars) {
+			let exemplar = entry.read();
+			let check = dbpf.index.get(entry.id).read();
+			expect(exemplar).to.eql(check);
+		}
+
+		my.save(path.resolve(__dirname, 'files/saved.sc4lot'));
+
+	});
+
 });
 
 describe('An exemplar file', function() {
