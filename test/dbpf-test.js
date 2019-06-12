@@ -10,7 +10,7 @@ const Exemplar = require('../lib/exemplar');
 
 describe('A DBPF file', function() {
 
-	it.only('should be parsed', function() {
+	it('should be parsed', function() {
 
 		let file = path.resolve(__dirname, 'files/cement.sc4lot');
 		let buff = fs.readFileSync(file);
@@ -18,25 +18,30 @@ describe('A DBPF file', function() {
 		// Parse the dbpf.
 		let dbpf = new DBPF(buff);
 
-		let entries = dbpf.entries.filter(entry => entry.compressed);
-		for (let entry of entries) {
-			let source = entry.get();
-			let exmp = new Exemplar(source);
-			let bin = exmp.toBuffer().toString('hex');
-			let check = source.toString('hex');
-			expect(bin).to.equal(check);
+	});
 
-			// console.log(exmp.toBuffer());
-			// console.log(...exmp.props.map(x => {
-			// 	x.name = hex(x.name);
-			// 	return x;
-			// }));
+});
+
+describe('An exemplar file', function() {
+
+	it('should serialize to a buffer correctly', function() {
+
+		// Read an exemplar from a sample dbpf first.
+		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let exemplars = dbpf.exemplars;
+		let raw = exemplars.map(entry => entry.decompress());
+
+		for (let i = 0; i < exemplars.length; i++) {
+			let entry = exemplars[i];
+			let exemplar = entry.read()
+			let bin = exemplar.toBuffer().toString('hex');
+			let check = raw[i].toString('hex');
+			expect(bin).to.equal(check);
 		}
 
 	});
 
 });
-
-function hex(nr) {
-	return '0x'+(Number(nr).toString(16).padStart(8, '0'));
-}
