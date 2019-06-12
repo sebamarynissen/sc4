@@ -15,5 +15,8 @@
     "mocha": "^6.1.4",
     "node-addon-api": "^1.6.3",
     "node-gyp": "^4.0.0"
+  },
+  "dependencies": {
+    "xml2js": "^0.4.19"
   }
 }
