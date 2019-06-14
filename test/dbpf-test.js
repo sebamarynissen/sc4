@@ -65,4 +65,15 @@ describe('An exemplar file', function() {
 
 	});
 
+	it('should read textual exemplars', function() {
+
+		let file = path.resolve(__dirname, 'files/quotes.sc4desc');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.exemplars[0];
+		let exemplar = entry.read();
+
+	});
+
 });

@@ -1,5 +1,7 @@
 **/node_modules/**
 *.sc4lot
+*.sc4desc
+*.dat
 *.dat
 
 package-lock.json

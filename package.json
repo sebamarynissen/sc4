@@ -7,6 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:cpp": "node-gyp rebuild --dir=src"
   },
+  "bin": {
+    "sc4": "./lib/cli/cli.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,6 +20,8 @@
     "node-gyp": "^4.0.0"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
+    "commander": "^2.20.0",
     "xml2js": "^0.4.19"
   }
 }
