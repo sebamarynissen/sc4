@@ -82,7 +82,7 @@ describe('An exemplar file', function() {
 
 describe('A lot subfile', function() {
 
-	it.only('should compute the all crc checksums correctly', function() {
+	it('should compute the all crc checksums correctly', function() {
 
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		let buff = fs.readFileSync(file);
@@ -99,6 +99,28 @@ describe('A lot subfile', function() {
 			let calc = lot.calculateCRC();
 			expect(crc).to.equal(calc);
 		}
+
+	});
+
+	it('should re-save after making buildings historical', async function() {
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		// Mark all lots as historical.
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+		for (let lot of lotFile) {
+			expect(lot.historical).to.be.false;
+			lot.historical = true;
+			expect(lot.historical).to.be.true;
+		}
+
+		// Save baby. Oh boy oh boy.
+		let to = path.resolve(__dirname, 'files/historical-city.sc4');
+		await dbpf.save({"file": to});
+
+		// Now hand-test this in SC4.
 
 	});
 
