@@ -120,7 +120,7 @@ describe('A lot subfile', function() {
 
 		// Save baby. Oh boy oh boy.
 		let to = path.resolve(__dirname, 'files/writing_true_history.sc4');
-		await dbpf.save({"file": file});
+		await dbpf.save({"file": to});
 
 		// Now hand-test this in SC4.
 
