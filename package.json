@@ -1,27 +1,34 @@
 {
   "name": "sc4",
-  "version": "0.0.2-alpha",
+  "version": "0.0.3-alpha",
   "description": "A command line utility for automating SimCity 4 modding tasks & modifying savegames",
   "main": "lib/dpbf.js",
   "scripts": {
+    "install": "node-gyp-build",
     "test": "mocha",
+    "prebuild": "prebuildify -t node@12.0.0 -t node@12.1.0 -t node@12.2.0 -t node@12.3.0 -t node@12.4.0 -t electron@4.0.0 -t electron@5.0.1",
     "build:cpp": "node-gyp rebuild"
   },
   "bin": {
     "sc4": "./bin/cli.js"
   },
-  "keywords": ["SimCity 4", "modding"],
+  "keywords": [
+    "SimCity 4",
+    "modding"
+  ],
   "author": "Sebastiaan Marynissen",
   "license": "MIT",
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
-    "node-gyp": "^4.0.0"
+    "node-gyp": "^4.0.0",
+    "prebuildify": "^3.0.0"
   },
   "dependencies": {
     "chalk": "^2.4.2",
     "commander": "^2.20.0",
     "node-addon-api": "^1.6.3",
+    "node-gyp-build": "^4.1.0",
     "xml2js": "^0.4.19"
   }
 }

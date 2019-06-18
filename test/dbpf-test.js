@@ -102,10 +102,10 @@ describe('A lot subfile', function() {
 
 	});
 
-	it.only('should re-save after making buildings historical', async function() {
-		// let file = path.resolve(__dirname, 'files/city.sc4');
+	it('should re-save after making buildings historical', async function() {
+		let file = path.resolve(__dirname, 'files/city.sc4');
 		// let file = path.resolve(__dirname, 'files/writing_history.sc4');
-		let file = path.resolve(process.env.HOMEPATH, 'documents/SimCity 4/Regions/Experiments/City - Writing More History.sc4');
+		// let file = path.resolve(process.env.HOMEPATH, 'documents/SimCity 4/Regions/Experiments/City - Writing More History.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -113,13 +113,13 @@ describe('A lot subfile', function() {
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
 		let lotFile = entry.read();
 		for (let lot of lotFile) {
-			// expect(lot.historical).to.be.false;
+			expect(lot.historical).to.be.false;
 			lot.historical = true;
 			expect(lot.historical).to.be.true;
 		}
 
 		// Save baby. Oh boy oh boy.
-		// let to = path.resolve(__dirname, 'files/writing_true_history.sc4');
+		let to = path.resolve(__dirname, 'files/writing_true_history.sc4');
 		await dbpf.save({"file": file});
 
 		// Now hand-test this in SC4.
