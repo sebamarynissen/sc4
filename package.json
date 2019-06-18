@@ -8,7 +8,7 @@
     "build:cpp": "node-gyp rebuild --dir=src"
   },
   "bin": {
-    "sc4": "./lib/cli/cli.js"
+    "sc4": "./bin/cli.js"
   },
   "keywords": [],
   "author": "",

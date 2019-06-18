@@ -1,14 +1,14 @@
-// # cli.js
+#!/usr/bin/env node
 "use strict";
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
 const program = require('commander');
-const DBPF = require('../dbpf');
+const DBPF = require('../lib/dbpf');
 
 const Style = {
 	"Chicago": 0x00002000,
-	"New York": 0x00002001,
+	"NewYork": 0x00002001,
 	"Houston": 0x00002002,
 	"Euro": 0x00002003
 };
@@ -19,13 +19,34 @@ program
 
 // Some commands.
 program
-	.command('block [dir]')
+	.command('tileset [dir]')
+	.option('-b --block', 'Block all buildings from growing')
+	.option('-C --chicago', 'Set the Chicago tileset for all buildings')
+	.option('-N --ny', 'Set the New York tileset for all buildings')
+	.option('-H --houston', 'Set the Houston tileset for all buildings')
+	.option('-E --euro', 'Set the Euro tileset for all buildings')
+	.option('-r --recursive', 'Scan directories recursively')
 	.action(function(dir) {
+
+		let start = new Date();
 
 		if (!dir) {
 			dir = process.cwd();
 		}
 		dir = path.resolve(process.cwd(), dir);
+
+		// Check which tilesets need to be set.
+		let sets = [];
+		if (this.block) {
+			sets.push(0);
+		} else  {
+			if (this.chicago) sets.push(Style.Chicago);
+			if (this.ny) sets.push(Style.NewYork);
+			if (this.houston) sets.push(Style.Houston);
+			if (this.euro) sets.push(Style.Euro);
+		}
+
+		console.log(chalk.green('SCANNING IN'), dir, chalk.cyan('RECURSIVE?'), !!this.recursive);
 
 		let all = [];
 		read(dir, function(file) {
@@ -38,9 +59,13 @@ program
 			}
 
 			let dir = path.dirname(file);
-			console.log(chalk.cyan('SCANNING'), chalk.gray(name));
-
 			let buff = fs.readFileSync(file);
+
+			// Check the first 4 bytes. Should be DBPF, otherwise no point in 
+			// reading it.
+			if (buff.toString('utf8', 0, 4) !== 'DBPF') return;
+
+			console.log(chalk.cyan('SCANNING'), chalk.gray(name));
 			let dbpf = new DBPF(buff);
 			let shouldSave = false;
 			for (let entry of dbpf.exemplars) {
@@ -55,12 +80,14 @@ program
 					if (prop.id === 0xAA1DD396) {
 						chalk.gray('FOUND "OccupantGroups"');
 
-						// Loop the values & set none of it.
+						// Filter out any existing styles.
 						shouldSave = true;
 						prop.value = prop.value.filter(function(style) {
 							return !(Style.Chicago<=style&&style<=Style.Euro);
 						});
-						prop.value.push(0);
+
+						// Push in the new styles.
+						prop.value.push(...sets);
 
 					}
 				}
@@ -75,7 +102,10 @@ program
 			}
 			
 
-		});
+		}, !!this.recursive);
+
+		let time = new Date() - start;
+		console.log(chalk.green('DONE'), chalk.gray('('+time+'ms)'));
 
 	});
 
@@ -83,13 +113,20 @@ program.parse(process.argv);
 
 // # read(dir, cb, recursive)
 function read(dir, cb, recursive) {
+
+	let stat = fs.statSync(dir);
+	if (!stat.isDirectory()) {
+		cb(dir);
+		return;
+	}
+
 	let list = fs.readdirSync(dir);
 	for (let entry of list) {
 		let full = path.join(dir, entry);
 		let stat = fs.statSync(full);
 		if (stat.isDirectory()) {
 			if (recursive) {
-				read(full, cb);
+				read(full, cb, recursive);
 			}
 		} else {
 			cb(full);
