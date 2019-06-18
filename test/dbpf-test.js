@@ -5,6 +5,8 @@ const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
 
+const { hex } = require('../lib/util');
+const FileType = require('../lib/file-types');
 const DBPF = require('../lib/dbpf');
 const Exemplar = require('../lib/exemplar');
 
@@ -73,6 +75,30 @@ describe('An exemplar file', function() {
 
 		let entry = dbpf.exemplars[0];
 		let exemplar = entry.read();
+
+	});
+
+});
+
+describe('A lot subfile', function() {
+
+	it.only('should compute the all crc checksums correctly', function() {
+
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		// Find the lot subfile & read it.
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+		let lots = lotFile.lots;
+
+		for (let i = 0; i < lots.length; i++) {
+			let lot = lots[i];
+			let crc = lot.crc;
+			let calc = lot.calculateCRC();
+			expect(crc).to.equal(calc);
+		}
 
 	});
 

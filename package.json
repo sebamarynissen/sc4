@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:cpp": "node-gyp rebuild --dir=src"
+    "build:cpp": "node-gyp rebuild"
   },
   "bin": {
     "sc4": "./lib/cli/cli.js"
