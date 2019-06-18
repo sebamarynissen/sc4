@@ -1,11 +1,12 @@
 {
 	"targets": [{
-		"target_name": "qfs",
+		"target_name": "lib-cpp",
 		"cflags!": ["-fno-exceptions"],
 		"cflags_cc!": ["-fno-exceptions"],
 		"sources": [
-			"main.cpp",
-			"decompress.cpp"
+			"src/main.cpp",
+			"src/decompress.cpp",
+			"src/crc.cpp"
 		],
 		"include_dirs": [
 			"<!@(node -p \"require('node-addon-api').include\")",
