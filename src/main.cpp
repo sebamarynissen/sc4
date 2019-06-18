@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <iostream>
 #include "decompress.h"
+#include "crc.h"
 
 using namespace Napi;
 using std::cout;
@@ -44,9 +45,27 @@ Value compress(CallbackInfo& info) {
 
 }
 
+// # crc(CallbackInfo& info)
+Value crc(CallbackInfo& info) {
+
+	auto env = info.Env();
+	try {
+		auto buffer = info[0].As<Buffer<unsigned char>>();
+		int size = info[1].As<Number>().Int32Value();
+		auto data = (unsigned char*) buffer.Data();
+		unsigned int crc = xcrc32(data, size);
+		return Number::New(env, (double)crc);
+	} catch (...) {
+		Error::New(env, "Error occurred while crc").ThrowAsJavaScriptException();
+		return Boolean::New(env, false);
+	}
+
+}
+
 Object init(Env env, Object exports) {
 	exports.Set("decompress", Function::New(env, decompress));
 	exports.Set("compress", Function::New(env, compress));
+	exports.Set("crc", Function::New(env, crc));
 	return exports;
 }
 
