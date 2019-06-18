@@ -23,7 +23,7 @@ This package however is not yet available on npm as it is still in a pre-alpha s
 It probably will be available via npm later on.
 Hence currently you will need to clone this git repository.
 If you already have git installed, you can clone the repository using `git clone https://github.com/sebamarynissen/sc4`.
-Otheriwse, you can simply download the repository as a [.zip file](https://github.com/sebamarynissen/sc4/archive/master.zip) and unzip it somewhere on your computer.
+Otherwise, you can simply download the repository as a [.zip file](https://github.com/sebamarynissen/sc4/archive/master.zip) and unzip it somewhere on your computer.
 
 Once you have cloned the repository (either using `git` or as a zip), navigate to the folder and open up a command prompt.
 In Windows this can be done easily by clicking in the Windows Explorer Adress bar, typing "cmd" and then hitting enter.
