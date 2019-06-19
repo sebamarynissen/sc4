@@ -28,7 +28,7 @@ program
 	.command('historical <city>')
 	.description('Make all buildings within the given city historical')
 	.option('--force', 'Force override of the city')
-	.option('-o --output', 'The output path to store the city if you\'re not force-overriding')
+	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
 		
 		let dir = process.cwd();
@@ -75,12 +75,12 @@ program
 program
 	.command('tileset [dir]')
 	.description('Set the tilesets for all buildings in the given directory')
-	.option('-b --block', 'Block all buildings from growing')
-	.option('-C --chicago', 'Set the Chicago tileset for all buildings')
-	.option('-N --ny', 'Set the New York tileset for all buildings')
-	.option('-H --houston', 'Set the Houston tileset for all buildings')
-	.option('-E --euro', 'Set the Euro tileset for all buildings')
-	.option('-r --recursive', 'Scan directories recursively')
+	.option('-b, --block', 'Block all buildings from growing')
+	.option('-C, --chicago', 'Set the Chicago tileset for all buildings')
+	.option('-N, --ny', 'Set the New York tileset for all buildings')
+	.option('-H, --houston', 'Set the Houston tileset for all buildings')
+	.option('-E, --euro', 'Set the Euro tileset for all buildings')
+	.option('-r, --recursive', 'Scan directories recursively')
 	.action(function(dir) {
 
 		let start = new Date();
@@ -175,9 +175,9 @@ program
 program
 	.command('backup')
 	.description('Backup a region or your entire plugins folder')
-	.option('-R --region <name>', 'The name of the region to be backuped, or the path to the region\'s directory')
-	.option('-P --plugins [dir]', 'Set this flag if you want to backup your plugins')
-	.option('-o --output [dir]', 'Specify the path to the output directory. Defaults to Current Working Directory.')
+	.option('-R, --region <name>', 'The name of the region to be backuped, or the path to the region\'s directory')
+	.option('-P, --plugins [dir]', 'Set this flag if you want to backup your plugins')
+	.option('-o, --output [dir]', 'Specify the path to the output directory. Defaults to Current Working Directory.')
 	.action(async function() {
 
 		// Find the user's home directory.
