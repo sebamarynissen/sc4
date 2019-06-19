@@ -126,4 +126,33 @@ describe('A lot subfile', function() {
 
 	});
 
+	it('should change a plopped building into a grown one', async function() {
+
+		let file = path.resolve(__dirname, 'files/plopped.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		// Read the lots
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+		let lots = lotFile.lots;
+		let plopped = lots[26];
+
+		plopped.zoneType = 0x00000001;
+		// console.log(hex(plopped.zoneType));
+		// console.log(lots)
+		// lots[1].zoneType = lots[0].zoneType;
+
+		// Save again.
+		let to = path.dirname(file, 'plopped-mod.sc4');
+		await dbpf.save({"file": to});
+
+		// console.log(hex(lots[1].zoneType));
+		// console.log(hex(lots[0].zoneType));
+		// for (let lot of lotFile) {
+
+		// }
+
+	});
+
 });
