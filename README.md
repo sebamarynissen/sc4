@@ -2,11 +2,7 @@
 
 # SC4
 
-`sc4` is a command line utility for automating SimCity 4 modding and modifying SimCity 4 savegames. Run `sc4 --help` to list all available commands.
-Currently the following commands are included:
-
- - `historical [city]` This will mark *all* lots in the given city (given as relative path to an .sc4 savegame file) as historical.
- - `tileset [dir]` Loops all DBPF files in the given directory and sets the tilesets for each building as given in the options. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
+`sc4` is a command line utility for automating SimCity 4 modding and modifying SimCity 4 savegames.
  
 ## Installation
  
@@ -25,6 +21,13 @@ Prebuilt versions of the C++ libraries are included for node v12 and higher, so 
 If you want to compile the C++ libraries from source, you will need to install [Windows Build Tools](https://github.com/felixrieseberg/windows-build-tools).
 This can be done by running `npm install --global windows-build-tools`.
 On Windows 7 you will also need to download & install [.NET Framework 4.5.1](http://www.microsoft.com/en-us/download/details.aspx?id=40773).
+
+## Usage
+
+Currently the following commands are included. Run `sc4 --help` to list all available commands.
+
+ - `historical [city]` This will mark *all* lots in the given city (given as relative path to an .sc4 savegame file) as historical.
+ - `tileset [dir]` Loops all DBPF files in the given directory and sets the tilesets for each building as given in the options. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
 
 ## License
 
