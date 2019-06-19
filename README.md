@@ -6,8 +6,9 @@
 Currently the following commands are included:
 
  - `historical [city]` This will mark *all* lots in the given city (given as relative path to an .sc4 savegame file) as historical.
+ - `tileset [dir]` Loops all DBPF files in the given directory and sets the tilesets for each building as given in the options. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
  
- ## Installation
+## Installation
  
 In order to use the `sc4` command, you will need to install [node.js](https://www.nodejs.org).
 Node.js 12 or higher is required, so choose the one with the latest features, otherwise it won't work!
@@ -25,7 +26,7 @@ If you want to compile the C++ libraries from source, you will need to install [
 This can be done by running `npm install --global windows-build-tools`.
 On Windows 7 you will also need to download & install [.NET Framework 4.5.1](http://www.microsoft.com/en-us/download/details.aspx?id=40773).
 
- ## License
+## License
 
  MIT License
 

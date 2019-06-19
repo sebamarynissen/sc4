@@ -21,7 +21,8 @@ program
 	.version(pkg.version);
 
 program
-	.command('historical [city]')
+	.command('historical <city>')
+	.description('Make all buildings within the given city historical')
 	.option('--force', 'Force override of the city')
 	.option('-o --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
@@ -68,7 +69,8 @@ program
 
 // Some commands.
 program
-	.command('tileset [dir]', 'Add all buildings in the given directory to the given tilesets')
+	.command('tileset [dir]')
+	.description('Set the tilesets for all buildings in the given directory')
 	.option('-b --block', 'Block all buildings from growing')
 	.option('-C --chicago', 'Set the Chicago tileset for all buildings')
 	.option('-N --ny', 'Set the New York tileset for all buildings')
@@ -93,6 +95,13 @@ program
 			if (this.ny) sets.push(Style.NewYork);
 			if (this.houston) sets.push(Style.Houston);
 			if (this.euro) sets.push(Style.Euro);
+
+			// Ensure that at least 1 tileset has been given.
+			if (sets.length === 0) {
+				console.log(chalk.red('You must specify at least 1 tileset! Use --chicago, --ny, --houston and --euro, or use --block to block the buildings from growing!'));
+				return;
+			}
+
 		}
 
 		console.log(chalk.green('SCANNING IN'), dir, chalk.cyan('RECURSIVE?'), !!this.recursive);
@@ -159,6 +168,11 @@ program
 	});
 
 program.parse(process.argv);
+
+// Display help by default.
+if (program.args.length === 0) {
+	program.help();
+}
 
 // # read(dir, cb, recursive)
 function read(dir, cb, recursive) {
