@@ -27,6 +27,10 @@ On Windows 7 you will also need to download & install [.NET Framework 4.5.1](htt
 Currently the following commands are included. Run `sc4 --help` to list all available commands.
 
  - `historical [city]` This will mark *all* lots in the given city (given as relative path to an .sc4 savegame file) as historical.
+ - `growify [city] [--zone-type=R1 or R2 or R3]` This will turn all plopped residential buildings in the given city into growables so that no more No Car Zots will appear and the Sims can find a way to work. Example usage (when I'm in the folder of the region)
+ ```
+ sc4 growify --zone-type=R3 "City - City name.sc4"
+ ```
  - `tileset [dir]` Loops all DBPF files in the given directory and sets the tilesets for each building as given in the options. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
 
 ## License
