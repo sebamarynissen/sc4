@@ -138,7 +138,7 @@ describe('A lot subfile', function() {
 		let lots = lotFile.lots;
 		let plopped = lots[26];
 
-		plopped.zoneType = 0x00000001;
+		plopped.zoneType = 0x01;
 		// console.log(hex(plopped.zoneType));
 		// console.log(lots)
 		// lots[1].zoneType = lots[0].zoneType;
@@ -152,6 +152,21 @@ describe('A lot subfile', function() {
 		// for (let lot of lotFile) {
 
 		// }
+
+	});
+
+	it('should check for plopped residentials', function() {
+
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+
+		for (let lot of lotFile) {
+			expect(lot.isPloppedResidential).to.be.false;
+		}
 
 	});
 
