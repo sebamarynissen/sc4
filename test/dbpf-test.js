@@ -144,7 +144,7 @@ describe('A lot subfile', function() {
 		// lots[1].zoneType = lots[0].zoneType;
 
 		// Save again.
-		let to = path.dirname(file, 'plopped-mod.sc4');
+		let to = path.join(path.dirname(file), 'plopped-mod.sc4');
 		await dbpf.save({"file": to});
 
 		// console.log(hex(lots[1].zoneType));
