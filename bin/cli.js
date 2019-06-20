@@ -71,6 +71,78 @@ program
 
 	});
 
+program
+	.command('growify <city>')
+	.description('Convert all plopped Residential buildings to growables')
+	.option('--force', 'Force override of the city')
+	.option('-z, --zone-type <type>', 'The zone type to be set. Defaults to Residential - High (R3). Use R1, R2, or R3')
+	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.action(async function(city) {
+
+		let dir = process.cwd();
+		let file = path.resolve(dir, city);
+		let ext = path.extname(file);
+		if (ext !== '.sc4') {
+			return err(`${file} is not A SimCity 4 savegame!`);
+		}
+
+		// Read in the city.
+		console.log(chalk.cyan('READING'), file);
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		// Find the lotfile entry.
+		let entry = dbpf.entries.find(entry=> entry.type === FileType.LotFile);
+		let lotFile = entry.read();
+
+		// Parse the zone type to be set.
+		let type = this.zoneType;
+		if (!type) type = 'R3';
+		let zoneType = ({
+			"R1": 0x01,
+			"R2": 0x02,
+			"R3": 0x03
+		})[type] || 0x03;
+
+		// Loop all lots & check whether it is residential.
+		let i = 0;
+		for (let lot of lotFile) {
+			if (!lot.isPloppedResidential) continue;
+
+			// Change zoneType. That's all we have to do to make it act as if 
+			// it grew.
+			lot.zoneType = zoneType;
+			i++;
+
+		}
+
+		// If no plopped residentials were found, exit.
+		if (i === 0) {
+			return warn('No plopped residentials were found');
+		}
+
+		ok(`Made ${i} residential lots growable`);
+
+		// If we did have plopped residentials, save.
+		let out;
+		if (this.force) {
+			out = file;
+		} else {
+			out = this.output;
+			if (!out) {
+				out = 'GROWIFIED-'+path.basename(file);
+			}
+			let dir = path.dirname(file);
+			out = path.resolve(dir, out);
+		}
+
+		console.log(chalk.cyan('SAVING'), out);
+		await dbpf.save({"file": out});
+
+		return ok('Done');
+
+	});
+
 // Some commands.
 program
 	.command('tileset [dir]')
