@@ -31,6 +31,16 @@ program
 	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
 		
+		// Apparently if someone accidentally uses the command wrong and types 
+		// "--force city-name", things go terribly wrong. The command starts 
+		// executing and creates a new readable stream, but apparently on the 
+		// next tick it decides that the syntax was incorrect and just force 
+		// terminates the program, resulting in an empty file that was 
+		// force-overwritten. That's a BIG thing, but we can solve this by 
+		// only starting the command on the next tick, which can be force by 
+		// Promise.resolve().
+		await Promise.resolve();
+
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
 		let ext = path.extname(file);
@@ -78,6 +88,9 @@ program
 	.option('-z, --zone-type <type>', 'The zone type to be set. Defaults to Residential - High (R3). Use R1, R2, or R3')
 	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
+
+		// Same story here. See historical command.
+		await Promise.resolve();
 
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
