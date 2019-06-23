@@ -93,6 +93,9 @@ program
 			}
 		}]);
 
+		// Not ok? Exit.
+		if (!answers.force && !answers.ok) return;
+
 		// Parse answers.
 		answers.types.map(type => this[type.toLowerCase()] = true);
 		this.force = answers.force;
@@ -258,7 +261,7 @@ program
 		}]);
 
 		// Not ok? Exit.
-		if (!answers.ok) return;
+		if (!answers.force && !answers.ok) return;
 
 		// Put the answers in the options.
 		answers.filter.map(type => this[type.toLowerCase()] = true);
