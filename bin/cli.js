@@ -10,6 +10,7 @@ const ora = require('ora');
 const program = require('commander');
 const inquirer = require('inquirer');
 const DBPF = require('../lib/dbpf');
+const Savegame = require('../lib/savegame');
 const FileType = require('../lib/file-types');
 const pkg = require('../package.json');
 const { ZoneType } = require('../lib/enums');
@@ -28,9 +29,9 @@ program
 
 program
 	.command('historical <city>')
-	.description('Make all buildings within the given city historical')
-	.option('--force', 'Force override of the city')
-	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.description('Make buildings within the given city historical')
+	// .option('--force', 'Force override of the city')
+	// .option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
 		
 		// Apparently if someone accidentally uses the command wrong and types 
@@ -46,40 +47,101 @@ program
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
 		let ext = path.extname(file);
-		if (ext !== '.sc4') throw new Error(`${file} is not a SimCity 4 savegame!`);
-
-		// Read in the city.
-		console.log(chalk.cyan('READING'), file);
-		let buff = fs.readFileSync(file);
-		let dbpf = new DBPF(buff);
-
-		// Find the lotfile entry.
-		let entry = dbpf.entries.find(entry => entry.type===FileType.LotFile);
-		let lotFile = entry.read();
-		
-		// Loop all lots & make historical.
-		let i = 0;
-		for (let lot of lotFile) {
-			i++;
-			lot.historical = true;
+		if (ext !== '.sc4' || !fs.existsSync(file)) {
+			return err(`${file} is not a SimCity 4 savegame!`);
 		}
-		ok(chalk.gray('Marked '+i+' lots as historical'));
 
-		// Save again.
+		// Fire up inquirer for an interactive interface.
+		let answers = await inquirer.prompt([{
+			"type": "checkbox",
+			"name": "types",
+			"message": "What type of buildings do you want to make historical?",
+			"default": ["Residential", "Commercial", "Agricultural", "Industrial"],
+			"choices": ["Residential", "Commercial", "Agricultural", "Industrial"]
+		}, {
+			"name": "force",
+			"type": "confirm",
+			"message": [
+				`Do you want to override "${path.basename(city)}"?`,
+				chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
+			].join(' '),
+			"default": false
+		}, {
+			"name": "output",
+			"type": "input",
+			"message": [
+				`Where should I save your city?`,
+				`Path is relative to "${dir}".`
+			].join(' '),
+			"default": 'HISTORICAL-'+path.basename(city),
+			when(answers) {
+				return !answers.force;
+			},
+			validate(answer) {
+				return Boolean(answer.trim());
+			}
+		}, {
+			"name": "ok",
+			"type": "confirm",
+			"default": true,
+			message(answers) {
+				let out = path.resolve(dir, answers.output);
+				return `Saving to "${out}", is that ok?`;
+			},
+			when(answers) {
+				return answers.hasOwnProperty('output');
+			}
+		}]);
+
+		// Parse answers.
+		answers.types.map(type => this[type.toLowerCase()] = true);
+
+		// Parse the output path.
 		let out;
 		if (this.force) {
 			out = file;
 		} else {
-			out = this.output;
-			if (!out) {
-				out = 'HISTORICAL-'+path.basename(file);
-			}
-			let dir = path.dirname(file);
-			out = path.resolve(dir, out);
+			out = path.resolve(dir, answers.output);
 		}
 
+		// Read in the city.
+		console.log(chalk.cyan('READING'), file);
+		let buff = fs.readFileSync(file);
+		let dbpf = new Savegame(buff);
+
+		// // Find the lotfile entry.
+		let lotFile = dbpf.lotFile;
+		if (!lotFile) {
+			return err('No lots found in this city!');
+		}
+		
+		// Loop the lots & make historical.
+		let i = 0;
+		for (let lot of lotFile) {
+			if (lot.historical) continue;
+			if (
+				(this.residential && lot.isResidential) ||
+				(this.commercial && lot.isCommercial) ||
+				(this.agricultural && lot.isAgricultural) ||
+				(this.industrial && lot.isIndustrial)
+			) {
+				i++;
+				lot.historical = true;
+			}
+		}
+
+		// No lots found? Don't re-save.
+		if (i === 0) {
+			return warn('No lots fond to make historical!');
+		}
+
+		// Log.
+		ok(chalk.gray(`Marked ${i} lots as historical.`));
+
+		// Save again.
 		console.log(chalk.cyan('SAVING'), out);
 		await dbpf.save({"file": out});
+		return ok('Done');
 
 	});
 
@@ -215,11 +277,13 @@ program
 		// Read in the city.
 		console.log(chalk.cyan('READING'), file);
 		let buff = fs.readFileSync(file);
-		let dbpf = new DBPF(buff);
+		let dbpf = new Savegame(buff);
 
 		// Find the lotfile entry.
-		let entry = dbpf.entries.find(entry=> entry.type === FileType.LotFile);
-		let lotFile = entry.read();
+		let lotFile = dbpf.lotFile;
+		if (!lotFile) {
+			return err('No lots in this city!');
+		}
 
 		// Loop all lots & check for plopped residential or industrial.
 		let rCount = 0, iCount = 0;

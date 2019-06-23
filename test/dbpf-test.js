@@ -8,6 +8,7 @@ const path = require('path');
 const { hex } = require('../lib/util');
 const FileType = require('../lib/file-types');
 const DBPF = require('../lib/dbpf');
+const Savegame = require('../lib/savegame');
 const Exemplar = require('../lib/exemplar');
 const { ZoneType } = require('../lib/enums');
 
@@ -100,6 +101,22 @@ describe('A lot subfile', function() {
 			let calc = lot.calculateCRC();
 			expect(crc).to.equal(calc);
 		}
+
+	});
+
+	it.only('should detect Residential, Commercial, Agricultural & Industry correctly', function() {
+		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new Savegame(buff);
+
+		// Get the lotfile.
+		let lotFile = dbpf.lotFile;
+		let lots = lotFile.lots;
+		expect(lots[0].isResidential).to.be.true;
+		expect(lots[1].isIndustrial).to.be.true;
+		expect(lots[2].isAgricultural).to.be.true;
+		expect(lots[2].isIndustrial).to.be.false;
+		expect(lots[3].isCommercial).to.be.true;
 
 	});
 
