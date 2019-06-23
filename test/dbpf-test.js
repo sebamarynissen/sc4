@@ -9,6 +9,7 @@ const { hex } = require('../lib/util');
 const FileType = require('../lib/file-types');
 const DBPF = require('../lib/dbpf');
 const Exemplar = require('../lib/exemplar');
+const { ZoneType } = require('../lib/enums');
 
 describe('A DBPF file', function() {
 
@@ -166,7 +167,49 @@ describe('A lot subfile', function() {
 
 		for (let lot of lotFile) {
 			expect(lot.isPloppedResidential).to.be.false;
+			if (lot.isResidential) {
+				lot.zoneType = 0x0f;
+				expect(lot.isPloppedResidential).to.be.true;
+			}
 		}
+
+	});
+
+	it.skip('should move a lot under a bridge', async function() {
+		let file = path.resolve(__dirname, 'files/dumbo-offset.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+
+		let lot = lotFile.lots[0];
+		lot.minZ += 3;
+		lot.maxZ += 3;
+
+		let to = path.join(path.dirname(file), 'dumbo-mod.sc4');
+		await dbpf.save({"file": to});
+
+	});
+
+	it('should growify industry', async function() {
+		let file = path.resolve(__dirname, 'files/City - Plopped Industry - source.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
+
+		let lot = lotFile.lots[0];
+		expect(lot.isPloppedIndustrial).to.be.true;
+
+		// Now change it and check in SC4.
+		lot.zoneType = ZoneType.IMedium;
+
+		let to = path.join(path.dirname(file), 'City - Plopped Industry.sc4');
+		await dbpf.save({"file": to});
+
+		// It works!
 
 	});
 
