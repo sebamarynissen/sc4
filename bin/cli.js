@@ -347,7 +347,7 @@ program
 				iCount++;
 
 			} else if (this.agricultural && lot.isPloppedAgricultural) {
-				lot.zoneType = this.agricultural;
+				lot.zoneType = ZoneType.ILow;
 				aCount++;
 			}
 		}
