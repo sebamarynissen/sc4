@@ -107,10 +107,9 @@ program
 			answers.types.map(type => this[type.toLowerCase()] = true);
 			if (answers.force) {
 				this.force = true;
-				this.output = file;
 			} else {
 				this.force = false;
-				this.output = answers.output;	
+				this.output = answers.output;
 			}
 
 		}
@@ -121,6 +120,8 @@ program
 				this.output = 'HISTORICAL-'+path.basename(city);
 			}
 			this.output = path.resolve(dir, this.output);
+		} else {
+			this.output = file;
 		}
 
 		// Read in the city.
@@ -287,7 +288,6 @@ program
 
 			if (answers.force) {
 				this.force = true;
-				this.output = file;
 			} else {
 				this.force = false;
 				this.output = answers.output;	
@@ -301,6 +301,8 @@ program
 				this.output = 'GROWIFIED-'+path.basename(city);
 			}
 			this.output = path.resolve(dir, this.output);
+		} else {
+			this.output = file;
 		}
 
 		// Parse residential zone when comming from command line.
