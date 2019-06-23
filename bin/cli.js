@@ -95,6 +95,7 @@ program
 
 		// Parse answers.
 		answers.types.map(type => this[type.toLowerCase()] = true);
+		this.force = answers.force;
 
 		// Parse the output path.
 		let out;
@@ -174,13 +175,16 @@ program
 			"name": "filter",
 			"type": "checkbox",
 			"message": "What type(s) of buildings do you want to growify?",
-			"default": ["Residential", "Industrial"],
+			"default": ["Residential", "Industrial", "Agricultural"],
 			"choices": [{
 				"name": "Residential buildings",
 				"value": "Residential"
 			}, {
 				"name": "Industrial buildings",
 				"value": "Industrial"
+			}, {
+				"name": "Agricultural buildings",
+				"value": "Agricultural"
 			}]
 		}, {
 			"name": "RZoneType",
@@ -203,7 +207,7 @@ program
 		}, {
 			"name": "IZoneType",
 			"type": "list",
-			"message": "What zone should the industrial buildings become? (Agricultural buildings will be handled automatically)",
+			"message": "What zone should the industrial buildings become?",
 			"default": 1,
 			"choices": [{
 				"name": "Medium Density",
@@ -264,6 +268,9 @@ program
 		if (this.industrial) {
 			this.industrial = answers.IZoneType;
 		}
+		if (this.agricultural) {
+			this.agricultural = ZoneType.ILow;
+		}
 		this.force = answers.force;
 
 		// Parse the output path.
@@ -286,7 +293,7 @@ program
 		}
 
 		// Loop all lots & check for plopped residential or industrial.
-		let rCount = 0, iCount = 0;
+		let rCount = 0, iCount = 0, aCount = 0;
 		for (let lot of lotFile) {
 			if (this.residential && lot.isPloppedResidential) {
 				lot.zoneType = this.residential;
@@ -294,13 +301,12 @@ program
 			} else if (this.industrial && lot.isPloppedIndustrial) {
 
 				// Check for agricultural plops.
-				if (lot.isAgricultural) {
-					lot.zoneType = ZoneType.Agricultural;
-				} else {
-					lot.zoneType = this.industrial;
-				}
+				lot.zoneType = this.industrial;
 				iCount++;
 
+			} else if (this.agricultural && lot.isPloppedAgricultural) {
+				lot.zoneType = this.agricultural;
+				aCount++;
 			}
 		}
 
@@ -309,7 +315,7 @@ program
 			return warn('No plopped buildings found to growify!');
 		}
 
-		ok(`Growified ${rCount} residentials & ${iCount} industrials.`);
+		ok(`Growified ${rCount} residentials, ${iCount} industrials & ${aCount} agriculturals`);
 
 		// Save.
 		console.log(chalk.cyan('SAVING'), out);
