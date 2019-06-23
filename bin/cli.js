@@ -8,9 +8,11 @@ const ini = require('ini');
 const tar = require('tar');
 const ora = require('ora');
 const program = require('commander');
+const inquirer = require('inquirer');
 const DBPF = require('../lib/dbpf');
 const FileType = require('../lib/file-types');
 const pkg = require('../package.json');
+const { ZoneType } = require('../lib/enums');
 
 const Style = {
 	"Chicago": 0x00002000,
@@ -83,20 +85,131 @@ program
 
 program
 	.command('growify <city>')
-	.description('Convert all plopped Residential buildings to growables')
-	.option('--force', 'Force override of the city')
-	.option('-z, --zone-type <type>', 'The zone type to be set. Defaults to Residential - High (R3). Use R1, R2, or R3')
-	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.description('Convert plopped buildings into functional growables')
+	// .description('Convert all plopped Residential buildings to growables')
+	// .option('-i, --interactive', 'Interactively define the growify options')
+	// .option('--force', 'Force override of the city')
+	// .option('-z, --zone-type <type>', 'The zone type to be set. Defaults to Residential - High (R3). Use R1, R2, or R3')
+	// .option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
 	.action(async function(city) {
 
 		// Same story here. See historical command.
 		await Promise.resolve();
 
+		// Ensure that the city exists first.
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
 		let ext = path.extname(file);
-		if (ext !== '.sc4') {
+		if (ext !== '.sc4' || !fs.existsSync(file)) {
 			return err(`${file} is not A SimCity 4 savegame!`);
+		}
+
+		// For now we're going interactive by default. Perhaps we can change 
+		// this again later if we want to write scripts that automate the 
+		// tasks, but for now it's better this way. Doesn't take too long to 
+		// fill in anyway.
+		let answers = await inquirer.prompt([{
+			"name": "filter",
+			"type": "checkbox",
+			"message": "What type(s) of buildings do you want to growify?",
+			"default": ["Residential", "Industrial"],
+			"choices": [{
+				"name": "Residential buildings",
+				"value": "Residential"
+			}, {
+				"name": "Industrial buildings",
+				"value": "Industrial"
+			}]
+		}, {
+			"name": "RZoneType",
+			"type": "list",
+			"message": "What zone should the residential buildings become?",
+			"default": 2,
+			"choices": [{
+				"name": "Low Density",
+				"value": ZoneType.RLow
+			}, {
+				"name": "Medium Density",
+				"value": ZoneType.RMedium
+			}, {
+				"name": "High Density",
+				"value": ZoneType.RHigh
+			}],
+			when(answers) {
+				return answers.filter.includes('Residential');
+			}
+		}, {
+			"name": "IZoneType",
+			"type": "list",
+			"message": "What zone should the industrial buildings become? (Agricultural buildings will be handled automatically)",
+			"default": 1,
+			"choices": [{
+				"name": "Medium Density",
+				"value": ZoneType.IMedium
+			}, {
+				"name": "High Density",
+				"value": ZoneType.IHigh
+			}],
+			when(answers) {
+				return answers.filter.includes('Industrial');
+			}
+		}, {
+			"name": "force",
+			"type": "confirm",
+			"message": [
+				`Do you want to override "${path.basename(city)}"?`,
+				chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
+			].join(' '),
+			"default": false,
+			when(answers) {
+				return answers.filter.length > 0;
+			}
+		}, {
+			"name": "output",
+			"type": "input",
+			"message": [
+				`Where should I save your city?`,
+				`Path is relative to "${dir}".`
+			].join(' '),
+			"default": 'GROWIFIED-'+path.basename(city),
+			when(answers) {
+				return answers.filter.length > 0 && !answers.force;
+			},
+			validate(answer) {
+				return Boolean(answer.trim());
+			}
+		}, {
+			"name": "ok",
+			"type": "confirm",
+			"default": true,
+			message(answers) {
+				let out = path.resolve(dir, answers.output);
+				return `Saving to "${out}", is that ok?`;
+			},
+			when(answers) {
+				return answers.hasOwnProperty('output');
+			}
+		}]);
+
+		// Not ok? Exit.
+		if (!answers.ok) return;
+
+		// Put the answers in the options.
+		answers.filter.map(type => this[type.toLowerCase()] = true);
+		if (this.residential) {
+			this.residential = answers.RZoneType;
+		}
+		if (this.industrial) {
+			this.industrial = answers.IZoneType;
+		}
+		this.force = answers.force;
+
+		// Parse the output path.
+		let out;
+		if (this.force) {
+			out = file;
+		} else {
+			out = path.resolve(dir, answers.output);
 		}
 
 		// Read in the city.
@@ -108,50 +221,35 @@ program
 		let entry = dbpf.entries.find(entry=> entry.type === FileType.LotFile);
 		let lotFile = entry.read();
 
-		// Parse the zone type to be set.
-		let type = this.zoneType;
-		if (!type) type = 'R3';
-		let zoneType = ({
-			"R1": 0x01,
-			"R2": 0x02,
-			"R3": 0x03
-		})[type] || 0x03;
-
-		// Loop all lots & check whether it is residential.
-		let i = 0;
+		// Loop all lots & check for plopped residential or industrial.
+		let rCount = 0, iCount = 0;
 		for (let lot of lotFile) {
-			if (!lot.isPloppedResidential) continue;
+			if (this.residential && lot.isPloppedResidential) {
+				lot.zoneType = this.residential;
+				rCount++;
+			} else if (this.industrial && lot.isPloppedIndustrial) {
 
-			// Change zoneType. That's all we have to do to make it act as if 
-			// it grew.
-			lot.zoneType = zoneType;
-			i++;
+				// Check for agricultural plops.
+				if (lot.isAgricultural) {
+					lot.zoneType = ZoneType.Agricultural;
+				} else {
+					lot.zoneType = this.industrial;
+				}
+				iCount++;
 
-		}
-
-		// If no plopped residentials were found, exit.
-		if (i === 0) {
-			return warn('No plopped residentials were found');
-		}
-
-		ok(`Made ${i} residential lots growable`);
-
-		// If we did have plopped residentials, save.
-		let out;
-		if (this.force) {
-			out = file;
-		} else {
-			out = this.output;
-			if (!out) {
-				out = 'GROWIFIED-'+path.basename(file);
 			}
-			let dir = path.dirname(file);
-			out = path.resolve(dir, out);
 		}
 
+		// If no plopped buildings were found, exit.
+		if (rCount + iCount === 0) {
+			return warn('No plopped buildings found to growify!');
+		}
+
+		ok(`Growified ${rCount} residentials & ${iCount} industrials.`);
+
+		// Save.
 		console.log(chalk.cyan('SAVING'), out);
 		await dbpf.save({"file": out});
-
 		return ok('Done');
 
 	});
