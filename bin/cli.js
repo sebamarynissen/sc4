@@ -25,15 +25,21 @@ const Style = {
 // Main program options.
 program
 	.name('sc4')
+	.option('--no-interactive', 'Disable interactive mode for the commands')
 	.version(pkg.version);
 
 program
 	.command('historical <city>')
 	.description('Make buildings within the given city historical')
-	// .option('--force', 'Force override of the city')
-	// .option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.option('--force', 'Force override of the city')
+	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.option('-a, --all', 'Make all buildings historical')
+	.option('-r, --residential', 'Make all residential buildings historical')
+	.option('-c, --commercial', 'Make all commercial buildings historical')
+	.option('-i, --industrial', 'Make all industrial buildings historical')
+	.option('-g, --agricultural', 'Make all agricultural buildings historical')
 	.action(async function(city) {
-		
+
 		// Apparently if someone accidentally uses the command wrong and types 
 		// "--force city-name", things go terribly wrong. The command starts 
 		// executing and creates a new readable stream, but apparently on the 
@@ -47,65 +53,74 @@ program
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
 		let ext = path.extname(file);
-		if (ext !== '.sc4' || !fs.existsSync(file)) {
+		if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
 			return err(`${file} is not a SimCity 4 savegame!`);
 		}
 
-		// Fire up inquirer for an interactive interface.
-		let answers = await inquirer.prompt([{
-			"type": "checkbox",
-			"name": "types",
-			"message": "What type of buildings do you want to make historical?",
-			"default": ["Residential", "Commercial", "Agricultural", "Industrial"],
-			"choices": ["Residential", "Commercial", "Agricultural", "Industrial"]
-		}, {
-			"name": "force",
-			"type": "confirm",
-			"message": [
-				`Do you want to override "${path.basename(city)}"?`,
-				chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
-			].join(' '),
-			"default": false
-		}, {
-			"name": "output",
-			"type": "input",
-			"message": [
-				`Where should I save your city?`,
-				`Path is relative to "${dir}".`
-			].join(' '),
-			"default": 'HISTORICAL-'+path.basename(city),
-			when(answers) {
-				return !answers.force;
-			},
-			validate(answer) {
-				return Boolean(answer.trim());
-			}
-		}, {
-			"name": "ok",
-			"type": "confirm",
-			"default": true,
-			message(answers) {
-				let out = path.resolve(dir, answers.output);
-				return `Saving to "${out}", is that ok?`;
-			},
-			when(answers) {
-				return answers.hasOwnProperty('output');
-			}
-		}]);
+		// Fire up inquirer for an interactive interface, in case we're not static.
+		if (this.parent.interactive) {
+			let answers = await inquirer.prompt([{
+				"type": "checkbox",
+				"name": "types",
+				"message": "What type of buildings do you want to make historical?",
+				"default": ["Residential", "Commercial", "Agricultural", "Industrial"],
+				"choices": ["Residential", "Commercial", "Agricultural", "Industrial"]
+			}, {
+				"name": "force",
+				"type": "confirm",
+				"message": [
+					`Do you want to override "${path.basename(city)}"?`,
+					chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
+				].join(' '),
+				"default": false
+			}, {
+				"name": "output",
+				"type": "input",
+				"message": [
+					`Where should I save your city?`,
+					`Path is relative to "${dir}".`
+				].join(' '),
+				"default": 'HISTORICAL-'+path.basename(city),
+				when(answers) {
+					return !answers.force;
+				},
+				validate(answer) {
+					return Boolean(answer.trim());
+				}
+			}, {
+				"name": "ok",
+				"type": "confirm",
+				"default": true,
+				message(answers) {
+					let out = path.resolve(dir, answers.output);
+					return `Saving to "${out}", is that ok?`;
+				},
+				when(answers) {
+					return answers.hasOwnProperty('output');
+				}
+			}]);
 
-		// Not ok? Exit.
-		if (!answers.force && !answers.ok) return;
+			// Not ok? Exit.
+			if (!answers.force && !answers.ok) return;
 
-		// Parse answers.
-		answers.types.map(type => this[type.toLowerCase()] = true);
-		this.force = answers.force;
+			// Parse answers.
+			answers.types.map(type => this[type.toLowerCase()] = true);
+			if (answers.force) {
+				this.force = true;
+				this.output = file;
+			} else {
+				this.force = false;
+				this.output = answers.output;	
+			}
+
+		}
 
 		// Parse the output path.
-		let out;
-		if (this.force) {
-			out = file;
-		} else {
-			out = path.resolve(dir, answers.output);
+		if (!this.force) {
+			if (!this.output) {
+				this.output = 'HISTORICAL-'+path.basename(city);
+			}
+			this.output = path.resolve(dir, this.output);
 		}
 
 		// Read in the city.
@@ -113,17 +128,18 @@ program
 		let buff = fs.readFileSync(file);
 		let dbpf = new Savegame(buff);
 
-		// // Find the lotfile entry.
+		// Find the lotfile entry.
 		let lotFile = dbpf.lotFile;
 		if (!lotFile) {
 			return err('No lots found in this city!');
 		}
-		
+
 		// Loop the lots & make historical.
 		let i = 0;
 		for (let lot of lotFile) {
 			if (lot.historical) continue;
 			if (
+				this.all || 
 				(this.residential && lot.isResidential) ||
 				(this.commercial && lot.isCommercial) ||
 				(this.agricultural && lot.isAgricultural) ||
@@ -136,15 +152,15 @@ program
 
 		// No lots found? Don't re-save.
 		if (i === 0) {
-			return warn('No lots fond to make historical!');
+			return warn('No lots found to make historical!');
 		}
 
 		// Log.
 		ok(chalk.gray(`Marked ${i} lots as historical.`));
 
 		// Save again.
-		console.log(chalk.cyan('SAVING'), out);
-		await dbpf.save({"file": out});
+		console.log(chalk.cyan('SAVING'), this.output);
+		await dbpf.save({"file": this.output});
 		return ok('Done');
 
 	});
@@ -152,11 +168,11 @@ program
 program
 	.command('growify <city>')
 	.description('Convert plopped buildings into functional growables')
-	// .description('Convert all plopped Residential buildings to growables')
-	// .option('-i, --interactive', 'Interactively define the growify options')
-	// .option('--force', 'Force override of the city')
-	// .option('-z, --zone-type <type>', 'The zone type to be set. Defaults to Residential - High (R3). Use R1, R2, or R3')
-	// .option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.option('--force', 'Force override of the city')
+	.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+	.option('-r, --residential <type>', 'Zone type of the residential buildings to growify (Low, Medium, High)')
+	.option('-i, --industrial <type>', 'Zone type of the industrial buildings to growify (Medium, High)')
+	.option('-g, --agricultural', 'Whether or not to growify agricultural buildings as well')
 	.action(async function(city) {
 
 		// Same story here. See historical command.
@@ -166,122 +182,145 @@ program
 		let dir = process.cwd();
 		let file = path.resolve(dir, city);
 		let ext = path.extname(file);
-		if (ext !== '.sc4' || !fs.existsSync(file)) {
+		if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
 			return err(`${file} is not A SimCity 4 savegame!`);
 		}
 
-		// For now we're going interactive by default. Perhaps we can change 
-		// this again later if we want to write scripts that automate the 
-		// tasks, but for now it's better this way. Doesn't take too long to 
-		// fill in anyway.
-		let answers = await inquirer.prompt([{
-			"name": "filter",
-			"type": "checkbox",
-			"message": "What type(s) of buildings do you want to growify?",
-			"default": ["Residential", "Industrial", "Agricultural"],
-			"choices": [{
-				"name": "Residential buildings",
-				"value": "Residential"
+		// If we're not running in static mode, go interactive.
+		if (this.parent.interactive) {
+			let answers = await inquirer.prompt([{
+				"name": "filter",
+				"type": "checkbox",
+				"message": "What type(s) of buildings do you want to growify?",
+				"default": ["residential", "industrial", "agricultural"],
+				"choices": [{
+					"name": "Residential buildings",
+					"value": "residential"
+				}, {
+					"name": "Industrial buildings",
+					"value": "industrial"
+				}, {
+					"name": "Agricultural buildings",
+					"value": "agricultural"
+				}]
 			}, {
-				"name": "Industrial buildings",
-				"value": "Industrial"
+				"name": "residential",
+				"type": "list",
+				"message": "What zone should the residential buildings become?",
+				"default": 2,
+				"choices": [{
+					"name": "Low Density",
+					"value": ZoneType.RLow
+				}, {
+					"name": "Medium Density",
+					"value": ZoneType.RMedium
+				}, {
+					"name": "High Density",
+					"value": ZoneType.RHigh
+				}],
+				when(answers) {
+					return answers.filter.includes('residential');
+				}
 			}, {
-				"name": "Agricultural buildings",
-				"value": "Agricultural"
-			}]
-		}, {
-			"name": "RZoneType",
-			"type": "list",
-			"message": "What zone should the residential buildings become?",
-			"default": 2,
-			"choices": [{
-				"name": "Low Density",
-				"value": ZoneType.RLow
+				"name": "industrial",
+				"type": "list",
+				"message": "What zone should the industrial buildings become?",
+				"default": 1,
+				"choices": [{
+					"name": "Medium Density",
+					"value": ZoneType.IMedium
+				}, {
+					"name": "High Density",
+					"value": ZoneType.IHigh
+				}],
+				when(answers) {
+					return answers.filter.includes('industrial');
+				}
 			}, {
-				"name": "Medium Density",
-				"value": ZoneType.RMedium
+				"name": "force",
+				"type": "confirm",
+				"message": [
+					`Do you want to override "${path.basename(city)}"?`,
+					chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
+				].join(' '),
+				"default": false,
+				when(answers) {
+					return answers.filter.length > 0;
+				}
 			}, {
-				"name": "High Density",
-				"value": ZoneType.RHigh
-			}],
-			when(answers) {
-				return answers.filter.includes('Residential');
-			}
-		}, {
-			"name": "IZoneType",
-			"type": "list",
-			"message": "What zone should the industrial buildings become?",
-			"default": 1,
-			"choices": [{
-				"name": "Medium Density",
-				"value": ZoneType.IMedium
+				"name": "output",
+				"type": "input",
+				"message": [
+					`Where should I save your city?`,
+					`Path is relative to "${dir}".`
+				].join(' '),
+				"default": 'GROWIFIED-'+path.basename(city),
+				when(answers) {
+					return answers.filter.length > 0 && !answers.force;
+				},
+				validate(answer) {
+					return Boolean(answer.trim());
+				}
 			}, {
-				"name": "High Density",
-				"value": ZoneType.IHigh
-			}],
-			when(answers) {
-				return answers.filter.includes('Industrial');
-			}
-		}, {
-			"name": "force",
-			"type": "confirm",
-			"message": [
-				`Do you want to override "${path.basename(city)}"?`,
-				chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
-			].join(' '),
-			"default": false,
-			when(answers) {
-				return answers.filter.length > 0;
-			}
-		}, {
-			"name": "output",
-			"type": "input",
-			"message": [
-				`Where should I save your city?`,
-				`Path is relative to "${dir}".`
-			].join(' '),
-			"default": 'GROWIFIED-'+path.basename(city),
-			when(answers) {
-				return answers.filter.length > 0 && !answers.force;
-			},
-			validate(answer) {
-				return Boolean(answer.trim());
-			}
-		}, {
-			"name": "ok",
-			"type": "confirm",
-			"default": true,
-			message(answers) {
-				let out = path.resolve(dir, answers.output);
-				return `Saving to "${out}", is that ok?`;
-			},
-			when(answers) {
-				return answers.hasOwnProperty('output');
-			}
-		}]);
+				"name": "ok",
+				"type": "confirm",
+				"default": true,
+				message(answers) {
+					let out = path.resolve(dir, answers.output);
+					return `Saving to "${out}", is that ok?`;
+				},
+				when(answers) {
+					return answers.hasOwnProperty('output');
+				}
+			}]);
 
-		// Not ok? Exit.
-		if (!answers.force && !answers.ok) return;
+			// Not ok? Exit.
+			if (!answers.force && !answers.ok) return;
 
-		// Put the answers in the options.
-		answers.filter.map(type => this[type.toLowerCase()] = true);
-		if (this.residential) {
-			this.residential = answers.RZoneType;
+			// Put the answers in the options.
+			answers.filter.map(type => {
+				type = type.toLowerCase();
+				if (!this.hasOwnProperty(type)) {
+					this[type] = true;
+				}
+			});
+
+			if (answers.force) {
+				this.force = true;
+				this.output = file;
+			} else {
+				this.force = false;
+				this.output = answers.output;	
+			}
+
 		}
-		if (this.industrial) {
-			this.industrial = answers.IZoneType;
-		}
-		if (this.agricultural) {
-			this.agricultural = ZoneType.ILow;
-		}
-		this.force = answers.force;
 
 		// Parse the output path.
-		let out;
-		if (this.force) {
-			out = file;
-		} else {
-			out = path.resolve(dir, answers.output);
+		if (!this.force) {
+			if (!this.output) {
+				this.output = 'GROWIFIED-'+path.basename(city);
+			}
+			this.output = path.resolve(dir, this.output);
+		}
+
+		// Parse residential zone when comming from command line.
+		if (!this.parent.interactive) {
+			if (this.residential) {
+				if (/^l/i.test(this.residential)) {
+					this.residential = ZoneType.RLow;
+				} else if (/^m/i.test(this.residential)) {
+					this.residential = ZoneType.RMedium;
+				} else {
+					this.residential = ZoneType.RHigh;
+				}
+			}
+			if (this.industrial) {
+				if (/^m/i.test(this.residential)) {
+					this.industrial = ZoneType.IMedium;
+				} else {
+					this.industrial = ZoneType.IHigh;
+				}
+			}
 		}
 
 		// Read in the city.
@@ -321,8 +360,8 @@ program
 		ok(`Growified ${rCount} residentials, ${iCount} industrials & ${aCount} agriculturals`);
 
 		// Save.
-		console.log(chalk.cyan('SAVING'), out);
-		await dbpf.save({"file": out});
+		console.log(chalk.cyan('SAVING'), this.output);
+		await dbpf.save({"file": this.output});
 		return ok('Done');
 
 	});
@@ -466,7 +505,7 @@ program
 			let files = [];
 			read(folder, function(file) {
 				let ext = path.extname(file);
-				if (!ext.match(/(\.sc4)|(\.bmp)|(\.png)|(\.ini)/)) return;
+				if (!ext.match(/(\.sc4)|(\.bmp)|(\.png)|(\.ini)/i)) return;
 				files.push(path.relative(folder, file));
 			}, true);
 
