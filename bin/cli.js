@@ -35,20 +35,12 @@ const $cwd$ = Symbol('cwd');
 const $api$ = Symbol('api');
 Object.defineProperties(Command.prototype, {
 	"api": {
-		get() {
-			return root(this)[$api$];
-		},
-		set(api) {
-			root(this)[$api$] = api;
-		}
+		get() { return root(this)[$api$]; },
+		set(api) { root(this)[$api$] = api; }
 	},
 	"cwd": {
-		get() {
-			return root(this)[$cwd$];
-		},
-		set(cwd) {
-			root(this)[$cwd$] = cwd;
-		}
+		get() { return root(this)[$cwd$]; },
+		set(cwd) { root(this)[$cwd$] = cwd; }
 	}
 });
 
@@ -112,7 +104,7 @@ function factory(program) {
 
 			// Give ourselves our own options hash that we'll populate along 
 			// the way and which will be passed to the api.
-			const opts = Object.create(baseOptions);
+			const opts = baseOptions();
 
 			let dir = this.cwd;
 			let file = opts.dbpf = path.resolve(dir, city);
@@ -130,16 +122,16 @@ function factory(program) {
 					"message": "What type of buildings do you want to make historical?",
 					"default": ["residential", "commercial", "agricultural", "industrial"],
 					"choices": [{
-						"name": "Residential buildings",
+						"name": "Residential",
 						"value": "residential"
 					}, {
-						"name": "Commercial buildings",
+						"name": "Commercial",
 						"value": "commercial"
 					}, {
-						"name": "Agricultural buildings",
+						"name": "Agricultural",
 						"value": "agricultural"
 					}, {
-						"name": "Industrial buildings",
+						"name": "Industrial",
 						"value": "industrial"
 					}]
 				}, {
@@ -211,48 +203,7 @@ function factory(program) {
 			opts.save = true;
 
 			// Now call the api.
-			this.api.historical(opts);
-			// return console.log('RETURNING');
-
-			// // Read in the city.
-			// console.log(chalk.cyan('READING'), file);
-			// let buff = fs.readFileSync(file);
-			// let dbpf = opts.dbpf = new Savegame(buff);
-
-			// Find the lotfile entry.
-			// let lotFile = dbpf.lotFile;
-			// if (!lotFile) {
-			// 	return err('No lots found in this city!');
-			// }
-
-			// // Loop the lots & make historical.
-			// let i = 0;
-			// for (let lot of lotFile) {
-			// 	if (lot.historical) continue;
-			// 	if (
-			// 		this.all || 
-			// 		(this.residential && lot.isResidential) ||
-			// 		(this.commercial && lot.isCommercial) ||
-			// 		(this.agricultural && lot.isAgricultural) ||
-			// 		(this.industrial && lot.isIndustrial)
-			// 	) {
-			// 		i++;
-			// 		lot.historical = true;
-			// 	}
-			// }
-
-			// // No lots found? Don't re-save.
-			// if (i === 0) {
-			// 	return warn('No lots found to make historical!');
-			// }
-
-			// // Log.
-			// ok(chalk.gray(`Marked ${i} lots as historical.`));
-
-			// // Save again.
-			// console.log(chalk.cyan('SAVING'), this.output);
-			// await dbpf.save({"file": this.output});
-			// return ok('Done');
+			return this.api.historical(opts);
 
 		});
 
@@ -271,11 +222,11 @@ function factory(program) {
 
 			// Create an options object for ourselves that we'll pass to the 
 			// api later on.
-			const opts = Object.create(baseOptions);
+			const opts = baseOptions();
 
 			// Ensure that the city exists first.
 			let dir = this.cwd;
-			let file = path.resolve(dir, city);
+			let file = opts.dbpf = path.resolve(dir, city);
 			let ext = path.extname(file);
 			if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
 				return err(`${file} is not A SimCity 4 savegame!`);
@@ -435,49 +386,7 @@ function factory(program) {
 			opts.save = true;
 
 			// Call the api.
-			this.api.growify(opts);
-			return;
-
-			// Read in the city.
-			// console.log(chalk.cyan('READING'), file);
-			// let buff = fs.readFileSync(file);
-			// let dbpf = new Savegame(buff);
-
-			// // Find the lotfile entry.
-			// let lotFile = dbpf.lotFile;
-			// if (!lotFile) {
-			// 	return err('No lots in this city!');
-			// }
-
-			// // Loop all lots & check for plopped residential or industrial.
-			// let rCount = 0, iCount = 0, aCount = 0;
-			// for (let lot of lotFile) {
-			// 	if (this.residential && lot.isPloppedResidential) {
-			// 		lot.zoneType = this.residential;
-			// 		rCount++;
-			// 	} else if (this.industrial && lot.isPloppedIndustrial) {
-
-			// 		// Check for agricultural plops.
-			// 		lot.zoneType = this.industrial;
-			// 		iCount++;
-
-			// 	} else if (this.agricultural && lot.isPloppedAgricultural) {
-			// 		lot.zoneType = ZoneType.ILow;
-			// 		aCount++;
-			// 	}
-			// }
-
-			// // If no plopped buildings were found, exit.
-			// if (rCount + iCount === 0) {
-			// 	return warn('No plopped buildings found to growify!');
-			// }
-
-			// ok(`Growified ${rCount} residentials, ${iCount} industrials & ${aCount} agriculturals`);
-
-			// // Save.
-			// console.log(chalk.cyan('SAVING'), this.output);
-			// await dbpf.save({"file": this.output});
-			// return ok('Done');
+			return this.api.growify(opts);
 
 		});
 
@@ -768,27 +677,29 @@ function read(dir, cb, recursive) {
 	}
 }
 
-const baseOptions = {
-	"ok": ok,
-	"error": err,
-	"warn": warn,
-	"log": msg
-};
+function baseOptions() {
+	return {
+		"info": info,
+		"ok": ok,
+		"warn": warn,
+		"error": err
+	};
+}
 
 function ok(msg) {
 	console.log(chalk.green('OK'), msg);
 }
 
 function err(msg) {
-	console.log(chalk.red('ERROR'), chalk.red(msg));
+	console.log(chalk.red('ERROR'), msg);
 }
 
 function warn(msg) {
-	console.log(chalk.yellow('WARNING'), chalk.yellow(msg));
+	console.log(chalk.yellow('WARNING'), msg);
 }
 
-function msg(code, msg) {
-	console.log(chalk.cyan(code), msg);
+function info(msg) {
+	console.log(chalk.cyan('INFO'), msg);
 }
 
 function getDateSuffix() {
