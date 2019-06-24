@@ -31,21 +31,23 @@ const Command = program.Command;
 
 // Define getters for the api & cwd on the command's prototype which default 
 // to going back up to the main program.
+const $cwd$ = Symbol('cwd');
+const $api$ = Symbol('api');
 Object.defineProperties(Command.prototype, {
 	"api": {
 		get() {
-			return root(this)._api;
+			return root(this)[$api$];
 		},
 		set(api) {
-			root(this)._api = api;
+			root(this)[$api$] = api;
 		}
 	},
 	"cwd": {
 		get() {
-			return root(this)._cwd;
+			return root(this)[$cwd$];
 		},
 		set(cwd) {
-			root(this)._cwd = cwd;
+			root(this)[$cwd$] = cwd;
 		}
 	}
 });
@@ -90,7 +92,7 @@ function factory(program) {
 		.command('historical <city>')
 		.description('Make buildings within the given city historical')
 		.option('--force', 'Force override of the city')
-		.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
 		.option('-a, --all', 'Make all buildings historical')
 		.option('-r, --residential', 'Make all residential buildings historical')
 		.option('-c, --commercial', 'Make all commercial buildings historical')
@@ -98,31 +100,48 @@ function factory(program) {
 		.option('-g, --agricultural', 'Make all agricultural buildings historical')
 		.action(async function(city) {
 
-			// Apparently if someone accidentally uses the command wrong and types 
-			// "--force city-name", things go terribly wrong. The command starts 
-			// executing and creates a new readable stream, but apparently on the 
-			// next tick it decides that the syntax was incorrect and just force 
-			// terminates the program, resulting in an empty file that was 
-			// force-overwritten. That's a BIG thing, but we can solve this by 
-			// only starting the command on the next tick, which can be force by 
-			// Promise.resolve().
+			// Apparently if someone accidentally uses the command wrong and 
+			// types "--force city-name", things go terribly wrong. The 
+			// command starts executing and creates a new readable stream, but 
+			// apparently on the next tick it decides that the syntax was 
+			// incorrect and just force terminates the program, resulting in 
+			// an empty file that was force-overwritten. That's a BIG thing, 
+			// but we can solve this by only starting the command on the next 
+			// tick, which can be force by Promise.resolve().
 			await Promise.resolve();
 
+			// Give ourselves our own options hash that we'll populate along 
+			// the way and which will be passed to the api.
+			const opts = Object.create(baseOptions);
+
 			let dir = this.cwd;
-			let file = path.resolve(dir, city);
+			let file = opts.dbpf = path.resolve(dir, city);
 			let ext = path.extname(file);
 			if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
 				return err(`${file} is not a SimCity 4 savegame!`);
 			}
 
-			// Fire up inquirer for an interactive interface, in case we're not static.
+			// Fire up inquirer for an interactive interface, in case we're 
+			// not static.
 			if (this.parent.interactive) {
 				let answers = await inquirer.prompt([{
 					"type": "checkbox",
 					"name": "types",
 					"message": "What type of buildings do you want to make historical?",
-					"default": ["Residential", "Commercial", "Agricultural", "Industrial"],
-					"choices": ["Residential", "Commercial", "Agricultural", "Industrial"]
+					"default": ["residential", "commercial", "agricultural", "industrial"],
+					"choices": [{
+						"name": "Residential buildings",
+						"value": "residential"
+					}, {
+						"name": "Commercial buildings",
+						"value": "commercial"
+					}, {
+						"name": "Agricultural buildings",
+						"value": "agricultural"
+					}, {
+						"name": "Industrial buildings",
+						"value": "industrial"
+					}]
 				}, {
 					"name": "force",
 					"type": "confirm",
@@ -183,56 +202,57 @@ function factory(program) {
 			}
 
 			// Prepare our api call.
-			const opts = {};
 			if (this.all) opts.all = true;
 			if (this.residential) opts.residential = true;
 			if (this.commercial) opts.commercial = true;
 			if (this.industrial) opts.industrial = true;
 			if (this.agricultural) opts.agricultural = true;
-
-			// Read in the city.
-			console.log(chalk.cyan('READING'), file);
-			let buff = fs.readFileSync(file);
-			let dbpf = opts.dbpf = new Savegame(buff);
+			opts.output = this.output;
+			opts.save = true;
 
 			// Now call the api.
 			this.api.historical(opts);
-			return;
+			// return console.log('RETURNING');
+
+			// // Read in the city.
+			// console.log(chalk.cyan('READING'), file);
+			// let buff = fs.readFileSync(file);
+			// let dbpf = opts.dbpf = new Savegame(buff);
 
 			// Find the lotfile entry.
-			let lotFile = dbpf.lotFile;
-			if (!lotFile) {
-				return err('No lots found in this city!');
-			}
+			// let lotFile = dbpf.lotFile;
+			// if (!lotFile) {
+			// 	return err('No lots found in this city!');
+			// }
 
-			// Loop the lots & make historical.
-			let i = 0;
-			for (let lot of lotFile) {
-				if (lot.historical) continue;
-				if (
-					this.all || 
-					(this.residential && lot.isResidential) ||
-					(this.commercial && lot.isCommercial) ||
-					(this.agricultural && lot.isAgricultural) ||
-					(this.industrial && lot.isIndustrial)
-				) {
-					i++;
-					lot.historical = true;
-				}
-			}
+			// // Loop the lots & make historical.
+			// let i = 0;
+			// for (let lot of lotFile) {
+			// 	if (lot.historical) continue;
+			// 	if (
+			// 		this.all || 
+			// 		(this.residential && lot.isResidential) ||
+			// 		(this.commercial && lot.isCommercial) ||
+			// 		(this.agricultural && lot.isAgricultural) ||
+			// 		(this.industrial && lot.isIndustrial)
+			// 	) {
+			// 		i++;
+			// 		lot.historical = true;
+			// 	}
+			// }
 
-			// No lots found? Don't re-save.
-			if (i === 0) {
-				return warn('No lots found to make historical!');
-			}
+			// // No lots found? Don't re-save.
+			// if (i === 0) {
+			// 	return warn('No lots found to make historical!');
+			// }
 
-			// Log.
-			ok(chalk.gray(`Marked ${i} lots as historical.`));
+			// // Log.
+			// ok(chalk.gray(`Marked ${i} lots as historical.`));
 
-			// Save again.
-			console.log(chalk.cyan('SAVING'), this.output);
-			await dbpf.save({"file": this.output});
-			return ok('Done');
+			// // Save again.
+			// console.log(chalk.cyan('SAVING'), this.output);
+			// await dbpf.save({"file": this.output});
+			// return ok('Done');
 
 		});
 
@@ -240,7 +260,7 @@ function factory(program) {
 		.command('growify <city>')
 		.description('Convert plopped buildings into functional growables')
 		.option('--force', 'Force override of the city')
-		.option('-o, --output', 'The output path to store the city if you\'re not force-overriding')
+		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
 		.option('-r, --residential <type>', 'Zone type of the residential buildings to growify (Low, Medium, High)')
 		.option('-i, --industrial <type>', 'Zone type of the industrial buildings to growify (Medium, High)')
 		.option('-g, --agricultural', 'Whether or not to growify agricultural buildings as well')
@@ -249,8 +269,12 @@ function factory(program) {
 			// Same story here. See historical command.
 			await Promise.resolve();
 
+			// Create an options object for ourselves that we'll pass to the 
+			// api later on.
+			const opts = Object.create(baseOptions);
+
 			// Ensure that the city exists first.
-			let dir = process.cwd();
+			let dir = this.cwd;
 			let file = path.resolve(dir, city);
 			let ext = path.extname(file);
 			if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
@@ -260,7 +284,7 @@ function factory(program) {
 			// If we're not running in static mode, go interactive.
 			if (this.parent.interactive) {
 				let answers = await inquirer.prompt([{
-					"name": "filter",
+					"name": "types",
 					"type": "checkbox",
 					"message": "What type(s) of buildings do you want to growify?",
 					"default": ["residential", "industrial", "agricultural"],
@@ -290,7 +314,7 @@ function factory(program) {
 						"value": ZoneType.RHigh
 					}],
 					when(answers) {
-						return answers.filter.includes('residential');
+						return answers.types.includes('residential');
 					}
 				}, {
 					"name": "industrial",
@@ -305,7 +329,7 @@ function factory(program) {
 						"value": ZoneType.IHigh
 					}],
 					when(answers) {
-						return answers.filter.includes('industrial');
+						return answers.types.includes('industrial');
 					}
 				}, {
 					"name": "force",
@@ -316,7 +340,7 @@ function factory(program) {
 					].join(' '),
 					"default": false,
 					when(answers) {
-						return answers.filter.length > 0;
+						return answers.types.length > 0;
 					}
 				}, {
 					"name": "output",
@@ -327,7 +351,7 @@ function factory(program) {
 					].join(' '),
 					"default": 'GROWIFIED-'+path.basename(city),
 					when(answers) {
-						return answers.filter.length > 0 && !answers.force;
+						return answers.types.length > 0 && !answers.force;
 					},
 					validate(answer) {
 						return Boolean(answer.trim());
@@ -349,7 +373,7 @@ function factory(program) {
 				if (!answers.force && !answers.ok) return;
 
 				// Put the answers in the options.
-				answers.filter.map(type => {
+				answers.types.map(type => {
 					type = type.toLowerCase();
 					if (!answers.hasOwnProperty(type)) {
 						this[type] = true;
@@ -397,46 +421,63 @@ function factory(program) {
 				}
 			}
 
+			// If agricultural is set to true, set it as zone type.
+			if (this.agricultural === true) {
+				this.agricultural = ZoneType.ILow;
+			}
+
+			// Now format the options to pass to the api, regardless of where 
+			// we're coming from.
+			if (this.residential) opts.residential = this.residential;
+			if (this.industrial) opts.industrial = this.industrial;
+			if (this.agricultural) opts.agricultural = this.agricultural;
+			opts.output = this.output;
+			opts.save = true;
+
+			// Call the api.
+			this.api.growify(opts);
+			return;
+
 			// Read in the city.
-			console.log(chalk.cyan('READING'), file);
-			let buff = fs.readFileSync(file);
-			let dbpf = new Savegame(buff);
+			// console.log(chalk.cyan('READING'), file);
+			// let buff = fs.readFileSync(file);
+			// let dbpf = new Savegame(buff);
 
-			// Find the lotfile entry.
-			let lotFile = dbpf.lotFile;
-			if (!lotFile) {
-				return err('No lots in this city!');
-			}
+			// // Find the lotfile entry.
+			// let lotFile = dbpf.lotFile;
+			// if (!lotFile) {
+			// 	return err('No lots in this city!');
+			// }
 
-			// Loop all lots & check for plopped residential or industrial.
-			let rCount = 0, iCount = 0, aCount = 0;
-			for (let lot of lotFile) {
-				if (this.residential && lot.isPloppedResidential) {
-					lot.zoneType = this.residential;
-					rCount++;
-				} else if (this.industrial && lot.isPloppedIndustrial) {
+			// // Loop all lots & check for plopped residential or industrial.
+			// let rCount = 0, iCount = 0, aCount = 0;
+			// for (let lot of lotFile) {
+			// 	if (this.residential && lot.isPloppedResidential) {
+			// 		lot.zoneType = this.residential;
+			// 		rCount++;
+			// 	} else if (this.industrial && lot.isPloppedIndustrial) {
 
-					// Check for agricultural plops.
-					lot.zoneType = this.industrial;
-					iCount++;
+			// 		// Check for agricultural plops.
+			// 		lot.zoneType = this.industrial;
+			// 		iCount++;
 
-				} else if (this.agricultural && lot.isPloppedAgricultural) {
-					lot.zoneType = ZoneType.ILow;
-					aCount++;
-				}
-			}
+			// 	} else if (this.agricultural && lot.isPloppedAgricultural) {
+			// 		lot.zoneType = ZoneType.ILow;
+			// 		aCount++;
+			// 	}
+			// }
 
-			// If no plopped buildings were found, exit.
-			if (rCount + iCount === 0) {
-				return warn('No plopped buildings found to growify!');
-			}
+			// // If no plopped buildings were found, exit.
+			// if (rCount + iCount === 0) {
+			// 	return warn('No plopped buildings found to growify!');
+			// }
 
-			ok(`Growified ${rCount} residentials, ${iCount} industrials & ${aCount} agriculturals`);
+			// ok(`Growified ${rCount} residentials, ${iCount} industrials & ${aCount} agriculturals`);
 
-			// Save.
-			console.log(chalk.cyan('SAVING'), this.output);
-			await dbpf.save({"file": this.output});
-			return ok('Done');
+			// // Save.
+			// console.log(chalk.cyan('SAVING'), this.output);
+			// await dbpf.save({"file": this.output});
+			// return ok('Done');
 
 		});
 
@@ -727,6 +768,13 @@ function read(dir, cb, recursive) {
 	}
 }
 
+const baseOptions = {
+	"ok": ok,
+	"error": err,
+	"warn": warn,
+	"log": msg
+};
+
 function ok(msg) {
 	console.log(chalk.green('OK'), msg);
 }
@@ -737,6 +785,10 @@ function err(msg) {
 
 function warn(msg) {
 	console.log(chalk.yellow('WARNING'), chalk.yellow(msg));
+}
+
+function msg(code, msg) {
+	console.log(chalk.cyan(code), msg);
 }
 
 function getDateSuffix() {
@@ -764,6 +816,7 @@ if (isMain) {
 
 	// Set the default api & cwd to be used.
 	program.api = api;
+	program.cwd = process.cwd();
 
 	// Now run.
 	program.parse(process.argv);
