@@ -281,8 +281,10 @@ program
 			// Put the answers in the options.
 			answers.filter.map(type => {
 				type = type.toLowerCase();
-				if (!this.hasOwnProperty(type)) {
+				if (!answers.hasOwnProperty(type)) {
 					this[type] = true;
+				} else {
+					this[type] = answers[type];
 				}
 			});
 
@@ -317,7 +319,7 @@ program
 				}
 			}
 			if (this.industrial) {
-				if (/^m/i.test(this.residential)) {
+				if (/^m/i.test(this.industrial)) {
 					this.industrial = ZoneType.IMedium;
 				} else {
 					this.industrial = ZoneType.IHigh;
