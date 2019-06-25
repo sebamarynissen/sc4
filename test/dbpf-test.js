@@ -5,7 +5,7 @@ const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
 
-const { hex } = require('../lib/util');
+const { hex, chunk } = require('../lib/util');
 const FileType = require('../lib/file-types');
 const DBPF = require('../lib/dbpf');
 const Savegame = require('../lib/savegame');
@@ -84,34 +84,35 @@ describe('An exemplar file', function() {
 
 describe('A lot subfile', function() {
 
-	// it.only('should be parsed & serialized correctly', function() {
+	it.only('should be parsed & serialized correctly', function() {
 
-	// 	let file = path.resolve(__dirname, 'files/city.sc4');
-	// 	let buff = fs.readFileSync(file);
-	// 	let dbpf = new DBPF(buff);
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
 
-	// 	let entry = dbpf.entries.find(x => x.type === FileType.BuildingFile);
-	// 	let buildingFile = entry.read();
+		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
+		let lotFile = entry.read();
 
-	// 	// Serialize the building file right away. Should result in exactly 
-	// 	// the same buffer.
-	// 	let source = entry.decompress();
-	// 	let check = buildingFile.toBuffer();
-	// 	expect(source.toString('hex')).to.equal(check.toString('hex'));
+		// Check the crc checksums. We didn't modify the lot, so they should 
+		// still match. This also ensures that the serialization process is 
+		// correct as well!
+		for (let lot of lotFile) {
 
-	// 	// Check the crc checksums. When we didn't modify a building, they 
-	// 	// should still match.
-	// 	for (let building of buildingFile) {
+			// Note: toBuffer() updates the crc, so make sure to grab the old 
+			// one!
+			let crc = lot.crc;
+			let buff = lot.toBuffer();
+			expect(buff.readUInt32LE(4)).to.equal(crc);
 
-	// 		// Note: toBuffer() updates the crc, so make sure to grab the old 
-	// 		// one!
-	// 		let crc = building.crc;
-	// 		let buff = building.toBuffer();
-	// 		expect(buff.readUInt32LE(4)).to.equal(crc);
+		}
 
-	// 	}
+		// Serialize the building file right away. Should result in exactly 
+		// the same buffer.
+		let source = entry.decompress();
+		let check = lotFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
-	// });
+	});
 
 	it('should compute the all crc checksums correctly', function() {
 
@@ -263,19 +264,13 @@ describe('A lot subfile', function() {
 
 describe('A building subfile', function() {
 
-	it.only('should be parsed & serialized correctly', function() {
+	it('should be parsed & serialized correctly', function() {
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.BuildingFile);
 		let buildingFile = entry.read();
-
-		// Serialize the building file right away. Should result in exactly 
-		// the same buffer.
-		let source = entry.decompress();
-		let check = buildingFile.toBuffer();
-		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 		// Check the crc checksums. When we didn't modify a building, they 
 		// should still match.
@@ -288,6 +283,12 @@ describe('A building subfile', function() {
 			expect(buff.readUInt32LE(4)).to.equal(crc);
 
 		}
+
+		// Serialize the building file right away. Should result in exactly 
+		// the same buffer.
+		let source = entry.decompress();
+		let check = buildingFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
 
