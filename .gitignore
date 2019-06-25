@@ -9,3 +9,5 @@ package-lock.json
 
 src/build/**
 build/**
+
+test/files/**
