@@ -84,7 +84,7 @@ describe('An exemplar file', function() {
 
 describe('A lot subfile', function() {
 
-	it.only('should be parsed & serialized correctly', function() {
+	it('should be parsed & serialized correctly', function() {
 
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		let buff = fs.readFileSync(file);
@@ -268,6 +268,38 @@ describe('A building subfile', function() {
 		// the same buffer.
 		let source = entry.decompress();
 		let check = buildingFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+	});
+
+});
+
+describe('A prop subfile', function() {
+
+	it('should be parsed & serialized correctly', function() {
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.PropFile);
+		let propFile = entry.read();
+
+		// Check the crc checksums. When we didn't modify a prop, they should 
+		// still match.
+		for (let prop of propFile) {
+
+			// Note: toBuffer() updates the crc, so make sure to grab the old
+			// one!
+			let crc = prop.crc;
+			let buff = prop.toBuffer();
+			expect(buff.readUInt32LE(4)).to.equal(crc);
+
+		}
+
+		// Serialize the prop file right away. Should result in exactly the 
+		// same buffer.
+		let source = entry.decompress();
+		let check = propFile.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
