@@ -33,6 +33,9 @@ describe('The file index', function() {
 		expect(file.table).to.have.property('LotConfigPropertyLotObject');
 		expect(file.table).to.have.property(0x88EDC900);
 
+		let building = file.lotObjects.find(x => x.type === 0x00);
+		console.log(building.x, building.y, building.z);
+
 	});
 
 });
