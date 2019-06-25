@@ -114,26 +114,6 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should compute the all crc checksums correctly', function() {
-
-		let file = path.resolve(__dirname, 'files/city.sc4');
-		let buff = fs.readFileSync(file);
-		let dbpf = new DBPF(buff);
-
-		// Find the lot subfile & read it.
-		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
-		let lots = lotFile.lots;
-
-		for (let i = 0; i < lots.length; i++) {
-			let lot = lots[i];
-			let crc = lot.crc;
-			let calc = lot.calculateCRC();
-			expect(crc).to.equal(calc);
-		}
-
-	});
-
 	it('should detect Residential, Commercial, Agricultural & Industry correctly', function() {
 		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
 		let buff = fs.readFileSync(file);
@@ -150,7 +130,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should re-save after making buildings historical', async function() {
+	it.skip('should re-save after making buildings historical', async function() {
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		// let file = path.resolve(__dirname, 'files/writing_history.sc4');
 		// let file = path.resolve(process.env.HOMEPATH, 'documents/SimCity 4/Regions/Experiments/City - Writing More History.sc4');
@@ -174,7 +154,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should change a plopped building into a grown one', async function() {
+	it.skip('should change a plopped building into a grown one', async function() {
 
 		let file = path.resolve(__dirname, 'files/plopped.sc4');
 		let buff = fs.readFileSync(file);
@@ -203,7 +183,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should check for plopped residentials', function() {
+	it.skip('should check for plopped residentials', function() {
 
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		let buff = fs.readFileSync(file);
@@ -239,7 +219,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should growify industry', async function() {
+	it.skip('should growify industry', async function() {
 		let file = path.resolve(__dirname, 'files/City - Plopped Industry - source.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
