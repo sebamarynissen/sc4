@@ -30,6 +30,8 @@ describe('The file index', function() {
 		// Read the file. Should be an exemplar.
 		let file = record.read();
 		expect(file.fileType).to.equal(FileType.Exemplar);
+		expect(file.table).to.have.property('LotConfigPropertyLotObject');
+		expect(file.table).to.have.property(0x88EDC900);
 
 	});
 
