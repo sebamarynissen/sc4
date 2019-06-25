@@ -260,8 +260,6 @@ describe('A building subfile', function() {
 
 		}
 
-		console.log(buildingFile.buildings[0]);
-
 	});
 
 });
