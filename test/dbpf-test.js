@@ -306,3 +306,41 @@ describe('A prop subfile', function() {
 	});
 
 });
+
+describe('An item index subfile', function() {
+
+	it('should be parsed & serialized correctly', function() {
+
+		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.ItemIndexFile);
+		let indexFile = entry.read();
+
+		expect(indexFile.width).to.equal(1024);
+		expect(indexFile.depth).to.equal(1024);
+		expect(indexFile.tractWidth).to.equal(16);
+		expect(indexFile.tractDepth).to.equal(16);
+		expect(indexFile.tileWidth).to.equal(64);
+		expect(indexFile.tileDepth).to.equal(64);
+		expect(indexFile.columns).to.have.length(192);
+		for (let column of indexFile.columns) {
+			expect(column).to.have.length(192);
+			for (let cell of column) {
+				for (let item of cell) {
+					expect(item).to.have.property('mem');
+					expect(item).to.have.property('type');
+				}
+			}
+		}
+
+		// Now serialize again. We haven't modified anything so everything 
+		// should still match.
+		let source = entry.decompress();
+		let check = indexFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+	});
+
+});
