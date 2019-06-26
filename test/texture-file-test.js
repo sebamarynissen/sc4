@@ -70,8 +70,8 @@ describe('A base texture file', function() {
 // BYTE	Min Tract Z (normally between 0x40 and 0x7f)	
 // BYTE	Max Tract X (normally between 0x40 and 0x7f)	
 // BYTE	Max Tract X (normally between 0x40 and 0x7f)	
-// WORD	X Tract Size? (only seen 0x0002)	
-// WORD	Z Tract Size? (only seen 0x0002)	
+// WORD	X Tract Size? (only seen 0x0002, probably indicating the size is 2²)	
+// WORD	Z Tract Size? (only seen 0x0002, probably indicating the size is 2²)	
 // DWORD	Unknown, only seen 0x00000000	
 // DWORD	Unknown, only seen 0x00000000	
 // DWORD	Unknown, only seen 0x00000000	

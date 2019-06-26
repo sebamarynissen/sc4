@@ -657,7 +657,8 @@ function factory(program) {
 			let word = 'unknown6'.split(' ');
 			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
 			function replacer(name, val) {
-				if (dword.includes(name)) return hex(val);
+				if (name === 'commuteBuffer') return val ? "..." : null;
+				else if (dword.includes(name)) return hex(val);
 				else if (byte.includes(name)) return hex(val, 2);
 				else if (word.includes(name)) return hex(val, 4);
 				else return val;

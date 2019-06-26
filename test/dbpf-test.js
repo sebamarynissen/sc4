@@ -6,11 +6,12 @@ const fs = require('fs');
 const path = require('path');
 
 const { hex, chunk } = require('../lib/util');
+const crc32 = require('../lib/crc');
 const FileType = require('../lib/file-types');
 const DBPF = require('../lib/dbpf');
 const Savegame = require('../lib/savegame');
 const Exemplar = require('../lib/exemplar');
-const { ZoneType } = require('../lib/enums');
+const { ZoneType, cClass } = require('../lib/enums');
 
 describe('A DBPF file', function() {
 
@@ -42,6 +43,35 @@ describe('A DBPF file', function() {
 		}
 
 		my.save(path.resolve(__dirname, 'files/saved.sc4lot'));
+
+	});
+
+	it('should find all entries using a checksum', function() {
+
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let dbpf = new DBPF(fs.readFileSync(file));
+
+		let all = [];
+		for (let entry of dbpf) {
+			let buff = entry.decompress();
+			let size = buff.readUInt32LE();
+
+			// If what we're interpreting as size is larger than the buffer, 
+			// it's impossible that this has the structure size crc mem!
+			if (size > buff.byteLength) continue;
+
+			// Calculate the checksum. If it matches the second value, then we 
+			// have something of the structure "size crc mem".
+			let crc = crc32(buff, 8);
+			if (crc === buff.readUInt32LE(4)) {
+				let type = entry.type;
+				let name = cClass[type].replace(/^cSC4/, '');
+				all.push(name);
+			}
+
+		}
+
+		// console.log('Thats', all.length/dbpf.entries.length, 'of the entries');
 
 	});
 
