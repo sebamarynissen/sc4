@@ -55,39 +55,3 @@ describe('A base texture file', function() {
 	});
 
 });
-
-// DWORD	Size	
-// DWORD	CRC	
-// DWORD	Memory	
-// WORD	Major version (0x0002)	
-// WORD	Minor version (0x0004)	
-// BYTE	Unknown, only seen 0x00	
-// BYTE	Unknown, only seen 0x00	
-// BYTE	Unknown, only seen 0x00	
-// BYTE	Unknown, only seen 0x00	
-// DWORD	 0x497f6d9d (always the same)	
-// BYTE	Min Tract X (normally between 0x40 and 0x7f)	
-// BYTE	Min Tract Z (normally between 0x40 and 0x7f)	
-// BYTE	Max Tract X (normally between 0x40 and 0x7f)	
-// BYTE	Max Tract X (normally between 0x40 and 0x7f)	
-// WORD	X Tract Size? (only seen 0x0002, probably indicating the size is 2²)	
-// WORD	Z Tract Size? (only seen 0x0002, probably indicating the size is 2²)	
-// DWORD	Unknown, only seen 0x00000000	
-// DWORD	Unknown, only seen 0x00000000	
-// DWORD	Unknown, only seen 0x00000000	
-// FLOAT32	Min X Coordinate	
-// FLOAT32	Min Y Coordinate	
-// FLOAT32	Min Z Coordinate	
-// FLOAT32	Max X Coordinate	
-// FLOAT32	Max Y Coordinate	
-// FLOAT32	Max Z Coordinate	
-// BYTE	Unknown, seen 0x01 and 0x02	
-// DWORD	Count of tiles with a texture	
-// 	DWORD	Instance ID of the texture
-// 	BYTE	X tile
-// 	BYTE	Z tile
-// 	BYTE 	Orientation
-// 	BYTE	Unknown, seen 0x00 and 0x01
-// 	4 BYTES	Unknown, mostly 0xff, seen several other values as well
-// 	BYTE	Unknown, mostly 0xff but seen 0x03 and 0x01 as well
-// 	BYTE	Unknown, seen 0x00 up to 0x07
