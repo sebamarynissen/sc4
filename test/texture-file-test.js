@@ -12,43 +12,82 @@ const REGION = require('./test-region');
 
 describe('A base texture file', function() {
 
-	it.only('we\'re trying to decode it', function() {
+	it('should be parsed & serialized correctly', function() {
 
-		// let file = path.resolve(__dirname, 'files/City - Double - check.sc4');
-		let file = path.resolve(REGION, 'City - Textures.sc4');
+		// let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let file = path.resolve(__dirname, 'files/city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
-		let textureFile = dbpf.getByType(FileType.BaseTextureFile);
+		let entry = dbpf.getByType(FileType.BaseTextureFile);
+		let textureFile = entry.read();
 
-		let buff = textureFile.read();
+		// Loop all textures and see if we find different values for the 
+		// unknowns. "u10" is know to have seen values 0x02 or 0x01. u4 in the
+		// texture has only seen value 0x05 while u5 has only seen value 
+		// 0x497f6d9d. For all the rest only "0" has been observed.
+		let sets = {};
+		let tsets = {};
+		for (let base of textureFile) {
 
-		// Cut the buffer in pieces.
-		let pieces = [];
-		while (buff.length > 4) {
-			let size = buff.readUInt32LE(0);
-			pieces.push(buff.slice(0, size));
-			buff = buff.slice(size);
+			// Loop the textures.
+			for (let texture of base.textures) {
+				for (let key in texture) {
+					if (!key.match(/^u[\d]+/)) continue;
+					let set = tsets[key] || (tsets[key] = new Set());
+					set.add(hex(texture[key], 2));
+				}
+			}
+
+			for (let key in base) {
+				if (!key.match(/^u[\d]+/)) continue;
+				let set = sets[key] || (sets[key] = new Set());
+				set.add(base[key]);
+			}
 		}
 
-		console.log(pieces.length);
-		console.log(pieces.map(x => x.length));
-		for (let piece of pieces) {
-			let rs = new Stream(piece);
-			let size = rs.dword();
-			let crc = rs.dword();
-			let mem = rs.dword();
-			let major = rs.word();
-			let minor = rs.word();
+		console.log(sets);
+		console.log(tsets);
 
-			let id = '25 8E 30 00'.split(' ').reverse().join('');
-
-			// console.log({size, crc, mem, major, minor});
-			let format = '4 4 4 2 2 4 4 1 1 1 1 2 2 4 4 4 4 4 2 2 4 4 4 4 4 4 4 4'.split(' ').map(x => 2*(+x));
-			let hex = piece.toString('hex');
-
-			console.log(chunk(format, hex));
-
-		}
+		// Now serialize again.
+		let source = entry.decompress();
+		let check = textureFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
 
 });
+
+// DWORD	Size	
+// DWORD	CRC	
+// DWORD	Memory	
+// WORD	Major version (0x0002)	
+// WORD	Minor version (0x0004)	
+// BYTE	Unknown, only seen 0x00	
+// BYTE	Unknown, only seen 0x00	
+// BYTE	Unknown, only seen 0x00	
+// BYTE	Unknown, only seen 0x00	
+// DWORD	 0x497f6d9d (always the same)	
+// BYTE	Min Tract X (normally between 0x40 and 0x7f)	
+// BYTE	Min Tract Z (normally between 0x40 and 0x7f)	
+// BYTE	Max Tract X (normally between 0x40 and 0x7f)	
+// BYTE	Max Tract X (normally between 0x40 and 0x7f)	
+// WORD	X Tract Size? (only seen 0x0002)	
+// WORD	Z Tract Size? (only seen 0x0002)	
+// DWORD	Unknown, only seen 0x00000000	
+// DWORD	Unknown, only seen 0x00000000	
+// DWORD	Unknown, only seen 0x00000000	
+// FLOAT32	Min X Coordinate	
+// FLOAT32	Min Y Coordinate	
+// FLOAT32	Min Z Coordinate	
+// FLOAT32	Max X Coordinate	
+// FLOAT32	Max Y Coordinate	
+// FLOAT32	Max Z Coordinate	
+// BYTE	Unknown, seen 0x01 and 0x02	
+// DWORD	Count of tiles with a texture	
+// 	DWORD	Instance ID of the texture
+// 	BYTE	X tile
+// 	BYTE	Z tile
+// 	BYTE 	Orientation
+// 	BYTE	Unknown, seen 0x00 and 0x01
+// 	4 BYTES	Unknown, mostly 0xff, seen several other values as well
+// 	BYTE	Unknown, mostly 0xff but seen 0x03 and 0x01 as well
+// 	BYTE	Unknown, seen 0x00 up to 0x07

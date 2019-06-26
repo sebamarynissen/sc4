@@ -15,6 +15,7 @@ const Savegame = require('../lib/savegame');
 const FileType = require('../lib/file-types');
 const pkg = require('../package.json');
 const { ZoneType } = require('../lib/enums');
+const { hex } = require('../lib/util');
 
 const isMain = require.main === module;
 
@@ -639,6 +640,37 @@ function factory(program) {
 
 			// We're done.
 			ok('Done');
+
+		});
+
+	// Command for comparing
+	program
+		.command('dump <city>')
+		.description('Give a human-readable representation of all lots in the city')
+		.action(function(city) {
+
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			
+			let dword = 'crc mem IID dateCreated buildingIID linkedIndustrial linkedAgricultural demandSourceIndex name unknown0'.split(' ');
+			let word = 'unknown6'.split(' ');
+			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
+			function replacer(name, val) {
+				if (dword.includes(name)) return hex(val);
+				else if (byte.includes(name)) return hex(val, 2);
+				else if (word.includes(name)) return hex(val, 4);
+				else return val;
+			}
+
+			let dbpf = new DBPF(buff);
+			let lotFile = dbpf.entries.find(x => x.type === FileType.LotFile).read();
+			let all = [];
+			for (let lot of lotFile) {
+				let str = JSON.stringify(lot, replacer, 2);
+				all.push(str);
+			}
+			console.log(all.join('\n\n-----------------\n\n'));
 
 		});
 

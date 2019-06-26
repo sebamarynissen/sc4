@@ -15,7 +15,7 @@ const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
 describe('A city manager', function() {
 
-	it.only('should plop a building', async function() {
+	it.skip('should plop a building', async function() {
 
 		// Build up an index first of the buildings we're about to use.
 		let index = new Index({
