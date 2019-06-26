@@ -312,6 +312,7 @@ describe('An item index subfile', function() {
 	it('should be parsed & serialized correctly', function() {
 
 		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		// let file = path.resolve(__dirname, 'files/city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -340,6 +341,52 @@ describe('An item index subfile', function() {
 		let source = entry.decompress();
 		let check = indexFile.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+		// Seems that the item index works with tracts and that it only starts 
+		// at 64. So a lot of the items is apparently never used. Probably 
+		// related to the data structure I guess.
+		let cells = [...indexFile].filter(x => x.length);
+		let all = [];
+		for (let cell of cells) {
+			all.push(...cell);
+		}
+		let types = {};
+		for (let item of all) {
+			types[hex(item.type)] = true;
+		}
+		console.log(...Object.keys(types).map(x => x.slice(2)));
+		// let coords = cells.map(cell => [cell.x, cell.z]);
+		// console.log(Math.max(...coords.map(x => x[0])));
+		// console.log(Math.max(...coords.map(x => x[1])));
+		// let tract = indexFile.columns[64][64];
+		// console.log(tract.map(x => ({
+		// 	"mem": hex(x.mem),
+		// 	"type": hex(x.type)
+		// })));
+
+	});
+
+});
+
+describe('A terrain map', function() {
+
+	it('should read the terrain correctly', function() {
+
+		const TerrainMap = require('../lib/terrain-map');
+
+		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		// Read the region data.
+		let regionData = dbpf.entries.find(x => x.type===FileType.RegionViewFile).read();
+
+		// Read the terrain as well;
+		let entry = dbpf.entries.find(function(entry) {
+			return entry.type === 0xa9dd6ff4 && entry.group === 0xe98f9525 && entry.instance === 0x00000001;
+		});
+		let map = new TerrainMap(regionData.xSize, regionData.ySize);
+		map.parse(entry.read());
 
 	});
 
