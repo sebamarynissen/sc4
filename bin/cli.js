@@ -675,6 +675,23 @@ function factory(program) {
 
 		});
 
+	// Command for looking for refs.
+	program
+		.command('refs <city>')
+		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
+		.description('Finds internal memory references within a city')
+		.action(function(city) {
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			let opts = baseOptions();
+			opts.dbpf = new DBPF(buff);
+			if (this.max) {
+				opts.max = +this.max;
+			}
+			api.refs(opts);
+		});
+
 	// End of factory function.
 	return program;
 
@@ -719,20 +736,20 @@ function baseOptions() {
 	};
 }
 
-function ok(msg) {
-	console.log(chalk.green('OK'), msg);
+function ok(...msg) {
+	console.log(chalk.green('OK'), ...msg);
 }
 
-function err(msg) {
-	console.log(chalk.red('ERROR'), msg);
+function err(...msg) {
+	console.log(chalk.red('ERROR'), ...msg);
 }
 
-function warn(msg) {
-	console.log(chalk.yellow('WARNING'), msg);
+function warn(...msg) {
+	console.log(chalk.yellow('WARNING'), ...msg);
 }
 
-function info(msg) {
-	console.log(chalk.cyan('INFO'), msg);
+function info(...msg) {
+	console.log(chalk.cyan('INFO'), ...msg);
 }
 
 function getDateSuffix() {
