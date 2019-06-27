@@ -43,13 +43,18 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should move a building', async function() {
+	it.only('should look for memory references', function() {
 
-		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
+		this.timeout(0);
+
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - labP01.sc4'));
 		let dbpf = new Savegame(buff);
 
 		// Find all entries using a checksum.
 		let all = [];
+		let dont = [];
 		let mems = new Set();
 		for (let entry of dbpf) {
 			let buff = entry.decompress();
@@ -57,33 +62,38 @@ describe('A city manager', function() {
 
 			// If what we're interpreting as size is larger than the buffer, 
 			// it's impossible that this has the structure size crc mem!
-			if (size > buff.byteLength) continue;
+			if (size > buff.byteLength) {
+				dont.push(cClass[entry.type]);
+				continue;
+			}
 
-			// Calculate the checksum. If it matches the second value, then we 
-			// have something of the structure "size crc mem". Perhaps more follow here.
-			let crc = crc32(buff, 8);
-			if (crc === buff.readUInt32LE(4)) {
+			// Note that there may be multiple records in this buffer. We're 
+			// going to parse them one by one and calculate the checksum. If 
+			// the checksum matches, we're considering them to have the 
+			// structure "SIZE CRC MEM".
+			let slice = buff.slice(0, size);
+			let crc = crc32(slice, 8);
+			if (crc !== buff.readUInt32LE(4)) {
+				dont.push(cClass[entry.type]);
+				continue;
+			}
 
-				let records = [];
-				while (buff.length > 4) {
-					let size = buff.readUInt32LE(0);
-					records.push(buff.slice(0, size));
-					buff = buff.slice(size);
+			// Allright, first entry is of type "SIZE MEM CRC", we assume that 
+			// all following entries are as well.
+			while (buff.length > 4) {
+				let size = buff.readUInt32LE(0);
+				let slice = buff.slice(0, size);
+				let mem = slice.readUInt32LE(8);
+				if (mems.has(mem)) {
+					console.warn(`Double memory address ${mem}!`);
 				}
-
-				let type = entry.type;
-				for (let record of records) {
-					let mem = record.readUInt32LE(8);
-					if (mems.has(mem)) {
-						console.log('Double memory address!');
-					}
-					mems.add(mem);
-					all.push({
-						"mem": mem,
-						"type": type,
-						"buffer": record
-					});
-				}
+				mems.add(mem);
+				all.push({
+					"mem": mem,
+					"type": entry.type,
+					"buffer": slice
+				});
+				buff = buff.slice(size);
 			}
 
 		}
@@ -92,19 +102,53 @@ describe('A city manager', function() {
 			return a.mem - b.mem;
 		});
 
-		console.log(all);
-		let diffs = all.map((a, i) => {
-			let next = all[i+1];
-			if (!next) return;
-			let diff = next.mem - a.mem;
-			if (diff < a.buffer.byteLength) {
-				console.log(hex(a.type));
-			}
-			return diff;
-		});
+		// Log all C++ classes that seem to be using the SIZE MEM CRC.
+		let uniq = [...new Set(all.map(x => cClass[x.type]))];
+		console.log(uniq, 'that\'s', String(100*uniq.length / dbpf.entries.length)+'% of all files');
 
-		return;
-		// return all;
+		let queries = {
+			"lots": dbpf.lotFile.lots,
+			"buildings": dbpf.buildingFile.buildings,
+			"textures": dbpf.baseTextureFile.textures,
+			"props": dbpf.propFile.props
+		};
+
+		// Alright now pick a random texture and check if it occurs somewhere 
+		// else.
+		for (let type in queries) {
+			let set = new Set();
+			let arr = queries[type];
+			if ('electron' in process.versions) {
+				console.log(`%c Searching ${type}...`, 'color: maroon; font-weight: bold; font-size: 15px;');
+			} else {
+				console.log(`Searching ${type}...`);
+			}
+			let i = 0;
+			let max = 100;
+			for (let record of arr) {
+				let mem = record.mem;
+				let result = dbpf.memSearch(mem);
+				for (let row of result) {
+					set.add(row.class);
+				}
+				if (++i > max) break;
+			}
+			console.table([...set].sort(function(a, b) {
+				if (a === 'cSC4OccupantManager') return -1;
+				else if (b === 'cSC4OccupantManager') return 1;
+				else return a - b;
+			}));
+
+		}
+
+	});
+
+	it.skip('should move a building', async function() {
+
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
+		let dbpf = new Savegame(buff);
 
 		// Find the building & lot file.
 		let { buildingFile, baseTextureFile, lotFile } = dbpf;
