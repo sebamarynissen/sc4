@@ -65,8 +65,8 @@ static const unsigned int crc32_table[] = {
     0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4
 };
 
-unsigned int xcrc32 (const unsigned char *buf, int len) {
-	unsigned int crc = 0xFFFFFFFF;
+unsigned int xcrc32 (const unsigned char *buf, int len, unsigned int crc) {
+	// unsigned int crc = 0xFFFFFFFF;
     while (len--) {
         crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buf) & 255];
         buf++;
