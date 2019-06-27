@@ -62,7 +62,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should move give an overview of entries per class', function() {
+	it('should move give an overview of entries per class', function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - labP01.sc4'));
 		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
@@ -79,12 +79,21 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('should move a building', async function() {
+	it.only('should move a building', async function() {
 
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
-		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
+
+		// Get all mem refs.
+		let refs = dbpf.memRefs().sort((a, b) => a.mem - b.mem);
+		// console.log(refs);
+		// refs.forEach(function(ref) {
+			// if (ref.mem %  !== 0) {
+			// 	console.log('not by 8');
+			// }
+		// });
 
 		// Find the building & lot file.
 		let { buildingFile, baseTextureFile, lotFile } = dbpf;
@@ -92,39 +101,72 @@ describe('A city manager', function() {
 		let building = buildingFile.buildings[0];
 		let tx = baseTextureFile.textures[0];
 
-		const dx = 1;
-
-		// Move the lot 1 to the right so that it stays within its the tract.
-		lot.minX += dx;
-		lot.maxX += dx;
-		lot.commuteX += dx;
-
-		// Move the building as well, but keep it in its tract.
-		building.minX += dx*16;
-		building.maxX += dx*16;
-
-		// Move the base texture underneath, but again keep it in its tract.
-		// tx.minX += dx*16;
-		tx.maxX += dx*16;
-		let i = 0;
-		tx.textures.map(function(tx) {
-			if (i++ > 0) return;
-			let iid = hex(tx.IID);
-			if (tx.priority === 1) {
-				tx.x += dx;
+		let mem = tx.mem;
+		let dm = 1;
+		tx.mem += dm;
+		let index = dbpf.itemIndexFile;
+		let items = index.columns[0x40][0x40];
+		for (let item of items) {
+			if (item.mem === mem) {
+				item.mem += dm;
 			}
+		}
+
+		// Now check if we're able to insert another texture. We'll do it by 
+		// cloning for now.
+		let proto = Object.getPrototypeOf(tx);
+		let clone = Object.create(proto, Object.getOwnPropertyDescriptors(tx));
+		baseTextureFile.textures.push(clone);
+		let id = clone.mem = clone.mem + 4;
+		let dx = 2;
+		clone.minX += 16*dx;
+		clone.maxX += 16*dx;
+		clone.textures.forEach(function(entry) {
+			entry.x += 2;
 		});
 
-		console.log(tx);
+		// Insert into the item index as well.
+		items.push({
+			"mem": id,
+			"type": FileType.BaseTextureFile
+		});
 
-		// Decode the index file and find all types we have.
-		let index = dbpf.itemIndexFile;
-		let cells = index.columns.flat().filter(x => x.length).flat();
-		let types = [...new Set(cells.map(item => cClass[item.type]))];
-		console.log(types);
-
-		// Now save.
+		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
+
+		// const dx = 1;
+
+		// // Move the lot 1 to the right so that it stays within its the tract.
+		// lot.minX += dx;
+		// lot.maxX += dx;
+		// lot.commuteX += dx;
+
+		// // Move the building as well, but keep it in its tract.
+		// building.minX += dx*16;
+		// building.maxX += dx*16;
+
+		// // Move the base texture underneath, but again keep it in its tract.
+		// // tx.minX += dx*16;
+		// tx.maxX += dx*16;
+		// let i = 0;
+		// tx.textures.map(function(tx) {
+		// 	if (i++ > 0) return;
+		// 	let iid = hex(tx.IID);
+		// 	if (tx.priority === 1) {
+		// 		tx.x += dx;
+		// 	}
+		// });
+
+		// console.log(tx);
+
+		// // Decode the index file and find all types we have.
+		// let index = dbpf.itemIndexFile;
+		// let cells = index.columns.flat().filter(x => x.length).flat();
+		// let types = [...new Set(cells.map(item => cClass[item.type]))];
+		// console.log(types);
+
+		// // Now save.
+		// await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
 
 	});
 
