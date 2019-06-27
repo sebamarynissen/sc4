@@ -679,6 +679,7 @@ function factory(program) {
 	program
 		.command('refs <city>')
 		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
+		.option('--address <ref>', 'A specific memory reference to look for')
 		.option('--types <type>', 'The Type IDs for which we need to look for references')
 		.option('-a, --all', 'Finds lot, building, texture & prop references')
 		.option('-l, --lots', 'Find lot references')
@@ -693,29 +694,35 @@ function factory(program) {
 			let opts = baseOptions();
 			opts.dbpf = new DBPF(buff);
 
-			// If nothing was specified explicitly, set to all by default.
-			if (!this.all && !this.lots && !this.buildings && !this.textures && !this.props && !this.types) {
-				this.all = true;
+			if (this.address) {
+				opts.address = this.address.split(',').map(x => Number(x));
+			} else {
+				// If nothing was specified explicitly, set to all by default.
+				if (!this.all && !this.lots && !this.buildings && !this.textures && !this.props && !this.types) {
+					this.all = true;
+				}
+
+				// Build up the queries.
+				let queries = opts.queries = {};
+				if (this.lots || this.all) queries.Lot = FileType.LotFile;
+				if (this.buildings || this.all) queries.Building = FileType.BuildingFile;
+				if (this.textures || this.all) queries.Texture = FileType.BaseTextureFile;
+				if (this.props || this.all) queries.Prop = FileType.PropFile;
+
+				// Handle more types.
+				if (this.types) {
+					this.types.split(',').forEach(function(type) {
+						let nr = Number(type);
+						queries[hex(nr)] = nr;
+					});
+				}
+
+				if (this.max) {
+					opts.max = +this.max;
+				}
+
 			}
 
-			// Build up the queries.
-			let queries = opts.queries = {};
-			if (this.lots || this.all) queries.Lot = FileType.LotFile;
-			if (this.buildings || this.all) queries.Building = FileType.BuildingFile;
-			if (this.textures || this.all) queries.Texture = FileType.BaseTextureFile;
-			if (this.props || this.all) queries.Prop = FileType.PropFile;
-
-			// Handle more types.
-			if (this.types) {
-				this.types.split(',').forEach(function(type) {
-					let nr = Number(type);
-					queries[hex(nr)] = nr;
-				});
-			}
-
-			if (this.max) {
-				opts.max = +this.max;
-			}
 			api.refs(opts);
 		});
 
