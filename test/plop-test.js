@@ -7,7 +7,7 @@ const path = require('path');
 const chalk = require('chalk');
 const api = require('../lib');
 const crc32 = require('../lib/crc');
-const { hex, chunk } = require('../lib/util');
+const { hex, chunk, split } = require('../lib/util');
 const { ZoneType, FileType, cClass } = require('../lib/enums');
 const Index = require('../lib/index');
 const Savegame = require('../lib/savegame');
@@ -45,6 +45,42 @@ describe('A city manager', function() {
 
 	});
 
+	it.only('should decode the cSC4ZoneDeveloper class', function() {
+
+		let dbpf = new Savegame(fs.readFileSync(path.resolve(REGION, 'City - Move bitch.sc4')));
+
+		let entry = dbpf.entries.find(entry => entry.type === FileType.ZoneDeveloperFile);
+		let buff = entry.read();
+
+		// console.log(buff.length);
+		let header = buff.slice(0, 22).toString('hex');
+		let rest = buff.slice(22);
+		let format = '4 4 4 2 4 4'.split(' ').map(x => 2*+(x));
+		console.log(chunk(format, header));
+
+		let first = rest.readUInt32LE(0);
+		let second = rest.readUInt32LE(4);
+		console.log(hex(first), hex(second));
+		console.log('mem first', dbpf.memSearch(first));
+		console.log(first);
+		// console.log('first', rest.readFloatLE(0));
+
+		rest = rest.toString('hex').match(/[\da-f]{64}/g).map(function(x) {
+			return chunk([8, 8, 8, 8, 8, 8, 8, 8], x);
+		}).join('\n');
+		console.log(rest);
+
+		// console.log('rest length', rest.length);
+		// console.log(rest.toString('hex'));
+
+		// console.log(buff.readUInt32LE(0));
+
+		// let pieces = split(buff);
+		// console.log(pieces);
+
+
+	});
+
 	it('should look for memory references', function() {
 
 		this.timeout(0);
@@ -79,7 +115,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should move a building', async function() {
+	it.skip('should move a building', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
@@ -87,7 +123,7 @@ describe('A city manager', function() {
 		let dbpf = new Savegame(buff);
 
 		// Get all mem refs.
-		let refs = dbpf.memRefs().sort((a, b) => a.mem - b.mem);
+		// let refs = dbpf.memRefs().sort((a, b) => a.mem - b.mem);
 		// console.log(refs);
 		// refs.forEach(function(ref) {
 			// if (ref.mem %  !== 0) {
@@ -96,40 +132,53 @@ describe('A city manager', function() {
 		// });
 
 		// Find the building & lot file.
-		let { buildingFile, baseTextureFile, lotFile } = dbpf;
-		let lot = lotFile.lots[0];
-		let building = buildingFile.buildings[0];
-		let tx = baseTextureFile.textures[0];
+		// let { buildingFile, baseTextureFile, lotFile } = dbpf;
+		// let lot = lotFile.lots[0];
+		// let building = buildingFile.buildings[0];
+		// building.move([32,0,0]);		
 
-		let mem = tx.mem;
-		let dm = 1;
-		tx.mem += dm;
-		let index = dbpf.itemIndexFile;
-		let items = index.columns[0x40][0x40];
-		for (let item of items) {
-			if (item.mem === mem) {
-				item.mem += dm;
-			}
-		}
+		// let tx = baseTextureFile.textures[0];
+		// tx.minX += 16*2;
+		// tx.maxX += 16*2;
+		// tx.textures.map(function(tile) {
+		// 	tile.x += 1*2;
+		// });
+		// tx.mem += 4;
+
+		// console.log(tx);
+
+		// let mem = tx.mem;
+		// let dm = 1;
+		// tx.mem = value;
+		// let index = dbpf.itemIndexFile;
+		// let items = index.columns[0x40][0x40];
+		// for (let item of items) {
+		// 	if (item.mem === mem) {
+		// 		item.mem = value;
+		// 	}
+		// }
 
 		// Now check if we're able to insert another texture. We'll do it by 
 		// cloning for now.
-		let proto = Object.getPrototypeOf(tx);
-		let clone = Object.create(proto, Object.getOwnPropertyDescriptors(tx));
-		baseTextureFile.textures.push(clone);
-		let id = clone.mem = clone.mem + 4;
-		let dx = 2;
-		clone.minX += 16*dx;
-		clone.maxX += 16*dx;
-		clone.textures.forEach(function(entry) {
-			entry.x += 2;
-		});
+		// let proto = Object.getPrototypeOf(tx);
+		// let clone = Object.create(proto, Object.getOwnPropertyDescriptors(tx));
+		// baseTextureFile.textures.push(clone);
+		// let id = clone.mem = clone.mem + 4;
+		// let dx = 2;
+		// clone.minX += 16*dx;
+		// clone.maxX += 16*dx;
+		// clone.textures.forEach(function(entry) {
+		// 	entry.x += 2;
+		// });
 
-		// Insert into the item index as well.
-		items.push({
-			"mem": id,
-			"type": FileType.BaseTextureFile
-		});
+		// let indexFile = dbpf.itemIndexFile;
+		// let items = indexFile.columns[64][64];
+
+		// // Insert into the item index as well.
+		// items.push({
+		// 	"mem": id,
+		// 	"type": FileType.BaseTextureFile
+		// });
 
 		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
