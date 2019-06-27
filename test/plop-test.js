@@ -4,6 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 const api = require('../lib');
 const crc32 = require('../lib/crc');
 const { hex, chunk } = require('../lib/util');
@@ -44,7 +45,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should look for memory references', function() {
+	it('should look for memory references', function() {
 
 		this.timeout(0);
 
@@ -55,9 +56,26 @@ describe('A city manager', function() {
 
 		api.refs({
 			"dbpf": dbpf,
-			"info": console.log.bind(console, require('chalk').cyan('INFO')),
-			"ok": console.log.bind(console, require('chalk').green('OK'))
+			"info": console.log.bind(console, chalk.cyan('INFO')),
+			"ok": console.log.bind(console, chalk.green('OK'))
 		});
+
+	});
+
+	it.only('should move give an overview of entries per class', function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - labP01.sc4'));
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
+		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let count = dbpf.recordCount();
+		count.sort((a, b) => b[1] - a[1]);
+		// console.table(count.filter(x => x[1] > 0 && !x[0].match(/^cSC4Ordinance/i) && !x[0].match(/Advice/i)));
+
+		let t10 = dbpf.entries.find(entry => entry.type === 0x6534284a);
+		let bin = t10.read();
+		console.log(bin);
 
 	});
 
