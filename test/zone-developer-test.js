@@ -88,17 +88,10 @@ describe('The ZoneDeveloper Subfile', function() {
 			}
 		}
 
-		let check = entry.decompress();
-		let buff = dev.toBuffer();
-
-		let format = '4 4 4 2 4 4'.split(' ').map(x => 2*(+x));
-		console.log(chunk(format, check.slice(0, 22).toString('hex')));
-		console.log(chunk(format, buff.slice(0, 22).toString('hex')));
-
 		// Now serialize again & check that the CRC still matches.
-		// let crc = dev.crc;
-		// let buff = dev.toBuffer();
-		// expect(buff.readUInt32LE(4)).to.equal(crc);
+		let crc = dev.crc;
+		let buff = dev.toBuffer();
+		expect(buff.readUInt32LE(4)).to.equal(crc);
 
 	});
 
