@@ -45,39 +45,230 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should decode the cSC4ZoneDeveloper class', function() {
+	it.only('should compare two savegames', function() {
 
-		let dbpf = new Savegame(fs.readFileSync(path.resolve(REGION, 'City - Move bitch.sc4')));
+		let one = new Savegame(fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch - generated.sc4')));
+		let two = new Savegame(fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch - native.sc4')));
 
-		let entry = dbpf.entries.find(entry => entry.type === FileType.ZoneDeveloperFile);
-		let buff = entry.read();
+		function isPrimitive(val) {
+			let type = typeof val;
+			switch (type) {
+				case 'string':
+				case 'number':
+				case 'boolean':
+				case 'symbol':
+				case 'undefined':
+				case 'null':
+					return true;
+			}
+		}
 
-		// console.log(buff.length);
-		let header = buff.slice(0, 22).toString('hex');
-		let rest = buff.slice(22);
-		let format = '4 4 4 2 4 4'.split(' ').map(x => 2*+(x));
-		console.log(chunk(format, header));
+		function diff(gen, source, level) {
+			level = level || 0;
+			for (let key in source) {
 
-		let first = rest.readUInt32LE(0);
-		let second = rest.readUInt32LE(4);
-		console.log(hex(first), hex(second));
-		console.log('mem first', dbpf.memSearch(first));
-		console.log(first);
-		// console.log('first', rest.readFloatLE(0));
+				// Check for primitives.
+				if (isPrimitive(source[key])) {
+					if (source[key] !== gen[key]) {
+						if (key !== 'crc' && key !== 'mem') {
+							console.log(' '.repeat(level), 'DIFF', key, 'is', gen[key], 'should be', source[
+								key]);
+							console.log(gen);
+						}
+					}
+				} else {
+					diff(gen[key], source[key], level+1);
+				}
 
-		rest = rest.toString('hex').match(/[\da-f]{64}/g).map(function(x) {
-			return chunk([8, 8, 8, 8, 8, 8, 8, 8], x);
-		}).join('\n');
-		console.log(rest);
+			}
+		}
 
-		// console.log('rest length', rest.length);
-		// console.log(rest.toString('hex'));
+		// Programatically diff here.
+		let files = ['lotFile', 'buildingFile', 'baseTextureFile', 'itemIndexFile', 'lotDeveloperFile', 'zoneDeveloperFile'];
+		for (let type of files) {
 
-		// console.log(buff.readUInt32LE(0));
+			console.log('now checking', type);
 
-		// let pieces = split(buff);
-		// console.log(pieces);
+			let a = one[type];
+			let b = two[type];
 
+			diff(a, b);
+
+		}
+
+		// Find all memrefs in both files because we will need to nullify them 
+		// for diffing.
+		let oneRefs = one.memRefs();
+		let twoRefs = two.memRefs();
+
+		// Diff the entire dbpf.
+		for (let entry of two) {
+			let source = entry.decompress();
+			let gen = one.getByType(entry.type);
+			if (!gen) {
+				console.log('Gen does not contain type id', hex(entry.type));
+			}
+			gen = gen.decompress();
+
+			// Check for CRC-data.
+			let sizeOne = source.readUInt32LE(0);
+			if (sizeOne > source.byteLength) {
+				// console.log('Skipping', cClass[ entry.type ]);
+				continue;
+			}
+			let slice = source.slice(0, sizeOne);
+			if (source.readUInt32LE(4) !== crc32(slice, 8)) {
+				// console.log('Skipping', cClass[ entry.type ]);
+				continue;
+			}
+
+			// Now split both parts op.
+			let splitOne = split(source);
+			let splitTwo = split(gen);
+			if (splitOne.length !== splitTwo.length) {
+				// console.log(cClass[entry.type], 'has not the same amount of records!');
+				continue;
+			}
+
+			// Compare each record.
+			for (let i = 0; i < splitOne.length; i++) {
+
+				let type = cClass[entry.type];
+				if (type.match(/Advice/)) continue;
+				if (type.match(/Ordinance/)) continue;
+
+				let sizeOne = splitOne[i].length;
+				let sizeTwo = splitTwo[i].length;
+				if (sizeOne !== sizeTwo) {
+					// console.log(cClass[entry.type], 'index', i, 'length differs');
+					continue;
+				}
+
+				let crcOne = splitOne[i].slice(12).toString('hex');
+				let crcTwo = splitTwo[i].slice(12).toString('hex');
+
+				let buff = Buffer.alloc(4);
+
+				// Replace all memrefs with "null".
+				for (let ref of oneRefs) {
+					buff.writeUInt32LE(ref.mem);
+					let str = buff.toString('hex');
+					let regex = new RegExp(str, 'g');
+					crcOne = crcOne.replace(regex, '00000000');
+				}
+
+				for (let ref of twoRefs) {
+					buff.writeUInt32LE(ref.mem);
+					let str = buff.toString('hex');
+					let regex = new RegExp(str, 'g');
+					crcTwo.replace(regex, '00000000');
+				}
+
+				if (crcOne !== crcTwo) {
+					console.log(cClass[entry.type], 'index', i, 'differs');
+				}
+			}
+
+			// let sizeTwo = source.readUInt32LE(0);
+
+		}
+
+		// console.log('Generated', window.one = one);
+		// console.log('Generated', window.two = two);
+
+	});
+
+	it.only('should plop a new lot', async function() {
+
+		function clone(obj) {
+			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
+		}
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let index = dbpf.itemIndexFile;
+
+		// Step 1: create a new lot and put it in the zone developer.
+		let lots = dbpf.lotFile.lots;
+		let source = lots[0];
+
+		// Create the new lot and add it to the lots as well and add to the 
+		// **zone developer**.
+		let lot = clone(source);
+		lot.mem += 4;
+		lot.minX = 2;
+		lot.maxX = 2;
+		lot.commuteX = 2;
+		lot.dateCreated = 2451552;
+		lot.debug = 40;
+		lots.push(lot);
+
+		// Clone it's sgprops as well.
+		lot.sgprops = lot.sgprops.map(clone);
+		lot.jobCapacities = lot.jobCapacities.map(clone);
+		lot.jobTotalCapacities = lot.jobTotalCapacities.map(clone);
+
+		// We found a diff in the sgprops, see if this fixes it.
+		lot.sgprops[0].value = 6;
+		lot.sgprops[1].value = 3;
+
+		// Remember! This goes per **tile**! Not per tract!
+		let dev = dbpf.zoneDeveloperFile;
+		for (let x = lot.minX; x <= lot.maxX; x++) {
+			for (let z = lot.minZ; z <= lot.maxZ; z++) {
+				dev.cells[x][z] = {
+					"mem": lot.mem,
+					"type": FileType.LotFile
+				};
+			}
+		}
+
+		// Create the building on the new lot.
+		let buildings = dbpf.buildingFile.buildings;
+		source = buildings[0];
+		let building = clone(source);
+		building.mem += 4;
+		building.minX += 2*16;
+		building.maxX += 2*16;
+		buildings.push(building);
+		index.columns[64][64].push({
+			"mem": building.mem,
+			"type": FileType.BuildingFile
+		});
+
+		// Add the building to the lot developer.
+		dev = dbpf.lotDeveloperFile;
+		dev.buildings.push({
+			"mem": building.mem,
+			"type": FileType.BuildingFile
+		});
+
+		// Now add the texture as well.
+		let txs = dbpf.baseTextureFile.textures;
+		source = txs[0];
+
+		// Don't forget that the textures array needs to be cloned as well!
+		let tx = clone(source);
+		tx.textures = tx.textures.map(clone);
+		tx.mem += 4;
+		tx.minX += 2*16;
+		tx.maxX += 2*16
+		tx.textures.forEach(function(tx) {
+			tx.x += 2;
+		});
+		tx.textures[0].u7 = 1;
+		txs.push(tx);
+
+		// Add to the item index.
+		index.columns[64][64].push({
+			"mem": tx.mem,
+			"type": FileType.BaseTextureFile
+		});
+
+		// Time for action: save!
+		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
+		await dbpf.save({"file":path.resolve(__dirname,'files/City - Move bitch - generated.sc4')});
 
 	});
 
