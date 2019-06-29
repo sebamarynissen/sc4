@@ -1,17 +1,18 @@
-// # grid-data-test.js
+// # sim-grid-test.js
 "use strict";
 const chai = require('chai');
 const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
 const REGION = require('./test-region');
+const Stream = require('../lib/stream');
 const Savegame = require('../lib/savegame');
-const SimGrid = require('../lib/sim-grid');
+const SimGridFile = require('../lib/sim-grid');
 const { split, chunk, hex } = require('../lib/util');
 
-describe('The grid data object', function() {
+describe('A single sim grid object', function() {
 
-	it.only('should read parse from a buffer', function() {
+	it.only('should parse from a stream', function() {
 
 		// let source = path.resolve(REGION, 'City - grid.sc4');
 		let source = path.resolve(__dirname, 'files/city - grid.sc4');
@@ -26,10 +27,11 @@ describe('The grid data object', function() {
 			"Float32": 0x49b9e60a
 		};
 
-		document.querySelector('#view').remove();
-		document.querySelector('#mocha').remove();
+		// document.querySelector('#view').remove();
+		// document.querySelector('#mocha').remove();
 
 		for (let type in types) {
+
 			let num = types[type];
 
 			let entry = dbpf.getByType(num);
@@ -46,14 +48,15 @@ describe('The grid data object', function() {
 			// Pick the first one.
 			for (let i = 0; i < buffers.length; i++) {
 				let buffer = buffers[i];
-				let grid = new SimGrid();
+				let grid = new SimGridFile.SimGrid();
 
 				let td;
 				let tr = document.createElement('tr');
 				td = document.createElement('td');
 				tr.append(td);
-				td.textContent = String(i)+':';
-				td.style.setProperty('font-weight', 'bold');
+				let dataId = buffer.readUInt32LE(19);
+				td.textContent = hex(dataId)+':';
+				td.style.setProperty('font-weight', 'normal');
 				td.style.setProperty('font-family', 'Arial');
 
 				td = document.createElement('td');
@@ -64,7 +67,7 @@ describe('The grid data object', function() {
 				pre.textContent = header;
 				td.append(pre);
 
-				grid.parse(buffer);
+				grid.parse(new Stream(buffer));
 
 				let arr = grid.createProxy();
 				td = document.createElement('td');
@@ -80,7 +83,7 @@ describe('The grid data object', function() {
 
 	});
 
-	it.only('should remove the simgrid from a city', async function() {
+	it.skip('should remove the simgrid from a city', async function() {
 
 		let source = path.resolve(__dirname, 'files/City - grid.sc4');
 		let out = path.resolve(REGION, 'City - grid.sc4');

@@ -46,7 +46,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('should plop a new lot', async function() {
+	it.only('should plop a new lot', async function() {
 
 		function clone(obj) {
 			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
@@ -68,8 +68,8 @@ describe('A city manager', function() {
 		lot.minX = 2;
 		lot.maxX = 2;
 		lot.commuteX = 2;
-		lot.dateCreated = 2451552;
-		lot.debug = 40;
+		// lot.dateCreated = 2451552;
+		// lot.debug = 40;
 		lots.push(lot);
 
 		// Clone it's sgprops as well.
@@ -77,9 +77,9 @@ describe('A city manager', function() {
 		lot.jobCapacities = lot.jobCapacities.map(clone);
 		lot.jobTotalCapacities = lot.jobTotalCapacities.map(clone);
 
-		// We found a diff in the sgprops, see if this fixes it.
-		lot.sgprops[0].value = 6;
-		lot.sgprops[1].value = 3;
+		// // We found a diff in the sgprops, see if this fixes it.
+		// // lot.sgprops[0].value = 6;
+		// // lot.sgprops[1].value = 3;
 
 		// Remember! This goes per **tile**! Not per tract!
 		let dev = dbpf.zoneDeveloperFile;
@@ -125,7 +125,7 @@ describe('A city manager', function() {
 		tx.textures.forEach(function(tx) {
 			tx.x += 2;
 		});
-		tx.textures[0].u7 = 1;
+		// tx.textures[0].u7 = 1;
 		txs.push(tx);
 
 		// Add to the item index.
@@ -136,7 +136,7 @@ describe('A city manager', function() {
 
 		// Time for action: save!
 		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
-		await dbpf.save({"file":path.resolve(__dirname,'files/City - Move bitch - generated.sc4')});
+		// await dbpf.save({"file":path.resolve(__dirname,'files/City - Move bitch - generated.sc4')});
 
 	});
 
@@ -174,7 +174,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should decode the cSC4SimGridUint8', function() {
+	it.skip('should decode the cSC4SimGridUint8', function() {
 
 		let source = path.resolve(REGION, 'City - Grid.sc4');
 		// let source = path.resolve(__dirname, 'files/city.sc4');
