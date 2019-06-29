@@ -7,12 +7,66 @@ const path = require('path');
 const REGION = require('./test-region');
 const Stream = require('../lib/stream');
 const Savegame = require('../lib/savegame');
-const SimGridFile = require('../lib/sim-grid');
+const SimGridFile = require('../lib/sim-grid-file');
+const { FileType } = require('../lib/enums');
 const { split, chunk, hex } = require('../lib/util');
+
+describe('A SimGridFile', function() {
+
+	it('should parse & serialize correctly', function() {
+
+		let source = path.resolve(__dirname, 'files/city - grid.sc4');
+		let dbpf = new Savegame(fs.readFileSync(source));
+
+		// Test for all types.
+		let all = [
+			FileType.SimGridUint8,
+			FileType.SimGridSint8,
+			FileType.SimGridUint16,
+			FileType.SimGridSint16,
+			FileType.SimGridUint32,
+			FileType.SimGridFloat32
+		];
+
+		for (let type of all) {
+
+			let entry = dbpf.getByType(type);
+			let grids = entry.read();
+
+			// Check that we can find the power grid.
+			if (type === FileType.SimGridUint8) {
+				const POWER = 0x49d5bc86;
+				let power = grids.get(POWER);
+				expect(power.dataId).to.equal(POWER);
+			}
+
+			// Serialize each grid independently.
+			for (let grid of grids) {
+				let crc = grid.crc;
+				let buff = grid.toBuffer();
+				expect(buff.readUInt32LE(4)).to.equal(crc);
+			}
+
+			// Check the entire grid.
+			let check = entry.decompress();
+			let buff = grids.toBuffer();
+			expect(check.toString('hex')).to.equal(buff.toString('hex'));
+
+		}
+
+	});
+
+});
 
 describe('A single sim grid object', function() {
 
-	it.only('should parse from a stream', function() {
+	it.only('should output to pdf', function() {
+
+		// Skip if we are not in a browser environment (i.e. electron).
+		if (typeof document === 'undefined') {
+			this.test.title += ' (Skipping due to no document available)';
+			return this.skip();
+		}
 
 		// let source = path.resolve(REGION, 'City - grid.sc4');
 		let source = path.resolve(__dirname, 'files/city - grid.sc4');
@@ -35,7 +89,7 @@ describe('A single sim grid object', function() {
 			let num = types[type];
 
 			let entry = dbpf.getByType(num);
-			let buffers = split(entry.read());
+			let buffers = split(entry.decompress());
 			let h = document.createElement('h3');
 			h.style.setProperty('font-family', 'Arial');
 			h.textContent = `${type} (${hex(num)})`;
