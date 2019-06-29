@@ -69,7 +69,11 @@ describe('A single sim grid object', function() {
 		}
 
 		// let source = path.resolve(REGION, 'City - grid.sc4');
-		let source = path.resolve(__dirname, 'files/city - grid.sc4');
+		// let source = path.resolve(__dirname, 'files/city - grid.sc4');
+		// let source = path.resolve(__dirname, 'files/city - Established.sc4');
+		// let source = path.resolve(__dirname, 'files/city - Medium.sc4');
+		// let source = path.resolve('c:/users/sebastiaan/documents/simcity 4/regions/Sebastia/City - North Sebastia.sc4');
+		let source = path.resolve('C:\\Users\\Sebastiaan\\Documents\\SimCity 4 Modding\\Saved\\Old Regions\\Regions 2009\\New York\\City - New Sebastia.sc4');
 		let dbpf = new Savegame(fs.readFileSync(source));
 
 		let types = {
@@ -111,6 +115,7 @@ describe('A single sim grid object', function() {
 				let dataId = buffer.readUInt32LE(19);
 				td.textContent = hex(dataId)+':';
 				td.style.setProperty('font-weight', 'normal');
+				td.style.setProperty('font-size', '13px');
 				td.style.setProperty('font-family', 'Arial');
 
 				td = document.createElement('td');
@@ -119,6 +124,7 @@ describe('A single sim grid object', function() {
 				let pre = document.createElement('pre');
 				let header = chunk(format, buffer.toString('hex', 0, 55));
 				pre.textContent = header;
+				pre.style.setProperty('font-size', '12px');
 				td.append(pre);
 
 				grid.parse(new Stream(buffer));

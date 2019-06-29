@@ -9,7 +9,7 @@ const api = require('../lib');
 const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
 const { hex, chunk, split } = require('../lib/util');
-const { ZoneType, FileType, cClass } = require('../lib/enums');
+const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
 const Index = require('../lib/index');
 const Savegame = require('../lib/savegame');
 const LotFile = require('../lib/lot-file');
@@ -46,7 +46,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should plop a new lot', async function() {
+	it.skip('should plop a new lot', async function() {
 
 		function clone(obj) {
 			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
@@ -134,9 +134,70 @@ describe('A city manager', function() {
 			"type": FileType.BaseTextureFile
 		});
 
+		// Read in the UInt8 simgrids and check if we can do something with it.
+		let grids = dbpf.getByType(FileType.SimGridUint8).read();
+
+		// Find all grids that only have 1 non-zero entry.
+		// Yeah it definitely does do something, but we will have to run an 
+		// established city through it to get some results here.
+		for (let grid of grids) {
+			for (let i = 0; i < grid.data.length; i++) {
+				grid.data[i] = 0xff;
+			}
+			// let n = 0;
+			// for (let value of grid.data) {
+			// 	if (value) n++;
+			// }
+			// if (n === 1) {
+			// 	let max = Math.max(...grid.data);
+			// 	for (let i = 0; i < grid.data.length; i++) {
+			// 		grid.data[i] = max;
+			// 	}
+			// }
+		}
+
+		// Loop all grids and find those that only have 1 as max value.
+		// for (let grid of grids) {
+		// 	let max = Math.max(...grid.data);
+		// 	if (max === 1) {
+		// 		console.log(hex(grid.dataId));
+		// 	}
+		// }
+
+		// let power = grids.get(SimGrid.Power);
+		// for (let i = 0; i < power.data.length; i++) {
+		// 	power.data[i] = 1;
+		// }
+
 		// Time for action: save!
 		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
 		// await dbpf.save({"file":path.resolve(__dirname,'files/City - Move bitch - generated.sc4')});
+
+	});
+
+	it.only('should play with the grids in an established city', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Established.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let all = [
+			FileType.SimGridUint8,
+			FileType.SimGridSint8,
+			FileType.SimGridUint16,
+			FileType.SimGridSint16,
+			FileType.SimGridUint32,
+			FileType.SimGridFloat32
+		];
+		for (let type of all) {
+			let grids = dbpf.getByType(type).read();
+			for (let grid of grids) {
+				for (let i = 0; i < grid.data.length; i++) {
+					grid.data[i] = 0;
+				}
+			}
+		}
+
+		await dbpf.save({"file":path.resolve(REGION,'City - Established.sc4')});
 
 	});
 
