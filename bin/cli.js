@@ -401,6 +401,7 @@ function factory(program) {
 		.option('-H, --houston', 'Set the Houston tileset for all buildings')
 		.option('-E, --euro', 'Set the Euro tileset for all buildings')
 		.option('-r, --recursive', 'Scan directories recursively')
+		.option('--force', 'Force override the files')
 		.action(function(dir) {
 
 			let start = new Date();
@@ -431,6 +432,7 @@ function factory(program) {
 			console.log(chalk.green('SCANNING IN'), dir, chalk.cyan('RECURSIVE?'), !!this.recursive);
 
 			let all = [];
+			const force = this.force;
 			read(dir, function(file) {
 
 				let name = path.basename(file);
@@ -476,7 +478,7 @@ function factory(program) {
 				}
 
 				if (shouldSave) {
-					let override = 'zzz_BLOCK_'+name;
+					let override = force ? name : 'zzz_BLOCK_'+name;
 					console.log(chalk.green('SAVING TO'), chalk.gray(override));
 					override = path.join(dir, override);
 					let buff = dbpf.toBuffer();
