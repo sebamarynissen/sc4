@@ -175,7 +175,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should play with the grids in an established city', async function() {
+	it('should play with the grids in an established city', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Established.sc4'));
 		let dbpf = new Savegame(buff);
@@ -198,6 +198,33 @@ describe('A city manager', function() {
 		}
 
 		await dbpf.save({"file":path.resolve(REGION,'City - Established.sc4')});
+
+	});
+
+	it.only('should create flora', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Flora.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let { floraFile, itemIndexFile } = dbpf;
+		let tree = floraFile.flora[0];
+		let clone = Object.create(Object.getPrototypeOf(tree), Object.getOwnPropertyDescriptors(tree));
+
+		clone.mem += 4;
+		clone.x += 16;
+		clone.z += 16;
+
+		floraFile.flora = [];
+		itemIndexFile.columns[64][64].length = 0;
+		// floraFile.flora.push(clone);
+		// itemIndexFile.columns[64][64].push({
+		// 	"mem": clone.mem,
+		// 	"type": clone.type
+		// });
+
+		console.log(floraFile, itemIndexFile.columns[64][64]);
+
+		await dbpf.save({"file": path.resolve(REGION, 'City - Flora.sc4')});
 
 	});
 
