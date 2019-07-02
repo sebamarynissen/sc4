@@ -337,6 +337,37 @@ describe('A prop subfile', function() {
 
 });
 
+describe('The flora subfile', function() {
+
+	it('should be parsed & serialized correctly', function() {
+
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.FloraFile);
+		let floraFile = entry.read();
+
+		// Check the crc checksums. When we didn't modify a flora item, they 
+		// should still match.
+		for (let item of floraFile) {
+
+			let crc = item.crc;
+			let buff = item.toBuffer();
+			expect(buff.readUInt32LE(4)).to.equal(crc);
+
+		}
+
+		// Serialize the entire file right away. Should result in exactly the 
+		// same buffer.
+		let source = entry.decompress();
+		let check = floraFile.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+	});
+
+});
+
 describe('An item index subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
