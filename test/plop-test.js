@@ -46,7 +46,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('should plop a new lot', async function() {
+	it.only('should plop a new lot', async function() {
 
 		function clone(obj) {
 			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
@@ -134,44 +134,14 @@ describe('A city manager', function() {
 			"type": FileType.BaseTextureFile
 		});
 
-		// Read in the UInt8 simgrids and check if we can do something with it.
-		let grids = dbpf.getByType(FileType.SimGridUint8).read();
-
-		// Find all grids that only have 1 non-zero entry.
-		// Yeah it definitely does do something, but we will have to run an 
-		// established city through it to get some results here.
-		for (let grid of grids) {
-			for (let i = 0; i < grid.data.length; i++) {
-				grid.data[i] = 0xff;
-			}
-			// let n = 0;
-			// for (let value of grid.data) {
-			// 	if (value) n++;
-			// }
-			// if (n === 1) {
-			// 	let max = Math.max(...grid.data);
-			// 	for (let i = 0; i < grid.data.length; i++) {
-			// 		grid.data[i] = max;
-			// 	}
-			// }
-		}
-
-		// Loop all grids and find those that only have 1 as max value.
-		// for (let grid of grids) {
-		// 	let max = Math.max(...grid.data);
-		// 	if (max === 1) {
-		// 		console.log(hex(grid.dataId));
-		// 	}
-		// }
-
-		// let power = grids.get(SimGrid.Power);
-		// for (let i = 0; i < power.data.length; i++) {
-		// 	power.data[i] = 1;
-		// }
+		// Now update the com serializer as well.
+		let com = dbpf.COMSerializerFile;
+		com.set(FileType.LotFile, lots.length);
+		com.set(FileType.BuildingFile, buildings.length);
+		com.set(FileType.BaseTextureFile, txs.length);
 
 		// Time for action: save!
 		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
-		// await dbpf.save({"file":path.resolve(__dirname,'files/City - Move bitch - generated.sc4')});
 
 	});
 
@@ -201,30 +171,89 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should create flora', async function() {
+	it.skip('should create flora', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Flora.sc4'));
 		let dbpf = new Savegame(buff);
 
-		let { floraFile, itemIndexFile } = dbpf;
+		let { floraFile, itemIndexFile, COMSerializerFile } = dbpf;
 		let tree = floraFile.flora[0];
-		let clone = Object.create(Object.getPrototypeOf(tree), Object.getOwnPropertyDescriptors(tree));
 
-		clone.mem += 4;
-		clone.x += 16;
-		clone.z += 16;
-
-		floraFile.flora = [];
+		floraFile.flora.length = 0;
 		itemIndexFile.columns[64][64].length = 0;
-		// floraFile.flora.push(clone);
-		// itemIndexFile.columns[64][64].push({
-		// 	"mem": clone.mem,
-		// 	"type": clone.type
-		// });
 
-		console.log(floraFile, itemIndexFile.columns[64][64]);
+		let mem = tree.mem;
+		for (let i = 0; i < 64; i++) {
+			for (let j = 0; j < 64; j++) {
+
+				if (i === j) continue;
+
+				let clone = Object.create(Object.getPrototypeOf(tree), Object.getOwnPropertyDescriptors(tree));
+				clone.mem = mem += 4;
+				clone.x = 16*i+8;
+				clone.z = 16*j+8;
+
+				let xx = 64 + Math.floor(clone.x / 64);
+				let zz = 64 + Math.floor(clone.z / 64);
+
+				floraFile.flora.push(clone);
+				itemIndexFile.columns[xx][zz].push({
+					"mem": clone.mem,
+					"type": clone.type
+				});
+
+			}
+		}
+
+		COMSerializerFile.set(FileType.FloraFile, floraFile.length);
+		// console.log(COMSerializerFile.get(FileType.FloraFile));
+		console.log(COMSerializerFile);
 
 		await dbpf.save({"file": path.resolve(REGION, 'City - Flora.sc4')});
+
+	});
+
+	// Beware!! If the tracts are not set correctly we've created immortal 
+	// flora. Probably when deleting within a tract the game only looks for 
+	// stuff in that tract. That's quite logical actually.
+	it.skip('should create forested streets', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Million Trees.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let { floraFile, itemIndexFile, COMSerializerFile } = dbpf;
+
+		let mem = 1;
+		function clone(nr) {
+			let tree = floraFile.flora[nr];
+			let proto = Object.getPrototypeOf(tree);
+			let props = Object.getOwnPropertyDescriptors(tree);
+			tree = Object.create(tree, props);
+			tree.mem = mem++;
+			return tree;
+		}
+
+		// Create some trees on the street.
+		for (let i = 0; i < 10; i++) {
+			for (let j = 0; j < 2; j++) {
+				let tree = clone( Math.floor(2*Math.random()) );
+				tree.x = 16*17 + 16*i + 8;
+				tree.z = 16*10 + (j === 0 ? 2 : 14);
+				floraFile.flora.push(tree);
+				let xx = 64 + Math.floor(tree.x / 64);
+				let zz = 64 + Math.floor(tree.z / 64);
+				tree.xMinTract = tree.xMaxTract = xx;
+				tree.zMinTract = tree.zMaxTract = zz;
+				itemIndexFile.columns[xx][zz].push({
+					"mem": tree.mem,
+					"type": FileType.FloraFile
+				});
+			}
+		}
+
+		COMSerializerFile.set(FileType.FloraFile, floraFile.length);
+
+		await dbpf.save({"file": path.resolve(REGION, 'City - Million Trees.sc4')});
 
 	});
 

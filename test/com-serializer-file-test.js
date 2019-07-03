@@ -4,6 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const path = require('path');
 const fs = require('fs');
+const crc32 = require('../lib/crc');
 const Savegame = require('../lib/savegame');
 const { FileType } = require('../lib/enums');
 
@@ -17,6 +18,10 @@ describe('The COM serializer file', function() {
 		// Find the com serializer file.
 		let entry = dbpf.getByType(FileType.COMSerializerFile);
 		let com = entry.read();
+		let raw = entry.decompress();
+		let size = raw.readUInt32LE(8);
+		
+		// console.log(raw.readUInt32LE(8), crc32(raw, 12));
 
 		// Assertions.
 		expect(com.u1).to.equal(1);
