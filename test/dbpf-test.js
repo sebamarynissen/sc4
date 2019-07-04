@@ -384,8 +384,8 @@ describe('An item index subfile', function() {
 		expect(indexFile.tractDepth).to.equal(16);
 		expect(indexFile.tileWidth).to.equal(64);
 		expect(indexFile.tileDepth).to.equal(64);
-		expect(indexFile.columns).to.have.length(192);
-		for (let column of indexFile.columns) {
+		expect(indexFile).to.have.length(192);
+		for (let column of indexFile) {
 			expect(column).to.have.length(192);
 			for (let cell of column) {
 				for (let item of cell) {
@@ -404,7 +404,7 @@ describe('An item index subfile', function() {
 		// Seems that the item index works with tracts and that it only starts 
 		// at 64. So a lot of the items is apparently never used. Probably 
 		// related to the data structure I guess.
-		let cells = [...indexFile].filter(x => x.length);
+		let cells = [...indexFile.flat()].filter(x => x.length);
 		let all = [];
 		for (let cell of cells) {
 			all.push(...cell);
