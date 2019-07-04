@@ -339,16 +339,16 @@ describe('The flora subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = path.resolve(__dirname, 'files/city - rci.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.FloraFile);
-		let floraFile = entry.read();
+		let flora = entry.read();
 
 		// Check the crc checksums. When we didn't modify a flora item, they 
 		// should still match.
-		for (let item of floraFile) {
+		for (let item of flora) {
 
 			let crc = item.crc;
 			let buff = item.toBuffer();
@@ -359,7 +359,7 @@ describe('The flora subfile', function() {
 		// Serialize the entire file right away. Should result in exactly the 
 		// same buffer.
 		let source = entry.decompress();
-		let check = floraFile.toBuffer();
+		let check = flora.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
