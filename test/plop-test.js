@@ -12,8 +12,8 @@ const { hex, chunk, split } = require('../lib/util');
 const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
 const Index = require('../lib/index');
 const Savegame = require('../lib/savegame');
-const LotFile = require('../lib/lot-file');
-const BuildingFile = require('../lib/building-file');
+const Lot = require('../lib/lot');
+const Building = require('../lib/building');
 const HOME = process.env.HOMEPATH;
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
@@ -58,7 +58,7 @@ describe('A city manager', function() {
 		let index = dbpf.itemIndexFile;
 
 		// Step 1: create a new lot and put it in the zone developer.
-		let lots = dbpf.lotFile.lots;
+		let lots = dbpf.lotFile;
 		let source = lots[0];
 
 		// Create the new lot and add it to the lots as well and add to the 
@@ -93,14 +93,14 @@ describe('A city manager', function() {
 		}
 
 		// Create the building on the new lot.
-		let buildings = dbpf.buildingFile.buildings;
+		let buildings = dbpf.buildingFile;
 		source = buildings[0];
 		let building = clone(source);
 		building.mem += 4;
 		building.minX += 2*16;
 		building.maxX += 2*16;
 		buildings.push(building);
-		index.columns[64][64].push({
+		index[64][64].push({
 			"mem": building.mem,
 			"type": FileType.BuildingFile
 		});
@@ -113,7 +113,7 @@ describe('A city manager', function() {
 		});
 
 		// Now add the texture as well.
-		let txs = dbpf.baseTextureFile.textures;
+		let txs = dbpf.baseTextureFile;
 		source = txs[0];
 
 		// Don't forget that the textures array needs to be cloned as well!
@@ -129,7 +129,7 @@ describe('A city manager', function() {
 		txs.push(tx);
 
 		// Add to the item index.
-		index.columns[64][64].push({
+		index[64][64].push({
 			"mem": tx.mem,
 			"type": FileType.BaseTextureFile
 		});
@@ -177,10 +177,10 @@ describe('A city manager', function() {
 		let dbpf = new Savegame(buff);
 
 		let { floraFile, itemIndexFile, COMSerializerFile } = dbpf;
-		let tree = floraFile.flora[0];
+		let tree = floraFile[0];
 
-		floraFile.flora.length = 0;
-		itemIndexFile.columns[64][64].length = 0;
+		floraFile.length = 0;
+		itemIndexFile[64][64].length = 0;
 
 		let mem = tree.mem;
 		for (let i = 0; i < 64; i++) {
@@ -196,8 +196,8 @@ describe('A city manager', function() {
 				let xx = 64 + Math.floor(clone.x / 64);
 				let zz = 64 + Math.floor(clone.z / 64);
 
-				floraFile.flora.push(clone);
-				itemIndexFile.columns[xx][zz].push({
+				floraFile.push(clone);
+				itemIndexFile[xx][zz].push({
 					"mem": clone.mem,
 					"type": clone.type
 				});
@@ -216,7 +216,7 @@ describe('A city manager', function() {
 	// Beware!! If the tracts are not set correctly we've created immortal 
 	// flora. Probably when deleting within a tract the game only looks for 
 	// stuff in that tract. That's quite logical actually.
-	it.skip('should create forested streets', async function() {
+	it('should create forested streets', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Million Trees.sc4'));
 		let dbpf = new Savegame(buff);
@@ -225,7 +225,7 @@ describe('A city manager', function() {
 
 		let mem = 1;
 		function clone(nr) {
-			let tree = floraFile.flora[nr];
+			let tree = floraFile[nr];
 			let proto = Object.getPrototypeOf(tree);
 			let props = Object.getOwnPropertyDescriptors(tree);
 			tree = Object.create(tree, props);
@@ -239,12 +239,12 @@ describe('A city manager', function() {
 				let tree = clone( Math.floor(2*Math.random()) );
 				tree.x = 16*17 + 16*i + 8;
 				tree.z = 16*10 + (j === 0 ? 2 : 14);
-				floraFile.flora.push(tree);
+				floraFile.push(tree);
 				let xx = 64 + Math.floor(tree.x / 64);
 				let zz = 64 + Math.floor(tree.z / 64);
 				tree.xMinTract = tree.xMaxTract = xx;
 				tree.zMinTract = tree.zMaxTract = zz;
-				itemIndexFile.columns[xx][zz].push({
+				itemIndexFile[xx][zz].push({
 					"mem": tree.mem,
 					"type": FileType.FloraFile
 				});
@@ -257,14 +257,14 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('should move a building', async function() {
+	it('should move a building', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		let dbpf = new Savegame(buff);
 
 		// Find the building & lot file.
 		let { buildingFile, baseTextureFile, lotFile } = dbpf;
-		let lot = lotFile.lots[0];
+		let lot = lotFile[0];
 
 		const dx = 2;
 
@@ -274,12 +274,12 @@ describe('A city manager', function() {
 		lot.commuteX += dx;
 
 		// Move the building.
-		let building = buildingFile.buildings[0];
+		let building = buildingFile[0];
 		building.minX += 16*dx;
 		building.maxX += 16*dx;
 
 		// Move the texture.
-		let tx = baseTextureFile.textures[0];
+		let tx = baseTextureFile[0];
 		tx.minX += 16*dx;
 		tx.maxX += 16*dx;
 		tx.textures.map(function(tile) {
@@ -288,72 +288,6 @@ describe('A city manager', function() {
 
 		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
-
-	});
-
-	it.skip('should decode the cSC4SimGridUint8', function() {
-
-		let source = path.resolve(REGION, 'City - Grid.sc4');
-		// let source = path.resolve(__dirname, 'files/city.sc4');
-		let dbpf = new Savegame(fs.readFileSync(source));
-
-		// Find the entry.
-
-		// cSC4SimGridUInt8
-		let entry = dbpf.entries.find(x => x.type === 0x49b9e602);
-
-		// cSC4SimGridSInt8
-		// let entry = dbpf.entries.find(x => x.type === 0x49b9e603);
-
-		// cSC4SimGridUint32
-		// let entry = dbpf.entries.find(x => x.type === 0x49b9e606);
-
-		// cSC4SimGridFloat32
-		// let entry = dbpf.entries.find(x => x.type === 0x49b9e60a);
-
-		let buff = entry.read();
-		let buffs = split(buff);
-		let target = buffs[0];
-
-		let header = target.slice(0, 55);
-		let format = '4 4 4 2 1 4 4 4 4 4 4 2 1 4 4'.split(' ').map(x => 2*x);
-
-		console.log(header);
-
-		// console.log(chunk(format, target.slice(0, headerLength).toString('hex')));
-
-		// console.log('rest', target.slice(headerLength).toString('hex'));
-
-		// Loop all buffers and create a grid from it.
-		for (let i = 0; i < buffs.length; i++) {
-
-			let buff = buffs[i];
-			let slice = buff.slice(55);
-			let rs = new Stream(slice);
-			let sqrt = Math.sqrt(slice.byteLength);
-
-			let grid = new Array(sqrt);
-			for (let x = 0; x < sqrt; x++) {
-				let column = grid[x] = new Array(sqrt);
-				for (let z = 0; z < sqrt; z++) {
-					column[z] = rs.byte();
-					// column[z] = rs.dword();
-				}
-			}
-
-			let str = '';
-			for (let z = 0; z < sqrt; z++) {
-				for (let x = 0; x < sqrt; x++) {
-					str += grid[x][z] ? 'x' : '.';
-				}
-				str += '\n';
-			}
-			console.log(str);
-
-		}
-
-		// Check the second buffer as well.
-		// console.log(buffs);
 
 	});
 
