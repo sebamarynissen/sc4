@@ -150,8 +150,7 @@ describe('A lot subfile', function() {
 		let dbpf = new Savegame(buff);
 
 		// Get the lotfile.
-		let lotFile = dbpf.lotFile;
-		let lots = lotFile.lots;
+		let lots = dbpf.lotFile;
 		expect(lots[0].isResidential).to.be.true;
 		expect(lots[1].isIndustrial).to.be.true;
 		expect(lots[2].isAgricultural).to.be.true;
@@ -192,8 +191,7 @@ describe('A lot subfile', function() {
 
 		// Read the lots
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
-		let lots = lotFile.lots;
+		let lots = entry.read();
 		let plopped = lots[26];
 
 		plopped.zoneType = 0x01;
@@ -238,9 +236,9 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
+		let lots = entry.read();
 
-		let lot = lotFile.lots[0];
+		let lot = lots[0];
 		lot.minZ += 3;
 		lot.maxZ += 3;
 
@@ -255,9 +253,9 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
+		let lots = entry.read();
 
-		let lot = lotFile.lots[0];
+		let lot = lots[0];
 		expect(lot.isPloppedIndustrial).to.be.true;
 
 		// Now change it and check in SC4.
