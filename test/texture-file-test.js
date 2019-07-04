@@ -44,8 +44,8 @@ describe('A base texture file', function() {
 			}
 		}
 
-		console.log(sets);
-		console.log(tsets);
+		// console.log(sets);
+		// console.log(tsets);
 
 		// Now serialize again.
 		let source = entry.decompress();
