@@ -7,7 +7,6 @@ const fs = require('fs');
 const dir = path.resolve(process.env.HOMEPATH, 'documents/simcity 4/plugins');
 const DBPF = require('../lib/dbpf');
 const Savegame = require('../lib/savegame');
-const JulianDate = require('../lib/julian-date');
 const REGION = require('./test-region');
 
 describe('Making trees no longer seasonal', function() {
@@ -90,43 +89,123 @@ describe('Making trees no longer seasonal', function() {
 
 	});
 
-	it.skip('should synchronize flora', function() {
+	it('should synchronize flora', function() {
 
-		let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
+		// let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
+		let city = path.resolve(__dirname, 'files/city.sc4');
 		let dbpf = new Savegame(city);
 		let flora = dbpf.floraFile;
 
-		for (let item of flora) {
+		// let i = 0;
+		// for (let item of flora) {
 
-			// Set to first of september 2000.
-			item.appearanceDate = item.cycleDate = 2451789;
-			// item.appearanceDate = item.cycleDate = 2451809;
+		// 	if (i > 10) break;
 
-		}
+		// 	if (item.appearanceDate !== item.cycleDate) {
+		// 		i++;
+		// 		const JulianDate = require('../lib/julian-date');
+		// 		// console.log(new JulianDate(item.appearanceDate), item.appearanceDate);
+		// 		// console.log(new JulianDate(item.cycleDate));
+		// 		console.log('-'.repeat(100));
+		// 	}
+
+		// 	// Set to first of september 2000.
+		// 	// item.appearanceDate = item.cycleDate = 2451789;
+		// 	// item.appearanceDate = item.cycleDate = 2451809;
+
+		// }
 
 		let out = path.join(REGION, 'City - Out of sync.sc4');
 		dbpf.save({"file": out});
 
 	});
 
-	it.skip('should override the Fagus', function() {
+	it.only('should create static season mods', function() {
 
-		// Evergreen exemplars, mapping to [fall, winter, spring]
-		let map = {
-			"vip/orange/vip_or_fagus/vip_or_fagus_summer.dat": [
-				0xfbd95afe
-			]
-		};
+		function extract(dir) {
+			let files = fs.readdirSync(dir);
+			let seasonal = files.find(file => file.match(/seasonal/i));
+			if (!seasonal) {
+				console.warn(`Did not find seasonal flora in ${dir}!`);
+				return;
+			}
 
-		let fagus = path.join(dir, 'vip/orange/vip_or_fagus/vip_or_fagus_summer.dat');
-		let dbpf = new DBPF(fagus);
-		dbpf.exemplars.map(function(entry) {
-			let file = entry.read();
-			file.table[0x27812821].value[1] = 0xfbd95afe;
+			// Open as dbpf & find all exemplars.
+			let dbpf = new DBPF(path.join(dir, seasonal));
+			let exemplars = dbpf.exemplars
+				.sort((a, b) => a.instance - b.instance)
+				.map(x => x.read());
+
+			// Find the RKT 4 of each exemplar.
+			let maps = exemplars.map(exemplar => {
+				let rkt = exemplar.table[0x27812824].value;
+
+				// Split up each entry.
+				let reps = [];
+				while (rkt.length) {
+					reps.push(rkt.slice(0, 8));
+					rkt = rkt.slice(8);
+				}
+				reps.sort((a, b) => a[0] - b[0]);
+				let iids = reps.map(x => x[6]);
+				let map = {};
+
+				// If we have 3, it's fall, winter, summer.
+				const { hex } = require('../lib/util');
+				if (iids.length !== 3) {
+					[map.fall, map.winter, map.spring, map.summer] = iids;
+				} else {
+					map.spring = map.summer = iids[2];
+					map.fall = iids[0];
+					map.winter = iids[1];
+				}
+
+				return map;
+
+			});
+
+			// Now read in the evergreen exemplar as well.
+			let evergreen = files.find(file => file.match(/(summer|evergreen)/i));
+			if (!evergreen) {
+				return console.warn(`No evergreen flora found in ${dir}!`);
+			}
+
+			// Read in all exemplars again and sort as well.
+			let sub = path.basename(dir);
+			dbpf = new DBPF(path.join(dir, evergreen));
+			exemplars = dbpf.exemplars
+				.sort((a, b) => a.instance - b.instance)
+				.map(entry => entry.read());
+
+			// Now save a file for every season.
+			for (let season of ['fall', 'winter', 'spring','summer']) {
+				exemplars.map((exemplar, i) => {
+					let iid = maps[i][season];
+					let prop = exemplar.table[0x27812821];
+					prop.value[1] = iid;
+				});
+
+				let name = evergreen.replace(/(summer|evergreen)/i, season.toUpperCase());
+				name = 'zzz_'+name;
+
+				// Save.
+				const DESKTOP = path.resolve(process.env.HOMEPATH, 'desktop');
+				let out = path.join(DESKTOP, 'Girafe', season, name);
+				dbpf.save({"file": out});
+
+			}
+
+		}
+
+		let girafe = path.join(dir, 'BSC/girafe');
+		fs.readdirSync(girafe).map(function(entry) {
+			let dir = path.join(girafe, entry);
+			extract(dir);
 		});
 
-		// Save
-		dbpf.save({"file": path.join(dir, 'vip/orange/vip_or_fagus/zz_vip_or_fagus_summer.dat')});
+		// Read in the faguses as well.
+		let fagus = path.join(dir, 'VIP/Orange/VIP_Or_Fagus');
+		extract(fagus);
 
 	});
 
