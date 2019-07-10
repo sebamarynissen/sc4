@@ -89,38 +89,53 @@ describe('Making trees no longer seasonal', function() {
 
 	});
 
-	it('should synchronize flora', function() {
+	it.only('should synchronize flora', function() {
 
 		// let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
 		let city = path.resolve(__dirname, 'files/city.sc4');
 		let dbpf = new Savegame(city);
 		let flora = dbpf.floraFile;
 
-		// let i = 0;
-		// for (let item of flora) {
+		let datefile = dbpf.entries.find(entry => entry.type === 0x2990C1E5);
+		let buff = datefile.read();
 
-		// 	if (i > 10) break;
+		const { getUnixFromJulian } = require('../lib/julian-date');
+		let date = new Date(getUnixFromJulian(buff.readUInt32LE(buff.length-4)));
 
-		// 	if (item.appearanceDate !== item.cycleDate) {
-		// 		i++;
-		// 		const JulianDate = require('../lib/julian-date');
-		// 		// console.log(new JulianDate(item.appearanceDate), item.appearanceDate);
-		// 		// console.log(new JulianDate(item.cycleDate));
-		// 		console.log('-'.repeat(100));
-		// 	}
+		let i = 0;
+		for (let item of flora) {
 
-		// 	// Set to first of september 2000.
-		// 	// item.appearanceDate = item.cycleDate = 2451789;
-		// 	// item.appearanceDate = item.cycleDate = 2451809;
+			// if (i > 100) break;
 
-		// }
+			if (item.appearanceDate !== item.cycleDate) {
+				i++;
+				let appeared = item.appearanceDate;
+				let cycle = item.cycleDate;
+				if (appeared > date) {
+					console.log('problem');
+				}
+				if (+appeared !== +cycle) {
+					if (cycle > date) {
+						console.log('jo');
+					}
+					// console.log(cycle, appeared);
+					// console.log((cycle - appeared)/1000/60/60/24/365.2524);
+					// console.log(appeared.toDateString(), cycle.toDateString());
+				}
+			}
 
-		let out = path.join(REGION, 'City - Out of sync.sc4');
-		dbpf.save({"file": out});
+			// Set to first of september 2000.
+			// item.appearanceDate = item.cycleDate = 2451789;
+			// item.appearanceDate = item.cycleDate = 2451809;
+
+		}
+
+		// let out = path.join(REGION, 'City - Out of sync.sc4');
+		// dbpf.save({"file": out});
 
 	});
 
-	it.only('should create static season mods', function() {
+	it('should create static season mods', function() {
 
 		function extract(dir) {
 			let files = fs.readdirSync(dir);
