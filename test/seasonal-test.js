@@ -91,8 +91,8 @@ describe('Making trees no longer seasonal', function() {
 
 	it.only('should synchronize flora', function() {
 
-		// let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
-		let city = path.resolve(__dirname, 'files/city.sc4');
+		let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
+		// let city = path.resolve(__dirname, 'files/city.sc4');
 		let dbpf = new Savegame(city);
 		let flora = dbpf.floraFile;
 
@@ -105,33 +105,21 @@ describe('Making trees no longer seasonal', function() {
 		let i = 0;
 		for (let item of flora) {
 
-			// if (i > 100) break;
+			// Synchronize everything to September 1st.
+			let date = item.appearanceDate;
+			date.setMonth(0);
+			date.setDate(15);
+			// if (date > item.cycleDate) {
+				date.setFullYear(date.getFullYear()-1);
+			// }
+			item.appearanceDate = date;
 
-			if (item.appearanceDate !== item.cycleDate) {
-				i++;
-				let appeared = item.appearanceDate;
-				let cycle = item.cycleDate;
-				if (appeared > date) {
-					console.log('problem');
-				}
-				if (+appeared !== +cycle) {
-					if (cycle > date) {
-						console.log('jo');
-					}
-					// console.log(cycle, appeared);
-					// console.log((cycle - appeared)/1000/60/60/24/365.2524);
-					// console.log(appeared.toDateString(), cycle.toDateString());
-				}
-			}
-
-			// Set to first of september 2000.
-			// item.appearanceDate = item.cycleDate = 2451789;
-			// item.appearanceDate = item.cycleDate = 2451809;
+			item.cycleDate.setTime(date.getTime());
 
 		}
 
-		// let out = path.join(REGION, 'City - Out of sync.sc4');
-		// dbpf.save({"file": out});
+		let out = path.join(REGION, 'City - Out of sync.sc4');
+		dbpf.save({"file": out});
 
 	});
 
