@@ -18,6 +18,10 @@
   ],
   "author": "Sebastiaan Marynissen",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebamarynissen/sc4.git"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
