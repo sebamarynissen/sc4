@@ -16,7 +16,7 @@ const BuildingFile = require('../lib/building-file');
 const HOME = process.env.HOMEPATH;
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
-describe.skip('A city manager', function() {
+describe('A city manager', function() {
 
 	it.skip('should decode the cSC4Occupant class', function() {
 
@@ -79,7 +79,7 @@ describe.skip('A city manager', function() {
 
 	});
 
-	it.skip('should move a building', async function() {
+	it.only('should move a building', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
