@@ -728,6 +728,49 @@ function factory(program) {
 			api.refs(opts);
 		});
 
+	// Command for switching the active tilesets in a city.
+	program
+		.command('tracts <city>')
+		.option('-t, --tilesets <tilesets>', 'The tileset identifiers, given as numbers')
+		.option('-y, --years <years>', 'The amount of years in the cycle')
+		.option('--force', 'Force override the city')
+		.description('Changes the active tilesets in the given city')
+		.action(async function(city) {
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			let dbpf = new DBPF(buff);
+
+			let entry = dbpf.entries.find(entry => entry.type === FileType.TractDeveloper);
+			let tracts = entry.read();
+			if (!this.tilesets) {
+				throw new Error('No tilesets specified!');
+			}
+
+			// Parse the tilesets.
+			let styles = [];
+			for (let style of this.tilesets.split(',')) {
+				styles.push(+style);
+			}
+			tracts.styles = styles;
+
+			if (this.years) {
+				tracts.years = +this.years;
+			}
+
+			// Save.
+			let opts = baseOptions();
+			let output = file;
+			if (!this.force) {
+				let dir = path.dirname(file);
+				let name = 'TRACTS_'+path.basename(file);
+				output = path.join(dir, name);
+			}
+			opts.info(`Saving to ${ output }`);
+			await dbpf.save({ file: output });
+
+		});
+
 	// End of factory function.
 	return program;
 
