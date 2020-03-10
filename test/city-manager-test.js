@@ -1,7 +1,6 @@
 // # city-manager-test.js
 "use strict";
-const chai = require('chai');
-const expect = chai.expect;
+const { expect } = require('chai');
 const CityManager = require('../lib/city-manager');
 const path = require('path');
 
@@ -21,6 +20,22 @@ describe('A city manager', function() {
 
 		let bd = city.plugins.records.find(x => x.type === 0x6534284a && x.instance === iid).read();
 		console.log(bd);
+
+	});
+
+	context('#mem()', function() {
+
+		it('returns an unused memory address', async function() {
+
+			let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+			let city = new CityManager(file);
+
+			expect(city.mem()).to.equal(1);
+			city.memRefs.add(2);
+			expect(city.mem()).to.equal(3);
+			expect(city.mem()).to.equal(4);
+
+		});
 
 	});
 
