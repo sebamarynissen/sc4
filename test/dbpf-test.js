@@ -150,8 +150,7 @@ describe('A lot subfile', function() {
 		let dbpf = new Savegame(buff);
 
 		// Get the lotfile.
-		let lotFile = dbpf.lotFile;
-		let lots = lotFile.lots;
+		let lots = dbpf.lotFile;
 		expect(lots[0].isResidential).to.be.true;
 		expect(lots[1].isIndustrial).to.be.true;
 		expect(lots[2].isAgricultural).to.be.true;
@@ -192,8 +191,7 @@ describe('A lot subfile', function() {
 
 		// Read the lots
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
-		let lots = lotFile.lots;
+		let lots = entry.read();
 		let plopped = lots[26];
 
 		plopped.zoneType = 0x01;
@@ -238,9 +236,9 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
+		let lots = entry.read();
 
-		let lot = lotFile.lots[0];
+		let lot = lots[0];
 		lot.minZ += 3;
 		lot.maxZ += 3;
 
@@ -255,9 +253,9 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find(x => x.type === FileType.LotFile);
-		let lotFile = entry.read();
+		let lots = entry.read();
 
-		let lot = lotFile.lots[0];
+		let lot = lots[0];
 		expect(lot.isPloppedIndustrial).to.be.true;
 
 		// Now change it and check in SC4.
@@ -337,6 +335,66 @@ describe('A prop subfile', function() {
 
 });
 
+describe('The flora subfile', function() {
+
+	it('should be parsed & serialized correctly', function() {
+
+		let file = path.resolve(__dirname, 'files/city - rci.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.FloraFile);
+		let flora = entry.read();
+
+		// Check the crc checksums. When we didn't modify a flora item, they 
+		// should still match.
+		for (let item of flora) {
+
+			let crc = item.crc;
+			let buff = item.toBuffer();
+			expect(buff.readUInt32LE(4)).to.equal(crc);
+
+		}
+
+		// Serialize the entire file right away. Should result in exactly the 
+		// same buffer.
+		let source = entry.decompress();
+		let check = flora.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+	});
+
+});
+
+describe('The network subfile', function() {
+
+	it('should be parsed & serialized correctly', function() {
+
+		let file = path.resolve(__dirname, 'files/city.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new DBPF(buff);
+
+		let entry = dbpf.entries.find(x => x.type === FileType.NetworkFile);
+		let network = entry.read();
+
+		// Check the crc checksums. When we didn't modify a network tile, they 
+		// should still match.
+		for (let tile of network) {
+			let crc = tile.crc;
+			let buff = tile.toBuffer();
+			expect(buff.readUInt32LE(4)).to.equal(crc);
+		}
+
+		// Serialize the entire file right away. Should result in exactly the 
+		// same buffer.
+		let source = entry.decompress();
+		let check = network.toBuffer();
+		expect(source.toString('hex')).to.equal(check.toString('hex'));
+
+	});
+
+});
+
 describe('An item index subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
@@ -355,8 +413,8 @@ describe('An item index subfile', function() {
 		expect(indexFile.tractDepth).to.equal(16);
 		expect(indexFile.tileWidth).to.equal(64);
 		expect(indexFile.tileDepth).to.equal(64);
-		expect(indexFile.columns).to.have.length(192);
-		for (let column of indexFile.columns) {
+		expect(indexFile).to.have.length(192);
+		for (let column of indexFile) {
 			expect(column).to.have.length(192);
 			for (let cell of column) {
 				for (let item of cell) {
@@ -375,7 +433,7 @@ describe('An item index subfile', function() {
 		// Seems that the item index works with tracts and that it only starts 
 		// at 64. So a lot of the items is apparently never used. Probably 
 		// related to the data structure I guess.
-		let cells = [...indexFile].filter(x => x.length);
+		let cells = [...indexFile.flat()].filter(x => x.length);
 		let all = [];
 		for (let cell of cells) {
 			all.push(...cell);

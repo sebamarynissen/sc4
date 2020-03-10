@@ -6,13 +6,14 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const api = require('../lib');
+const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
-const { hex, chunk } = require('../lib/util');
-const { ZoneType, FileType, cClass } = require('../lib/enums');
+const { hex, chunk, split } = require('../lib/util');
+const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
 const Index = require('../lib/index');
 const Savegame = require('../lib/savegame');
-const LotFile = require('../lib/lot-file');
-const BuildingFile = require('../lib/building-file');
+const Lot = require('../lib/lot');
+const Building = require('../lib/building');
 const HOME = process.env.HOMEPATH;
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
@@ -45,239 +46,248 @@ describe('A city manager', function() {
 
 	});
 
-	it('should look for memory references', function() {
+	it.only('should plop a new lot', async function() {
 
-		this.timeout(0);
-
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
-		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - labP01.sc4'));
-		let dbpf = new Savegame(buff);
-
-		api.refs({
-			"dbpf": dbpf,
-			"info": console.log.bind(console, chalk.cyan('INFO')),
-			"ok": console.log.bind(console, chalk.green('OK'))
-		});
-
-	});
-
-	it('should move give an overview of entries per class', function() {
-
-		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - labP01.sc4'));
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
-		let dbpf = new Savegame(buff);
-
-		let count = dbpf.recordCount();
-		count.sort((a, b) => b[1] - a[1]);
-		// console.table(count.filter(x => x[1] > 0 && !x[0].match(/^cSC4Ordinance/i) && !x[0].match(/Advice/i)));
-
-		let t10 = dbpf.entries.find(entry => entry.type === 0x6534284a);
-		let bin = t10.read();
-		console.log(bin);
-
-	});
-
-	it.only('should move a building', async function() {
+		function clone(obj) {
+			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
+		}
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/city.sc4'));
-		// let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
 
-		// Get all mem refs.
-		let refs = dbpf.memRefs().sort((a, b) => a.mem - b.mem);
-		// console.log(refs);
-		// refs.forEach(function(ref) {
-			// if (ref.mem %  !== 0) {
-			// 	console.log('not by 8');
-			// }
-		// });
-
-		// Find the building & lot file.
-		let { buildingFile, baseTextureFile, lotFile } = dbpf;
-		let lot = lotFile.lots[0];
-		let building = buildingFile.buildings[0];
-		let tx = baseTextureFile.textures[0];
-
-		let mem = tx.mem;
-		let dm = 1;
-		tx.mem += dm;
 		let index = dbpf.itemIndexFile;
-		let items = index.columns[0x40][0x40];
-		for (let item of items) {
-			if (item.mem === mem) {
-				item.mem += dm;
+
+		// Step 1: create a new lot and put it in the zone developer.
+		let lots = dbpf.lotFile;
+		let source = lots[0];
+
+		// Create the new lot and add it to the lots as well and add to the 
+		// **zone developer**.
+		let lot = clone(source);
+		lot.mem += 4;
+		lot.minX = 2;
+		lot.maxX = 2;
+		lot.commuteX = 2;
+		// lot.dateCreated = 2451552;
+		// lot.debug = 40;
+		lots.push(lot);
+
+		// Clone it's sgprops as well.
+		lot.sgprops = lot.sgprops.map(clone);
+		lot.jobCapacities = lot.jobCapacities.map(clone);
+		lot.jobTotalCapacities = lot.jobTotalCapacities.map(clone);
+
+		// // We found a diff in the sgprops, see if this fixes it.
+		// // lot.sgprops[0].value = 6;
+		// // lot.sgprops[1].value = 3;
+
+		// Remember! This goes per **tile**! Not per tract!
+		let dev = dbpf.zoneDeveloperFile;
+		for (let x = lot.minX; x <= lot.maxX; x++) {
+			for (let z = lot.minZ; z <= lot.maxZ; z++) {
+				dev.cells[x][z] = {
+					"mem": lot.mem,
+					"type": FileType.LotFile
+				};
 			}
 		}
 
-		// Now check if we're able to insert another texture. We'll do it by 
-		// cloning for now.
-		let proto = Object.getPrototypeOf(tx);
-		let clone = Object.create(proto, Object.getOwnPropertyDescriptors(tx));
-		baseTextureFile.textures.push(clone);
-		let id = clone.mem = clone.mem + 4;
-		let dx = 2;
-		clone.minX += 16*dx;
-		clone.maxX += 16*dx;
-		clone.textures.forEach(function(entry) {
-			entry.x += 2;
+		// Create the building on the new lot.
+		let buildings = dbpf.buildingFile;
+		source = buildings[0];
+		let building = clone(source);
+		building.mem += 4;
+		building.minX += 2*16;
+		building.maxX += 2*16;
+		buildings.push(building);
+		index[64][64].push({
+			"mem": building.mem,
+			"type": FileType.BuildingFile
 		});
 
-		// Insert into the item index as well.
-		items.push({
-			"mem": id,
+		// Add the building to the lot developer.
+		dev = dbpf.lotDeveloperFile;
+		dev.buildings.push({
+			"mem": building.mem,
+			"type": FileType.BuildingFile
+		});
+
+		// Now add the texture as well.
+		let txs = dbpf.baseTextureFile;
+		source = txs[0];
+
+		// Don't forget that the textures array needs to be cloned as well!
+		let tx = clone(source);
+		tx.textures = tx.textures.map(clone);
+		tx.mem += 4;
+		tx.minX += 2*16;
+		tx.maxX += 2*16
+		tx.textures.forEach(function(tx) {
+			tx.x += 2;
+		});
+		// tx.textures[0].u7 = 1;
+		txs.push(tx);
+
+		// Add to the item index.
+		index[64][64].push({
+			"mem": tx.mem,
 			"type": FileType.BaseTextureFile
+		});
+
+		// Now update the com serializer as well.
+		let com = dbpf.COMSerializerFile;
+		com.set(FileType.LotFile, lots.length);
+		com.set(FileType.BuildingFile, buildings.length);
+		com.set(FileType.BaseTextureFile, txs.length);
+
+		// Time for action: save!
+		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
+
+	});
+
+	it('should play with the grids in an established city', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Established.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let all = [
+			FileType.SimGridUint8,
+			FileType.SimGridSint8,
+			FileType.SimGridUint16,
+			FileType.SimGridSint16,
+			FileType.SimGridUint32,
+			FileType.SimGridFloat32
+		];
+		for (let type of all) {
+			let grids = dbpf.getByType(type).read();
+			for (let grid of grids) {
+				for (let i = 0; i < grid.data.length; i++) {
+					grid.data[i] = 0;
+				}
+			}
+		}
+
+		await dbpf.save({"file":path.resolve(REGION,'City - Established.sc4')});
+
+	});
+
+	it.skip('should create flora', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Flora.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let { floraFile, itemIndexFile, COMSerializerFile } = dbpf;
+		let tree = floraFile[0];
+
+		floraFile.length = 0;
+		itemIndexFile[64][64].length = 0;
+
+		let mem = tree.mem;
+		for (let i = 0; i < 64; i++) {
+			for (let j = 0; j < 64; j++) {
+
+				if (i === j) continue;
+
+				let clone = Object.create(Object.getPrototypeOf(tree), Object.getOwnPropertyDescriptors(tree));
+				clone.mem = mem += 4;
+				clone.x = 16*i+8;
+				clone.z = 16*j+8;
+
+				let xx = 64 + Math.floor(clone.x / 64);
+				let zz = 64 + Math.floor(clone.z / 64);
+
+				floraFile.push(clone);
+				itemIndexFile[xx][zz].push({
+					"mem": clone.mem,
+					"type": clone.type
+				});
+
+			}
+		}
+
+		COMSerializerFile.set(FileType.FloraFile, floraFile.length);
+		// console.log(COMSerializerFile.get(FileType.FloraFile));
+		console.log(COMSerializerFile);
+
+		await dbpf.save({"file": path.resolve(REGION, 'City - Flora.sc4')});
+
+	});
+
+	// Beware!! If the tracts are not set correctly we've created immortal 
+	// flora. Probably when deleting within a tract the game only looks for 
+	// stuff in that tract. That's quite logical actually.
+	it('should create forested streets', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Million Trees.sc4'));
+		let dbpf = new Savegame(buff);
+
+		let { floraFile, itemIndexFile, COMSerializerFile } = dbpf;
+
+		let mem = 1;
+		function clone(nr) {
+			let tree = floraFile[nr];
+			let proto = Object.getPrototypeOf(tree);
+			let props = Object.getOwnPropertyDescriptors(tree);
+			tree = Object.create(tree, props);
+			tree.mem = mem++;
+			return tree;
+		}
+
+		// Create some trees on the street.
+		for (let i = 0; i < 10; i++) {
+			for (let j = 0; j < 2; j++) {
+				let tree = clone( Math.floor(2*Math.random()) );
+				tree.x = 16*17 + 16*i + 8;
+				tree.z = 16*10 + (j === 0 ? 2 : 14);
+				floraFile.push(tree);
+				let xx = 64 + Math.floor(tree.x / 64);
+				let zz = 64 + Math.floor(tree.z / 64);
+				tree.xMinTract = tree.xMaxTract = xx;
+				tree.zMinTract = tree.zMaxTract = zz;
+				itemIndexFile[xx][zz].push({
+					"mem": tree.mem,
+					"type": FileType.FloraFile
+				});
+			}
+		}
+
+		COMSerializerFile.set(FileType.FloraFile, floraFile.length);
+
+		await dbpf.save({"file": path.resolve(REGION, 'City - Million Trees.sc4')});
+
+	});
+
+	it('should move a building', async function() {
+
+		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
+		let dbpf = new Savegame(buff);
+
+		// Find the building & lot file.
+		let { buildingFile, baseTextureFile, lotFile } = dbpf;
+		let lot = lotFile[0];
+
+		const dx = 2;
+
+		// Move the lot.
+		lot.minX += dx;
+		lot.maxX += dx;
+		lot.commuteX += dx;
+
+		// Move the building.
+		let building = buildingFile[0];
+		building.minX += 16*dx;
+		building.maxX += 16*dx;
+
+		// Move the texture.
+		let tx = baseTextureFile[0];
+		tx.minX += 16*dx;
+		tx.maxX += 16*dx;
+		tx.textures.map(function(tile) {
+			tile.x += 1*dx;
 		});
 
 		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
-
-		// const dx = 1;
-
-		// // Move the lot 1 to the right so that it stays within its the tract.
-		// lot.minX += dx;
-		// lot.maxX += dx;
-		// lot.commuteX += dx;
-
-		// // Move the building as well, but keep it in its tract.
-		// building.minX += dx*16;
-		// building.maxX += dx*16;
-
-		// // Move the base texture underneath, but again keep it in its tract.
-		// // tx.minX += dx*16;
-		// tx.maxX += dx*16;
-		// let i = 0;
-		// tx.textures.map(function(tx) {
-		// 	if (i++ > 0) return;
-		// 	let iid = hex(tx.IID);
-		// 	if (tx.priority === 1) {
-		// 		tx.x += dx;
-		// 	}
-		// });
-
-		// console.log(tx);
-
-		// // Decode the index file and find all types we have.
-		// let index = dbpf.itemIndexFile;
-		// let cells = index.columns.flat().filter(x => x.length).flat();
-		// let types = [...new Set(cells.map(item => cClass[item.type]))];
-		// console.log(types);
-
-		// // Now save.
-		// await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
-
-	});
-
-	it.skip('should plop a building', async function() {
-
-		// Build up an index first of the buildings we're about to use.
-		let index = new Index({
-			"dirs": [
-				path.resolve(__dirname, 'files/DarkNight_11KingStreetWest')
-			]
-		});
-		await index.build();
-
-		// Read in the city as dbpf. Note: we can't get create lot & building 
-		// files apparently, so using an already established city with 1 
-		// building here.
-		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Double.sc4'));
-		let dbpf = new Savegame(buff);
-
-		// Read the check file so that we can do some diffing.
-		let check = new Savegame(fs.readFileSync(path.resolve(__dirname, 'files/City - Double - check.sc4')));
-		
-		// Loop all files in the dbpf.
-		// for (let entry of dbpf.entries) {
-		// 	let type = entry.type;
-		// 	let group = entry.group;
-		// 	let instance = entry.instance;
-
-		// 	// Find the corresponding entry.
-		// 	let mirror = check.entries.find(entry => {
-		// 		return entry.type === type && entry.group === group && entry.instance === instance;
-		// 	});
-		// 	if (!mirror) {
-		// 		console.log(`Found no mirror for ${hex(type)}!`);
-		// 		continue;
-		// 	}
-
-		// 	// Get both buffers.
-		// 	let buff = entry.decompress();
-		// 	mirror = mirror.decompress();
-
-		// 	if (buff.byteLength !== mirror.byteLength) {
-		// 		// console.log(`Type ${hex(type)}-${hex(group)}-${hex(instance)} has different length.`);
-		// 	}
-
-		// 	let a = buff.slice(0, 12).toString('hex');
-		// 	let b = mirror.slice(0, 12).toString('hex');
-		// 	if (a !== b) {
-		// 		// console.log('differ');
-		// 		// console.log(`${hex(type)}-${hex(group)}-${hex(instance)}`);
-		// 	} else {
-		// 		console.log('These are the same');
-		// 	}
-
-		// }
-
-		// return;
-
-		let lotFile = dbpf.lotFile;
-		let buildingFile = dbpf.buildingFile;
-		let textureFile = dbpf.baseTextureFile;
-		let tree = dbpf.itemIndexFile;
-
-		expect(lotFile).to.be.ok;
-		expect(buildingFile).to.be.ok;
-		expect(textureFile).to.be.ok;
-		expect(tree).to.be.ok;
-
-		// It's an empty city, so there are no lot and building file 
-		// yet. Create them.
-		// if (!lotFile) {
-		// 	let tgi = [FileType.LotFile, 0x299b2d1b, 0];
-		// 	let entry = dbpf.add(tgi, example.lotFile);
-		// 	lotFile = entry.file;
-		// }
-
-		// Same for the building file.
-		// if (!buildingFile) {
-		// 	let tgi = [FileType.BuildingFile, 0x299b2d1b, 0];
-		// 	let entry = dbpf.add(tgi, example.buildingFile);
-		// 	buildingFile = entry.file;
-
-		// }
-
-		// Get the TGI of the Lot Configuration Exemplar that we're about to 
-		// plop.
-		let tgi = [0x6534284a, 0xa8fbd372, 0xe001a291];
-		let exemplar = index.find(tgi).read();
-
-		// Clone the existing lot.
-		// let lot = lotFile.add();
-		let lot = lotFile.lots[1];
-		let dx = 5;
-		lot.move([dx, 0]);
-
-		// Clone the existing building.
-		let building = buildingFile.buildings[1];
-		building.move([dx*16, 0, 0]);
-
-		// Move the texture
-		let texture = textureFile.textures[1];
-		texture.move([dx, 0]);
-
-		// Rebuild the index.
-		tree.rebuild(buildingFile);
-		tree.rebuild(textureFile);
-
-		// expect(lotFile).to.have.length(2);
-
-		// Now save to the regions folder.
-		await dbpf.save({"file": path.join(REGION, 'City - Single.sc4')});
 
 	});
 

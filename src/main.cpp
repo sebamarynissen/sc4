@@ -53,7 +53,8 @@ Value crc(CallbackInfo& info) {
 		auto buffer = info[0].As<Buffer<unsigned char>>();
 		int size = info[1].As<Number>().Int32Value();
 		auto data = (unsigned char*) buffer.Data();
-		unsigned int crc = xcrc32(data, size);
+		unsigned int iv = (unsigned int)info[2].As<Number>().Int32Value();
+		unsigned int crc = xcrc32(data, size, iv);
 		return Number::New(env, (double)crc);
 	} catch (...) {
 		Error::New(env, "Error occurred while crc").ThrowAsJavaScriptException();
