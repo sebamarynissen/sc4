@@ -7,7 +7,7 @@ const path = require('path');
 
 describe('A city manager', function() {
 
-	it.only('should open a city', async function() {
+	it.skip('should open a city', async function() {
 
 		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
 		let city = new CityManager(file);

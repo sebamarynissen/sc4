@@ -9,7 +9,7 @@ const FileType = require('../lib/file-types');
 
 describe('The file index', function() {
 
-	it('should index all files in a directory', async function() {
+	it.skip('should index all files in a directory', async function() {
 
 		let index = new Index({
 			"dirs": [

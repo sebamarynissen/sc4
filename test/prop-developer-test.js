@@ -10,13 +10,16 @@ const { hex, chunk, split } = require('../lib/util');
 
 describe('The PropDeveloper Subfile', function() {
 
-	it('should read small city tiles', function() {
+	it.skip('should read small city tiles', function() {
 		let file = path.resolve(__dirname, 'files/city - RCI.sc4');
+		if (!fs.existsSync(file)) {
+			return this.skip();
+		}
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let txFile = dbpf.baseTextureFile;
 		let all = [];
-		txFile.textures.map(function(tx) {
+		txFile.map(function(tx) {
 			tx.textures.map(function(tile) {
 				let mem = tile.IID;
 				all.push(hex(mem));
@@ -24,7 +27,7 @@ describe('The PropDeveloper Subfile', function() {
 		});
 		console.log(all+'');
 
-		let props = dbpf.propFile.props;
+		let props = dbpf.propFile;
 		console.log('There are', props.length, 'props');
 		let entry = dbpf.getByType(FileType.PropDeveloperFile);
 

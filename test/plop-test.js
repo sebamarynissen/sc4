@@ -17,7 +17,7 @@ const Building = require('../lib/building');
 const HOME = process.env.HOMEPATH;
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
-describe('A city manager', function() {
+describe.skip('A city manager', function() {
 
 	it.skip('should decode the cSC4Occupant class', function() {
 
@@ -46,7 +46,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('should plop a new lot', async function() {
+	it.skip('should plop a new lot', async function() {
 
 		function clone(obj) {
 			return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));

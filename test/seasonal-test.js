@@ -89,7 +89,7 @@ describe('Making trees no longer seasonal', function() {
 
 	});
 
-	it.only('should synchronize flora', function() {
+	it.skip('should synchronize flora', function() {
 
 		let city = path.resolve(__dirname, 'files/City - Out of sync.sc4');
 		// let city = path.resolve(__dirname, 'files/city.sc4');
@@ -123,7 +123,7 @@ describe('Making trees no longer seasonal', function() {
 
 	});
 
-	it('should create static season mods', function() {
+	it.skip('should create static season mods', function() {
 
 		function extract(dir) {
 			let files = fs.readdirSync(dir);
