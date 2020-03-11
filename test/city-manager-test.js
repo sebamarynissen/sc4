@@ -63,9 +63,10 @@ describe('A city manager', function() {
 			// Plop it baby.
 			for (let i = 0; i < 4; i++) {
 				city.plop({
-					tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
-					x: 5+5*i,
-					z: 5,
+					// tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
+					tgi: [0x6534284a,0x76fbb03a,0x290dc058],
+					x: (1+i)*8,
+					z: 8,
 					orientation: i % 4,
 				});
 			}
