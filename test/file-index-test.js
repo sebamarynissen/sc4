@@ -1,15 +1,15 @@
-// # index-test.js
+// # file-index-test.js
 "use strict";
 const chai = require('chai');
 const expect = chai.expect;
 const path = require('path');
 
-const Index = require('../lib/index');
-const FileType = require('../lib/file-types');
+const Index = require('../lib/file-index.js');
+const FileType = require('../lib/file-types.js');
 
 describe('The file index', function() {
 
-	it.skip('should index all files in a directory', async function() {
+	it('should index all files in a directory', async function() {
 
 		let index = new Index({
 			"dirs": [
@@ -34,7 +34,9 @@ describe('The file index', function() {
 		expect(file.table).to.have.property(0x88EDC900);
 
 		let building = file.lotObjects.find(x => x.type === 0x00);
-		console.log(building.x, building.y, building.z);
+		expect(building.x).to.equal(1);
+		expect(building.y).to.equal(0);
+		expect(building.z).to.equal(1.5);
 
 	});
 

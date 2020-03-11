@@ -1,8 +1,8 @@
 // # city-manager-test.js
 "use strict";
 const { expect } = require('chai');
-const CityManager = require('../lib/city-manager');
 const path = require('path');
+const CityManager = require('../lib/city-manager.js');
 
 describe('A city manager', function() {
 
