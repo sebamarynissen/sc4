@@ -61,11 +61,12 @@ describe('A city manager', function() {
 			city.load(game);
 
 			// Plop it baby.
-			for (let i = 0; i < 1; i++) {
+			for (let i = 0; i < 4; i++) {
 				city.plop({
 					tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
 					x: 5+5*i,
 					z: 5,
+					orientation: i % 4,
 				});
 			}
 			let regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
