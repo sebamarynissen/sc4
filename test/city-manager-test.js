@@ -50,21 +50,27 @@ describe('A city manager', function() {
 			// First of all we need to build up a file index that the city 
 			// manager can use.
 			// let dir = path.join(__dirname, 'files/DarkNight_11KingStreetWest');
-			let dir = path.join(__dirname,'files/DiegoDL-432ParkAvenue-LM-DN');
+			// let dir = path.join(__dirname,'files/DiegoDL-432ParkAvenue-LM-DN');
+			let dir = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Plugins');
 			let index = new FileIndex(dir);
 			await index.build();
 
 			// Create the city manager.
-			let game = path.join(__dirname, 'files/City - Plopsaland.sc4');
+			let game = path.join(__dirname, 'files/City - 432.sc4');
 			let city = new CityManager({ index });
 			city.load(game);
 
 			// Plop it baby.
-			city.plop({
-				tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
-				x: 5,
-				z: 5,
-			});
+			for (let i = 0; i < 1; i++) {
+				city.plop({
+					tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
+					x: 5+5*i,
+					z: 5,
+				});
+			}
+			let regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
+			let file = path.join(regions, 'City - Plopsaland.sc4');
+			await city.save({ file });
 
 		});
 
