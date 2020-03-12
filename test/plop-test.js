@@ -10,14 +10,17 @@ const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
 const { hex, chunk, split } = require('../lib/util');
 const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
-const Index = require('../lib/file-index.js');
+const CityManager = require('../lib/city-manager.js');
+const FileIndex = require('../lib/file-index.js');
 const Savegame = require('../lib/savegame');
 const Lot = require('../lib/lot');
 const Building = require('../lib/building');
+const skyline = require('../lib/skyline.js');
 const HOME = process.env.HOMEPATH;
+const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 
-describe.skip('A city manager', function() {
+describe('A city manager', function() {
 
 	it.skip('should decode the cSC4Occupant class', function() {
 
@@ -145,7 +148,7 @@ describe.skip('A city manager', function() {
 
 	});
 
-	it('should play with the grids in an established city', async function() {
+	it.skip('should play with the grids in an established city', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Established.sc4'));
 		let dbpf = new Savegame(buff);
@@ -216,7 +219,7 @@ describe.skip('A city manager', function() {
 	// Beware!! If the tracts are not set correctly we've created immortal 
 	// flora. Probably when deleting within a tract the game only looks for 
 	// stuff in that tract. That's quite logical actually.
-	it('should create forested streets', async function() {
+	it.skip('should create forested streets', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Million Trees.sc4'));
 		let dbpf = new Savegame(buff);
@@ -257,7 +260,7 @@ describe.skip('A city manager', function() {
 
 	});
 
-	it('should move a building', async function() {
+	it.skip('should move a building', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		let dbpf = new Savegame(buff);
@@ -288,6 +291,24 @@ describe.skip('A city manager', function() {
 
 		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
+
+	});
+
+	it.only('builds a skyline', async function() {
+
+		let dir = path.join(__dirname, 'files');
+		let file = path.join(dir, 'City - Plopsaland.sc4');
+		let nybt = path.join(PLUGINS, 'NYBT');
+		let dbpf = new Savegame(file);
+		let index = new FileIndex(nybt);
+		await index.build();
+		let city = new CityManager({
+			dbpf,
+			index,
+		});
+
+		// Create the skyline in the city.
+		skyline({ city });
 
 	});
 
