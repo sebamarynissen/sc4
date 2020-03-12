@@ -1,11 +1,10 @@
 // # file-index-test.js
 "use strict";
-const chai = require('chai');
-const expect = chai.expect;
 const path = require('path');
-
+const { expect } = require('chai');
 const Index = require('../lib/file-index.js');
 const FileType = require('../lib/file-types.js');
+const dir = path.join(__dirname, 'files');
 
 describe('The file index', function() {
 
@@ -37,6 +36,14 @@ describe('The file index', function() {
 		expect(building.x).to.equal(1);
 		expect(building.y).to.equal(0);
 		expect(building.z).to.equal(1.5);
+
+	});
+
+	it.only('indexes all building and prop families', async function() {
+
+		let nybt = path.join(dir, 'NYBT Gracie Manor');
+		let index = new Index(nybt);
+		await index.build();
 
 	});
 
