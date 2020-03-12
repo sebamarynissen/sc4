@@ -41,9 +41,36 @@ describe('A city manager', function() {
 
 	});
 
+	context('#grow()', function() {
+
+		it.only('grows a lot', async function() {
+
+			this.slow(1000);
+
+			let dir = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Plugins');
+			let index = new FileIndex(dir);
+			await index.build();
+
+			// Create the city manager.
+			let game = path.join(__dirname, 'files/City - 432.sc4');
+			let city = new CityManager({ index });
+			city.load(game);
+
+			// Grow a lot.
+			city.grow({
+				tgi: [0x6534284a,0xa8fbd372,0x8fcc0f62],
+				x: 10,
+				z: 10,
+				orientation: 0,
+			});
+
+		});
+
+	});
+
 	context('#plop()', function() {
 
-		it.only('plops a ploppable lot', async function() {
+		it('plops a ploppable lot', async function() {
 
 			this.slow(1000);
 
@@ -61,10 +88,10 @@ describe('A city manager', function() {
 			city.load(game);
 
 			// Plop it baby.
-			for (let i = 0; i < 4; i++) {
+			for (let i = 0; i < 1; i++) {
 				city.plop({
-					// tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
-					tgi: [0x6534284a,0x76fbb03a,0x290dc058],
+					tgi: [0x6534284a, 0xd60100c4, 0x483248bb],
+					// tgi: [0x6534284a,0x76fbb03a,0x290dc058],
 					x: (1+i)*8,
 					z: 8,
 					orientation: i % 4,

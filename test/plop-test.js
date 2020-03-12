@@ -299,16 +299,16 @@ describe('A city manager', function() {
 		let dir = path.join(__dirname, 'files');
 		let file = path.join(dir, 'City - Plopsaland.sc4');
 		let nybt = path.join(PLUGINS, 'NYBT');
-		let dbpf = new Savegame(file);
 		let index = new FileIndex(nybt);
 		await index.build();
-		let city = new CityManager({
-			dbpf,
-			index,
-		});
+		let city = new CityManager({ index });
+		city.load(file);
 
 		// Create the skyline in the city.
 		skyline({ city });
+
+		// Save the city.
+		city.save({ file: path.join(REGION, 'City - Skyline.sc4') });
 
 	});
 

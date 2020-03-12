@@ -39,7 +39,7 @@ describe('The file index', function() {
 
 	it('uses a memory limit for the cache', async function() {
 
-		let nybt = path.join(dir, 'NYBT Gracie Manor');
+		let nybt = path.join(dir, 'NYBT/Aaron Graham/NYBT Gracie Manor');
 		let index = new Index({
 			dirs: [nybt],
 			mem: 1500000,
@@ -53,7 +53,7 @@ describe('The file index', function() {
 
 	it('indexes all building and prop families', async function() {
 
-		let nybt = path.join(dir, 'NYBT Gracie Manor');
+		let nybt = path.join(dir, 'NYBT/Aaron Graham/NYBT Gracie Manor');
 		let index = new Index(nybt);
 		await index.build();
 		let { families } = index;
