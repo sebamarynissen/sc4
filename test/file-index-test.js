@@ -51,13 +51,15 @@ describe('The file index', function() {
 
 	});
 
-	it.skip('indexes all building and prop families', async function() {
+	it('indexes all building and prop families', async function() {
 
 		let nybt = path.join(dir, 'NYBT Gracie Manor');
 		let index = new Index(nybt);
 		await index.build();
-
-		console.log(index);
+		let { families } = index;
+		expect(families).to.have.length(2);
+		expect(index.family(0x5484CA20)).to.have.length(4);
+		expect(index.family(0x5484CA1F)).to.have.length(4);
 
 	});
 
