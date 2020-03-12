@@ -10,11 +10,9 @@ describe('The file index', function() {
 
 	it('should index all files in a directory', async function() {
 
-		let index = new Index({
-			"dirs": [
-				path.resolve(__dirname, 'files/DarkNight_11KingStreetWest')
-			]
-		});
+		let index = new Index(
+			path.resolve(__dirname, 'files/DarkNight_11KingStreetWest')	
+		);
 
 		// Build up the index. This is done asynchronously so that files can 
 		// be read in parallel while parsing.
@@ -39,11 +37,27 @@ describe('The file index', function() {
 
 	});
 
-	it.only('indexes all building and prop families', async function() {
+	it('uses a memory limit for the cache', async function() {
+
+		let nybt = path.join(dir, 'NYBT Gracie Manor');
+		let index = new Index({
+			dirs: [nybt],
+			mem: 1500000,
+		});
+		await index.build();
+		for (let entry of index.records) {
+			entry.read();
+		}
+
+	});
+
+	it.skip('indexes all building and prop families', async function() {
 
 		let nybt = path.join(dir, 'NYBT Gracie Manor');
 		let index = new Index(nybt);
 		await index.build();
+
+		console.log(index);
 
 	});
 
