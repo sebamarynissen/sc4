@@ -296,11 +296,25 @@ describe('A city manager', function() {
 
 	it.only('builds a skyline', async function() {
 
+		this.timeout(0);
+
 		let dir = path.join(__dirname, 'files');
 		let file = path.join(dir, 'City - Plopsaland.sc4');
 		let nybt = path.join(PLUGINS, 'NYBT');
-		let index = new FileIndex(nybt);
+
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		// let index = new FileIndex(nybt);
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				// path.join(c, 'SimCity_2.dat'),
+				// path.join(c, 'SimCity_3.dat'),
+				// path.join(c, 'SimCity_4.dat'),
+				// path.join(c, 'SimCity_5.dat'),
+			]
+		});
 		await index.build();
+
 		let city = new CityManager({ index });
 		city.load(file);
 
@@ -308,7 +322,8 @@ describe('A city manager', function() {
 		skyline({ city });
 
 		// Save the city.
-		city.save({ file: path.join(REGION, 'City - Skyline.sc4') });
+		let out = path.join(REGION, 'City - Plopsaland.sc4');
+		await city.save({ file: out });
 
 	});
 
