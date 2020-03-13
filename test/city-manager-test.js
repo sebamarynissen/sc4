@@ -43,6 +43,8 @@ describe('A city manager', function() {
 
 	context('#grow()', function() {
 
+		const regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
+
 		it('grows a lot', async function() {
 
 			this.slow(1000);
@@ -56,7 +58,7 @@ describe('A city manager', function() {
 			let city = new CityManager({ index });
 			city.load(game);
 
-			console.log(city.dbpf.textures[0]);
+			// console.log(city.dbpf.textures[0]);
 
 			// Grow a lot.
 			city.grow({
@@ -66,7 +68,40 @@ describe('A city manager', function() {
 				orientation: 0,
 			});
 
-			let regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
+			let file = path.join(regions, 'City - Plopsaland.sc4');
+			await city.save({ file });
+
+		});
+
+		it.only('grows a lot with props', async function() {
+
+			this.slow(1000);
+
+			const dir = 'c:/GOG Games/Simcity 4 Deluxe Edition';
+			let index = new FileIndex({
+				files: [
+					path.join(dir, 'Simcity_1.dat'),
+					path.join(dir, 'Simcity_2.dat'),
+					path.join(dir, 'Simcity_3.dat'),
+					path.join(dir, 'Simcity_4.dat'),
+					path.join(dir, 'Simcity_5.dat'),
+				],
+			});
+			await index.build();
+
+			// Create the city manager.
+			let game = path.join(__dirname, 'files/City - 432.sc4');
+			let city = new CityManager({ index });
+			city.load(game);
+
+			// Grow a lot.
+			city.grow({
+				tgi: [0x6534284a,0xa8fbd372,0x600040d0],
+				x: 10,
+				z: 10,
+				orientation: 0,
+			});
+
 			let file = path.join(regions, 'City - Plopsaland.sc4');
 			await city.save({ file });
 
