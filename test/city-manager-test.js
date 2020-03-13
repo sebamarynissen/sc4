@@ -43,7 +43,7 @@ describe('A city manager', function() {
 
 	context('#grow()', function() {
 
-		it.only('grows a lot', async function() {
+		it('grows a lot', async function() {
 
 			this.slow(1000);
 
@@ -56,6 +56,8 @@ describe('A city manager', function() {
 			let city = new CityManager({ index });
 			city.load(game);
 
+			console.log(city.dbpf.textures[0]);
+
 			// Grow a lot.
 			city.grow({
 				tgi: [0x6534284a,0xa8fbd372,0x8fcc0f62],
@@ -63,6 +65,10 @@ describe('A city manager', function() {
 				z: 10,
 				orientation: 0,
 			});
+
+			let regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
+			let file = path.join(regions, 'City - Plopsaland.sc4');
+			await city.save({ file });
 
 		});
 
