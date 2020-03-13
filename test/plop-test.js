@@ -307,10 +307,10 @@ describe('A city manager', function() {
 		let index = new FileIndex({
 			files: [
 				path.join(c, 'SimCity_1.dat'),
-				// path.join(c, 'SimCity_2.dat'),
-				// path.join(c, 'SimCity_3.dat'),
-				// path.join(c, 'SimCity_4.dat'),
-				// path.join(c, 'SimCity_5.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
 			]
 		});
 		await index.build();
