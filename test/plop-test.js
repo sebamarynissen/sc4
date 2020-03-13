@@ -327,4 +327,59 @@ describe('A city manager', function() {
 
 	});
 
+	it.only('includes the textures when plopping', async function() {
+
+		this.timeout(0);
+
+		let dir = path.join(__dirname, 'files');
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let file = path.join(dir, 'City - Textures.sc4');
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+		// console.log(city.dbpf.textures[0]);
+
+		for (let i = 0; i < 9; i++) {
+			for (let j = 0; j < 9; j++) {
+				if (i === 1 && j === 1) {
+					continue;
+				}
+				city.grow({
+					tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+					x: i,
+					z: j,
+					// orientation: i,
+				});
+			}
+		}
+
+		// console.table(city.dbpf.textures, [
+		// 	'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7', 'u8', 'u9',
+		// ]);
+
+		// console.table([
+		// 	city.dbpf.textures[0].textures[0],
+		// 	city.dbpf.textures[1].textures[0],
+		// ]);
+
+		// console.table([
+		// 	city.dbpf.textures[0].textures[1],
+		// 	city.dbpf.textures[1].textures[1],
+		// ]);
+
+		// Save
+		let out = path.join(REGION, 'City - Textures.sc4');
+		await city.save({ file: out });
+
+	});
+
 });
