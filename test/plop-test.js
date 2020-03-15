@@ -19,6 +19,7 @@ const skyline = require('../lib/skyline.js');
 const HOME = process.env.HOMEPATH;
 const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
+const c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
 
 describe('A city manager', function() {
 
@@ -327,12 +328,11 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('includes the textures when plopping', async function() {
+	it.skip('includes the textures when plopping', async function() {
 
 		this.timeout(0);
 
 		let dir = path.join(__dirname, 'files');
-		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
 		let file = path.join(dir, 'City - Textures.sc4');
 		let index = new FileIndex({
 			files: [
@@ -379,6 +379,52 @@ describe('A city manager', function() {
 		// Save
 		let out = path.join(REGION, 'City - Textures.sc4');
 		await city.save({ file: out });
+
+	});
+
+	it.only('includes the base texture when plopping', async function() {
+
+		this.timeout(0);
+		let dir = path.join(__dirname, 'files');
+		let out = path.join(REGION, 'City - Base Textures.sc4');
+		// let source = path.join(dir, 'City - Base Textures.sc4');
+		let source = out;
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let float = x => {
+			return new Float32Array([x])[0];
+		};
+
+		let city = new CityManager({ index });
+		city.load(source);
+
+		// for (let i = 0; i < 64; i++) {
+		// 	for (let j = 0; j < 64; j++) {
+		// 		if (i === 1 && j === 1) {
+		// 			continue;
+		// 		}
+		// 		city.grow({
+		// 			tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+		// 			x: i,
+		// 			z: j,
+		// 			// orientation: (i+j) % 4,
+		// 		});
+		// 	}
+		// }
+
+		let { textures } = city.dbpf;
+		console.log('Texture entries in the city:', textures.length);
+
+		// await city.save({ file: out });
 
 	});
 
