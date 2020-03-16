@@ -295,7 +295,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('builds a skyline', async function() {
+	it.only('builds a skyline', async function() {
 
 		this.timeout(0);
 
@@ -413,7 +413,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('includes the base texture when plopping', async function() {
+	it.skip('includes the base texture when plopping', async function() {
 
 		this.timeout(0);
 		let dir = path.join(__dirname, 'files');
@@ -477,6 +477,79 @@ describe('A city manager', function() {
 			z: 2,
 			orientation: 0,
 		});
+
+		await city.save({ file: out });
+
+	});
+
+	it.skip('fixes the brown boxes', async function() {
+
+		this.timeout();
+
+		let dir = path.join(__dirname, 'files');
+		let out = path.join(REGION, 'City - Base Textures.sc4');
+		let source = path.join(dir, 'City - Base Textures.sc4');
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+		});
+		await index.build();
+
+		let entry = index.find([0x29A5D1EC,0x2A2458F9,0x213B0000]);
+		console.log(entry.dbpf.file);
+
+		return;
+
+		let city = new CityManager({ index });
+		city.load(source);
+
+		for (let i = 2; i < 64; i++) {
+			for (let j = 2; j < 32; j++) {
+				city.grow({
+					tgi: [0x6534284a,0xa8fbd372,0x600029b0],
+					x: i,
+					z: 2*j,
+					orientation: 0,
+				});
+				break;
+			}
+			break;
+		}
+
+		await city.save({ file: out });
+
+	});
+
+	it.only('plops a lot with an ATC prop', async function() {
+
+		this.timeout();
+		let dir = path.join(__dirname, 'files');
+		let source = path.join(dir, 'City - ATC.sc4');
+		let out = path.join(REGION, 'City - ATC.sc4');
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(source);
+
+		city.grow({
+			tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+			x: 2,
+			z: 1,
+			orientation: 2,
+		});
+
+		console.table(city.dbpf.props);
 
 		await city.save({ file: out });
 
