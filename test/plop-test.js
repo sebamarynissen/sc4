@@ -549,8 +549,6 @@ describe('A city manager', function() {
 			orientation: 2,
 		});
 
-		console.table(city.dbpf.props);
-
 		await city.save({ file: out });
 
 	});
