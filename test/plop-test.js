@@ -295,7 +295,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('builds a skyline', async function() {
+	it.skip('builds a skyline', async function() {
 
 		this.timeout(0);
 
@@ -324,6 +324,37 @@ describe('A city manager', function() {
 
 		// Save the city.
 		let out = path.join(REGION, 'City - Plopsaland.sc4');
+		await city.save({ file: out });
+
+	});
+
+	it.skip('builds a skyline on a medium tile', async function() {
+
+		this.timeout(0);
+
+		let dir = path.join(__dirname, 'files');
+		let file = path.join(dir, 'City - Medium tile.sc4');
+
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
+			]
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+
+		// Create the skyline in the city.
+		skyline({ city });
+
+		// Save the city.
+		let out = path.join(REGION, 'City - Medium tile.sc4');
 		await city.save({ file: out });
 
 	});
@@ -382,7 +413,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('includes the base texture when plopping', async function() {
+	it.only('includes the base texture when plopping', async function() {
 
 		this.timeout(0);
 		let dir = path.join(__dirname, 'files');
@@ -402,8 +433,6 @@ describe('A city manager', function() {
 
 		let city = new CityManager({ index });
 		city.load(source);
-
-		console.log(city.dbpf.lots[0].orientation);
 
 		for (let i = 0; i < 5; i++) {
 			for (let j = 0; j < 5; j++) {
@@ -425,7 +454,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('positions a 1x2 lot', async function() {
+	it.skip('positions a 1x2 lot', async function() {
 
 		this.timeout();
 		let dir = path.join(__dirname, 'files');
@@ -443,7 +472,7 @@ describe('A city manager', function() {
 		city.load(source);
 
 		city.grow({
-			tgi: [0x6534284a,0xa8fbd372,0x60000b70],
+			tgi: [0x6534284a,0xa8fbd372,0x600045d0],
 			x: 2,
 			z: 2,
 			orientation: 0,
