@@ -295,7 +295,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('builds a skyline', async function() {
+	it.skip('builds a skyline', async function() {
 
 		this.timeout(0);
 
@@ -522,7 +522,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('plops a lot with an ATC prop', async function() {
+	it.skip('plops a lot with an ATC prop', async function() {
 
 		this.timeout();
 		let dir = path.join(__dirname, 'files');
@@ -550,6 +550,97 @@ describe('A city manager', function() {
 		});
 
 		await city.save({ file: out });
+
+	});
+
+	it.only('plops a Hilbert curve', async function() {
+
+		const curve = require('hilbert-curve');
+
+		this.timeout();
+		let dir = path.join(__dirname, 'files');
+		let source = path.join(dir, 'City - Large Tile.sc4');
+		let out = path.join(REGION, 'City - Large Tile.sc4');
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(source);
+		let zones = city.dbpf.zones;
+
+		const order = 6;
+		const n = 2**order;
+		const nn = n**2;
+		let data = [];
+		const length = 4;
+		for (let i = 0; i < nn; i++) {
+			let point = curve.indexToPoint(i, order);
+			data.push({
+				x: (length-1)*point.x,
+				z: (length-1)*point.y,
+			});
+		}
+
+		let matrix = Array(length*n).fill().map(() => {
+			return Array(length*n).fill();
+		});
+
+		for (let i = 1; i < data.length; i++) {
+			let P = data[i-1];
+			let Q = data[i];
+			let d = {
+				x: (Q.x - P.x)/(length-1),
+				z: (Q.z - P.z)/(length-1),
+			};
+			for (let j = 0; j < length; j++) {
+				let xx = P.x + d.x*j + 2;
+				let zz = P.z + d.z*j + 2;
+				matrix[xx][zz] = true;
+			}
+		}
+
+		// Loop the entire curve and grow a lot to the left or to the right.
+		for (let i = 1; i < data.length; i++) {
+			let P = data[i-1];
+			let Q = data[i];
+			let d = {
+				x: (Q.x - P.x)/(length-1),
+				z: (Q.z - P.z)/(length-1),
+			};
+			let n = {
+				x: d.z,
+				z: -d.x,
+			};
+			for (let j = 0; j < length; j++) {
+				let xx = P.x + d.x*j + 2;
+				let zz = P.z + d.z*j + 2;
+				for (let s of [-1, 1]) {
+					let x = xx + n.x*s;
+					let z = zz + n.z*s;
+					if (zones.cells[x][z]) continue;
+					if (x < 0 || z < 0) continue;
+					if (matrix[x][z]) continue;
+
+					city.grow({
+						tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+						x,
+						z,
+					});
+
+				}
+			}
+		}
+
+		// Save baby.
+		await city.dbpf.save({ file: out });
 
 	});
 
