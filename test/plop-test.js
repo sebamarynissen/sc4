@@ -359,6 +359,57 @@ describe('A city manager', function() {
 
 	});
 
+	it.only('sets the ZoneType', async function() {
+
+		let dir = path.join(__dirname, 'files');
+		let out = path.join(REGION, 'City - Empty City.sc4');
+		let source = path.join(dir, 'City - Empty City.sc4');
+		// let source = out;
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(source);
+
+		for (let i = 0; i < 10; i++) {
+			city.grow({
+				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+				x: i,
+				z: 0,
+				orientation: 2,
+			});
+			city.grow({
+				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+				x: i,
+				z: 2,
+				orientation: 0,
+			});
+		}
+		for (let lot of city.dbpf.lots) {
+			lot.jobsCapacities = [{ demandSourceIndex: 4112, capacity: 5 }];
+			lot.jobsTotalCapacities = [{ demandSourceIndex: 4112, capacity: 5 }];
+		}
+		city.grow({
+			tgi: [0x6534284a,0xa8fbd372,0x60000b70],
+			x: 11,
+			z: 2,
+		});
+
+		await city.save({ file: out });
+
+	});
+
 	it.skip('includes the textures when plopping', async function() {
 
 		this.timeout(0);
@@ -454,106 +505,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('positions a 1x2 lot', async function() {
-
-		this.timeout();
-		let dir = path.join(__dirname, 'files');
-		let out = path.join(REGION, 'City - Base Textures.sc4');
-		let source = path.join(dir, 'City - Base Textures.sc4');
-
-		let index = new FileIndex({
-			files: [
-				path.join(c, 'SimCity_1.dat'),
-			],
-		});
-		await index.build();
-
-		let city = new CityManager({ index });
-		city.load(source);
-
-		city.grow({
-			tgi: [0x6534284a,0xa8fbd372,0x600045d0],
-			x: 2,
-			z: 2,
-			orientation: 0,
-		});
-
-		await city.save({ file: out });
-
-	});
-
-	it.skip('fixes the brown boxes', async function() {
-
-		this.timeout();
-
-		let dir = path.join(__dirname, 'files');
-		let out = path.join(REGION, 'City - Base Textures.sc4');
-		let source = path.join(dir, 'City - Base Textures.sc4');
-
-		let index = new FileIndex({
-			files: [
-				path.join(c, 'SimCity_1.dat'),
-			],
-		});
-		await index.build();
-
-		let entry = index.find([0x29A5D1EC,0x2A2458F9,0x213B0000]);
-		console.log(entry.dbpf.file);
-
-		return;
-
-		let city = new CityManager({ index });
-		city.load(source);
-
-		for (let i = 2; i < 64; i++) {
-			for (let j = 2; j < 32; j++) {
-				city.grow({
-					tgi: [0x6534284a,0xa8fbd372,0x600029b0],
-					x: i,
-					z: 2*j,
-					orientation: 0,
-				});
-				break;
-			}
-			break;
-		}
-
-		await city.save({ file: out });
-
-	});
-
-	it.skip('plops a lot with an ATC prop', async function() {
-
-		this.timeout();
-		let dir = path.join(__dirname, 'files');
-		let source = path.join(dir, 'City - ATC.sc4');
-		let out = path.join(REGION, 'City - ATC.sc4');
-
-		let index = new FileIndex({
-			files: [
-				path.join(c, 'SimCity_1.dat'),
-			],
-			dirs: [
-				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
-			],
-		});
-		await index.build();
-
-		let city = new CityManager({ index });
-		city.load(source);
-
-		city.grow({
-			tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
-			x: 2,
-			z: 1,
-			orientation: 2,
-		});
-
-		await city.save({ file: out });
-
-	});
-
-	it.only('plops a Hilbert curve', async function() {
+	it.skip('plops a Hilbert curve', async function() {
 
 		const curve = require('hilbert-curve');
 
@@ -580,7 +532,7 @@ describe('A city manager', function() {
 		const n = 2**order;
 		const nn = n**2;
 		let data = [];
-		const length = 4;
+		const length = 5;
 		for (let i = 0; i < nn; i++) {
 			let point = curve.indexToPoint(i, order);
 			data.push({
