@@ -20,6 +20,7 @@ const HOME = process.env.HOMEPATH;
 const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 const c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+const dir = path.join(__dirname, 'files');
 
 describe('A city manager', function() {
 
@@ -295,7 +296,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.skip('builds a skyline', async function() {
+	it.only('builds a skyline', async function() {
 
 		this.timeout(0);
 
@@ -359,53 +360,23 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('sets the ZoneType', async function() {
+	it.skip('creates RCI zones', async function() {
 
-		let dir = path.join(__dirname, 'files');
-		let out = path.join(REGION, 'City - Empty City.sc4');
-		let source = path.join(dir, 'City - Empty City.sc4');
-		// let source = out;
-		let index = new FileIndex({
-			files: [
-				path.join(c, 'SimCity_1.dat'),
-				path.join(c, 'SimCity_2.dat'),
-				path.join(c, 'SimCity_3.dat'),
-				path.join(c, 'SimCity_4.dat'),
-				path.join(c, 'SimCity_5.dat'),
-			],
-			dirs: [
-				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
-			],
-		});
-		await index.build();
+		this.timeout(0);
 
-		let city = new CityManager({ index });
+		let source = path.join(dir, 'City - Zone me.sc4');
+		let out = path.join(REGION, 'City - Zone me.sc4');
+		let city = new CityManager({});
 		city.load(source);
 
-		for (let i = 0; i < 10; i++) {
-			city.grow({
-				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
-				x: i,
-				z: 0,
-				orientation: 2,
-			});
-			city.grow({
-				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
-				x: i,
-				z: 2,
-				orientation: 0,
-			});
-		}
-		for (let lot of city.dbpf.lots) {
-			lot.jobsCapacities = [{ demandSourceIndex: 4112, capacity: 5 }];
-			lot.jobsTotalCapacities = [{ demandSourceIndex: 4112, capacity: 5 }];
-		}
-		city.grow({
-			tgi: [0x6534284a,0xa8fbd372,0x60000b70],
-			x: 11,
-			z: 2,
+		// Create a new zone.
+		city.zone({
+			x: 1,
+			z: 0,
+			orientation: 2,
 		});
 
+		// console.log(city.dbpf.textures);
 		await city.save({ file: out });
 
 	});
