@@ -7,7 +7,10 @@ const Stream = require('../lib/stream.js');
 const Savegame = require('../lib/savegame.js');
 const { hex, chunk } = require('../lib/util');
 const { FileType, cClass } = require('../lib/enums.js');
-const REGION = path.resolve(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
+const CityManager = require('../lib/city-manager.js');
+const HOME = process.env.HOMEPATH;
+const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
+const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 const dir = path.resolve(__dirname, 'files');
 
 describe('The zone manager file', function() {
@@ -27,69 +30,42 @@ describe('The zone manager file', function() {
 
 	});
 
-	it('is decoded', async function() {
+	it.only('is decoded', async function() {
 
-		// let file = path.join(REGION, 'City - Growth.sc4');
-		// let dbpf = new Savegame(file);
-		let one = new Savegame(path.join(REGION, 'City - Growth.sc4'));
-		// let one = new Savegame(path.resolve(REGION, '../New Delphina/City - Strateigia.sc4'));
-		// let two = new Savegame(path.join(REGION, 'City - Growth.sc4'));
+		const FileIndex = require('../lib/file-index.js');
 
-		const crc32 = require('../lib/crc.js');
-		let entry = one.entries.find(entry => entry.type === 0x298f9b2d);
-		// for (let entry of one) {
-			let buff = entry.decompress();
-			let size = buff.readUInt32LE();
-			let slice = buff.slice(0, size);
-			let crc = crc32(slice, 8);
-			if (crc !== buff.readUInt32LE(4)) {
-				console.log(types[ entry.type ]);
-			}
-		// }
+		let out = path.join(REGION, 'City - Growth.sc4');
+		let one = path.join(dir, 'City - Growth - 1.sc4');
+		let two = new Savegame(path.join(dir, 'City - Growth - 2.sc4'));
 
-		let rs = new Stream(buff);
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		// let index = new FileIndex(nybt);
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
+			],
+			dirs: [
+				PLUGINS,
+			],
+		});
+		await index.build();
 
-		// let header = buff.slice(0, 14);
-		let header = rs.read(14);
-		console.log(chunk([8, 8, 8, 4], header.toString('hex')));
-
-		let n = 23;
-		for (let i = 0; i < n; i++) {
-			// let slice = body.slice(32*i, 32*i+32);
-			let slice = rs.read(32);
-			let format = Array(8).fill(8);
-			console.log(chunk(format, slice.toString('hex')));
-		}
-		console.log(rs.read(1).toString('hex'));
-		for (let i = 0; i < 5; i++) {
-			let slice = rs.read(8);
-			console.log(chunk([8, 8], slice.toString('hex')));
+		let city = new CityManager({ index });
+		city.load(one);
+		for (let i = 0; i < 10; i++) {
+			let lot = city.grow({
+				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+				x: 3+i,
+				z: 1,
+				orientation: 2,
+			});
 		}
 
-		// console.log(buff.toString('hex'));
-		// console.log(slice.toString('hex').length);
-
-		return;
-
-		for (let type of [FileType.SimGridSint8]) {
-
-			let { grids } = one.readByType(type);
-			console.log('LENGTH', grids.length);
-			console.log(grids[0].dataId.toString(16));
-
-			function fill(grid, x=1) {
-				let { dataId } = grid;
-				// console.log('DATA ID', hex(dataId));
-				grid.data.fill(x);
-			}
-			fill(grids[0], 1);
-			// for (let i = 0; i < grids.length; i++) {
-			// 	fill(grids[i], 1);
-			// }
-
-		}
-
-		await one.save({ file: path.join(REGION, 'City - Growth.sc4') });
+		await city.save({ file: out });
 
 	});
 
