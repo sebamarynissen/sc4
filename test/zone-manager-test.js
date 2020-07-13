@@ -30,7 +30,7 @@ describe('The zone manager file', function() {
 
 	});
 
-	it.only('is decoded', async function() {
+	it('is decoded', async function() {
 
 		const FileIndex = require('../lib/file-index.js');
 
