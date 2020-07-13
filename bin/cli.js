@@ -216,6 +216,7 @@ function factory(program) {
 		.option('-r, --residential <type>', 'Zone type of the residential buildings to growify (Low, Medium, High)')
 		.option('-i, --industrial <type>', 'Zone type of the industrial buildings to growify (Medium, High)')
 		.option('-g, --agricultural', 'Whether or not to growify agricultural buildings as well')
+		.option('--no-historical', 'Don\'t make the growified lots historical')
 		.action(async function(city) {
 
 			// Same story here. See historical command.
@@ -284,6 +285,14 @@ function factory(program) {
 						return answers.types.includes('industrial');
 					}
 				}, {
+					"name": "historical",
+					"type": "confirm",
+					"message": "Do you want the growified buildings to be historical?",
+					"default": true,
+					when(answers) {
+						return answers.types.length > 0;
+					},
+				}, {
 					"name": "force",
 					"type": "confirm",
 					"message": [
@@ -341,6 +350,9 @@ function factory(program) {
 					this.output = answers.output;	
 				}
 
+				// Check if the buildings don't need to be made historical.
+				this.historical = answers.historical;
+
 			}
 
 			// Parse the output path.
@@ -371,6 +383,7 @@ function factory(program) {
 						this.industrial = ZoneType.IHigh;
 					}
 				}
+
 			}
 
 			// If agricultural is set to true, set it as zone type.
@@ -383,6 +396,7 @@ function factory(program) {
 			if (this.residential) opts.residential = this.residential;
 			if (this.industrial) opts.industrial = this.industrial;
 			if (this.agricultural) opts.agricultural = this.agricultural;
+			opts.historical = this.historical;
 			opts.output = this.output;
 			opts.save = true;
 
