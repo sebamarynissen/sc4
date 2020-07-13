@@ -16,8 +16,8 @@ describe('#historical()', function() {
 	it('should make all buildings in a city historical', async function() {
 
 		let dbpf = await historical({
-			"dbpf": path.join(files, 'city.sc4'),
-			"all": true
+			dbpf: path.join(files, 'city.sc4'),
+			all: true
 		});
 		
 		// Check the dbpf file now. Everything should be historical.
@@ -29,8 +29,8 @@ describe('#historical()', function() {
 
 	it('should make all residentials in a city historical', async function() {
 		let dbpf = await historical({
-			"dbpf": path.join(files, 'city.sc4'),
-			"residential": true
+			dbpf: path.join(files, 'city.sc4'),
+			residential: true
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -41,8 +41,8 @@ describe('#historical()', function() {
 
 	it('should make all commercials in a city historical', async function() {
 		let dbpf = await historical({
-			"dbpf": path.join(files, 'city.sc4'),
-			"commercial": true
+			dbpf: path.join(files, 'city.sc4'),
+			commercial: true
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -53,8 +53,8 @@ describe('#historical()', function() {
 
 	it('should make all industrials in a city historical', async function() {
 		let dbpf = await historical({
-			"dbpf": path.join(files, 'city.sc4'),
-			"industrial": true
+			dbpf: path.join(files, 'city.sc4'),
+			industrial: true
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -65,8 +65,8 @@ describe('#historical()', function() {
 
 	it('should make all agriculturals in a city historical', async function() {
 		let dbpf = await historical({
-			"dbpf": path.join(files, 'city.sc4'),
-			"agricultural": true
+			dbpf: path.join(files, 'city.sc4'),
+			agricultural: true
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -90,8 +90,8 @@ describe('#growify', function() {
 		expect(plopped.size).to.be.above(0);
 
 		await growify({
-			"dbpf": dbpf,
-			"residential": ZoneType.RMedium
+			dbpf,
+			residential: ZoneType.RMedium,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -114,8 +114,8 @@ describe('#growify', function() {
 		expect(plopped.size).to.be.above(0);
 
 		await growify({
-			"dbpf": dbpf,
-			"industrial": ZoneType.IHigh
+			dbpf,
+			industrial: ZoneType.IHigh
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -138,8 +138,8 @@ describe('#growify', function() {
 		expect(plopped.size).to.be.above(0);
 
 		await growify({
-			"dbpf": dbpf,
-			"agricultural": ZoneType.ILow
+			dbpf,
+			agricultural: ZoneType.ILow,
 		});
 
 		for (let lot of dbpf.lotFile) {

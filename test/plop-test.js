@@ -10,14 +10,19 @@ const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
 const { hex, chunk, split } = require('../lib/util');
 const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
-const Index = require('../lib/index');
+const CityManager = require('../lib/city-manager.js');
+const FileIndex = require('../lib/file-index.js');
 const Savegame = require('../lib/savegame');
 const Lot = require('../lib/lot');
 const Building = require('../lib/building');
+const skyline = require('../lib/skyline.js');
 const HOME = process.env.HOMEPATH;
+const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
+const c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+const dir = path.join(__dirname, 'files');
 
-describe.skip('A city manager', function() {
+describe('A city manager', function() {
 
 	it.skip('should decode the cSC4Occupant class', function() {
 
@@ -145,7 +150,7 @@ describe.skip('A city manager', function() {
 
 	});
 
-	it('should play with the grids in an established city', async function() {
+	it.skip('should play with the grids in an established city', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Established.sc4'));
 		let dbpf = new Savegame(buff);
@@ -216,7 +221,7 @@ describe.skip('A city manager', function() {
 	// Beware!! If the tracts are not set correctly we've created immortal 
 	// flora. Probably when deleting within a tract the game only looks for 
 	// stuff in that tract. That's quite logical actually.
-	it('should create forested streets', async function() {
+	it.skip('should create forested streets', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Million Trees.sc4'));
 		let dbpf = new Savegame(buff);
@@ -257,7 +262,7 @@ describe.skip('A city manager', function() {
 
 	});
 
-	it('should move a building', async function() {
+	it.skip('should move a building', async function() {
 
 		let buff = fs.readFileSync(path.resolve(__dirname, 'files/City - Move bitch.sc4'));
 		let dbpf = new Savegame(buff);
@@ -288,6 +293,277 @@ describe.skip('A city manager', function() {
 
 		// Now save and see what happens.
 		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
+
+	});
+
+	it.only('builds a skyline', async function() {
+
+		this.timeout(0);
+
+		let dir = path.join(__dirname, 'files');
+		let file = path.join(dir, 'City - Plopsaland.sc4');
+		let nybt = path.join(PLUGINS, 'NYBT');
+
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		// let index = new FileIndex(nybt);
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
+			]
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+
+		// Create the skyline in the city.
+		skyline({ city });
+
+		// Save the city.
+		let out = path.join(REGION, 'City - Plopsaland.sc4');
+		await city.save({ file: out });
+
+	});
+
+	it.skip('builds a skyline on a medium tile', async function() {
+
+		this.timeout(0);
+
+		let dir = path.join(__dirname, 'files');
+		let file = path.join(dir, 'City - Medium tile.sc4');
+
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+				path.join(c, 'SimCity_2.dat'),
+				path.join(c, 'SimCity_3.dat'),
+				path.join(c, 'SimCity_4.dat'),
+				path.join(c, 'SimCity_5.dat'),
+			]
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+
+		// Create the skyline in the city.
+		skyline({ city });
+
+		// Save the city.
+		let out = path.join(REGION, 'City - Medium tile.sc4');
+		await city.save({ file: out });
+
+	});
+
+	it.skip('creates RCI zones', async function() {
+
+		this.timeout(0);
+
+		let source = path.join(dir, 'City - Zone me.sc4');
+		let out = path.join(REGION, 'City - Zone me.sc4');
+		let city = new CityManager({});
+		city.load(source);
+
+		// Create a new zone.
+		city.zone({
+			x: 1,
+			z: 0,
+			orientation: 2,
+		});
+
+		// console.log(city.dbpf.textures);
+		await city.save({ file: out });
+
+	});
+
+	it.skip('includes the textures when plopping', async function() {
+
+		this.timeout(0);
+
+		let dir = path.join(__dirname, 'files');
+		let file = path.join(dir, 'City - Textures.sc4');
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+		// console.log(city.dbpf.textures[0]);
+
+		for (let i = 0; i < 9; i++) {
+			for (let j = 0; j < 9; j++) {
+				if (i === 1 && j === 1) {
+					continue;
+				}
+				city.grow({
+					tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+					x: i,
+					z: j,
+					orientation: (i+j) % 4,
+				});
+			}
+		}
+
+		// console.table(city.dbpf.textures, [
+		// 	'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7', 'u8', 'u9',
+		// ]);
+
+		// console.table([
+		// 	city.dbpf.textures[0].textures[0],
+		// 	city.dbpf.textures[1].textures[0],
+		// ]);
+
+		// console.table([
+		// 	city.dbpf.textures[0].textures[1],
+		// 	city.dbpf.textures[1].textures[1],
+		// ]);
+
+		// Save
+		let out = path.join(REGION, 'City - Textures.sc4');
+		await city.save({ file: out });
+
+	});
+
+	it.skip('includes the base texture when plopping', async function() {
+
+		this.timeout(0);
+		let dir = path.join(__dirname, 'files');
+		let out = path.join(REGION, 'City - Base Textures.sc4');
+		let source = path.join(dir, 'City - Base Textures.sc4');
+		// let source = out;
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(source);
+
+		for (let i = 0; i < 5; i++) {
+			for (let j = 0; j < 5; j++) {
+				if (i === 1 && j === 1) {
+					continue;
+				}
+				city.grow({
+					tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+					x: i,
+					z: j,
+					orientation: (i+j) % 4,
+				});
+				// break;
+			}
+			// break;
+		}
+
+		await city.save({ file: out });
+
+	});
+
+	it.skip('plops a Hilbert curve', async function() {
+
+		const curve = require('hilbert-curve');
+
+		this.timeout();
+		let dir = path.join(__dirname, 'files');
+		let source = path.join(dir, 'City - Large Tile.sc4');
+		let out = path.join(REGION, 'City - Large Tile.sc4');
+
+		let index = new FileIndex({
+			files: [
+				path.join(c, 'SimCity_1.dat'),
+			],
+			dirs: [
+				path.join(PLUGINS, 'Two Simple 1 x 1 Residential Lots v2'),
+			],
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(source);
+		let zones = city.dbpf.zones;
+
+		const order = 6;
+		const n = 2**order;
+		const nn = n**2;
+		let data = [];
+		const length = 5;
+		for (let i = 0; i < nn; i++) {
+			let point = curve.indexToPoint(i, order);
+			data.push({
+				x: (length-1)*point.x,
+				z: (length-1)*point.y,
+			});
+		}
+
+		let matrix = Array(length*n).fill().map(() => {
+			return Array(length*n).fill();
+		});
+
+		for (let i = 1; i < data.length; i++) {
+			let P = data[i-1];
+			let Q = data[i];
+			let d = {
+				x: (Q.x - P.x)/(length-1),
+				z: (Q.z - P.z)/(length-1),
+			};
+			for (let j = 0; j < length; j++) {
+				let xx = P.x + d.x*j + 2;
+				let zz = P.z + d.z*j + 2;
+				matrix[xx][zz] = true;
+			}
+		}
+
+		// Loop the entire curve and grow a lot to the left or to the right.
+		for (let i = 1; i < data.length; i++) {
+			let P = data[i-1];
+			let Q = data[i];
+			let d = {
+				x: (Q.x - P.x)/(length-1),
+				z: (Q.z - P.z)/(length-1),
+			};
+			let n = {
+				x: d.z,
+				z: -d.x,
+			};
+			for (let j = 0; j < length; j++) {
+				let xx = P.x + d.x*j + 2;
+				let zz = P.z + d.z*j + 2;
+				for (let s of [-1, 1]) {
+					let x = xx + n.x*s;
+					let z = zz + n.z*s;
+					if (zones.cells[x][z]) continue;
+					if (x < 0 || z < 0) continue;
+					if (matrix[x][z]) continue;
+
+					city.grow({
+						tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+						x,
+						z,
+					});
+
+				}
+			}
+		}
+
+		// Save baby.
+		await city.dbpf.save({ file: out });
 
 	});
 

@@ -15,19 +15,81 @@ const { ZoneType, cClass } = require('../lib/enums');
 
 describe('A DBPF file', function() {
 
-	it('should be parsed', function() {
+	it('parses from a file', function() {
+
+		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+
+		// Parse the dbpf.
+		let dbpf = new DBPF(file);
+
+		// Find an entry and verify that it gets read correctly.
+		let entry = dbpf.find(entry => {
+			return (
+				entry.type === 0x6534284a &&
+				entry.group === 0xa8fbd372 &&
+				entry.instance === 0x8a73e853
+			);
+		});
+		let exemplar = entry.read();
+		expect(+exemplar.prop(0x10)).to.equal(0x10);
+
+	});
+
+	it('parses from a buffer', function() {
 
 		let file = path.resolve(__dirname, 'files/cement.sc4lot');
 		let buff = fs.readFileSync(file);
-
-		// Parse the dbpf.
 		let dbpf = new DBPF(buff);
+
+		// Find an entry and verify that it gets read correctly.
+		let entry = dbpf.find(entry => {
+			return (
+				entry.type === 0x6534284a &&
+				entry.group === 0xa8fbd372 &&
+				entry.instance === 0x8a73e853
+			);
+		});
+		let exemplar = entry.read();
+		expect(+exemplar.prop(0x10)).to.equal(0x10);
+
+	});
+
+	it('frees memory the DBPF is taking up', function() {
+
+		// Read in the DBPF and make sure all entries are properly read.
+		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let dbpf = new DBPF(file);
+		expect(dbpf.buffer).to.be.ok;
+		for (let entry of dbpf) {
+			entry.read();
+			expect(entry.raw).to.be.ok;
+		}
+		let entry = dbpf.find(entry => {
+			return (
+				entry.type === 0x6534284a &&
+				entry.group === 0xa8fbd372 &&
+				entry.instance === 0x8a73e853
+			);
+		});
+
+		// Free up the DBPF memory.
+		dbpf.free();
+		expect(dbpf.buffer).to.be.null;
+		for (let entry of dbpf) {
+			expect(entry.raw).to.be.null;
+			expect(entry.file).to.be.null;
+		}
+
+		// Check that the DBPF gets automatically reloaded if we request to 
+		// read an entry.
+		let exemplar = entry.read();
+		expect(+exemplar.prop(0x10)).to.equal(0x10);
 
 	});
 
 	it('should be serialized to a buffer', function() {
 		let file = path.resolve(__dirname, 'files/cement.sc4lot');
-		let dbpf = new DBPF(fs.readFileSync(file));
+		let dbpf = new DBPF(file);
 
 		// Serialize the DBPF into a buffer and immediately parse again so 
 		// that we can compare.
