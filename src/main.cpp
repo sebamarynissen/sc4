@@ -8,7 +8,7 @@ using namespace Napi;
 using std::cout;
 
 // # decompress()
-Value decompress(CallbackInfo& info) {
+Value decompress(const CallbackInfo& info) {
 
 	auto env = info.Env();
 	try {
@@ -28,7 +28,7 @@ Value decompress(CallbackInfo& info) {
 }
 
 // # compress()
-Value compress(CallbackInfo& info) {
+Value compress(const CallbackInfo& info) {
 
 	auto env = info.Env();
 	try {
@@ -46,7 +46,7 @@ Value compress(CallbackInfo& info) {
 }
 
 // # crc(CallbackInfo& info)
-Value crc(CallbackInfo& info) {
+Value crc(const CallbackInfo& info) {
 
 	auto env = info.Env();
 	try {
