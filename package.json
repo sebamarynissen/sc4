@@ -6,7 +6,7 @@
   "scripts": {
     "install": "node-gyp-build",
     "test": "mocha",
-    "prebuild": "prebuildify --napi --strip & prebuildify --napi --strip --arch ia32",
+    "prebuild": "prebuildify --napi --strip & prebuildify --napi --strip --arch ia32 & prebuildify --napi --strip --platform linux --arc x64",
     "build:cpp": "node-gyp rebuild",
     "electron": "electron lib/gui/app.js"
   },
