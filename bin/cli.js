@@ -214,6 +214,7 @@ function factory(program) {
 		.option('--force', 'Force override of the city')
 		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
 		.option('-r, --residential <type>', 'Zone type of the residential buildings to growify (Low, Medium, High)')
+		.option('-c, --commercial <type>', 'Zone type of the commercial buildings to growify (Low, Medium, High)')
 		.option('-i, --industrial <type>', 'Zone type of the industrial buildings to growify (Medium, High)')
 		.option('-g, --agricultural', 'Whether or not to growify agricultural buildings as well')
 		.option('--no-historical', 'Don\'t make the growified lots historical')
@@ -240,10 +241,13 @@ function factory(program) {
 					"name": "types",
 					"type": "checkbox",
 					"message": "What type(s) of buildings do you want to growify?",
-					"default": ["residential", "industrial", "agricultural"],
+					"default": ["residential", "commercial", "industrial", "agricultural"],
 					"choices": [{
 						"name": "Residential buildings",
 						"value": "residential"
+					}, {
+						"name": "Commercial buildings",
+						"value": "commercial"
 					}, {
 						"name": "Industrial buildings",
 						"value": "industrial"
@@ -269,6 +273,24 @@ function factory(program) {
 					when(answers) {
 						return answers.types.includes('residential');
 					}
+				}, {
+					"name": "commercial",
+					"type": "list",
+					"message": "What zone should the commercial buildings become?",
+					"default": 2,
+					"choices": [{
+						"name": "Low Density",
+						"value": ZoneType.CLow,
+					}, {
+						"name": "Medium Density",
+						"value": ZoneType.CMedium,
+					}, {
+						"name": "High Density",
+						"value": ZoneType.CHigh,
+					}],
+					when(answers) {
+						return answers.types.includes('commercial');
+					},
 				}, {
 					"name": "industrial",
 					"type": "list",
@@ -376,6 +398,15 @@ function factory(program) {
 						this.residential = ZoneType.RHigh;
 					}
 				}
+				if (this.commercial) {
+					if (/^l/i.test(this.commercial)) {
+						this.commercial = ZoneType.CLow;
+					} else if (/^m/i.test(this.commercial)) {
+						this.commercial = ZoneType.CMedium;
+					} else {
+						this.commercial = ZoneType.CHigh;
+					}
+				}
 				if (this.industrial) {
 					if (/^m/i.test(this.industrial)) {
 						this.industrial = ZoneType.IMedium;
@@ -394,6 +425,7 @@ function factory(program) {
 			// Now format the options to pass to the api, regardless of where 
 			// we're coming from.
 			if (this.residential) opts.residential = this.residential;
+			if (this.commercial) opts.commercial = this.commercial;
 			if (this.industrial) opts.industrial = this.industrial;
 			if (this.agricultural) opts.agricultural = this.agricultural;
 			opts.historical = this.historical;
