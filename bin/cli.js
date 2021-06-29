@@ -774,6 +774,19 @@ function factory(program) {
 			api.refs(opts);
 		});
 
+	program
+		.command('pointer <city> <pointer>')
+		.description('Finds the subfile entery addressed by the given pointer')
+		.action(function(city, pointer) {
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			let opts = baseOptions();
+			opts.dbpf = new DBPF(buff);
+			opts.pointer = +pointer;
+			api.pointer(opts);
+		});
+
 	// Command for switching the active tilesets in a city.
 	program
 		.command('tracts <city>')
