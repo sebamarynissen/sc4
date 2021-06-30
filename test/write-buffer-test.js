@@ -71,4 +71,20 @@ describe('A WriteBuffer', function() {
 
 	});
 
+	it('automatically writes arrays', function() {
+
+		let obj = { toBuffer: () => Buffer.from('bar') };
+		let buffer = new WriteBuffer();
+		let arr = [
+			Buffer.from('foo'),
+			obj,
+		];
+		buffer.array(arr);
+		let out = buffer.toBuffer();
+		expect(out).to.have.length(4+3+3);
+		expect(out.readUInt32LE(0)).to.equal(arr.length);
+		expect(out.toString('utf8', 4)).to.equal('foobar');
+
+	});
+
 });
