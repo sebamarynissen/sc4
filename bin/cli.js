@@ -830,6 +830,16 @@ function factory(program) {
 
 		});
 
+	// Command for finding duplicate files in a plugin folder.
+	program
+		.command('duplicates <folder>')
+		.action(function(folder) {
+			api.duplicates({
+				...baseOptions(),
+				folder,
+			});
+		});
+
 	// End of factory function.
 	return program;
 
