@@ -141,7 +141,7 @@ describe('A DBPF file', function() {
 
 describe('An exemplar file', function() {
 
-	it.only('should serialize to a buffer correctly', function() {
+	it('should serialize to a buffer correctly', function() {
 
 		// Read an exemplar from a sample dbpf first.
 		let file = path.resolve(__dirname, 'files/cement.sc4lot');
