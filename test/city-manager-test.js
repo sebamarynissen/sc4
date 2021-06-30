@@ -73,7 +73,7 @@ describe('A city manager', function() {
 
 		});
 
-		it.only('grows a lot with props', async function() {
+		it('grows a lot with props', async function() {
 
 			this.slow(1000);
 

@@ -5,7 +5,7 @@ const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const api = require('../lib');
+const api = require('../lib/api.js');
 const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
 const { hex, chunk, split } = require('../lib/util');
@@ -296,7 +296,7 @@ describe('A city manager', function() {
 
 	});
 
-	it.only('builds a skyline', async function() {
+	it('builds a skyline', async function() {
 
 		this.timeout(0);
 

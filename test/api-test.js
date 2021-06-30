@@ -4,7 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const path = require('path');
 const fs = require('fs');
-const api = require('../lib');
+const api = require('../lib/api.js');
 const { Savegame } = api;
 const { ZoneType } = require('../lib/enums');
 

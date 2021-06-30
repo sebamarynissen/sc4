@@ -15,7 +15,7 @@ const dir = path.resolve(__dirname, 'files');
 
 describe('The zone manager file', function() {
 
-	it('is parsed & serialized correctly', function() {
+	it.skip('is parsed & serialized correctly', function() {
 		this.timeout(0);
 		let file = path.join(dir, 'city.sc4');
 		let buff = fs.readFileSync(file);
