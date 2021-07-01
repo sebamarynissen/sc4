@@ -13,7 +13,7 @@ Value decompress(const CallbackInfo& info) {
 	auto env = info.Env();
 	try {
 		auto buffer = info[0].As<Buffer<unsigned char>>();
-		int size = info[1].As<Number>().Int32Value();
+		int size = buffer.Length();
 		auto data = (unsigned char*) buffer.Data();
 		auto out = uncompress_data(data, &size);
 
