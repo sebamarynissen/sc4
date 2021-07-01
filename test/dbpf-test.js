@@ -395,6 +395,15 @@ describe('A prop subfile', function() {
 
 	});
 
+	it('crashes on a poxed city', function() {
+
+		let file = path.resolve(__dirname, 'files/poxed.sc4');
+		let buff = fs.readFileSync(file);
+		let dbpf = new Savegame(buff);
+		expect(() => dbpf.props).to.throw(Error);
+
+	});
+
 });
 
 describe('The flora subfile', function() {
