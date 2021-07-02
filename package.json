@@ -4,6 +4,9 @@
   "description": "A command line utility for automating SimCity 4 modding tasks & modifying savegames",
   "main": "lib/index.js",
   "exports": {
+    "./qfs": "./lib/compression/qfs.js",
+    "./qfs/cpp": "./lib/compression/qfs-cpp.js",
+    "./qfs/js": "./lib/compression/qfs-js.js",
     "./*": "./*"
   },
   "scripts": {
