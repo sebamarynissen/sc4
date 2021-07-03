@@ -15,13 +15,6 @@ In order to ensure that `sc4` is installed correctly, run `where sc4`.
 If it finds the sc4.cmd file, then you're good to go and can run all commands using `sc4 [name-of-the-command]`.
 In order to list all available options per command, run `sc4 [name-of-the-command] --help`.
 
-Note that the `sc4` module uses [Native Node Modules](https://nodejs.org/api/addons.html).
-These are C++ libraries that can be called from JavaScript and are used for the QFS compression & the CRC checksum algorithm.
-Prebuilt versions of the C++ libraries are included for node v12 and higher, so these should work out of the box.
-If you want to compile the C++ libraries from source, you will need to install [Windows Build Tools](https://github.com/felixrieseberg/windows-build-tools).
-This can be done by running `npm install --global windows-build-tools`.
-On Windows 7 you will also need to download & install [.NET Framework 4.5.1](http://www.microsoft.com/en-us/download/details.aspx?id=40773).
-
 ## Usage
 
 Currently the following commands are included. Run `sc4 --help` to list all available commands.
