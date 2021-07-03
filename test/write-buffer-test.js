@@ -58,19 +58,6 @@ describe('A WriteBuffer', function() {
 
 	});
 
-	it('adds the size and checksum', function() {
-
-		let buffer = new WriteBuffer();
-		buffer.uint32(4242);
-		let out = buffer.seal();
-		expect(out).to.have.length(12);
-		expect(out.readUInt32LE(0)).to.equal(out.length);
-		let sum = out.readUInt32LE(4);
-		expect(sum).to.not.equal(0);
-		expect(sum).to.equal(+buffer);
-
-	});
-
 	it('automatically writes arrays', function() {
 
 		let obj = { toBuffer: () => Buffer.from('bar') };
