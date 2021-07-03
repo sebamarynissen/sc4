@@ -26,7 +26,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "electron": "^5.0.6",
+    "electron": "^13.1.5",
     "hilbert-curve": "^2.0.5",
     "mocha": "^6.2.2",
     "string-argv": "^0.3.1",
