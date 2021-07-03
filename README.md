@@ -37,7 +37,7 @@ Currently the following commands are included. Run `sc4 --help` to list all avai
 
  MIT License
 
-Copyright (c) 2020 Sebastiaan Marynissen
+Copyright (c) 2019-present Sebastiaan Marynissen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
