@@ -6,7 +6,6 @@ const fs = require('fs');
 const TerrainMap = require('../lib/terrain-map.js');
 const DBPF = require('../lib/dbpf.js');
 const { FileType } = require('../lib/enums.js');
-const REGION = path.join(process.env.USERPROFILE, 'documents/SimCity 4/Regions/Experiments');
 
 describe('The terrain map', function() {
 
