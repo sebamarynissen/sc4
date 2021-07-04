@@ -360,6 +360,28 @@ describe('A city manager', function() {
 
 	});
 
+	it.skip('builds a skyline on a hilly terrain', async function() {
+
+		this.timeout(0);
+
+		let file = path.join(__dirname, 'files/City - Hilly skyline.sc4');
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let index = new FileIndex({
+			files: [1, 2, 3, 4, 5].map(nr => path.join(c, `SimCity_${nr}.dat`)),
+		});
+		await index.build();
+
+		let city = new CityManager({ index });
+		city.load(file);
+
+		skyline({ city });
+
+		// Save the city.
+		let out = path.join(REGION, 'City - Hilly skyline.sc4');
+		await city.save({ file: out });
+
+	});
+
 	it.skip('creates RCI zones', async function() {
 
 		this.timeout(0);
