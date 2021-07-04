@@ -19,7 +19,7 @@ describe('The terrain map', function() {
 		});
 		let terrain = entry.read();
 		expect(terrain.xSize).to.equal(257);
-		expect(terrain.ySize).to.equal(257);
+		expect(terrain.zSize).to.equal(257);
 		expect(terrain).to.have.length(terrain.xSize);
 
 		let source = entry.decompress();
