@@ -41,4 +41,24 @@ describe('The terrain map', function() {
 
 	});
 
+	it('performs a terrain query', function() {
+
+		let map = new TerrainMap(2);
+		map[1][0] = 5;
+
+		// Tile [0, 0]
+		expect(map.query(2, 3)).to.equal(0);
+		expect(map.query(8, 8)).to.equal(0);
+		expect(map.query(16, 8)).to.equal(2.5);
+		expect(map.query(16, 0)).to.equal(5);
+		expect(map.query(16, 16)).to.equal(0);
+
+		// Tile [1, 0]
+		expect(map.query(16+8, 8)).to.equal(2.5);
+		expect(map.query(16+16, 8)).to.equal(0);
+		expect(map.query(16+8, 16)).to.equal(0);
+		expect(map.query(16+16, 16)).to.equal(0);
+
+	});
+
 });
