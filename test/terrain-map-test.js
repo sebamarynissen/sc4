@@ -61,4 +61,19 @@ describe('The terrain map', function() {
 
 	});
 
+	it('performs a terrain query on cliffs', function() {
+
+		let map = new TerrainMap(2);
+		map[1][1] = 20;
+
+		expect(map.query(0, 0)).to.equal(0);
+		expect(map.query(8, 8)).to.equal(0);
+		expect(map.query(16, 16)).to.equal(20);
+		expect(map.query(24, 8)).to.equal(0);
+		expect(map.query(16, 32)).to.equal(0);
+		expect(map.query(24, 24)).to.equal(0);
+		expect(map.query(24, 8)).to.equal(0);
+
+	});
+
 });
