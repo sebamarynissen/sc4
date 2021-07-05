@@ -466,67 +466,6 @@ describe('The network subfile', function() {
 
 });
 
-describe('An item index subfile', function() {
-
-	it('should be parsed & serialized correctly', function() {
-
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
-		// let file = path.resolve(__dirname, 'files/city.sc4');
-		let buff = fs.readFileSync(file);
-		let dbpf = new DBPF(buff);
-
-		let entry = dbpf.entries.find(x => x.type === FileType.ItemIndexFile);
-		let indexFile = entry.read();
-
-		expect(indexFile.width).to.equal(1024);
-		expect(indexFile.depth).to.equal(1024);
-		expect(indexFile.tractWidth).to.equal(16);
-		expect(indexFile.tractDepth).to.equal(16);
-		expect(indexFile.tileWidth).to.equal(64);
-		expect(indexFile.tileDepth).to.equal(64);
-		expect(indexFile).to.have.length(192);
-		for (let column of indexFile) {
-			expect(column).to.have.length(192);
-			for (let cell of column) {
-				for (let item of cell) {
-					expect(item).to.have.property('mem');
-					expect(item).to.have.property('type');
-				}
-			}
-		}
-
-		// Now serialize again. We haven't modified anything so everything 
-		// should still match.
-		let source = entry.decompress();
-		let check = indexFile.toBuffer();
-		expect(source.toString('hex')).to.equal(check.toString('hex'));
-
-		// Seems that the item index works with tracts and that it only starts 
-		// at 64. So a lot of the items is apparently never used. Probably 
-		// related to the data structure I guess.
-		let cells = [...indexFile.flat()].filter(x => x.length);
-		let all = [];
-		for (let cell of cells) {
-			all.push(...cell);
-		}
-		let types = {};
-		for (let item of all) {
-			types[hex(item.type)] = true;
-		}
-		console.log(...Object.keys(types).map(x => x.slice(2)));
-		// let coords = cells.map(cell => [cell.x, cell.z]);
-		// console.log(Math.max(...coords.map(x => x[0])));
-		// console.log(Math.max(...coords.map(x => x[1])));
-		// let tract = indexFile.columns[64][64];
-		// console.log(tract.map(x => ({
-		// 	"mem": hex(x.mem),
-		// 	"type": hex(x.type)
-		// })));
-
-	});
-
-});
-
 describe('A terrain map', function() {
 
 	it('should read the terrain correctly', function() {
