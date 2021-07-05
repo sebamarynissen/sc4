@@ -6,7 +6,7 @@ const path = require('path');
 const { Savegame, DBPF } = require('sc4');
 const FileType = require('../lib/file-types.js');
 const Pipe = require('../lib/pipe.js');
-const { getCityPath } = require('../lib/util.js');
+const { chunk, getCityPath } = require('../lib/util.js');
 
 describe('The pipes subfile', function() {
 
@@ -26,11 +26,20 @@ describe('The pipes subfile', function() {
 
 	it('generates a pipe network', async function() {
 
-		let file = path.resolve(__dirname, 'files/City - Single Pipe.sc4');
+		// let file = path.resolve(__dirname, 'files/City - Single Pipe.sc4');
+		// let file = path.resolve(__dirname, 'files/City - Pipes.sc4');
+		// let file = getCityPath('Piped');
+		let file = getCityPath('New Delphina', 'New Delphina');
 		let buffer = fs.readFileSync(file);
 		let dbpf = new Savegame(buffer);
 		let { pipes, itemIndex } = dbpf;
+		let entry = dbpf.plumbingSimulator;
+		console.table([entry.unknown]);
+
+		return;
+
 		let [original] = pipes;
+
 		pipes.length = 0;
 
 		const float = x => {
@@ -38,6 +47,8 @@ describe('The pipes subfile', function() {
 			arr[0] = x;
 			return arr[0];
 		};
+
+		let grid = dbpf.getSimGrid(FileType.SimGridUint8, 0x49d5bb8c);
 
 		// Clear all pipes so we can generate new ones.
 		// pipes.length = 0;
