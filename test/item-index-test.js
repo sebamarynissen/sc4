@@ -42,7 +42,7 @@ describe('An item index subfile', function() {
 
 	});
 
-	it.only('rebuilds the index from a subfile', function() {
+	it('rebuilds the index from a subfile', function() {
 
 		const type = 0xabcd;
 		let index = new ItemIndex().fill();
@@ -70,7 +70,7 @@ describe('An item index subfile', function() {
 		}
 
 		// Rebuild the index. The item should still only be present once.
-		index.rebuild();
+		index.rebuild(arr);
 		for (let x = 0x40; x <= 0x42; x++) {
 			for (let z = 0x44; z <= 0x45; z++) {
 				let cell = index[x][z];
