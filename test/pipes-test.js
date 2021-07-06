@@ -49,12 +49,11 @@ describe('The pipes subfile', function() {
 		pipes.length = 0;
 		sim.clear();
 
-		let a = 1;
-		let b = 1;
+		let a = 3;
 		let mem = 10;
 		let h = 270;
-		for (let j = b; j <= b; j++) {
-			for (let i = a; i <= a+20; i++) {
+		for (let j = 6; j < 64; j += 13) {
+			for (let i = a; i < 61; i++) {
 
 				// Calculate the metric x and z positions.
 				let x = 16*i;
@@ -135,6 +134,15 @@ describe('The pipes subfile', function() {
 				pipe.eastConnection = 0x02;
 				pipe.westConnection = 0x02;
 
+				// Based on the connections, determine what value to set in 
+				// the plumbing simulator.
+				let base = 0b10000;
+				if (pipe.westConnection) base ^= 0b0001;
+				if (pipe.eastConnection) base ^= 0b0100;
+				if (pipe.northConnection) base ^= 0b0010;
+				if (pipe.southConnection) base ^= 0b1000;
+				sim.cells[j][i] = base;
+
 				// At last insert the pipe.
 				pipes.push(pipe);
 				sim.pipes.push(new Pointer(pipe));
@@ -146,6 +154,7 @@ describe('The pipes subfile', function() {
 		// console.table(pipes, getKeys(pipes));
 		// console.table(pipes[0].vertices);
 		// console.table(pipes[0].sideTextures[4]);
+		sim.revision++;
 		dbpf.itemIndex.rebuild(pipes);
 		dbpf.COMSerializerFile.set(FileType.PipeFile, pipes.length);
 		await dbpf.save(getCityPath('Pipes'));
@@ -154,11 +163,12 @@ describe('The pipes subfile', function() {
 
 	it.only('plays with some values', async function() {
 
-		let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
-		// let dbpf = this.open(getCityPath('Pipes'));
+		// let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
+		let dbpf = this.open(getCityPath('Piped'));
 		// let dbpf = this.open(getCityPath('New Sebastia', 'New Delphina'));
 		let { pipes } = dbpf;
-		console.table(pipes[0].sideTextures[1]);
+		// console.table(pipes[0].sideTextures[1]);
+		// console.log(dbpf.plumbingSimulator.cells);
 		// console.table(pipes, getKeys(dbpf.pipes));
 		// console.table(pipes[0].vertices);
 		// console.table(pipes[0].sideTextures[4]);
