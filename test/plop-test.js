@@ -15,6 +15,7 @@ const FileIndex = require('../lib/file-index.js');
 const Savegame = require('../lib/savegame');
 const Lot = require('../lib/lot');
 const Building = require('../lib/building');
+const Pointer = require('../lib/pointer.js');
 const skyline = require('../lib/skyline.js');
 const HOME = process.env.HOMEPATH;
 const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
@@ -90,10 +91,7 @@ describe('A city manager', function() {
 		let dev = dbpf.zoneDeveloperFile;
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
-				dev.cells[x][z] = {
-					"mem": lot.mem,
-					"type": FileType.LotFile
-				};
+				dev.cells[x][z] = new Pointer(lot);
 			}
 		}
 
@@ -105,17 +103,11 @@ describe('A city manager', function() {
 		building.minX += 2*16;
 		building.maxX += 2*16;
 		buildings.push(building);
-		index[64][64].push({
-			"mem": building.mem,
-			"type": FileType.BuildingFile
-		});
+		index[64][64].push(new Pointer(building));
 
 		// Add the building to the lot developer.
 		dev = dbpf.lotDeveloperFile;
-		dev.buildings.push({
-			"mem": building.mem,
-			"type": FileType.BuildingFile
-		});
+		dev.buildings.push(new Pointer(building));
 
 		// Now add the texture as well.
 		let txs = dbpf.baseTextureFile;
@@ -134,10 +126,7 @@ describe('A city manager', function() {
 		txs.push(tx);
 
 		// Add to the item index.
-		index[64][64].push({
-			"mem": tx.mem,
-			"type": FileType.BaseTextureFile
-		});
+		index[64][64].push(new Pointer(tx));
 
 		// Now update the com serializer as well.
 		let com = dbpf.COMSerializerFile;
@@ -202,10 +191,7 @@ describe('A city manager', function() {
 				let zz = 64 + Math.floor(clone.z / 64);
 
 				floraFile.push(clone);
-				itemIndexFile[xx][zz].push({
-					"mem": clone.mem,
-					"type": clone.type
-				});
+				itemIndexFile[xx][zz].push(new Pointer(clone));
 
 			}
 		}
@@ -249,10 +235,7 @@ describe('A city manager', function() {
 				let zz = 64 + Math.floor(tree.z / 64);
 				tree.xMinTract = tree.xMaxTract = xx;
 				tree.zMinTract = tree.zMaxTract = zz;
-				itemIndexFile[xx][zz].push({
-					"mem": tree.mem,
-					"type": FileType.FloraFile
-				});
+				itemIndexFile[xx][zz].push(new Pointer(tree));
 			}
 		}
 

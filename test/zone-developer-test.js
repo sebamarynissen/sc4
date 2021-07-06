@@ -22,7 +22,8 @@ describe('The ZoneDeveloper Subfile', function() {
 			expect(column).to.have.length(64);
 			for (let cell of column) {
 				if (cell) {
-					expect(cell).to.have.property('mem');
+					expect(+cell).to.be.above(0);
+					expect(cell).to.have.property('address');
 					expect(cell).to.have.property('type');
 				}
 			}
