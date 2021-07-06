@@ -14,7 +14,7 @@ describe('The LotDeveloper Subfile', function() {
 		let file = path.resolve(__dirname, 'files/city - RCI.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let buildings = dbpf.buildingFile.buildings;
+		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
 		let check = entry.decompress();
 		let dev = entry.read();
@@ -45,7 +45,7 @@ describe('The LotDeveloper Subfile', function() {
 		let file = path.resolve(__dirname, 'files/City - Medium.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let buildings = dbpf.buildingFile.buildings;
+		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
 		let check = entry.decompress();
 		let dev = entry.read();
@@ -62,7 +62,7 @@ describe('The LotDeveloper Subfile', function() {
 		let file = path.resolve(__dirname, 'files/city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let buildings = dbpf.buildingFile.buildings;
+		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
 		let check = entry.decompress();
 		let dev = entry.read();
