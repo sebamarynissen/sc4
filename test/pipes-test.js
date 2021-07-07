@@ -173,7 +173,7 @@ describe('The pipes subfile', function() {
 			if (pipe.orientation === 1) {
 				pipe.matrix.ex = [0, 0, 1];
 				pipe.matrix.ez = [-1, 0, 0];
-			} else if (pipe.orientation) {
+			} else if (pipe.orientation === 2) {
 				pipe.matrix.ex = [-1, 0, 0];
 				pipe.matrix.ez = [0, 0, -1];
 			} else if (pipe.orientation === 3) {
@@ -190,18 +190,23 @@ describe('The pipes subfile', function() {
 
 		}
 
-		// Determine the rows where we have to draw the pipes.
+		// Determine the rows where we have to draw the pipes. Note that if 
+		// the last row is too far form the edge, we'll insert a new one 
+		// manually.
 		const size = 64;
 		let rows = [];
-		for (let j = 7; j < size; j += 13) {
+		for (let j = 6; j < size; j += 13) {
 			rows.push(j);
+		}
+		if (size - rows[rows.length-1] > 6) {
+			rows.push(size-2);
 		}
 
 		// Draw the horizontal lines now.
-		const vertical = 5;
+		const vertical = size/2-1;
 		rows.forEach(j => {
 			const a = 3;
-			const b = size-a;
+			const b = size-a-1;
 			for (let i = a; i <= b; i++) {
 				if (i === vertical) continue;
 				let id = i === a ? 20 : (i === b ? 17 : 21);
