@@ -65,6 +65,58 @@ describe('The pipes subfile', function() {
 			[SOUTH, [1, 1, 0, 1]],
 		]);
 
+		// The function that generates the coordinates of all tiles and 
+		// connection identifier on that tile. Note that we return a sparse 
+		// array, not a full map. That's for later on!
+		function generateLayout(size) {
+			
+			// 1. Determine the rows where we have to draw the pipes. If the 
+			// last row is too far from the edge, we'll insert a new one 
+			// manually where the intermediate distance will hence be less 
+			// than optimal - but required anyway to cover the full city!
+			const range = 6;
+			let rows = [];
+			let last;
+			for (let j = range, dj = 2*range+1; j < size; j += dj) {
+				rows.push(last = j);
+			}
+			if (size - last > range) rows.push(size-2);
+
+			// 2. Insert the horizontal tiles. This has id 0x15, but we'll 
+			// need to take into account the end pieces as well of course.
+			const vertical = size/2-1;
+			let out = [];
+			for (let j of rows) {
+				const a = Math.floor(range/2);
+				const b = size-a-1;
+				for (let i = a; i <= b; i++) {
+
+					// Skip the crossing tiles for now, we'll handle those 
+					// later on.
+					if (i === vertical) continue;
+					let id = i === a ? 0x14 : (i === b ? 0x11 : 0x15);
+					out.push([i, j, id]);
+				}
+			}
+
+			// 3. Draw the vertical lines, *including* the crossings.
+			const [first] = rows;
+			for (let j = first; j <= last; j++) {
+				let id = 0b10000;
+				if (j !== first) id ^= NORTH;
+				if (j !== last) id ^= SOUTH;
+				if (rows.includes(j)) {
+					id ^= EAST;
+					id ^= WEST;
+				}
+				out.push([vertical, j, id]);
+			}
+
+			// x. We're done, return all the tiles.
+			return out;
+
+		}
+
 		// The function we use for creating a pipe on tile (i, j) with the 
 		// connections given as the byte as it appears in the plumbing 
 		// simulator. Note that this is not sufficient for diagonal tiles, but 
@@ -204,50 +256,16 @@ describe('The pipes subfile', function() {
 
 		}
 
-		// Determine the rows where we have to draw the pipes. Note that if 
-		// the last row is too far form the edge, we'll insert a new one 
-		// manually.
-		const size = sim.xSize;
-		let rows = [];
-		for (let j = 6; j < size; j += 13) {
-			rows.push(j);
-		}
-		if (size - rows[rows.length-1] > 6) {
-			rows.push(size-2);
-		}
-
-		// Draw the horizontal lines now.
-		const vertical = size/2-1;
-		rows.forEach(j => {
-			const a = 3;
-			const b = size-a-1;
-			for (let i = a; i <= b; i++) {
-				if (i === vertical) continue;
-				let id = i === a ? 20 : (i === b ? 17 : 21);
-				sim.cells[j][i] = id;
-				let pipe = createTile(i, j, id);
-				pipes.push(pipe);
-			}
-		});
-
-		// Draw the vertical line.
-		let [a] = rows;
-		let b = rows[rows.length-1];
-		for (let j = a; j <= b; j++) {
-			let id = 0b10000;
-			if (j !== a) id ^= NORTH;
-			if (j !== b) id ^= SOUTH;
-			if (rows.includes(j)) {
-				id ^= EAST;
-				id ^= WEST;
-			}
-			sim.cells[j][vertical] = id;
-			let pipe = createTile(vertical, j, id);
+		// First generate the ideal layout, which returns a sparse array of 
+		// all cells. Then well loop every cell, insert it into the plumbing 
+		// simulator and create a pipe tile for it as well.
+		let layout = generateLayout(sim.xSize);
+		for (let [i, j, id] of layout) {
+			sim.cells[j][i] = id;
+			let pipe = createTile(i, j, id);
 			pipes.push(pipe);
+			sim.pipes.push(new Pointer(pipe));
 		}
-
-		// Put the pipes in the plumbing simulator.
-		pipes.forEach(pipe => sim.pipes.push(new Pointer(pipe)));
 
 		// Now rebuild the item index and store in the com serializer.
 		// console.table(pipes, getKeys(pipes));
