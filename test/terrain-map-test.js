@@ -76,4 +76,15 @@ describe('The terrain map', function() {
 
 	});
 
+	it('clones a terrain map', function() {
+
+		let map = new TerrainMap(1);
+		map[0][0] = 0.5;
+		let clone = map.clone();
+		expect(clone[0][0]).to.equal(0.5);
+		clone[0][0] = Math.E;
+		expect(map[0][0]).to.equal(0.5);
+
+	});
+
 });
