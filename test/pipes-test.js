@@ -27,7 +27,7 @@ describe('The pipes subfile', function() {
 		});
 	}
 
-	it.only('is parsed correctly & serialized correctly', function() {
+	it('is parsed correctly & serialized correctly', function() {
 
 		let file = path.resolve(__dirname, 'files/City - Pipes.sc4');
 		let buffer = fs.readFileSync(file);
@@ -44,8 +44,11 @@ describe('The pipes subfile', function() {
 	it.only('generates a straight section of pipes', async function() {
 		
 		// Open the city and then clear the current pipes.
-		let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
-		let { pipes, plumbingSimulator: sim } = dbpf;
+		// const out = getCityPath('Pipes');
+		const out = getCityPath('Hilly Skyline');
+		// let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
+		let dbpf = this.open(getTestFile('City - Hilly skyline.sc4'));
+		let { pipes, plumbingSimulator: sim, terrain } = dbpf;
 		pipes.length = 0;
 		sim.clear();
 
@@ -79,7 +82,6 @@ describe('The pipes subfile', function() {
 			let pipe = new Pipe({
 				mem: mem++,
 				x: x+8,
-				y: h-1.4,
 				z: z+8,
 				xMin: x,
 				xMax: x+16,
@@ -92,8 +94,17 @@ describe('The pipes subfile', function() {
 			});
 			pipe.xMinTract = pipe.xMaxTract = 0x40 + Math.floor(i/4);
 			pipe.zMinTract = pipe.zMaxTract = 0x40 + Math.floor(j/4);
-			pipe.yNW = pipe.yNE = pipe.ySW = pipe.ySE = h;
-			pipe.yModel = pipe.y;
+			pipe.yModel = pipe.y = terrain.query(pipe.x, pipe.z)-1.4;
+
+			// Set the heights at the corner of the terrain.
+			let corners = [['NW', 'NE'], ['SW', 'SE']];
+			for (let j = 0; j < 2; j++) {
+				for (let i = 0; i < 2; i++) {
+					let xx = x+16*i;
+					let zz = z+16*i;
+					pipe['y'+corners[j][i]] = terrain.query(xx, zz);
+				}
+			}
 
 			// Set the bottom vertices & bottom texture.
 			for (let i = 0; i < 2; i++) {
@@ -101,15 +112,17 @@ describe('The pipes subfile', function() {
 					let index = 2*i+j;
 					let v = pipe.vertices[index];
 					v.x = x+16*i;
-					v.y = h-10.2;
+					// v.y = h-10.2;
 					v.z = z+16*(i !== j);
 					v.u = i;
 					v.v = +(i !== j);
+					v.y = terrain.query(v.x, v.z)-10.2;
 				}
 			}
 			pipe.sideTextures.bottom = pipe.vertices.map(vertex => {
 				let fresh = Object.assign(new Vertex(), vertex);
 				fresh.color = new Color(0xff, 0xff, 0xff, 0x80);
+				fresh.y = terrain.query(fresh.x, fresh.z)-10.2;
 				return fresh;
 			});
 
@@ -140,11 +153,12 @@ describe('The pipes subfile', function() {
 						let vertex = new Vertex();
 						let point = line[i];
 						vertex.x = 16*point[0];
-						vertex.y = h - (i !== j)*10.2;
 						vertex.z = 16*point[1];
 						vertex.u = i;
 						vertex.v = i !== j ? 0.6375007629394531 : 0;
 						vertex.color = new Color(0xff, 0xff, 0xff, 0x80);
+						let h = terrain.query(vertex.x, vertex.z);
+						vertex.y = h - (i !== j)*10.2;
 						pipe.sideTextures[0].push(vertex);
 					}
 				}
@@ -193,7 +207,7 @@ describe('The pipes subfile', function() {
 		// Determine the rows where we have to draw the pipes. Note that if 
 		// the last row is too far form the edge, we'll insert a new one 
 		// manually.
-		const size = 64;
+		const size = sim.xSize;
 		let rows = [];
 		for (let j = 6; j < size; j += 13) {
 			rows.push(j);
@@ -242,16 +256,22 @@ describe('The pipes subfile', function() {
 		sim.revision++;
 		dbpf.itemIndex.rebuild(pipes);
 		dbpf.COMSerializerFile.set(FileType.PipeFile, pipes.length);
-		await dbpf.save(getCityPath('Pipes'));
+		await dbpf.save(out);
 
 	});
 
-	it.only('plays with some values', async function() {
+	it.skip('plays with some values', async function() {
 
 		// let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
 		let dbpf = this.open(getCityPath('Piped'));
 		// let dbpf = this.open(getCityPath('New Sebastia', 'New Delphina'));
 		let { pipes } = dbpf;
+		let pipe = pipes.find(pipe => pipe.xTile === 8);
+		console.table([pipe], Object.keys(pipe).filter(key => key.startsWith('y')));
+		console.table(pipe.vertices);
+		console.log(pipe.matrix3);
+		console.log(pipe.matrix);
+		console.table(pipe.sideTextures.bottom);
 		// console.table(pipes[0].sideTextures[1]);
 		// console.log(dbpf.plumbingSimulator.cells);
 		// console.table(pipes, getKeys(dbpf.pipes));
