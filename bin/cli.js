@@ -16,6 +16,7 @@ const FileType = require('../lib/file-types');
 const pkg = require('../package.json');
 const { ZoneType } = require('../lib/enums');
 const { hex } = require('../lib/util');
+const PipeManager = require('../lib/pipe-manager.js');
 
 const isMain = require.main === module;
 
@@ -827,6 +828,103 @@ function factory(program) {
 			}
 			opts.info(`Saving to ${ output }`);
 			await dbpf.save({ file: output });
+
+		});
+
+	// Command for generating the optimal pipe layout in a city.
+	program
+		.command('pipes <city>')
+		.option('--force', 'Force override the city')
+		.description('Create the optimal pipe layout in the given city')
+		.action(async function(city) {
+
+			// Apparently if someone accidentally uses the command wrong and 
+			// types "--force city-name", things go terribly wrong. The 
+			// command starts executing and creates a new readable stream, but 
+			// apparently on the next tick it decides that the syntax was 
+			// incorrect and just force terminates the program, resulting in 
+			// an empty file that was force-overwritten. That's a BIG thing, 
+			// but we can solve this by only starting the command on the next 
+			// tick, which can be force by Promise.resolve().
+			await Promise.resolve();
+
+			// Give ourselves our own options hash that we'll populate along 
+			// the way and which will be passed to the api.
+			const opts = baseOptions();
+
+			let dir = this.cwd;
+			let file = opts.dbpf = path.resolve(dir, city);
+			let ext = path.extname(file);
+			if (ext.toLowerCase() !== '.sc4' || !fs.existsSync(file)) {
+				return err(`${file} is not a SimCity 4 savegame!`);
+			}
+
+			// Fire up inquirer for an interactive interface, in case we're 
+			// not static.
+			if (this.parent.interactive) {
+				let answers = await inquirer.prompt([{
+					name: 'force',
+					type: 'confirm',
+					message: [
+						`Do you want to override "${path.basename(city)}"?`,
+						chalk.yellow(`Don't do this if you have no backup yet!`.toUpperCase())
+					].join(' '),
+					default: false
+				}, {
+					name: 'output',
+					type: 'input',
+					message: [
+						`Where should I save your city?`,
+						`Path is relative to "${dir}".`
+					].join(' '),
+					default: 'PIPED-'+path.basename(city),
+					when(answers) {
+						return !answers.force;
+					},
+					validate(answer) {
+						return Boolean(answer.trim());
+					}
+				}, {
+					name: 'ok',
+					type: 'confirm',
+					default: true,
+					message(answers) {
+						let out = path.resolve(dir, answers.output);
+						return `Saving to "${out}", is that ok?`;
+					},
+					when(answers) {
+						return answers.hasOwnProperty('output');
+					}
+				}]);
+
+				// Not ok? Exit.
+				if (!answers.force && !answers.ok) return;
+
+				// Parse answers.
+				if (answers.force) {
+					this.force = true;
+				} else {
+					this.force = false;
+					this.output = answers.output;
+				}
+
+			}
+
+			// Parse the output path.
+			if (!this.force) {
+				if (!this.output) {
+					this.output = 'PIPED-'+path.basename(city);
+				}
+				this.output = path.resolve(dir, this.output);
+			} else {
+				this.output = file;
+			}
+
+			let buffer = fs.readFileSync(opts.dbpf);
+			let dbpf = new Savegame(buffer);
+			let mgr = new PipeManager(dbpf);
+			mgr.applyOptimalLayout();
+			await dbpf.save(this.output);
 
 		});
 
