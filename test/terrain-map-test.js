@@ -34,7 +34,7 @@ describe('The terrain map', function() {
 		buff.writeUint16LE(0, 2);
 		let terrain = new TerrainMap();
 		terrain.parse(buff);
-		terrain[1][0] = 10;
+		terrain[0][1] = 10;
 
 		let out = terrain.toBuffer();
 		expect(out.readFloatLE(6)).to.equal(10);
@@ -44,7 +44,7 @@ describe('The terrain map', function() {
 	it('performs a terrain query', function() {
 
 		let map = new TerrainMap(2);
-		map[1][0] = 5;
+		map[0][1] = 5;
 
 		// Tile [0, 0]
 		expect(map.query(2, 3)).to.equal(0);
