@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 "use strict";
+require('../lib/version-check.js');
 const stream = require('stream');
 const chalk = require('chalk');
 const path = require('path');

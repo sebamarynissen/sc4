@@ -49,6 +49,7 @@
     "ora": "^3.4.0",
     "p-queue": "^6.3.0",
     "qfs-compression": "^0.1.0",
+    "semver": "^7.3.5",
     "smart-buffer": "^4.1.0",
     "util-deprecate": "^1.0.2",
     "xml2js": "^0.4.23"
