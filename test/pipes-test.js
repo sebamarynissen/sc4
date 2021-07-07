@@ -42,7 +42,7 @@ describe('The pipes subfile', function() {
 
 	});
 
-	it.only('generates a straight section of pipes', async function() {
+	it.skip('generates a straight section of pipes', async function() {
 		
 		// Open the city and then clear the current pipes.
 		// const out = getCityPath('Pipes');
