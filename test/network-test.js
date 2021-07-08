@@ -22,12 +22,18 @@ describe('A network tile', function() {
 
 	it.only('plays with values', async function() {
 
-		// let file = getCityPath('Network');
+		let file = getCityPath('Network');
 		// let file = getCityPath('Wayside', 'New Delphina');
-		let file = getCityPath('New Delphina', 'New Delphina');
+		// let file = getCityPath('New Delphina', 'New Delphina');
+		// let file = getCityPath('New Sebastia', 'New Delphina');
 		let buffer = fs.readFileSync(file);
 		let dbpf = new Savegame(buffer);
 		let index = dbpf.networkIndex;
+		for (let tile of dbpf.network) {
+			if (tile.mem === 16347672) {
+				console.log(tile.xMin/16, tile.zMin/16);
+			}
+		}
 
 	});
 
