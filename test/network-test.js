@@ -20,7 +20,7 @@ describe('A network tile', function() {
 
 	});
 
-	it('plays with values', async function() {
+	it.skip('plays with values', async function() {
 
 		let file = getCityPath('Network');
 		// let file = getCityPath('Wayside', 'New Delphina');
@@ -37,21 +37,35 @@ describe('A network tile', function() {
 			map.set(tile.mem, tile);
 		}
 
-		let blocks = dbpf.networkIndex.intersections;
-		blocks.sort((a, b) => {
+		let tiles = dbpf.networkIndex.tiles;
+		tiles = tiles.filter(x => map.get(+x.pointer));
+		tiles.sort((a, b) => {
 			let at = map.get(+a.pointer);
 			let bt = map.get(+b.pointer);
 			return at.x - bt.x || at.z - bt.z;
 		});
-		for (let block of dbpf.networkIndex.intersections) {
+		for (let block of tiles) {
 			let tile = map.get(+block.pointer);
 			let x = tile.x/16-0.5;
 			let z = tile.z/16-0.5;
-			const chalk = require('chalk');
-			// console.log(chalk.yellow(String(x).padStart(3, ' ')), chalk.yellow(String(z).padStart(3, ' '))+' ', block.buffer.toString('hex').chunk([2, 8, 8, 2, 8, 8, 8, 8, 2, 8, 8, 8, 8, 2, 8, 8, 8, 8, 2]));
-			console.log(x, z);
-			console.table([block.west, block.north, block.east, block.south]);
+			console.log(x, z, block.reps);
 		}
+
+	});
+
+});
+
+describe('The network index', function() {
+
+	it('is parsed and serialized correctly', function() {
+
+		let file = getTestFile('City - Large Developed.sc4');
+		let buffer = fs.readFileSync(file);
+		let dbpf = new Savegame(buffer);
+		let { networkIndex } = dbpf;
+		let raw = dbpf.find(networkIndex.type).decompress();
+		let out = networkIndex.toBuffer();
+		expect(Buffer.compare(out, raw)).to.equal(0);
 
 	});
 
