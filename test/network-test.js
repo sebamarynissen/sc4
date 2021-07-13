@@ -55,7 +55,7 @@ describe('A network tile', function() {
 
 	});
 
-	it.only('reads the model network', async function() {
+	it('reads the model network', async function() {
 
 		let file = getCityPath('Network');
 		// let file = getCityPath('New Delphina', 'New Delphina');
@@ -89,8 +89,10 @@ describe('A network tile', function() {
 			[0x00005700, 0b1110, 0b1101, 0b1011, 0b0111],
 		]);
 		const orientations = createTable([
-			[3, 0b1010],
-			[0, 0b0101],
+			[0, 0b0101, 0b0001, 0b0011, 0b0111, 0b0000, 0b1111],
+			[1, 0b1000, 0b1001, 0b1011],
+			[2, 0b0100, 0b1100, 0b1101],
+			[3, 0b1010, 0b0010, 0b0110, 0b1110],
 		]);
 
 		// Helper function for creating a table that maps identifiers to other 
@@ -139,12 +141,19 @@ describe('A network tile', function() {
 			tile.eastConnection = (id & 0b0010) ? 0x02 : 0x00;
 			tile.southConnection = (id & 0b0001) ? 0x02 : 0x00;
 
-			// Set the texture vertices.
+			// Set the texture vertices. The uv coordinates here depend on the 
+			// orientation.
 			let color = new Color(0xde, 0xdb, 0xdd, 0xff);
-			Object.assign(tile.vertices[0], { x: x, y, z: z, u: 0, v: 0, color });
-			Object.assign(tile.vertices[1], { x: x, y, z: z+16, u: 0, v: 1, color });
-			Object.assign(tile.vertices[2], { x: x+16, y, z: z+16, u: 1, v: 1, color });
-			Object.assign(tile.vertices[3], { x: x+16, y, z: z, u: 1, v: 0, color });
+			let uv = [
+				[[0, 0], [0, 1], [1, 1], [1, 0]],
+				[[0, 1], [1, 1], [1, 0], [0, 0]],
+				[[1, 1], [1, 0], [0, 0], [0, 1]],
+				[[1, 0], [0, 0], [0, 1], [1, 1]],
+			][tile.orientation].map(([u, v]) => ({ u, v, color }));
+			Object.assign(tile.vertices[0], { x: x, y, z: z, ...uv[0] });
+			Object.assign(tile.vertices[1], { x: x, y, z: z+16, ...uv[1] });
+			Object.assign(tile.vertices[2], { x: x+16, y, z: z+16, ...uv[2] });
+			Object.assign(tile.vertices[3], { x: x+16, y, z: z, ...uv[3] });
 
 			// Create a network index tile for it.
 			let indexTile = networkIndex.tile();
@@ -173,10 +182,12 @@ describe('A network tile', function() {
 		// Construct the streetmap.
 		let streetmap = Array(64).fill().map(() => new Uint8Array(64).fill(0));
 		for (let i = 2; i <= 8; i++) {
-			streetmap[i][5] ^= 0b1010;
+			if (i > 2) streetmap[i][8] ^= 0b1000;
+			if (i < 8) streetmap[i][8] ^= 0b0010;
 		}
 		for (let i = 2; i <= 8; i++) {
-			streetmap[5][i] ^= 0b0101;
+			if (i > 2) streetmap[2][i] ^= 0b0100;
+			if (i < 8) streetmap[2][i] ^= 0b0001;
 		}
 
 		// And draw it.
