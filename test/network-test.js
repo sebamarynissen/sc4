@@ -68,7 +68,15 @@ describe('A network tile', function() {
 
 	});
 
-	it.only('draws roads', async function() {
+	it('checks the network index', function() {
+
+		let source = getCityPath('Road Construction');
+		let dbpf = new Savegame(source);
+		console.log(dbpf.networkIndex);
+
+	});
+
+	it.skip('draws roads', async function() {
 
 		let source = getTestFile('City - Road Construction.sc4');
 		let out = getCityPath('Road Construction');
@@ -182,12 +190,12 @@ describe('A network tile', function() {
 		// Construct the streetmap.
 		let streetmap = Array(64).fill().map(() => new Uint8Array(64).fill(0));
 		for (let i = 2; i <= 8; i++) {
-			if (i > 2) streetmap[i][8] ^= 0b1000;
-			if (i < 8) streetmap[i][8] ^= 0b0010;
+			if (i > 2) streetmap[i][5] ^= 0b1000;
+			if (i < 8) streetmap[i][5] ^= 0b0010;
 		}
 		for (let i = 2; i <= 8; i++) {
-			if (i > 2) streetmap[2][i] ^= 0b0100;
-			if (i < 8) streetmap[2][i] ^= 0b0001;
+			if (i > 2) streetmap[5][i] ^= 0b0100;
+			if (i < 8) streetmap[5][i] ^= 0b0001;
 		}
 
 		// And draw it.

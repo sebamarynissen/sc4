@@ -8,10 +8,11 @@ const chalk = require('chalk');
 const api = require('../lib/api.js');
 const Stream = require('../lib/stream');
 const crc32 = require('../lib/crc');
-const { hex, chunk, split } = require('../lib/util');
+const { hex, chunk, split, getCityPath } = require('../lib/util');
 const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
 const CityManager = require('../lib/city-manager.js');
 const FileIndex = require('../lib/file-index.js');
+const LotIndex = require('../lib/lot-index.js');
 const Savegame = require('../lib/savegame');
 const Lot = require('../lib/lot');
 const Building = require('../lib/building');
@@ -362,6 +363,126 @@ describe('A city manager', function() {
 		// Save the city.
 		let out = path.join(REGION, 'City - Hilly skyline.sc4');
 		await city.save({ file: out });
+
+	});
+
+	it.skip('creates a suburb', async function() {
+
+		this.timeout(0);
+		let file = 'c:/users/sebam/desktop/City - Suburb.sc4';
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let index = new FileIndex({
+			files: [1].map(nr => path.join(c, `SimCity_${nr}.dat`)),
+		});
+		await index.build();
+		let city = new CityManager({ index });
+		city.load(file);
+
+		let lots = new LotIndex(city.index)
+			.height
+			.query({ occupantGroups: [0x11020] })
+			.filter(entry => {
+				let { x, z } = entry.size;
+				return x === 1 && z === 3;
+			})
+			.filter(entry => entry.growthStage < 4)
+			.filter(entry => entry.occupantGroups.includes(0x2001));
+
+		console.log(lots.length);
+
+		function row(z = 0, orientation = 0) {
+			for (let i = 0; i < 2*128; i++) {
+				if (i % 13 === 7) continue;
+				let index = Math.floor(lots.length * Math.random());
+				let entry = lots[index];
+				city.grow({
+					lot: entry.lot,
+					building: entry.building,
+					x: i,
+					z,
+					orientation,
+				});
+			}
+		}
+		let dz = 7;
+		for (let i = 2; i <= 2*128-dz; i += dz) {
+			row(i, 0);
+			row(i+3, 2);
+		}
+
+		await city.save({ file: getCityPath('Suburb', 'Suburb') });
+
+	});
+
+	it('creates a Mattb suburb', async function() {
+
+		this.timeout(0);
+		let file = 'c:/users/sebam/desktop/City - Mattb.sc4';
+		let c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+		let index = new FileIndex({
+			files: [1, 2, 3, 4, 5].map(nr => path.join(c, `SimCity_${nr}.dat`)),
+		});
+		await index.build();
+		let city = new CityManager({ index });
+		city.load(file);
+
+		let set = new Set();
+		let lots = new LotIndex(city.index).height
+			.filter(lot => {
+				let building = lot.buildingExemplar;
+				let name = building.table['Exemplar Name'].value;
+				if (!/^R\$\$[^$]/.test(name)) return false;
+				if (name === 'R$$12x14_123HouStdHouse9_00D1') {
+					// console.log(building);
+					console.log(lot.lot.read().table['Exemplar Name'].value);
+				}
+				set.add(name);
+				return true;
+			});
+
+		console.log(set);
+		console.log(set.size);
+
+		// let lots = new LotIndex(city.index)
+		// 	.height
+		// 	.query({
+		// 		// occupantGroups: [0x11020],
+		// 	})
+		// 	// .filter(entry => entry.occupantGroups.includes(0x2000))
+		// 	// .filter(entry => entry.zoneTypes.includes(0x01))
+		// 	.filter(entry => {
+		// 		return true;
+		// 		let [x, z] = entry.size;
+		// 		return x === 1 && z === 3;
+		// 	})
+		// 	.filter(entry => entry.growthStage < 4)
+		// 	.filter(entry => {
+		// 		let name = entry.buildingExemplar.table['Exemplar Name'].value;
+		// 		return /(Chi)|(NY)/.test(name);
+		// 	});
+		return;
+
+		function row(z = 0, orientation = 0) {
+			for (let i = 0; i < 128; i++) {
+				if (i % 13 === 7) continue;
+				if (Math.random() < 0.01) continue;
+				let index = Math.floor(lots.length * Math.random());
+				let { lot } = lots[index];
+				city.grow({
+					exemplar: lot,
+					x: i,
+					z,
+					orientation,
+				});
+			}
+		}
+		let dz = 7;
+		for (let i = 2; i <= 128-dz; i += dz) {
+			row(i, 0);
+			row(i+3, 2);
+		}
+
+		await city.save({ file: getCityPath('Suburb') });
 
 	});
 
