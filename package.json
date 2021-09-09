@@ -4,8 +4,7 @@
   "description": "A command line utility for automating SimCity 4 modding tasks & modifying savegames",
   "main": "lib/index.js",
   "exports": {
-    ".": "./lib/index.js",
-    "./*": "./*"
+    ".": "./lib/index.js"
   },
   "scripts": {
     "test": "mocha",

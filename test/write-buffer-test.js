@@ -1,7 +1,7 @@
 // # write-stream-test.js
 'use strict';
 const { expect } = require('chai');
-const WriteBuffer = require('sc4/lib/write-buffer.js');
+const WriteBuffer = require('../lib/write-buffer.js');
 
 describe('A WriteBuffer', function() {
 
