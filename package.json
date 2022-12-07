@@ -35,7 +35,8 @@
     "hilbert-curve": "^2.0.5",
     "mocha": "^6.2.2",
     "string-argv": "^0.3.1",
-    "three": "^0.106.2"
+    "three": "^0.106.2",
+    "xml2js": "^0.4.23"
   },
   "dependencies": {
     "binary-search-bounds": "^2.0.4",
@@ -50,7 +51,6 @@
     "semver": "^7.3.5",
     "smart-buffer": "^4.1.0",
     "tar": "^6.1.8",
-    "util-deprecate": "^1.0.2",
-    "xml2js": "^0.4.23"
+    "util-deprecate": "^1.0.2"
   }
 }
