@@ -26,7 +26,7 @@
   },
   "files": [
     "bin",
-    "data",
+    "data/new-properties.json",
     "lib"
   ],
   "devDependencies": {
