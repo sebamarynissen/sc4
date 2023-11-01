@@ -24,7 +24,13 @@ Currently the following commands are included. Run `sc4 --help` to list all avai
  ```
  sc4 growify "City - City name.sc4"
  ```
- - `tileset [dir]` Loops all DBPF files in the given directory and sets the tilesets for each building as given in the options. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
+ -  `tileset [options] [dir]`      Set the tilesets for all buildings in the given directory. Use `--block` to remove the building from all tilesets and hence block its growth, or use `--chicago`, `--ny`, `--houston` or `--euro`
+ -  `backup [options]`             Backup a region or your entire plugins folder
+ -  `dump <city>`                  Give a human-readable representation of all lots in the city
+ -  `refs [options] <city>`        Finds internal memory references within a city
+ -  `pointer <city> <pointer>`     Finds the subfile entery addressed by the given pointer
+ -  `tracts [options] <city>`      Changes the active tilesets in the given city
+ -  `pipes [options] <city>`      Create the optimal pipe layout in the given city
 
 ## License
 
