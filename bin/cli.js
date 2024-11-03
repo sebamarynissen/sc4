@@ -8,8 +8,9 @@ const fs = require('fs');
 const ini = require('ini');
 const tar = require('tar');
 const ora = require('ora');
-const program = require('commander');
+const { program, Command } = require('commander');
 const inquirer = require('inquirer');
+const glob = require('glob');
 const DBPF = require('../lib/dbpf');
 const api = require('../lib/api.js');
 const Savegame = require('../lib/savegame');
@@ -18,6 +19,7 @@ const pkg = require('../package.json');
 const { ZoneType } = require('../lib/enums');
 const { hex } = require('../lib/util');
 const PipeManager = require('../lib/pipe-manager.js');
+const createMenuPatch = require('../lib/api/create-submenu-patch.js');
 
 const isMain = require.main === module;
 
@@ -27,10 +29,6 @@ const Style = {
 	"Houston": 0x00002002,
 	"Euro": 0x00002003
 };
-
-// Get a reference to commander's command class because we need to set the api 
-// & cwd on its prototype.
-const Command = program.Command;
 
 // Define getters for the api & cwd on the command's prototype which default 
 // to going back up to the main program.
@@ -438,6 +436,25 @@ function factory(program) {
 			return this.api.growify(opts);
 
 		});
+
+	program
+		.command('create-submenu-patch')
+		.argument('<menu>', 'The Button ID of the submenu, e.g. 0x83E040BB for highway signage.')
+		.argument('[files...]', 'The files to scan, given as a glob patterns. Defaults to *.{dat,sc4lot}.')
+		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
+		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
+		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
+		.action(async function(menu, files, options) {
+			let fullPaths = glob
+				.globSync(files)
+				.map(file => path.resolve(process.cwd(), file));
+			await createMenuPatch(+menu, fullPaths, {
+				save: true,
+				output: options.output,
+				instance: +options.instance || undefined,
+			});
+		});
+
 
 	// Some commands.
 	program
