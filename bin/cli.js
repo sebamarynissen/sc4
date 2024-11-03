@@ -83,6 +83,7 @@ function factory(program) {
 
 	program
 		.command('historical <city>')
+		.storeOptionsAsProperties()
 		.description('Make buildings within the given city historical')
 		.option('--force', 'Force override of the city')
 		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
@@ -210,6 +211,7 @@ function factory(program) {
 
 	program
 		.command('growify <city>')
+		.storeOptionsAsProperties()
 		.description('Convert plopped buildings into functional growables')
 		.option('--force', 'Force override of the city')
 		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
@@ -459,6 +461,7 @@ function factory(program) {
 	// Some commands.
 	program
 		.command('tileset [dir]')
+		.storeOptionsAsProperties()
 		.description('Set the tilesets for all buildings in the given directory')
 		.option('-b, --block', 'Block all buildings from growing')
 		.option('-C, --chicago', 'Set the Chicago tileset for all buildings')
@@ -561,6 +564,7 @@ function factory(program) {
 	// Backup command for backup a region or a plugins folder.
 	program
 		.command('backup')
+		.storeOptionsAsProperties()
 		.description('Backup a region or your entire plugins folder')
 		.option('-R, --region <name>', 'The name of the region to be backuped, or the path to the region\'s directory')
 		.option('-P, --plugins [dir]', 'Set this flag if you want to backup your plugins')
@@ -713,6 +717,7 @@ function factory(program) {
 	// Command for comparing
 	program
 		.command('dump <city>')
+		.storeOptionsAsProperties()
 		.description('Give a human-readable representation of all lots in the city')
 		.action(function(city) {
 
@@ -745,6 +750,7 @@ function factory(program) {
 	// Command for looking for refs.
 	program
 		.command('refs <city>')
+		.storeOptionsAsProperties()
 		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
 		.option('--address <ref>', 'A specific memory reference to look for')
 		.option('--types <type>', 'The Type IDs for which we need to look for references')
@@ -795,6 +801,7 @@ function factory(program) {
 
 	program
 		.command('pointer <city> <pointer>')
+		.storeOptionsAsProperties()
 		.description('Finds the subfile entery addressed by the given pointer')
 		.action(function(city, pointer) {
 			let dir = this.cwd;
@@ -809,6 +816,7 @@ function factory(program) {
 	// Command for switching the active tilesets in a city.
 	program
 		.command('tracts <city>')
+		.storeOptionsAsProperties()
 		.option('-t, --tilesets <tilesets>', 'The tileset identifiers, given as numbers')
 		.option('-y, --years <years>', 'The amount of years in the cycle')
 		.option('--force', 'Force override the city')
@@ -852,6 +860,7 @@ function factory(program) {
 	// Command for generating the optimal pipe layout in a city.
 	program
 		.command('pipes <city>')
+		.storeOptionsAsProperties()
 		.option('--force', 'Force override the city')
 		.description('Create the optimal pipe layout in the given city')
 		.action(async function(city) {
@@ -949,6 +958,7 @@ function factory(program) {
 	// Command for finding duplicate files in a plugin folder.
 	program
 		.command('duplicates <folder>')
+		.storeOptionsAsProperties()
 		.action(function(folder) {
 			api.duplicates({
 				...baseOptions(),
