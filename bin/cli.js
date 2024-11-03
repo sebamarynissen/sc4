@@ -448,7 +448,7 @@ function factory(program) {
 		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
 		.action(async function(menu, files, options) {
 			let fullPaths = glob
-				.globSync(files)
+				.globSync(files, { nodir: true })
 				.map(file => path.resolve(process.cwd(), file));
 			await createMenuPatch(+menu, fullPaths, {
 				save: true,
