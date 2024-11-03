@@ -447,6 +447,7 @@ function factory(program) {
 		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
 		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
 		.action(async function(menu, files, options) {
+			if (files.length === 0) files = ['*.{dat,sc4lot}'];
 			let fullPaths = glob
 				.globSync(files, { nodir: true })
 				.map(file => path.resolve(process.cwd(), file));
