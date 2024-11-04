@@ -1,5 +1,5 @@
 // # file-index-test.js
-"use strict";
+'use strict';
 const path = require('path');
 const { expect } = require('chai');
 const Index = require('../lib/file-index.js');
@@ -11,7 +11,7 @@ describe('The file index', function() {
 	it('should index all files in a directory', async function() {
 
 		let index = new Index(
-			path.resolve(__dirname, 'files/DarkNight_11KingStreetWest')	
+			path.resolve(__dirname, 'files/DarkNight_11KingStreetWest'),
 		);
 
 		// Build up the index. This is done asynchronously so that files can 
