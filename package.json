@@ -30,10 +30,12 @@
     "lib"
   ],
   "devDependencies": {
+    "@whisthub/eslint-config": "^3.0.0",
     "buffer": "^6.0.3",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "electron": "^13.1.5",
+    "eslint": "^8.57.1",
     "hilbert-curve": "^2.0.5",
     "mocha": "^6.2.2",
     "string-argv": "^0.3.1",
