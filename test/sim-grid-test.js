@@ -29,7 +29,7 @@ describe('A SimGridFile', function() {
 			FileType.SimGridUint16,
 			FileType.SimGridSint16,
 			FileType.SimGridUint32,
-			FileType.SimGridFloat32
+			FileType.SimGridFloat32,
 		];
 
 		for (let type of all) {
