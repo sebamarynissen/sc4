@@ -1,19 +1,16 @@
 'use strict';
+const path = require('node:path');
+const fs = require('node:fs');
 const chalk = require('chalk');
-const path = require('path');
-const fs = require('fs');
 const tar = require('tar');
 const ora = require('ora');
-const { Command } = require('commander');
+const { program: commander, Command } = require('commander');
 const inquirer = require('inquirer');
 const glob = require('glob');
-const DBPF = require('../lib/dbpf');
+const { DBPF, Savegame, FileType, ZoneType } = require('sc4');
 const api = require('../lib/api.js');
-const Savegame = require('../lib/savegame');
-const FileType = require('../lib/file-types');
 const pkg = require('../package.json');
-const { ZoneType } = require('../lib/enums');
-const { hex } = require('../lib/util');
+const { hex } = require('../lib/util.js');
 const PipeManager = require('../lib/pipe-manager.js');
 const createMenuPatch = require('../lib/api/create-submenu-patch.js');
 
@@ -1011,7 +1008,7 @@ function getDateSuffix() {
 	return [day, time].join(' ');
 }
 
-module.exports = function setup(program) {
+module.exports = function setup(program = commander) {
 
 	// Set up all options first.
 	factory(program);
