@@ -5,11 +5,9 @@ const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
 
+const { FileType, DBPF, Savegame, ZoneType } = require('sc4');
+const { cClass } = require('../lib/enums.js');
 const crc32 = require('../lib/crc');
-const FileType = require('../lib/file-types');
-const DBPF = require('../lib/dbpf');
-const Savegame = require('../lib/savegame');
-const { ZoneType, cClass } = require('../lib/enums');
 
 describe('A DBPF file', function() {
 
