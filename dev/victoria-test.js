@@ -1,8 +1,9 @@
 // # victoria-test.js
 const path = require('path');
 const Savegame = require('../lib/savegame.js');
+const resource = require('./get-resource.js');
 
-let city = new Savegame(path.resolve(__dirname, 'files/City - Victoria.sc4'));
+let city = new Savegame(resource('City - Victoria.sc4'));
 let { lots } = city;
 for (let lot of lots) {
 	if (lot.minX === 2752/16 && lot.minZ === 3120/16) {

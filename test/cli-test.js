@@ -1,20 +1,33 @@
 // # cli-test.js
-"use strict";
+'use strict';
 const chai = require('chai');
+const { Command } = require('commander');
 const expect = chai.expect;
 chai.use(require('chai-spies'));
 const path = require('path');
-const commander = require('commander');
 const inquirer = require('inquirer');
 const argv = require('string-argv').default;
 
-const cli = require('../bin/cli');
-const { ZoneType } = require('../lib/enums');
+const { factory } = require('../bin/setup-cli.js');
+const { ZoneType } = require('../lib/enums.js');
 
+const action = Command.prototype.action;
 beforeEach(function() {
 	let ctx = this.currentTest.ctx;
-	let instance = ctx.cli = cli();
+	let instance = ctx.cli = factory(new Command());
 	instance.cwd = path.join(__dirname, 'files');
+
+	// Override the action so that we can save a reference to the action.
+	Command.prototype.action = function(fn) {
+		return action.call(this, function(...args) {
+			return instance._currentCommand = fn.call(this, ...args);
+		});
+	};
+
+	// Make the cli awaitable when testing.
+	instance.then = function(...args) {
+		return Promise.resolve(this._currentCommand).then(...args);
+	};
 
 	// Create a run method as well.
 	ctx.run = function(cmd) {
@@ -24,17 +37,17 @@ beforeEach(function() {
 	};
 
 	Object.defineProperty(ctx, 'api', {
-		"configurable": true,
+		configurable: true,
 		get() {
 			return this.cli.api;
-		}
+		},
 	});
 
 	Object.defineProperty(ctx, 'cwd', {
-		"configurable": true,
+		configurable: true,
 		get() {
 			return this.cli.cwd;
-		}
+		},
 	});
 
 	// Helper for mocking api calls.
@@ -42,10 +55,10 @@ beforeEach(function() {
 		return function(fn) {
 			let spy = chai.spy(fn);
 			this.cli.api = {
-				[name]: spy
-			}
+				[name]: spy,
+			};
 			return spy;
-		}
+		};
 	};
 
 	// Helper function for mocking inquirer.
@@ -59,7 +72,7 @@ beforeEach(function() {
 
 // Restore inquirer after each test.
 const prompt = inquirer.prompt;
-afterEach(() => inquirer.prompt);
+afterEach(() => inquirer.prompt = prompt);
 
 describe('The historical command', function() {
 
@@ -68,12 +81,10 @@ describe('The historical command', function() {
 		ctx.mock = ctx.mock('historical');
 	});
 
-	it('--no-interactive historical "city.sc4" -rci', async function() {
+	it('historical --no-interactive -rci "city.sc4"', async function() {
 
 		// Mock the api.
-		let dbpf;
 		this.mock((opts) => {
-			dbpf = opts.dbpf;
 			expect(opts).to.have.property('dbpf');
 			expect(opts.residential).to.be.true;
 			expect(opts.commercial).to.be.true;
@@ -88,7 +99,7 @@ describe('The historical command', function() {
 
 	});
 
-	it('--no-interactive historical "city.sc4" --all -o "my city.sc4"', async function() {
+	it('historical --no-interactive --all -o "my city.sc4" "city.sc4"', async function() {
 
 		// Mock the api.
 		this.mock((opts) => {
@@ -107,7 +118,7 @@ describe('The historical command', function() {
 
 	});
 
-	it('--no-interactive historical "city.sc4" --force -rg', async function() {
+	it('historical --no-interactive --force -rg "city.sc4"', async function() {
 
 		this.mock(opts => {
 			expect(opts.residential).to.be.true;
@@ -124,15 +135,13 @@ describe('The historical command', function() {
 
 	context('in interactive mode', function() {
 
-		const cmd = 'historical "city.sc4"';
-
 		it('historical "city.sc4" with all types', async function() {
 
 			// Mock inquirer answers.
 			this.prompt({
-				"types": ['Residential', 'Commercial', 'Agricultural', 'Industrial'],
-				"ok": true,
-				"output": "C:/my-city.sc4"
+				types: ['Residential', 'Commercial', 'Agricultural', 'Industrial'],
+				ok: true,
+				output: 'C:/my-city.sc4',
 			});
 
 			// Mock the api.
@@ -153,8 +162,8 @@ describe('The historical command', function() {
 
 			// Mock inquirer answers.
 			this.prompt({
-				"types": ['Residential', 'Industrial'],
-				"ok": true
+				types: ['Residential', 'Industrial'],
+				ok: true,
 			});
 
 			// Mock the api.
@@ -181,7 +190,7 @@ describe('The growify command', function() {
 		ctx.mock = ctx.mock('growify');
 	});
 
-	it('--no-interactive growify "city.sc4" -r Medium -i High', async function() {
+	it('growify --no-interactive -r Medium -i High "city.sc4"', async function() {
 
 		this.mock(opts => {
 			expect(opts.residential).to.equal(ZoneType.RMedium);
@@ -196,7 +205,7 @@ describe('The growify command', function() {
 
 	});
 
-	it('--no-interactive growify "city.sc4" -g', async function() {
+	it('growify --no-interactive -g "city.sc4"', async function() {
 		this.mock(opts => {
 			expect(opts.agricultural).to.equal(ZoneType.ILow);
 			expect(opts.output).to.equal(path.resolve(this.cwd, 'GROWIFIED-city.sc4'));
@@ -206,7 +215,7 @@ describe('The growify command', function() {
 		expect(this.api.growify).to.have.been.called.once;
 	});
 
-	it('--no-interactive growify "city.sc4" -r Low --force', async function() {
+	it('growify --no-interactive -r Low --force city.sc4', async function() {
 		this.mock(opts => {
 			expect(opts.residential).to.equal(ZoneType.RLow);
 			expect(opts.industrial).to.be.undefined;
@@ -218,7 +227,7 @@ describe('The growify command', function() {
 		expect(this.api.growify).to.have.been.called.once;
 	});
 
-	it('--no-interactive growify "city.sc4" -r High -i Medium', async function() {
+	it('growify --no-interactive -r High -i Medium city.sc4', async function() {
 		this.mock(opts => {
 			expect(opts.residential).to.equal(ZoneType.RHigh);
 			expect(opts.industrial).to.equal(ZoneType.IMedium);
@@ -230,7 +239,7 @@ describe('The growify command', function() {
 		expect(this.api.growify).to.have.been.called.once;
 	});
 
-	it('--no-interactive growify "city.sc4" -r High --output ../city.sc4', async function() {
+	it('growify --no-interactive -r High --output ../city.sc4 city.sc4', async function() {
 		this.mock(opts => {
 			expect(opts.residential).to.equal(ZoneType.RHigh);
 			expect(opts.industrial).to.be.undefined;
@@ -247,10 +256,10 @@ describe('The growify command', function() {
 		it('should pick low-density residentials only', async function() {
 
 			this.prompt({
-				"types": ['residential'],
-				"residential": ZoneType.RLow,
-				"output": "my-city.sc4",
-				"ok": true
+				types: ['residential'],
+				residential: ZoneType.RLow,
+				output: 'my-city.sc4',
+				ok: true,
 			});
 
 			this.mock(opts => {
@@ -268,10 +277,10 @@ describe('The growify command', function() {
 		it('should pick medium-density residentials only', async function() {
 
 			this.prompt({
-				"types": ['residential'],
-				"residential": ZoneType.RMedium,
-				"output": "my-city.sc4",
-				"ok": true
+				types: ['residential'],
+				residential: ZoneType.RMedium,
+				output: 'my-city.sc4',
+				ok: true,
 			});
 
 			this.mock(opts => {
@@ -289,9 +298,9 @@ describe('The growify command', function() {
 		it('should pick high-density residentials only', async function() {
 
 			this.prompt({
-				"types": ['residential'],
-				"residential": ZoneType.RHigh,
-				"ok": true
+				types: ['residential'],
+				residential: ZoneType.RHigh,
+				ok: true,
 			});
 
 			this.mock(opts => {
@@ -308,9 +317,9 @@ describe('The growify command', function() {
 
 		it('should force pick agricultural buildings', async function() {
 			this.prompt({
-				"types": ['agricultural'],
-				"agricultural": true,
-				"force": true
+				types: ['agricultural'],
+				agricultural: true,
+				force: true,
 			});
 
 			this.mock(opts => {
@@ -328,10 +337,10 @@ describe('The growify command', function() {
 
 		it('should pick medium-density industrials', async function() {
 			this.prompt({
-				"types": ['industrial'],
-				"industrial": ZoneType.IMedium,
-				"ok": true,
-				"output": "../my-city.sc4"
+				types: ['industrial'],
+				industrial: ZoneType.IMedium,
+				ok: true,
+				output: '../my-city.sc4',
 			});
 
 			this.mock((opts) => {
@@ -349,9 +358,9 @@ describe('The growify command', function() {
 
 		it('should pick high-density industrials', async function() {
 			this.prompt({
-				"types": ['industrial'],
-				"industrial": ZoneType.IHigh,
-				"force": true
+				types: ['industrial'],
+				industrial: ZoneType.IHigh,
+				force: true,
 			});
 			this.mock((opts) => {
 				expect(opts.residential).to.be.undefined;
@@ -369,10 +378,10 @@ describe('The growify command', function() {
 		it('should exit if not ok', async function() {
 
 			this.prompt({
-				"types": ['residential', 'industrial'],
-				"residential": ZoneType.RLow,
-				"industrial": ZoneType.RMedium,
-				"ok": false
+				types: ['residential', 'industrial'],
+				residential: ZoneType.RLow,
+				industrial: ZoneType.RMedium,
+				ok: false,
 			});
 			this.mock();
 

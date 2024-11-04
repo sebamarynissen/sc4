@@ -1,8 +1,9 @@
 // # city-manager-test.js
-"use strict";
+'use strict';
+const path = require('node:path');
 const { expect } = require('chai');
-const path = require('path');
 const { glob } = require('glob');
+const resource = require('./get-resource.js');
 const FileIndex = require('../lib/file-index.js');
 const CityManager = require('../lib/city-manager.js');
 
@@ -10,7 +11,7 @@ describe('A city manager', function() {
 
 	it.skip('should open a city', async function() {
 
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let file = resource('City - RCI.sc4');
 		let city = new CityManager(file);
 
 		await city.loadPlugins();
@@ -29,7 +30,7 @@ describe('A city manager', function() {
 
 		it('returns an unused memory address', async function() {
 
-			let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+			let file = resource('City - RCI.sc4');
 			let city = new CityManager();
 			city.load(file);
 
@@ -55,7 +56,7 @@ describe('A city manager', function() {
 			await index.build();
 
 			// Create the city manager.
-			let game = path.join(__dirname, 'files/City - 432.sc4');
+			let game = resource('City - 432.sc4');
 			let city = new CityManager({ index });
 			city.load(game);
 
@@ -88,7 +89,7 @@ describe('A city manager', function() {
 			await index.build();
 
 			// Create the city manager.
-			let game = path.join(__dirname, 'files/City - 432.sc4');
+			let game = resource('City - 432.sc4');
 			let city = new CityManager({ index });
 			city.load(game);
 
@@ -115,14 +116,14 @@ describe('A city manager', function() {
 
 			// First of all we need to build up a file index that the city 
 			// manager can use.
-			// let dir = path.join(__dirname, 'files/DarkNight_11KingStreetWest');
+			// let dir = resource('DarkNight_11KingStreetWest');
 			// let dir = path.join(__dirname,'files/DiegoDL-432ParkAvenue-LM-DN');
 			let dir = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Plugins');
 			let index = new FileIndex(dir);
 			await index.build();
 
 			// Create the city manager.
-			let game = path.join(__dirname, 'files/City - 432.sc4');
+			let game = resource('City - 432.sc4');
 			let city = new CityManager({ index });
 			city.load(game);
 
