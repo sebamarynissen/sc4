@@ -443,12 +443,12 @@ function factory(program) {
 	program
 		.command('create-submenu-patch')
 		.argument('<menu>', 'The Button ID of the submenu, e.g. 0x83E040BB for highway signage.')
-		.argument('[files...]', 'The files to scan, given as a glob patterns. Defaults to *.{dat,sc4desc}.')
+		.argument('[files...]', 'The files to scan, given as a glob patterns. Defaults to *.{dat,sc4*}.')
 		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
 		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
 		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
 		.action(async function(menu, files, options) {
-			if (files.length === 0) files = ['*.{dat,sc4desc}'];
+			if (files.length === 0) files = ['*.{dat,sc4*}'];
 			let fullPaths = glob
 				.globSync(files, { nodir: true })
 				.map(file => path.resolve(process.cwd(), file));
