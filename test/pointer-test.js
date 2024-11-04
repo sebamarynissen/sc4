@@ -2,7 +2,6 @@
 'use strict';
 const { expect } = require('chai');
 const Pointer = require('../lib/pointer.js');
-const Type = require('../lib/type.js');
 
 describe('A pointer', function() {
 
@@ -17,9 +16,9 @@ describe('A pointer', function() {
 
 		it('is constructed from a record', function() {
 
-			class Record extends Type(0xaabbccdd) {
+			class Record {
+				static [Symbol.for('sc4.type')] = 0xaabbccdd;
 				constructor(mem) {
-					super();
 					this.mem = mem;
 				}
 			}
