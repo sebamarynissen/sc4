@@ -78,7 +78,6 @@ function factory(program) {
 	// Main program options.
 	program
 		.name('sc4')
-		.option('--no-interactive', 'Disable interactive mode for the commands')
 		.version(pkg.version);
 
 	program
@@ -92,6 +91,7 @@ function factory(program) {
 		.option('-c, --commercial', 'Make all commercial buildings historical')
 		.option('-i, --industrial', 'Make all industrial buildings historical')
 		.option('-g, --agricultural', 'Make all agricultural buildings historical')
+		.option('--no-interactive', 'Disable interactive mode')
 		.action(async function(city) {
 
 			// Apparently if someone accidentally uses the command wrong and 
@@ -117,7 +117,7 @@ function factory(program) {
 
 			// Fire up inquirer for an interactive interface, in case we're 
 			// not static.
-			if (this.parent.interactive) {
+			if (this.interactive) {
 				let answers = await inquirer.prompt([{
 					"type": "checkbox",
 					"name": "types",
@@ -219,6 +219,7 @@ function factory(program) {
 		.option('-c, --commercial <type>', 'Zone type of the commercial buildings to growify (Low, Medium, High)')
 		.option('-i, --industrial <type>', 'Zone type of the industrial buildings to growify (Medium, High)')
 		.option('-g, --agricultural', 'Whether or not to growify agricultural buildings as well')
+		.option('--no-interactive', 'Disable interactive mode')
 		.option('--no-historical', 'Don\'t make the growified lots historical')
 		.action(async function(city) {
 
@@ -238,7 +239,7 @@ function factory(program) {
 			}
 
 			// If we're not running in static mode, go interactive.
-			if (this.parent.interactive) {
+			if (this.interactive) {
 				let answers = await inquirer.prompt([{
 					"name": "types",
 					"type": "checkbox",
@@ -390,7 +391,7 @@ function factory(program) {
 			}
 
 			// Parse residential zone when comming from command line.
-			if (!this.parent.interactive) {
+			if (!this.interactive) {
 				if (this.residential) {
 					if (/^l/i.test(this.residential)) {
 						this.residential = ZoneType.RLow;
@@ -863,6 +864,7 @@ function factory(program) {
 		.command('pipes <city>')
 		.storeOptionsAsProperties()
 		.option('--force', 'Force override the city')
+		.option('--no-interactive', 'Disable interactive mode')
 		.description('Create the optimal pipe layout in the given city')
 		.action(async function(city) {
 
@@ -889,7 +891,7 @@ function factory(program) {
 
 			// Fire up inquirer for an interactive interface, in case we're 
 			// not static.
-			if (this.parent.interactive) {
+			if (this.interactive) {
 				let answers = await inquirer.prompt([{
 					name: 'force',
 					type: 'confirm',
