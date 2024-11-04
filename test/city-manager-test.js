@@ -2,6 +2,7 @@
 "use strict";
 const { expect } = require('chai');
 const path = require('path');
+const { glob } = require('glob');
 const FileIndex = require('../lib/file-index.js');
 const CityManager = require('../lib/city-manager.js');
 
@@ -62,7 +63,7 @@ describe('A city manager', function() {
 
 			// Grow a lot.
 			city.grow({
-				tgi: [0x6534284a,0xa8fbd372,0x8fcc0f62],
+				tgi: [0x6534284a, 0xa8fbd372, 0x8fcc0f62],
 				x: 10,
 				z: 10,
 				orientation: 0,
@@ -79,13 +80,10 @@ describe('A city manager', function() {
 
 			const dir = 'c:/GOG Games/Simcity 4 Deluxe Edition';
 			let index = new FileIndex({
-				files: [
-					path.join(dir, 'Simcity_1.dat'),
-					path.join(dir, 'Simcity_2.dat'),
-					path.join(dir, 'Simcity_3.dat'),
-					path.join(dir, 'Simcity_4.dat'),
-					path.join(dir, 'Simcity_5.dat'),
-				],
+				files: glob.globSync('SimCity_*.dat', {
+					absolute: true,
+					cwd: dir,
+				}),
 			});
 			await index.build();
 
