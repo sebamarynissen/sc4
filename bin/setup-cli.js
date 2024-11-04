@@ -1,14 +1,10 @@
-#!/usr/bin/env node
-"use strict";
-require('../lib/version-check.js');
-const stream = require('stream');
+'use strict';
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
-const ini = require('ini');
 const tar = require('tar');
 const ora = require('ora');
-const { program, Command } = require('commander');
+const { Command } = require('commander');
 const inquirer = require('inquirer');
 const glob = require('glob');
 const DBPF = require('../lib/dbpf');
@@ -21,13 +17,11 @@ const { hex } = require('../lib/util');
 const PipeManager = require('../lib/pipe-manager.js');
 const createMenuPatch = require('../lib/api/create-submenu-patch.js');
 
-const isMain = require.main === module;
-
 const Style = {
-	"Chicago": 0x00002000,
-	"NewYork": 0x00002001,
-	"Houston": 0x00002002,
-	"Euro": 0x00002003
+	Chicago: 0x00002000,
+	NewYork: 0x00002001,
+	Houston: 0x00002002,
+	Euro: 0x00002003,
 };
 
 // Define getters for the api & cwd on the command's prototype which default 
@@ -35,14 +29,14 @@ const Style = {
 const $cwd$ = Symbol('cwd');
 const $api$ = Symbol('api');
 Object.defineProperties(Command.prototype, {
-	"api": {
+	api: {
 		get() { return root(this)[$api$]; },
-		set(api) { root(this)[$api$] = api; }
+		set(api) { root(this)[$api$] = api; },
 	},
-	"cwd": {
+	cwd: {
 		get() { return root(this)[$cwd$]; },
-		set(cwd) { root(this)[$cwd$] = cwd; }
-	}
+		set(cwd) { root(this)[$cwd$] = cwd; },
+	},
 });
 
 // # factory(program)
@@ -51,29 +45,6 @@ Object.defineProperties(Command.prototype, {
 // otherwise global state is shared between tests which is a big no no. Have a 
 // look at https://github.com/tj/commander.js/issues/438.
 function factory(program) {
-
-	// Override the action method if we're not running from the command line. 
-	// We mainly use this for testing.
-	if (!isMain) {
-		const base = Object.getPrototypeOf(program);
-		const Command = base.constructor;
-		const action = base.action;
-		const proto = Object.create(base);
-		Command.prototype = proto;
-
-		// Override the action so that we can save a reference to the action.
-		proto.action = function(fn) {
-			return action.call(this, function(...args) {
-				return program._currentCommand = fn.call(this, ...args);
-			});
-		};
-
-		// Make the cli awaitable when testing.
-		program.then = function(...args) {
-			return Promise.resolve(this._currentCommand).then(...args);
-		};
-
-	}
 
 	// Main program options.
 	program
@@ -1005,12 +976,7 @@ function read(dir, cb, recursive) {
 }
 
 function baseOptions() {
-	return {
-		"info": info,
-		"ok": ok,
-		"warn": warn,
-		"error": err
-	};
+	return { info, ok, warn, error: err };
 }
 
 function ok(...msg) {
@@ -1034,20 +1000,18 @@ function getDateSuffix() {
 	let day = [
 		date.getFullYear(),
 		String(date.getMonth()).padStart(2, '0'),
-		String(date.getDay()).padStart(2, '0')
+		String(date.getDay()).padStart(2, '0'),
 	].join('-');
 	
 	let time = [
 		String(date.getHours()).padStart(2, '0'),
 		String(date.getMinutes()).padStart(2, '0'),
-		String(date.getSeconds()).padStart(2, '0')
+		String(date.getSeconds()).padStart(2, '0'),
 	].join('.');
 	return [day, time].join(' ');
 }
 
-// Check if we're the main module required - i.e. if someone called the 
-// program from the command line. In that case we're going to parse argv.
-if (isMain) {
+module.exports = function setup(program) {
 
 	// Set up all options first.
 	factory(program);
@@ -1055,17 +1019,7 @@ if (isMain) {
 	// Set the default api & cwd to be used.
 	program.api = api;
 	program.cwd = process.cwd();
+	return program;
 
-	// Now run.
-	program.parse(process.argv);
-
-	// Display help by default.
-	if (program.args.length === 0) {
-		program.help();
-	}
-
-} else {
-	module.exports = function(cmd) {
-		return factory(cmd || new program.Command());
-	};
-}
+};
+module.exports.factory = factory;
