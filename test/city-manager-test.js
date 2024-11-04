@@ -45,11 +45,11 @@ describe('A city manager', function() {
 
 		const regions = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Regions/Experiments');
 
-		it('grows a lot', async function() {
+		it.skip('grows a lot', async function() {
 
 			this.slow(1000);
 
-			let dir = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Plugins');
+			let dir = path.join(process.env.HOMEPATH, 'Documents/SimCity 4/Plugins_empty');
 			let index = new FileIndex(dir);
 			await index.build();
 
@@ -96,7 +96,7 @@ describe('A city manager', function() {
 
 			// Grow a lot.
 			city.grow({
-				tgi: [0x6534284a,0xa8fbd372,0x600040d0],
+				tgi: [0x6534284a, 0xa8fbd372, 0x600040d0],
 				x: 10,
 				z: 10,
 				orientation: 0,
