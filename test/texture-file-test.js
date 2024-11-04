@@ -1,14 +1,12 @@
 // # texture-file-test.js
-"use strict";
+'use strict';
 const chai = require('chai');
 const expect = chai.expect;
 const fs = require('fs');
 const path = require('path');
-const { hex, chunk } = require('../lib/util');
+const { hex } = require('../lib/util');
 const { FileType } = require('../lib/enums');
 const Savegame = require('../lib/savegame');
-const Stream = require('../lib/stream');
-const REGION = require('./test-region');
 
 describe('A base texture file', function() {
 
@@ -49,7 +47,8 @@ describe('A base texture file', function() {
 
 		// Now serialize again.
 		let source = entry.decompress();
-		let check = textureFile.toBuffer();
+		entry.read();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});

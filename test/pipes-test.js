@@ -36,8 +36,8 @@ describe('The pipes subfile', function() {
 
 		let entry = dbpf.find(0x49c05b9f);
 		let raw = entry.decompress();
-		let pipes = entry.read();
-		let out = pipes.toBuffer();
+		entry.read();
+		let out = entry.toBuffer();
 		expect(Buffer.compare(out, raw)).to.equal(0);
 
 	});

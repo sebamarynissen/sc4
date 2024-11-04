@@ -201,7 +201,7 @@ describe('A lot subfile', function() {
 		// Serialize the building file right away. Should result in exactly 
 		// the same buffer.
 		let source = entry.decompress();
-		let check = lotFile.toBuffer();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
@@ -357,7 +357,7 @@ describe('A building subfile', function() {
 		// Serialize the building file right away. Should result in exactly 
 		// the same buffer.
 		let source = entry.decompress();
-		let check = buildingFile.toBuffer();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
@@ -390,7 +390,7 @@ describe('A prop subfile', function() {
 		// Serialize the prop file right away. Should result in exactly the 
 		// same buffer.
 		let source = entry.decompress();
-		let check = propFile.toBuffer();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
@@ -430,7 +430,7 @@ describe('The flora subfile', function() {
 		// Serialize the entire file right away. Should result in exactly the 
 		// same buffer.
 		let source = entry.decompress();
-		let check = flora.toBuffer();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
@@ -459,7 +459,7 @@ describe('The network subfile', function() {
 		// Serialize the entire file right away. Should result in exactly the 
 		// same buffer.
 		let source = entry.decompress();
-		let check = network.toBuffer();
+		let check = entry.toBuffer();
 		expect(source.toString('hex')).to.equal(check.toString('hex'));
 
 	});
@@ -470,7 +470,7 @@ describe('A terrain map', function() {
 
 	it('should read the terrain correctly', function() {
 
-		const TerrainMap = require('../lib/terrain-map');
+		const TerrainMap = require('../lib/terrain-map.js');
 
 		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
 		let buff = fs.readFileSync(file);
@@ -484,7 +484,7 @@ describe('A terrain map', function() {
 			return entry.type === 0xa9dd6ff4 && entry.group === 0xe98f9525 && entry.instance === 0x00000001;
 		});
 		let map = new TerrainMap(regionData.xSize, regionData.ySize);
-		map.parse(entry.read());
+		map.parse(entry.decompress());
 
 	});
 
