@@ -22,7 +22,7 @@
     "electron": "electron lib/gui/app.js"
   },
   "bin": {
-    "sc4": "./bin/cli.js"
+    "sc4": "./lib/cli/cli.js"
   },
   "keywords": [
     "SimCity 4",
