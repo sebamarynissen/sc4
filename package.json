@@ -10,10 +10,10 @@
     "./api": "./lib/api.js"
   },
   "imports": {
-    "#core/*": "./lib/*"
+    "#test/*": "./test/*"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "mocha lib/**/*-test.js test/**/*.js",
     "build": "build\\sea.bat",
     "build:bundle": "esbuild bin/cli.js --bundle --platform=node --target=node22 --outfile=dist/sc4.js",
     "build:postject": "postject dist/sc4.exe NODE_SEA_BLOB dist/sea-prep.blob",

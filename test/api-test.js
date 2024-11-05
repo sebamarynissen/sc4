@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const fs = require('node:fs');
 const api = require('../lib/api.js');
-const resource = require('./get-test-file.js');
+const resource = require('#test/get-test-file.js');
 const { Savegame, ZoneType } = require('sc4/core');
 const { historical, growify } = api;
 
