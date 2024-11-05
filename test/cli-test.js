@@ -4,18 +4,18 @@ const chai = require('chai');
 const { Command } = require('commander');
 const expect = chai.expect;
 chai.use(require('chai-spies'));
-const path = require('path');
+const path = require('node:path');
 const inquirer = require('inquirer');
 const argv = require('string-argv').default;
-
+const resource = require('./get-test-file.js');
 const { factory } = require('../bin/setup-cli.js');
-const { ZoneType } = require('../lib/enums.js');
+const { ZoneType } = require('sc4/core');
 
 const action = Command.prototype.action;
 beforeEach(function() {
 	let ctx = this.currentTest.ctx;
 	let instance = ctx.cli = factory(new Command());
-	instance.cwd = path.join(__dirname, 'files');
+	instance.cwd = resource('.');
 
 	// Override the action so that we can save a reference to the action.
 	Command.prototype.action = function(fn) {

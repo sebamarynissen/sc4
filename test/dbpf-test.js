@@ -1,19 +1,25 @@
 // # dbpf-test.js
 'use strict';
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
+const { expect } = require('chai');
+const fs = require('node:fs');
+const path = require('node:path');
+const resource = require('./get-test-file.js');
 
-const { FileType, DBPF, Savegame, ZoneType } = require('sc4');
+const {
+	FileType,
+	DBPF,
+	Savegame,
+	ZoneType,
+	TerrainMap,
+} = require('sc4/core');
 const { cClass } = require('../lib/enums.js');
-const crc32 = require('../lib/crc');
+const crc32 = require('../lib/crc.js');
 
 describe('A DBPF file', function() {
 
 	it('parses from a file', function() {
 
-		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let file = resource('cement.sc4lot');
 
 		// Parse the dbpf.
 		let dbpf = new DBPF(file);
@@ -33,7 +39,7 @@ describe('A DBPF file', function() {
 
 	it('parses from a buffer', function() {
 
-		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let file = resource('cement.sc4lot');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -53,7 +59,7 @@ describe('A DBPF file', function() {
 	it('frees memory the DBPF is taking up', function() {
 
 		// Read in the DBPF and make sure all entries are properly read.
-		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let file = resource('cement.sc4lot');
 		let dbpf = new DBPF(file);
 		expect(dbpf.buffer).to.be.ok;
 		for (let entry of dbpf) {
@@ -84,7 +90,7 @@ describe('A DBPF file', function() {
 	});
 
 	it('should be serialized to a buffer', function() {
-		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let file = resource('cement.sc4lot');
 		let dbpf = new DBPF(file);
 
 		// Serialize the DBPF into a buffer and immediately parse again so 
@@ -100,13 +106,13 @@ describe('A DBPF file', function() {
 			expect(exemplar).to.eql(check);
 		}
 
-		my.save(path.resolve(__dirname, 'files/saved.sc4lot'));
+		my.save(resource('saved.sc4lot'));
 
 	});
 
 	it('should find all entries using a checksum', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let dbpf = new DBPF(fs.readFileSync(file));
 
 		let all = [];
@@ -140,7 +146,7 @@ describe('An exemplar file', function() {
 	it('should serialize to a buffer correctly', function() {
 
 		// Read an exemplar from a sample dbpf first.
-		let file = path.resolve(__dirname, 'files/cement.sc4lot');
+		let file = resource('cement.sc4lot');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -149,7 +155,7 @@ describe('An exemplar file', function() {
 
 		for (let i = 0; i < exemplars.length; i++) {
 			let entry = exemplars[i];
-			let exemplar = entry.read()
+			let exemplar = entry.read();
 			let bin = exemplar.toBuffer().toString('hex');
 			let check = raw[i].toString('hex');
 			expect(bin).to.equal(check);
@@ -159,12 +165,12 @@ describe('An exemplar file', function() {
 
 	it('should read textual exemplars', function() {
 
-		let file = path.resolve(__dirname, 'files/quotes.sc4desc');
+		let file = resource('quotes.sc4desc');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.exemplars[0];
-		let exemplar = entry.read();
+		entry.read();
 
 	});
 
@@ -174,7 +180,7 @@ describe('A lot subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -203,7 +209,7 @@ describe('A lot subfile', function() {
 	});
 
 	it('should detect Residential, Commercial, Agricultural & Industry correctly', function() {
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let file = resource('City - RCI.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new Savegame(buff);
 
@@ -218,8 +224,8 @@ describe('A lot subfile', function() {
 	});
 
 	it('should re-save after making buildings historical', async function() {
-		let file = path.resolve(__dirname, 'files/city.sc4');
-		// let file = path.resolve(__dirname, 'files/writing_history.sc4');
+		let file = resource('city.sc4');
+		// let file = resource('writing_history.sc4');
 		// let file = path.resolve(process.env.HOMEPATH, 'documents/SimCity 4/Regions/Experiments/City - Writing More History.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
@@ -234,8 +240,8 @@ describe('A lot subfile', function() {
 		}
 
 		// Save baby. Oh boy oh boy.
-		let to = path.resolve(__dirname, 'files/writing_true_history.sc4');
-		await dbpf.save({"file": to});
+		let to = resource('writing_true_history.sc4');
+		await dbpf.save({ file: to });
 
 		// Now hand-test this in SC4.
 
@@ -243,7 +249,7 @@ describe('A lot subfile', function() {
 
 	it('should change a plopped building into a grown one', async function() {
 
-		let file = path.resolve(__dirname, 'files/plopped.sc4');
+		let file = resource('plopped.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -259,7 +265,7 @@ describe('A lot subfile', function() {
 
 		// Save again.
 		let to = path.join(path.dirname(file), 'plopped-mod.sc4');
-		await dbpf.save({"file": to});
+		await dbpf.save({ file: to });
 
 		// console.log(hex(lots[1].zoneType));
 		// console.log(hex(lots[0].zoneType));
@@ -271,7 +277,7 @@ describe('A lot subfile', function() {
 
 	it('should check for plopped residentials', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -289,7 +295,7 @@ describe('A lot subfile', function() {
 	});
 
 	it('should move a lot under a bridge', async function() {
-		let file = path.resolve(__dirname, 'files/dumbo-offset.sc4');
+		let file = resource('dumbo-offset.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -301,12 +307,12 @@ describe('A lot subfile', function() {
 		lot.maxZ += 3;
 
 		let to = path.join(path.dirname(file), 'dumbo-mod.sc4');
-		await dbpf.save({"file": to});
+		await dbpf.save({ file: to });
 
 	});
 
 	it('should growify industry', async function() {
-		let file = path.resolve(__dirname, 'files/City - Plopped Industry - source.sc4');
+		let file = resource('City - Plopped Industry - source.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -320,7 +326,7 @@ describe('A lot subfile', function() {
 		lot.zoneType = ZoneType.IMedium;
 
 		let to = path.join(path.dirname(file), 'City - Plopped Industry.sc4');
-		await dbpf.save({"file": to});
+		await dbpf.save({ file: to });
 
 		// It works!
 
@@ -331,7 +337,7 @@ describe('A lot subfile', function() {
 describe('A building subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -364,7 +370,7 @@ describe('A prop subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 		this.timeout(0);
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -393,7 +399,7 @@ describe('A prop subfile', function() {
 
 	it('crashes on a poxed city', function() {
 
-		let file = path.resolve(__dirname, 'files/poxed.sc4');
+		let file = resource('poxed.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new Savegame(buff);
 		expect(() => dbpf.props).to.throw(Error);
@@ -406,7 +412,7 @@ describe('The flora subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/city - rci.sc4');
+		let file = resource('city - rci.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -437,7 +443,7 @@ describe('The network subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
@@ -466,9 +472,7 @@ describe('A terrain map', function() {
 
 	it('should read the terrain correctly', function() {
 
-		const TerrainMap = require('../lib/terrain-map.js');
-
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let file = resource('City - RCI.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 

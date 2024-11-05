@@ -1,18 +1,15 @@
 // # file-index-test.js
 'use strict';
-const path = require('path');
 const { expect } = require('chai');
 const Index = require('../lib/file-index.js');
-const FileType = require('../lib/file-types.js');
-const dir = path.join(__dirname, 'files');
+const { FileType } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('The file index', function() {
 
 	it('should index all files in a directory', async function() {
 
-		let index = new Index(
-			path.resolve(__dirname, 'files/DarkNight_11KingStreetWest'),
-		);
+		let index = new Index(resource('DarkNight_11KingStreetWest'));
 
 		// Build up the index. This is done asynchronously so that files can 
 		// be read in parallel while parsing.
@@ -39,7 +36,7 @@ describe('The file index', function() {
 
 	it('uses a memory limit for the cache', async function() {
 
-		let nybt = path.join(dir, 'NYBT/Aaron Graham/NYBT Gracie Manor');
+		let nybt = resource('NYBT/Aaron Graham/NYBT Gracie Manor');
 		let index = new Index({
 			dirs: [nybt],
 			mem: 1500000,
@@ -53,7 +50,7 @@ describe('The file index', function() {
 
 	it('indexes all building and prop families', async function() {
 
-		let nybt = path.join(dir, 'NYBT/Aaron Graham/NYBT Gracie Manor');
+		let nybt = resource('NYBT/Aaron Graham/NYBT Gracie Manor');
 		let index = new Index(nybt);
 		await index.build();
 		let { families } = index;

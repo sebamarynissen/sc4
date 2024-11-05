@@ -1,16 +1,15 @@
 // # sim-grid-test.js
 'use strict';
 const { expect } = require('chai');
-const fs = require('fs');
-const path = require('path');
-const Savegame = require('../lib/savegame.js');
-const { FileType } = require('../lib/enums.js');
+const fs = require('node:fs');
+const { Savegame, FileType } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('A SimGrid', function() {
 
 	it('should parse & serialize correctly', function() {
 
-		let source = path.resolve(__dirname, 'files/city - large developed.sc4');
+		let source = resource('city - large developed.sc4');
 		if (!fs.existsSync(source)) {
 			this.skip();
 			return;

@@ -2,14 +2,14 @@
 'use strict';
 const { expect } = require('chai');
 const fs = require('fs');
-const Savegame = require('../lib/savegame.js');
-const { getTestFile } = require('../lib/util.js');
+const { Savegame } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('The plumbing simulator file', function() {
 
 	it('is parsed & serialized correctly', function() {
 
-		let file = getTestFile('City - Large developed.sc4');
+		let file = resource('City - Large developed.sc4');
 		let buffer = fs.readFileSync(file);
 		let dbpf = new Savegame(buffer);
 		let sim = dbpf.plumbingSimulator;

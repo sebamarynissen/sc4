@@ -1,19 +1,16 @@
 // # texture-file-test.js
 'use strict';
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
+const { expect } = require('chai');
+const fs = require('node:fs');
 const { hex } = require('../lib/util');
-const { FileType } = require('../lib/enums');
-const Savegame = require('../lib/savegame');
+const { Savegame, FileType } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('A base texture file', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		// let file = path.resolve(__dirname, 'files/City - RCI.sc4');
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 		let entry = dbpf.getByType(FileType.BaseTextureFile);
 		let textureFile = entry.read();

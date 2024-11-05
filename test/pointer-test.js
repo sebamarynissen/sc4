@@ -1,7 +1,7 @@
 // # pointer-test.js
 'use strict';
 const { expect } = require('chai');
-const Pointer = require('../lib/pointer.js');
+const { Pointer } = require('sc4/core');
 
 describe('A pointer', function() {
 

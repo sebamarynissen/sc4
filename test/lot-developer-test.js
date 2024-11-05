@@ -1,22 +1,18 @@
 // # lot-developer-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
-const Savegame = require('../lib/savegame');
-const { FileType } = require('../lib/enums');
-const { chunk, split } = require('../lib/util');
+'use strict';
+const { expect } = require('chai');
+const fs = require('node:fs');
+const { Savegame, FileType } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('The LotDeveloper Subfile', function() {
 
 	it('should read small city tiles', function() {
-		let file = path.resolve(__dirname, 'files/city - RCI.sc4');
+		let file = resource('city - RCI.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
-		let check = entry.decompress();
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(64+1);
 		expect(dev.buildings).to.have.length(buildings.length);
@@ -42,12 +38,11 @@ describe('The LotDeveloper Subfile', function() {
 	});
 
 	it('should read medium city tiles', function() {
-		let file = path.resolve(__dirname, 'files/City - Medium.sc4');
+		let file = resource('City - Medium.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
-		let check = entry.decompress();
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(128+1);
 		expect(dev.buildings).to.have.length(buildings.length);
@@ -59,12 +54,11 @@ describe('The LotDeveloper Subfile', function() {
 	});
 
 	it('should read large city tiles', function() {
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
 		let entry = dbpf.getByType(FileType.LotDeveloperFile);
-		let check = entry.decompress();
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(256+1);
 		expect(dev.buildings).to.have.length(buildings.length);

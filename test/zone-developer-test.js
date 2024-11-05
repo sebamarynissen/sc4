@@ -1,17 +1,15 @@
 // # zone-developer-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
+'use strict';
+const { expect } = require('chai');
+const fs = require('node:fs');
 const Savegame = require('../lib/savegame');
 const { FileType } = require('../lib/enums');
-const { chunk } = require('../lib/util');
+const resource = require('./get-test-file.js');
 
 describe('The ZoneDeveloper Subfile', function() {
 
 	it('should read small city tiles', function() {
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
+		let file = resource('City - RCI.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let dev = dbpf.zoneDeveloperFile;
@@ -38,7 +36,7 @@ describe('The ZoneDeveloper Subfile', function() {
 
 	it('should read medium city tiles', function() {
 
-		let file = path.resolve(__dirname, 'files/City - Medium.sc4');
+		let file = resource('City - Medium.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let entry = dbpf.getByType(FileType.ZoneDeveloperFile);
@@ -68,7 +66,7 @@ describe('The ZoneDeveloper Subfile', function() {
 
 	it('should read large city tiles', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let entry = dbpf.getByType(FileType.ZoneDeveloperFile);

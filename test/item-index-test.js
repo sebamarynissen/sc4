@@ -1,12 +1,10 @@
 // # item-index-test.js
 'use strict';
 const { expect } = require('chai');
-const path = require('path');
-const fs = require('fs');
-const { DBPF } = require('sc4');
-const FileType = require('../lib/file-types.js');
-const { hex } = require('../lib/util.js');
-const ItemIndex = require('../lib/item-index.js');
+const fs = require('node:fs');
+const { DBPF, FileType, ItemIndex } = require('sc4/core');
+const { hex } = require('sc4/utils');
+const resource = require('./get-test-file.js');
 
 describe('An item index subfile', function() {
 
@@ -84,8 +82,7 @@ describe('An item index subfile', function() {
 
 	it('should be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/City - RCI.sc4');
-		// let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('City - RCI.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 

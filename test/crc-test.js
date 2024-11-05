@@ -1,8 +1,7 @@
 // # crc-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const crc32 = require('../lib/crc');
+'use strict';
+const { expect } = require('chai');
+const crc32 = require('../lib/crc.js');
 
 describe('The CRC32 checksum', function() {
 

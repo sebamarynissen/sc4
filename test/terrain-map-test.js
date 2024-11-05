@@ -1,17 +1,15 @@
 // # terrain-map-test.js
 'use strict';
 const { expect } = require('chai');
-const path = require('path');
-const fs = require('fs');
-const TerrainMap = require('../lib/terrain-map.js');
-const DBPF = require('../lib/dbpf.js');
-const { FileType } = require('../lib/enums.js');
+const fs = require('node:fs');
+const { DBPF, TerrainMap, FileType } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('The terrain map', function() {
 
 	it('is be parsed & serialized correctly', function() {
 
-		let file = path.resolve(__dirname, 'files/city.sc4');
+		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 		let entry = dbpf.find(({ type, instance }) => {

@@ -1,23 +1,19 @@
 // # api-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const path = require('path');
-const fs = require('fs');
+'use strict';
+const { expect } = require('chai');
+const fs = require('node:fs');
 const api = require('../lib/api.js');
-const { Savegame } = api;
-const { ZoneType } = require('../lib/enums');
-
+const resource = require('./get-test-file.js');
+const { Savegame, ZoneType } = require('sc4/core');
 const { historical, growify } = api;
-const files = path.join(__dirname, 'files');
 
 describe('#historical()', function() {
 
 	it('should make all buildings in a city historical', async function() {
 
 		let dbpf = await historical({
-			dbpf: path.join(files, 'city.sc4'),
-			all: true
+			dbpf: resource('city.sc4'),
+			all: true,
 		});
 		
 		// Check the dbpf file now. Everything should be historical.
@@ -29,8 +25,8 @@ describe('#historical()', function() {
 
 	it('should make all residentials in a city historical', async function() {
 		let dbpf = await historical({
-			dbpf: path.join(files, 'city.sc4'),
-			residential: true
+			dbpf: resource('city.sc4'),
+			residential: true,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -41,8 +37,8 @@ describe('#historical()', function() {
 
 	it('should make all commercials in a city historical', async function() {
 		let dbpf = await historical({
-			dbpf: path.join(files, 'city.sc4'),
-			commercial: true
+			dbpf: resource('city.sc4'),
+			commercial: true,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -53,8 +49,8 @@ describe('#historical()', function() {
 
 	it('should make all industrials in a city historical', async function() {
 		let dbpf = await historical({
-			dbpf: path.join(files, 'city.sc4'),
-			industrial: true
+			dbpf: resource('city.sc4'),
+			industrial: true,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -65,8 +61,8 @@ describe('#historical()', function() {
 
 	it('should make all agriculturals in a city historical', async function() {
 		let dbpf = await historical({
-			dbpf: path.join(files, 'city.sc4'),
-			agricultural: true
+			dbpf: resource('city.sc4'),
+			agricultural: true,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -81,7 +77,7 @@ describe('#growify', function() {
 
 	it('should growify all plopped residentials in a city', async function() {
 
-		let buff = fs.readFileSync(path.join(files, 'City - RCI.sc4'));
+		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
 		for (let lot of dbpf.lotFile) {
@@ -105,7 +101,7 @@ describe('#growify', function() {
 
 	it('should growify all plopped industrials in a city', async function() {
 
-		let buff = fs.readFileSync(path.join(files, 'City - labP01.sc4'));
+		let buff = fs.readFileSync(resource('City - labP01.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
 		for (let lot of dbpf.lotFile) {
@@ -115,7 +111,7 @@ describe('#growify', function() {
 
 		await growify({
 			dbpf,
-			industrial: ZoneType.IHigh
+			industrial: ZoneType.IHigh,
 		});
 
 		for (let lot of dbpf.lotFile) {
@@ -129,7 +125,7 @@ describe('#growify', function() {
 
 	it('should growify all plopped agriculturals in a city', async function() {
 
-		let buff = fs.readFileSync(path.join(files, 'City - RCI.sc4'));
+		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
 		for (let lot of dbpf.lotFile) {

@@ -2,14 +2,14 @@
 'use strict';
 const { expect } = require('chai');
 const fs = require('node:fs');
-const { DBPF } = require('sc4');
-const { getTestFile } = require('../lib/util.js');
+const { DBPF } = require('sc4/core');
+const resource = require('./get-test-file.js');
 
 describe('The pipes subfile', function() {
 
 	it('is parsed correctly & serialized correctly', function() {
 
-		let file = getTestFile('City - Pipes.sc4');
+		let file = resource('City - Pipes.sc4');
 		let buffer = fs.readFileSync(file);
 		let dbpf = new DBPF(buffer);
 
