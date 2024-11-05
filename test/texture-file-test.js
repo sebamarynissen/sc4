@@ -2,7 +2,7 @@
 'use strict';
 const { expect } = require('chai');
 const fs = require('node:fs');
-const { hex } = require('../lib/util');
+const { hex } = require('sc4/utils');
 const { Savegame, FileType } = require('sc4/core');
 const resource = require('./get-test-file.js');
 

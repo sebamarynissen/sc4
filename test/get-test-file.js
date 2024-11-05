@@ -1,2 +1,13 @@
 // # get-test-file.js
-module.exports = require('../lib/util.js').getTestFile;
+const path = require('node:path');
+
+// # getTestFile(file)
+// Helper function that easily gets the path of a given test file in the test 
+// folder.
+module.exports = function getTestFile(file) {
+	return path.resolve(
+		__dirname,
+		'./files',
+		file,
+	);
+};
