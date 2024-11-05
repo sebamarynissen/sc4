@@ -7,7 +7,6 @@
 package-lock.json
 *.sublime-workspace
 
-src/build/**
-build/**
+dist/**
 
 test/files/**
