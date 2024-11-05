@@ -1,5 +1,8 @@
 {
 	"main": "dist/sc4.js",
 	"output": "dist/sea-prep.blob",
-	"disableExperimentalSEAWarning": true
+	"disableExperimentalSEAWarning": true,
+	"assets": {
+		"version.txt": "./dist/version.txt"
+	}
 }
