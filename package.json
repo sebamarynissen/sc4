@@ -62,7 +62,7 @@
     "inquirer": "^6.5.2",
     "lru-cache": "^5.1.1",
     "ora": "^3.4.0",
-    "p-queue": "^6.3.0",
+    "p-queue": "^8.0.1",
     "pkg-up": "^3.1.0",
     "qfs-compression": "^0.2.1",
     "semver": "^7.3.5",

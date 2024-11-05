@@ -3,10 +3,10 @@
 // loading the library because we can't read from disk when running in the 
 // browser. From now on we use a single-use build script - this file - and then 
 // just read in the result json.
-const path = require('path');
-const fs = require('fs');
-const xml2js = require('xml2js');
-const file = path.resolve(__dirname, '../data/new_properties.xml');
+import path from 'node:path';
+import fs from 'node:fs';
+import xml2js from 'xml2js';
+const file = path.resolve(import.meta.dirname, '../lib/core/data/new_properties.xml');
 
 // Parse the new_properties.xml file
 let xml;
@@ -27,5 +27,8 @@ for (let prop of xml.ExemplarProperties.PROPERTIES[0].PROPERTY) {
 }
 
 // Now write away as a json file.
-const out = path.resolve(__dirname, '../data/new-properties.json');
-fs.writeFileSync(out, JSON.stringify(props));
+const out = path.resolve(import.meta.dirname, '../lib/core/data/new-properties.js');
+const contents = `// eslint-disable-next-line quotes
+export default JSON.parse(${JSON.stringify(JSON.stringify(props))})
+`;
+fs.writeFileSync(out, contents);
