@@ -5,7 +5,11 @@
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
+    "./core": "./lib/index.js",
     "./api": "./lib/api.js"
+  },
+  "imports": {
+    "#core/*": "./lib/*"
   },
   "scripts": {
     "test": "mocha",
