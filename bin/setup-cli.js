@@ -7,12 +7,12 @@ const ora = require('ora');
 const { program: commander, Command } = require('commander');
 const inquirer = require('inquirer');
 const glob = require('glob');
-const { DBPF, Savegame, FileType, ZoneType } = require('sc4');
+const { DBPF, Savegame, FileType, ZoneType } = require('sc4/core');
 const api = require('../lib/api.js');
 const pkg = require('../package.json');
-const { hex } = require('../lib/util.js');
 const PipeManager = require('../lib/pipe-manager.js');
 const createMenuPatch = require('../lib/api/create-submenu-patch.js');
+const { hex } = require('sc4/utils');
 
 const Style = {
 	Chicago: 0x00002000,

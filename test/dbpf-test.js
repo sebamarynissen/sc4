@@ -12,8 +12,8 @@ const {
 	ZoneType,
 	TerrainMap,
 } = require('sc4/core');
-const { cClass } = require('../lib/enums.js');
-const crc32 = require('../lib/crc.js');
+const { cClass } = require('../lib/core/enums.js');
+const crc32 = require('../lib/core/crc.js');
 
 describe('A DBPF file', function() {
 

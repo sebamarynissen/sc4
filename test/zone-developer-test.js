@@ -2,8 +2,7 @@
 'use strict';
 const { expect } = require('chai');
 const fs = require('node:fs');
-const Savegame = require('../lib/savegame');
-const { FileType } = require('../lib/enums');
+const { Savegame, FileType } = require('sc4/core');
 const resource = require('./get-test-file.js');
 
 describe('The ZoneDeveloper Subfile', function() {
