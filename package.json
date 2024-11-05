@@ -7,7 +7,9 @@
     ".": "./lib/index.js",
     "./core": "./lib/core/index.js",
     "./utils": "./lib/utils/util.js",
-    "./api": "./lib/api.js"
+    "./cli": "./lib/cli/cli.js",
+    "./api": "./lib/api/api.js",
+    "./api/*": "./lib/api/*"
   },
   "imports": {
     "#test/*": "./test/*"
@@ -60,6 +62,7 @@
     "lru-cache": "^5.1.1",
     "ora": "^3.4.0",
     "p-queue": "^6.3.0",
+    "pkg-up": "^3.1.0",
     "qfs-compression": "^0.2.1",
     "semver": "^7.3.5",
     "smart-buffer": "^4.1.0",
