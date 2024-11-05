@@ -2,7 +2,8 @@
   "name": "sc4",
   "version": "0.0.26-alpha.3",
   "description": "A command line utility for automating SimCity 4 modding tasks & modifying savegames",
-  "main": "lib/index.js",
+  "main": "lib/core/index.js",
+  "type": "module",
   "exports": {
     ".": "./lib/index.js",
     "./core": "./lib/core/index.js",
@@ -42,7 +43,7 @@
   "devDependencies": {
     "@whisthub/eslint-config": "^3.0.0",
     "buffer": "^6.0.3",
-    "chai": "^4.2.0",
+    "chai": "^5.1.2",
     "chai-spies": "^1.0.0",
     "esbuild": "^0.24.0",
     "eslint": "^8.57.1",
