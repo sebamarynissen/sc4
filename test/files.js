@@ -12,12 +12,18 @@ if (!fs.existsSync(outputDir)) {
 // # resource(file)
 // Helper function that easily gets the path of a given test file in the test 
 // folder.
+let set = new Set();
 export function resource(file) {
-	return path.resolve(
+	let fullPath = path.resolve(
 		import.meta.dirname,
 		'./files',
 		file,
 	);
+	if (!set.has(fullPath)) {
+		set.add(fullPath.toLowerCase());
+		console.log([...set].sort());
+	}
+	return fullPath;
 }
 
 // # output(file)
