@@ -7,7 +7,7 @@
   "exports": {
     ".": "./lib/index.js",
     "./core": "./lib/core/index.js",
-    "./utils": "./lib/utils/util.js",
+    "./utils": "./lib/utils/index.js",
     "./cli": "./lib/cli/cli.js",
     "./api": "./lib/api/api.js",
     "./api/*": "./lib/api/*"
