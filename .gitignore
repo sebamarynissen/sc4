@@ -2,3 +2,5 @@
 package-lock.json
 *.sublime-workspace
 dist/**
+
+test/output/**
