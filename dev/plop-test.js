@@ -1,27 +1,24 @@
 // # plop-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const api = require('../lib/api.js');
-const Stream = require('../lib/stream');
-const crc32 = require('../lib/crc');
-const { hex, chunk, split, getCityPath } = require('../lib/util');
-const { ZoneType, FileType, cClass, SimGrid } = require('../lib/enums');
-const CityManager = require('../lib/city-manager.js');
-const FileIndex = require('../lib/file-index.js');
-const LotIndex = require('../lib/lot-index.js');
-const Savegame = require('../lib/savegame');
-const Lot = require('../lib/lot');
-const Building = require('../lib/building');
-const Pointer = require('../lib/pointer.js');
-const skyline = require('../lib/skyline.js');
+import { expect } from 'chai';
+import fs from 'node:fs';
+import path from 'node:path';
+import chalk from 'chalk';
+import curve from 'hilbert-curve';
+import * as api from 'sc4/api';
+import Stream from '../lib/core/stream.js';
+import crc32 from '../lib/core/crc.js';
+import { hex, chunk, split, getCityPath } from 'sc4/utils';
+import { ZoneType, FileType, cClass } from 'sc4/core';
+import CityManager from '../lib/api/city-manager.js';
+import FileIndex from '../lib/api/file-index.js';
+import LotIndex from '../lib/api/lot-index.js';
+import skyline from '../lib/api/skyline.js';
+import { Savegame, Lot, Building, Pointer } from 'sc4/core';
 const HOME = process.env.HOMEPATH;
 const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
 const c = 'c:/GOG Games/SimCity 4 Deluxe Edition';
+const __dirname = import.meta.dirname;
 const dir = path.join(__dirname, 'files');
 
 describe('A city manager', function() {
@@ -119,7 +116,7 @@ describe('A city manager', function() {
 		tx.textures = tx.textures.map(clone);
 		tx.mem += 4;
 		tx.minX += 2*16;
-		tx.maxX += 2*16
+		tx.maxX += 2*16;
 		tx.textures.forEach(function(tx) {
 			tx.x += 2;
 		});
@@ -136,7 +133,7 @@ describe('A city manager', function() {
 		com.set(FileType.BaseTextureFile, txs.length);
 
 		// Time for action: save!
-		await dbpf.save({"file":path.resolve(REGION,'City - Move bitch.sc4')});
+		await dbpf.save({ file: path.resolve(REGION, 'City - Move bitch.sc4') });
 
 	});
 
@@ -151,7 +148,7 @@ describe('A city manager', function() {
 			FileType.SimGridUint16,
 			FileType.SimGridSint16,
 			FileType.SimGridUint32,
-			FileType.SimGridFloat32
+			FileType.SimGridFloat32,
 		];
 		for (let type of all) {
 			let grids = dbpf.getByType(type).read();
@@ -162,7 +159,7 @@ describe('A city manager', function() {
 			}
 		}
 
-		await dbpf.save({"file":path.resolve(REGION,'City - Established.sc4')});
+		await dbpf.save({ file: path.resolve(REGION, 'City - Established.sc4') });
 
 	});
 
@@ -201,7 +198,7 @@ describe('A city manager', function() {
 		// console.log(COMSerializerFile.get(FileType.FloraFile));
 		console.log(COMSerializerFile);
 
-		await dbpf.save({"file": path.resolve(REGION, 'City - Flora.sc4')});
+		await dbpf.save({ file: path.resolve(REGION, 'City - Flora.sc4') });
 
 	});
 
@@ -228,7 +225,7 @@ describe('A city manager', function() {
 		// Create some trees on the street.
 		for (let i = 0; i < 10; i++) {
 			for (let j = 0; j < 2; j++) {
-				let tree = clone( Math.floor(2*Math.random()) );
+				let tree = clone(Math.floor(2*Math.random()));
 				tree.x = 16*17 + 16*i + 8;
 				tree.z = 16*10 + (j === 0 ? 2 : 14);
 				floraFile.push(tree);
@@ -242,7 +239,7 @@ describe('A city manager', function() {
 
 		COMSerializerFile.set(FileType.FloraFile, floraFile.length);
 
-		await dbpf.save({"file": path.resolve(REGION, 'City - Million Trees.sc4')});
+		await dbpf.save({ file: path.resolve(REGION, 'City - Million Trees.sc4') });
 
 	});
 
@@ -276,7 +273,7 @@ describe('A city manager', function() {
 		});
 
 		// Now save and see what happens.
-		await dbpf.save({"file": path.join(REGION, 'City - Move bitch.sc4')});
+		await dbpf.save({ file: path.join(REGION, 'City - Move bitch.sc4') });
 
 	});
 
@@ -297,7 +294,7 @@ describe('A city manager', function() {
 				path.join(c, 'SimCity_3.dat'),
 				path.join(c, 'SimCity_4.dat'),
 				path.join(c, 'SimCity_5.dat'),
-			]
+			],
 		});
 		await index.build();
 
@@ -328,7 +325,7 @@ describe('A city manager', function() {
 				path.join(c, 'SimCity_3.dat'),
 				path.join(c, 'SimCity_4.dat'),
 				path.join(c, 'SimCity_5.dat'),
-			]
+			],
 		});
 		await index.build();
 
@@ -533,7 +530,7 @@ describe('A city manager', function() {
 					continue;
 				}
 				city.grow({
-					tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+					tgi: [0x6534284a, 0xa8fbd372, 0xa706ed25],
 					x: i,
 					z: j,
 					orientation: (i+j) % 4,
@@ -588,7 +585,7 @@ describe('A city manager', function() {
 					continue;
 				}
 				city.grow({
-					tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+					tgi: [0x6534284a, 0xa8fbd372, 0xa706ed25],
 					x: i,
 					z: j,
 					orientation: (i+j) % 4,
@@ -603,8 +600,6 @@ describe('A city manager', function() {
 	});
 
 	it.skip('plops a Hilbert curve', async function() {
-
-		const curve = require('hilbert-curve');
 
 		this.timeout();
 		let dir = path.join(__dirname, 'files');
@@ -679,7 +674,7 @@ describe('A city manager', function() {
 					if (matrix[x][z]) continue;
 
 					city.grow({
-						tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+						tgi: [0x6534284a, 0xa8fbd372, 0xa706ed25],
 						x,
 						z,
 					});

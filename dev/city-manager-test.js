@@ -1,11 +1,10 @@
 // # city-manager-test.js
-'use strict';
-const path = require('node:path');
-const { expect } = require('chai');
-const { glob } = require('glob');
-const resource = require('./get-resource.js');
-const FileIndex = require('../lib/file-index.js');
-const CityManager = require('../lib/city-manager.js');
+import path from 'node:path';
+import { expect } from 'chai';
+import { glob } from 'glob';
+import resource from '#test/get-test-file.js';
+import FileIndex from '../lib/api/file-index.js';
+import CityManager from '../lib/api/city-manager.js';
 
 describe('A city manager', function() {
 
@@ -16,7 +15,7 @@ describe('A city manager', function() {
 
 		await city.loadPlugins();
 
-		let exemplar = city.plugins.find(0x6534284a,0xa8fbd372,0xc000c356).read();
+		let exemplar = city.plugins.find(0x6534284a, 0xa8fbd372, 0xc000c356).read();
 		let objs = exemplar.lotObjects;
 		let building = objs.find(obj => obj.type === 0x0);
 		let iid = building.values[12];

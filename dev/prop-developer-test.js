@@ -1,12 +1,9 @@
 // # prop-developer-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const fs = require('fs');
-const path = require('path');
-const Savegame = require('../lib/savegame');
-const { FileType } = require('../lib/enums');
-const { hex, chunk, split } = require('../lib/util');
+import { expect } from 'chai';
+import fs from 'node:fs';
+import path from 'node:path';
+import { Savegame, FileType } from 'sc4/core';
+import { hex, chunk, split } from 'sc4/utils';
 
 describe('The PropDeveloper Subfile', function() {
 

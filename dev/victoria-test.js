@@ -1,7 +1,7 @@
 // # victoria-test.js
-const path = require('path');
-const Savegame = require('../lib/savegame.js');
-const resource = require('./get-resource.js');
+import path from 'node:path';
+import { Savegame } from 'sc4/core';
+import resource from '#test/get-test-file.js';
 
 let city = new Savegame(resource('City - Victoria.sc4'));
 let { lots } = city;

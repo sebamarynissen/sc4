@@ -1,16 +1,19 @@
 // # pipes-test.js
-'use strict';
-const { expect } = require('chai');
-const fs = require('fs');
-const path = require('path');
-const { Savegame, DBPF } = require('sc4');
-const FileType = require('../lib/file-types.js');
-const Pipe = require('../lib/pipe.js');
-const PipeManager = require('../lib/pipe-manager.js');
-const Pointer = require('../lib/pointer.js');
-const Vertex = require('../lib/vertex.js');
-const Color = require('../lib/color.js');
-const { chunk, getCityPath, getTestFile } = require('../lib/util.js');
+import { expect } from 'chai';
+import fs from 'node:fs';
+import path from 'node:path';
+import {
+	Savegame,
+	DBPF,
+	FileType,
+	Pipe,
+	Pointer,
+	Vertex,
+	Color,
+} from 'sc4/core';
+import { chunk, getCityPath } from 'sc4/utils';
+import resource from '#test/get-test-file.js';
+import PipeManager from '../lib/api/pipe-manager.js';
 
 describe('The pipes subfile', function() {
 
@@ -34,7 +37,7 @@ describe('The pipes subfile', function() {
 		// const out = getCityPath('Pipes');
 		const out = getCityPath('Hilly Skyline');
 		// let dbpf = this.open(getTestFile('City - Single Pipe.sc4'));
-		let dbpf = this.open(getTestFile('City - Hilly skyline.sc4'));
+		let dbpf = this.open(resource('City - Hilly skyline.sc4'));
 		let mgr = new PipeManager(dbpf);
 		mgr.applyOptimalLayout();
 		await dbpf.save(out);

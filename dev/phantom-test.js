@@ -1,10 +1,7 @@
 // # phantom-test.js
-'use strict';
-const path = require('path');
-const Savegame = require('../lib/savegame.js');
-const { chunk, hex } = require('../lib/util.js');
-
-const DBPF = require('../lib/dbpf.js');
+import path from 'node:path';
+import { Savegame } from 'sc4/core';
+import { chunk, hex } from 'sc4/utils';
 
 const city = name => path.join(process.env.USERPROFILE, 'documents/SimCity 4/Regions/Experiments', name);
 
@@ -23,7 +20,7 @@ describe('A phantom affected city', function() {
 				// 	0xE9244B2E,
 				// ].includes(prop.name);
 				// return yes;
-				return prop.name === 0xEA54D287
+				return prop.name === 0xEA54D287;
 			});
 
 			// prop.value[0] = 100;

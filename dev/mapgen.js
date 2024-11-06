@@ -1,4 +1,4 @@
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 class Segment extends Array {
 	constructor(x, z, type = 1) {

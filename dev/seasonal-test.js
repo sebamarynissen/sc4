@@ -1,13 +1,11 @@
 // # seasonal-test.js
-"use strict";
-const chai = require('chai');
-const expect = chai.expect;
-const path = require('path');
-const fs = require('fs');
+import { expect } from 'chai';
+import path from 'node:path';
+import fs from 'node:fs';
 const dir = path.resolve(process.env.HOMEPATH, 'documents/simcity 4/plugins');
-const DBPF = require('../lib/dbpf');
-const Savegame = require('../lib/savegame');
-const REGION = require('./test-region');
+import { DBPF, Savegame } from 'sc4/core';
+import { hex, getUnixFromJulian } from 'sc4/utils';
+import REGION from './test-region.js';
 
 describe('Making trees no longer seasonal', function() {
 
@@ -43,8 +41,8 @@ describe('Making trees no longer seasonal', function() {
 
 			for (let i = 0; i < mapped[0].length; i++) {
 				pairs.push({
-					"evergreen": mapped[0][i],
-					"seasonal": mapped[1][i]
+					evergreen: mapped[0][i],
+					seasonal: mapped[1][i],
 				});
 			}
 
@@ -85,7 +83,7 @@ describe('Making trees no longer seasonal', function() {
 		}
 
 		let out = path.join(REGION, 'City - Four Seasons.sc4');
-		dbpf.save({"file": out});
+		dbpf.save({ file: out });
 
 	});
 
@@ -99,7 +97,6 @@ describe('Making trees no longer seasonal', function() {
 		let datefile = dbpf.entries.find(entry => entry.type === 0x2990C1E5);
 		let buff = datefile.read();
 
-		const { getUnixFromJulian } = require('../lib/julian-date');
 		let date = new Date(getUnixFromJulian(buff.readUInt32LE(buff.length-4)));
 
 		let i = 0;
@@ -119,7 +116,7 @@ describe('Making trees no longer seasonal', function() {
 		}
 
 		let out = path.join(REGION, 'City - Out of sync.sc4');
-		dbpf.save({"file": out});
+		dbpf.save({ file: out });
 
 	});
 
@@ -154,7 +151,6 @@ describe('Making trees no longer seasonal', function() {
 				let map = {};
 
 				// If we have 3, it's fall, winter, summer.
-				const { hex } = require('../lib/util');
 				if (iids.length !== 3) {
 					[map.fall, map.winter, map.spring, map.summer] = iids;
 				} else {
@@ -181,7 +177,7 @@ describe('Making trees no longer seasonal', function() {
 				.map(entry => entry.read());
 
 			// Now save a file for every season.
-			for (let season of ['fall', 'winter', 'spring','summer']) {
+			for (let season of ['fall', 'winter', 'spring', 'summer']) {
 				exemplars.map((exemplar, i) => {
 					let iid = maps[i][season];
 					let prop = exemplar.table[0x27812821];
@@ -194,7 +190,7 @@ describe('Making trees no longer seasonal', function() {
 				// Save.
 				const DESKTOP = path.resolve(process.env.HOMEPATH, 'desktop');
 				let out = path.join(DESKTOP, 'Girafe', season, name);
-				dbpf.save({"file": out});
+				dbpf.save({ file: out });
 
 			}
 

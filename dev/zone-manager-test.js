@@ -1,17 +1,16 @@
 // # zone-manager-test.js
-"use strict";
-const { expect } = require('chai');
-const fs = require('fs');
-const path = require('path');
-const Stream = require('../lib/stream.js');
-const Savegame = require('../lib/savegame.js');
-const { hex, chunk } = require('../lib/util');
-const { FileType, cClass } = require('../lib/enums.js');
-const CityManager = require('../lib/city-manager.js');
+import { expect } from 'chai';
+import fs from 'node:fs';
+import path from 'node:path';
+import Stream from '../lib/core/stream.js';
+import { Savegame, FileType, cClass } from 'sc4/core';
+import { hex, chunk } from 'sc4/utils';
+import CityManager from '../lib/api/city-manager.js';
+import FileIndex from '../lib/api/file-index.js';
 const HOME = process.env.HOMEPATH;
 const PLUGINS = path.resolve(HOME, 'documents/SimCity 4/plugins');
 const REGION = path.resolve(HOME, 'documents/SimCity 4/regions/experiments');
-const dir = path.resolve(__dirname, 'files');
+const dir = path.resolve(import.meta.dirname, 'files');
 
 describe('The zone manager file', function() {
 
@@ -31,8 +30,6 @@ describe('The zone manager file', function() {
 	});
 
 	it('is decoded', async function() {
-
-		const FileIndex = require('../lib/file-index.js');
 
 		let out = path.join(REGION, 'City - Growth.sc4');
 		let one = path.join(dir, 'City - Growth - 1.sc4');
@@ -58,7 +55,7 @@ describe('The zone manager file', function() {
 		city.load(one);
 		for (let i = 0; i < 10; i++) {
 			let lot = city.grow({
-				tgi: [0x6534284a,0xa8fbd372,0xa706ed25],
+				tgi: [0x6534284a, 0xa8fbd372, 0xa706ed25],
 				x: 3+i,
 				z: 1,
 				orientation: 2,

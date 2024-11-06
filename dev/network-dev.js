@@ -1,11 +1,9 @@
 // # network-dev.js
-const fs = require('fs');
-const { expect } = require('chai');
-const Network = require('../lib/network.js');
-const { getCityPath, getTestFile } = require('../lib/util.js');
-const Savegame = require('../lib/savegame.js');
-const Color = require('../lib/color.js');
-const Pointer = require('../lib/pointer.js');
+import fs from 'node:fs';
+import { expect } from 'chai';
+import { Network, Savegame, Color, Pointer } from 'sc4/core';
+import { getCityPath } from 'sc4/utils';
+import getTestFile from '#test/get-test-file.js';
 
 describe('A network tile', function() {
 
