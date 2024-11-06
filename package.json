@@ -36,9 +36,8 @@
     "url": "https://github.com/sebamarynissen/sc4.git"
   },
   "files": [
-    "bin",
-    "data/new-properties.json",
-    "lib"
+    "lib",
+    "!lib/**/test"
   ],
   "devDependencies": {
     "@whisthub/eslint-config": "^3.0.0",
