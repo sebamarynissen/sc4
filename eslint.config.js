@@ -9,6 +9,14 @@ export default [
 		},
 	},
 	{
+		rules: {
+			"no-restricted-globals": [
+				"error",
+				"Buffer",
+			],
+		},
+	},
+	{
 		ignores: [
 			"lib/gui/**",
 		],
