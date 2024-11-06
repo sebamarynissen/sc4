@@ -1,12 +1,4 @@
 **/node_modules/**
-*.sc4lot
-*.sc4desc
-*.sc4
-*.dat
-
 package-lock.json
 *.sublime-workspace
-
 dist/**
-
-test/files/**
