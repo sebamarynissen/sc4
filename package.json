@@ -57,7 +57,11 @@
     "xml2js": "^0.6.2"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.0.1",
+    "@inquirer/checkbox": "^4.0.1",
+    "@inquirer/confirm": "^5.0.1",
+    "@inquirer/input": "^4.0.1",
+    "@inquirer/number": "^3.0.1",
+    "@inquirer/select": "^4.0.1",
     "binary-search-bounds": "^2.0.4",
     "chalk": "^2.4.2",
     "commander": "^12.1.0",
