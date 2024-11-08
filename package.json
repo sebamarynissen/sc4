@@ -13,6 +13,9 @@
     "./api/*": "./lib/api/*"
   },
   "imports": {
+    "#cli/prompts": "./lib/cli/prompts/index.js",
+    "#cli/commands": "./lib/cli/commands/index.js",
+    "#cli/flows": "./lib/cli/flows/index.js",
     "#test/*": "./test/*"
   },
   "engines": {
