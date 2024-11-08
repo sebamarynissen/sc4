@@ -62,6 +62,7 @@
   "dependencies": {
     "@inquirer/checkbox": "^4.0.1",
     "@inquirer/confirm": "^5.0.1",
+    "@inquirer/core": "^10.0.1",
     "@inquirer/input": "^4.0.1",
     "@inquirer/number": "^3.0.1",
     "@inquirer/select": "^4.0.1",
