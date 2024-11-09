@@ -18,14 +18,8 @@ jobs:
       - name: Install
         run: npm ci
       - name: Bump version
-        run: |
-          FOR /F "tokens=*" %G IN ('npm version ${{ github.event.inputs.version }}') DO (
-            SET NEW_VERSION=%G
-          )
-          echo NEW_VERSION=%NEW_VERSION%>>%GITHUB_ENV%
-      - name: echo
-        run: echo The new version is %NEW_VERSION%
-        env:
-          NEW_VERSION: ${{ env.NEW_VERSION }}
+        run: npm version ${{ github.event.inputs.version }}
+      - name: Read version
+        uses: ./.github/actions/get-version
       - name: Build
         run: npm run build

@@ -1,0 +1,8 @@
+name: get-version
+description: A custom action to make the version stored in package.json available as output
+outputs:
+  version:
+    description: The version stored in package.json
+runs:
+  using: 'node22'
+  main: 'main.js'
