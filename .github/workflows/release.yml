@@ -1,8 +1,5 @@
 name: Create release
 on:
-  push:
-    branches:
-      - feature/ci
   workflow_dispatch:
     inputs:
       version:
@@ -20,5 +17,7 @@ jobs:
           node-version-file: package.json
       - name: Install
         run: npm ci
+      - name: Bump version
+        run: npm version ${{ github.event.inputs.version }}
       - name: Build
         run: npm run build
