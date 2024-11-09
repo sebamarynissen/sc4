@@ -1,5 +1,8 @@
 name: Create release
 on:
+  push:
+    branches:
+      - feature/ci
   workflow_dispatch:
     inputs:
       version:
