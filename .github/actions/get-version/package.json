@@ -1,6 +1,7 @@
 {
   "name": "@sc4/action-get-version",
   "version": "1.0.0",
+  "type": "module",
   "description": "An action that reads the version stored in package.json and makes it available as output.",
   "main": "index.js",
   "scripts": {
