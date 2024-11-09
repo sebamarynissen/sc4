@@ -6,3 +6,11 @@ import core from '@actions/core';
 const require = createRequire(path.join(process.env.GITHUB_WORKSPACE, './package.json'));
 const pkg = require('./package.json');
 core.setOutput('version', `v${pkg.version}`);
+
+// If the package version contains -alpha, -beta or -rc, then we add the npm tag 
+// as next.
+if (pkg.version.match(/(alpha|beta|rc)/)) {
+	core.setOutput('npm-tag', 'next');
+} else {
+	core.setOutput('npm-tag', 'latest');
+}

@@ -59,6 +59,11 @@ jobs:
 
       # Publish to npm at last
       - name: Publish to npm
-        run: npm --ignore-scripts publish --provenance --access public
+        run: npm --ignore-scripts publish --provenance --access public --tag ${{ steps.read-version.outputs.npm-tag }}
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+      - name: Remove latest tag
+        if: steps.read-version.outputs.npm-tag == 'latest'
+        continue-on-error: true
+        run: npm --silent dist-tag rm sc4 next
