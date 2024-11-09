@@ -1,0 +1,21 @@
+name: Create release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version of the release. Will be passed to npm version, so you can use patch, minor and major as well.
+        required: true
+        default: patch
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@4
+        with:
+          node-version-file: package.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm build
