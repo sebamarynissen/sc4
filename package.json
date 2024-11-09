@@ -49,6 +49,8 @@
     "!lib/**/test"
   ],
   "devDependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
     "@whisthub/eslint-config": "^3.1.0",
     "buffer": "^6.0.3",
     "chai": "^5.1.2",

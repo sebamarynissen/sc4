@@ -1,0 +1,13 @@
+name: get-tag
+description: Determines what tag to use in npm.version
+inputs:
+  version:
+    description: The input from the workflow dispatch.
+    required: false
+    default: patch
+outputs:
+  tag:
+    description: The tag to be used in npm version
+runs:
+  using: 'node20'
+  main: 'main.js'
