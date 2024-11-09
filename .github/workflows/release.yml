@@ -18,15 +18,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-      - name: Configure Git user
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install
+      # - name: Configure Git user
+      #   run: |
+      #     git config --global user.name "github-actions[bot]"
+      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      # - name: Install
+      #   run: npm ci
+      # - name: Bump version
+      #   run: npm version ${{ github.event.inputs.version }}
+      - name: Install custom action dependencies
+        working-directory: ./github/actions/get-version
         run: npm ci
-      - name: Bump version
-        run: npm version ${{ github.event.inputs.version }}
+
       - name: Read version
         uses: ./.github/actions/get-version
-      - name: Build
-        run: npm run build
+      # - name: Build
+      #   run: npm run build
