@@ -1,8 +1,5 @@
 name: Create release
 on:
-  push:
-    branches:
-      feature/ci
   workflow_dispatch:
     inputs:
       version:
@@ -18,14 +15,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-      # - name: Configure Git user
-      #   run: |
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      # - name: Install
-      #   run: npm ci
-      # - name: Bump version
-      #   run: npm version ${{ github.event.inputs.version }}
+      - name: Configure Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Create a test branch to commit to.
+      - name: Test branch
+        run: git checkout -b ci/test
+
+      - name: Install
+        run: npm ci
+      - name: Bump version
+        run: npm version ${{ github.event.inputs.version }}
       - name: Install custom action dependencies
         working-directory: ./.github/actions/get-version
         run: npm ci
@@ -34,7 +36,10 @@ jobs:
         name: Read version
         uses: ./.github/actions/get-version
 
-      - name: echo
-        run: echo ${{ steps.read-version.outputs.version }}
-      # - name: Build
-      #   run: npm run build
+      # - name: echo
+      #   run: echo ${{ steps.read-version.outputs.version }}
+      - name: Build
+        run: npm run build
+
+      - name: Push version bump
+        run: git push origin ci/test
