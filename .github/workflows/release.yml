@@ -27,7 +27,7 @@ jobs:
       # - name: Bump version
       #   run: npm version ${{ github.event.inputs.version }}
       - name: Install custom action dependencies
-        working-directory: ./github/actions/get-version
+        working-directory: ./.github/actions/get-version
         run: npm ci
 
       - name: Read version
