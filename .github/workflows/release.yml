@@ -23,7 +23,6 @@ jobs:
             SET NEW_VERSION=%%G
           )
           echo NEW_VERSION=%NEW_VERSION%>>%GITHUB_ENV%
-        run: npm version ${{ github.event.inputs.version }}
       - name: echo
         run: echo The new version is %NEW_VERSION%
         env:
