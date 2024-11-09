@@ -30,7 +30,11 @@ jobs:
         working-directory: ./.github/actions/get-version
         run: npm ci
 
-      - name: Read version
+      - id: read-version
+        name: Read version
         uses: ./.github/actions/get-version
+
+      - name: echo
+        run: echo ${{ steps.read-version.outputs.version }}
       # - name: Build
       #   run: npm run build
