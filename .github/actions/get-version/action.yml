@@ -3,6 +3,8 @@ description: A custom action to make the version stored in package.json availabl
 outputs:
   version:
     description: The version stored in package.json
+  npm-tag:
+    description: The tag to use when publishing to npm
 runs:
   using: 'node20'
   main: 'main.js'
