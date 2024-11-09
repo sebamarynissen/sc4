@@ -4,5 +4,5 @@ outputs:
   version:
     description: The version stored in package.json
 runs:
-  using: 'node22'
+  using: 'node20'
   main: 'main.js'
