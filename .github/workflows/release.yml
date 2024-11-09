@@ -1,0 +1,71 @@
+name: Create release
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version of the release. Will be passed to npm version, so you can use patch, minor and major as well.
+        required: true
+        default: patch
+
+jobs:
+  release:
+    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+      - name: Configure Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install
+        run: npm ci
+
+      # Find the version to use in npm version from either the PR or the workflow dispatch.
+      - id: get-tag
+        uses: ./.github/actions/get-tag
+        with:
+          version: ${{ github.event.inputs.version }}
+
+      # Perform the version bump
+      - name: Bump version
+        run: npm version ${{ steps.get-tag.outputs.version }}
+
+      # Read in the package.json version and make it available as outputs.version.
+      - id: read-version
+        name: Read version
+        uses: ./.github/actions/get-version
+
+      - name: Build
+        run: npm run build
+
+      # Push the version bump
+      - name: Push version bump
+        run: git push origin main
+
+      # Release baby
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.read-version.outputs.version }}
+          generate_release_notes: true
+          files: dist/sc4.exe
+
+      # Publish to npm at last
+      - name: Publish to npm
+        run: npm --ignore-scripts publish --provenance --access public --tag ${{ steps.read-version.outputs.npm-tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+      - name: Remove latest tag
+        if: steps.read-version.outputs.npm-tag == 'latest'
+        continue-on-error: true
+        run: npm --silent dist-tag rm sc4 next
