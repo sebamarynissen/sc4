@@ -1,5 +1,5 @@
 name: get-tag
-description: Determines what tag to use in npm.version
+description: Determines what tag to use in npm version
 inputs:
   version:
     description: The input from the workflow dispatch.
