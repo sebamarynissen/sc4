@@ -13,4 +13,4 @@ jobs:
         with:
           node-version-file: package.json
       - name: build
-        run: ./build/sea-linux.sh
+        run: npm run build:linux
