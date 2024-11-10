@@ -15,6 +15,8 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    outputs:
+      url: ${{ steps.gh-release.outputs.upload_url }}
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release'))
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +55,7 @@ jobs:
 
       # Release baby
       - name: Create release
+        id: gh-release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.read-version.outputs.version }}
@@ -69,3 +72,41 @@ jobs:
         if: steps.read-version.outputs.npm-tag == 'latest'
         continue-on-error: true
         run: npm --silent dist-tag rm sc4 next
+
+  linux:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+      - run: npm ci
+      - name: Build
+        run: |
+          node -e "const fs = require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');fs.writeFileSync('dist/version.txt', require('./package.json').version)"
+          npm run build:bundle
+          node --experimental-sea-config build/sea-config.json
+          cp $(command -v node) dist/sc4
+          chmod +x dist/sc4
+          npx postject dist/sc4 NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 
+
+      - name: Upload asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOAD_URL: ${{ needs.release.outputs.url }}
+          ASSET_PATH: ./dist/sc4
+        shell: bash
+        run: |
+          UPLOAD_URL=$(echo "$UPLOAD_URL" | sed 's/{?name,label}//')"?name=sc4&label=sc4%20(linux)"
+          echo $UPLOAD_URL
+
+          curl -L \
+          -X POST \
+          --fail-with-body \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Content-Type: application/octet-stream" \
+          $UPLOAD_URL \
+          --data-binary "@$ASSET_PATH"
