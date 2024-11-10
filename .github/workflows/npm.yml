@@ -13,6 +13,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: ls -a
       - name: Publish
-        run: npm whoami
+        run: npm publish
         env:
           NPM_AUTH_TOKEN: ${{ secrets.npm_token }}
