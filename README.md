@@ -5,14 +5,14 @@
 ## Installation
 
 There are two ways to install `sc4`.
-If you are on Windows, the easiest is to download `sc4.exe` from [the latest release](https://github.com/sebamarynissen/sc4/releases/latest).
-Just put the `sc4.exe` file somewhere on your filesystem and you're good to go.
+Binaries are available [for Windows and Linux](https://github.com/sebamarynissen/sc4/releases/latest).
+Just put the `sc4.exe` (or `sc4` if you're on LInux) somewhere on your filesystem and you're good to go.
 
 If you want to use the commands in `sc4` - see [Usage](#usage) for more info - then it's advisable to add the folder where you stored the `sc4.exe` to your `PATH` variable on Windows.
 That way, the `sc4` command will always be available if you open a command prompt in a folder.
 
 You can also install `sc4` with [Node.js](https://www.nodejs.org).
-Make sure to download the latest version of Node.js, as `sc4` only works with Node.js `22.3` or higher, or `20.16` or higher.
+Make sure to download the latest version of Node.js, as `sc4` only works with Node.js `22.3` or higher.
 
 Once Node.js is installed, fire up a command prompt, type `npm install -g sc4` and hit enter.
 This will globally install the sc4 module and make the `sc4` command available in your command line.
@@ -26,11 +26,11 @@ The easiest one is to use it in interactive mode, which is the default when you 
 When doing this, you will be prompted with what you want to do. Currently there are four things you can do in interactive mode:
 
  - **Growify RCI** It was long thought that plopped residentials could not be used because the residents could never find any jobs, and hence the buildings would always eventually abandon. However, by modifying the savegame, it is possible to trick SimCity 4 into thinking that they were actually grown. This process is called *growifying* the buildings, and it can be used for commercial of industrial buildings as well. For more info, see [this thread](https://community.simtropolis.com/forums/topic/758258-modifying-sc4-savegames-it-is-possible/) on Simtropolis.
- - **Make buildings historical** Marking a lot of buildings in a city is tedious and time consuming. You can use `sc4` to automatically mark all lots in a city as historical.
+ - **Make buildings historical** Marking a lot of buildings in a city historical is tedious and time consuming. You can use `sc4` to automatically mark all lots in a city as historical.
  - **Create an optimal pipe layout** Draws pipes in a city in an optimal way, meaning it covers the entire city for minimal cost. Note that this removes any existing piping network!
  - **Create a submenu patch** [@memo](https://github.com/memo33) has released an [excellent DLL mod](https://community.simtropolis.com/files/file/36142-submenus-dll/) that adds a submenu system to the game. However, in order to add existing content to a certain submenu, you need often need to edit the content yourself in iLives Reader. This action makes it easier to add a bunch of lots to a certain submenu.
 
-The tool has been designed in a way that if you drag & drop files on the `sc4.exe` and then run on of the actions above, it is automatically assumed that you want to modify the files you drag & dropped.
+The tool has been designed in a way that if you drag & drop files on the `sc4.exe` binary and then run on of the actions above, it is automatically assumed that you want to modify the files you drag & dropped.
 This becomes especially powerful for cities if you combine it with configuring Windows to open all `.sc4` files with the `sc4.exe`.
 As such you can simply double-click one of your cities, and subsequently it will fire up the interactive interface and ask you what you want to do with that city.
 
