@@ -9,6 +9,6 @@ jobs:
       - uses: actions/setup-node@v4
       - name: Publish
         if: secrets.npm_token != ''
-        run: npm publish --provenance --tag next
+        run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
