@@ -21,7 +21,7 @@
     "#test/*": "./test/*"
   },
   "engines": {
-    "node": ">=22.3.0 || ^20.16.0"
+    "node": ">=22.3.0"
   },
   "scripts": {
     "lint": "eslint lib",
