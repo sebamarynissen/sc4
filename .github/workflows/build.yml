@@ -1,0 +1,16 @@
+name: Build
+on:
+  push:
+    branches:
+      - feature/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@4
+      - uses: actions/setup-node@4
+        with:
+          node-version-file: package.json
+      - name: build
+        run: ./build/sea-linux.sh
