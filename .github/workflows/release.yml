@@ -64,7 +64,8 @@ jobs:
 
       # Publish to npm at last
       - name: Publish to npm
-        run: npm --ignore-scripts publish --provenance --access public --tag ${{ steps.read-version.outputs.npm-tag }}
+        run: npm whoami; npm --ignore-scripts publish --provenance --access public --tag ${{ steps.read-version.outputs.npm-tag }}
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
