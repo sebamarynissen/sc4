@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
+      - run: npm ci
       - name: build
         run: |
           node -e "const fs = require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');fs.writeFileSync('dist/version.txt', require('./package.json').version)"
