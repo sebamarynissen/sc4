@@ -4,6 +4,9 @@ on: [push, workflow_dispatch]
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - run: ls -a
