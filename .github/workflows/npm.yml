@@ -8,6 +8,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - name: Publish
-        run: npnm publish --provenance --acess public --tag next
+        run: npm publish --provenance --acess public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
