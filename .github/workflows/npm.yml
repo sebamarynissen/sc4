@@ -8,6 +8,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - name: Publish
-        run: npm publish --provenance
+        run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
