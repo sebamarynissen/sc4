@@ -13,4 +13,4 @@ jobs:
       - name: Publish
         run: npm whoami
         env:
-          NPM_TOKEN: ${{ secrets.npm_token }}
+          NPM_AUTH_TOKEN: ${{ secrets.npm_token }}
