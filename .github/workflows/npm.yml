@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
@@ -13,7 +13,11 @@ jobs:
         with:
           node-version: 22
           registry-url: "https://registry.npmjs.org"
+      # Read in the package.json version and make it available as outputs.version.
+      - id: read-version
+        name: Read version
+        uses: ./.github/actions/get-version
       - name: Publish
-        run: npm publish --provenance
+        run: npm publish --provenance --tag ${{ steps.read-version.outputs.npm-tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
