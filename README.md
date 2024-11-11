@@ -28,8 +28,9 @@ When doing this, you will be prompted with what you want to do. Currently there 
  - **Growify RCI** It was long thought that plopped residentials could not be used because the residents could never find any jobs, and hence the buildings would always eventually abandon. However, by modifying the savegame, it is possible to trick SimCity 4 into thinking that they were actually grown. This process is called *growifying* the buildings, and it can be used for commercial of industrial buildings as well. For more info, see [this thread](https://community.simtropolis.com/forums/topic/758258-modifying-sc4-savegames-it-is-possible/) on Simtropolis.
  - **Make buildings historical** Marking a lot of buildings in a city historical is tedious and time consuming. You can use `sc4` to automatically mark all lots in a city as historical.
  - **Create an optimal pipe layout** Draws pipes in a city in an optimal way, meaning it covers the entire city for minimal cost. Note that this removes any existing piping network!
- - **Create a submenu patch** [@memo](https://github.com/memo33) has released an [excellent DLL mod](https://community.simtropolis.com/files/file/36142-submenus-dll/) that adds a submenu system to the game. However, in order to add existing content to a certain submenu, you need often need to edit the content yourself in iLives Reader. This action makes it easier to add a bunch of lots to a certain submenu.
+ - **Adds lot to a submenu** [@memo](https://github.com/memo33) has released an [excellent DLL mod](https://community.simtropolis.com/files/file/36142-submenus-dll/) that adds a submenu system to the game. However, in order to add existing content to a certain submenu, you need often need to edit the content yourself in iLives Reader. This action makes it easier to add a bunch of lots to a certain submenu.
  - **Create a new submenu** You can use this to add a custom submenu to the game. It basically automates [this flow](https://github.com/memo33/submenus-dll?tab=readme-ov-file#creating-a-new-submenu-button) and expects you to specify a PNG file with the icon to use. You can find a template for generating icons with GIMP [here].
+ - **Scan plugins for submenus** This action can be used to scan a certain folder - which defaults to your configured plugins folder - for existing submenus. Any submenus that are found and not present in your config yet will be stored in the config and hence be available from then on to be used when adding lots to a certain submenu.
 
 The tool has been designed in a way that if you drag & drop files on the `sc4.exe` binary and then run on of the actions above, it is automatically assumed that you want to modify the files you drag & dropped.
 This becomes especially powerful for cities if you combine it with configuring Windows to open all `.sc4` files with the `sc4.exe`.
@@ -63,6 +64,7 @@ Commands:
   refs [options] <city>                      Finds internal memory references within a city
   pointer <city> <pointer>                   Finds the subfile entery addressed by the given pointer
   tracts [options] <city>                    Changes the active tilesets in the given city
+  config                                     Allows modifying the config file. Be careful with this if you don't know what you're doing!
 ```
 
 You can run `sc4 [command] --help` to get an overview of the options for every command.
