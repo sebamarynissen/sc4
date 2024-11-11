@@ -67,6 +67,7 @@
     "@inquirer/checkbox": "^4.0.1",
     "@inquirer/confirm": "^5.0.1",
     "@inquirer/core": "^10.0.1",
+    "@inquirer/editor": "^4.1.0",
     "@inquirer/figures": "^1.0.7",
     "@inquirer/input": "^4.0.1",
     "@inquirer/number": "^3.0.1",
