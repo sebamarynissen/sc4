@@ -29,6 +29,7 @@ When doing this, you will be prompted with what you want to do. Currently there 
  - **Make buildings historical** Marking a lot of buildings in a city historical is tedious and time consuming. You can use `sc4` to automatically mark all lots in a city as historical.
  - **Create an optimal pipe layout** Draws pipes in a city in an optimal way, meaning it covers the entire city for minimal cost. Note that this removes any existing piping network!
  - **Create a submenu patch** [@memo](https://github.com/memo33) has released an [excellent DLL mod](https://community.simtropolis.com/files/file/36142-submenus-dll/) that adds a submenu system to the game. However, in order to add existing content to a certain submenu, you need often need to edit the content yourself in iLives Reader. This action makes it easier to add a bunch of lots to a certain submenu.
+ - **Create a new submenu** You can use this to add a custom submenu to the game. It basically automates [this flow](https://github.com/memo33/submenus-dll?tab=readme-ov-file#creating-a-new-submenu-button) and expects you to specify a PNG file with the icon to use. You can find a template for generating icons with GIMP [here].
 
 The tool has been designed in a way that if you drag & drop files on the `sc4.exe` binary and then run on of the actions above, it is automatically assumed that you want to modify the files you drag & dropped.
 This becomes especially powerful for cities if you combine it with configuring Windows to open all `.sc4` files with the `sc4.exe`.
@@ -54,6 +55,7 @@ Commands:
   historical [options] <city>                Make buildings within the given city historical
   growify [options] <city>                   Convert plopped buildings into functional growables
   create-submenu-patch [options] [files...]  Adds all specified lots to the given menu using the Exemplar Patching method
+  create-new-submenu [options] <icon>        Generates a new submenu button
   pipes <city>                               Create the optimal pipe layout in the given city
   tileset [options] [dir]                    Set the tilesets for all buildings in the given directory
   backup [options]                           Backup a region or your entire plugins folder
