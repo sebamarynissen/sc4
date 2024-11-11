@@ -85,6 +85,7 @@
     "smart-buffer": "^4.1.0",
     "tar": "^6.1.8",
     "tmp-promise": "^3.0.3",
+    "uint8array-extras": "^1.4.0",
     "util-deprecate": "^1.0.2"
   }
 }
