@@ -108,6 +108,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Explicitly checkout the main branch because the npm version commit 
+          # has been pushed, which is not automatically checked out because by 
+          # default only the commit that triggered the workflow is checked out.
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
