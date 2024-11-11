@@ -32,7 +32,7 @@
     "electron": "electron lib/gui/app.js"
   },
   "bin": {
-    "sc4": "./lib/cli/cli.js"
+    "sc4": "lib/cli/cli.js"
   },
   "keywords": [
     "SimCity 4",
@@ -42,7 +42,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sebamarynissen/sc4.git"
+    "url": "git+https://github.com/sebamarynissen/sc4.git"
   },
   "files": [
     "lib",
