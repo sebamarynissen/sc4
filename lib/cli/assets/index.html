@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drag & Drop Image Processor</title>
+    <title>Upload an icon</title>
     <style>
     	* {
     		margin: 0;
@@ -16,20 +16,22 @@
     	body {
     		width: 100%;
     		height: 100%;
-    	}
-    	div {
-    		width: 100%;
-    		height: 100%;
-    		display: flex;
-    		justify-content: center;
-    		align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
     	}
     </style>
     <script type="module" src="./script.js"></script>
 </head>
 <body>
-	<div>
-		<canvas id="canvas" width="176" height="44"></canvas>
-	</div>
+    <form action="/upload" method="POST">
+    	<canvas id="canvas" width="176" height="44"></canvas>
+        <div style="text-align: center;">
+            <input type="file" accept="image/png, image/jpeg">
+        </div>
+        <div>
+            <button id="choose">Choose</button>
+        </div>
+    </form>
 </body>
 </html>
