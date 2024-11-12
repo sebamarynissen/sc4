@@ -3,6 +3,9 @@
 	"output": "dist/sea-prep.blob",
 	"disableExperimentalSEAWarning": true,
 	"assets": {
-		"version.txt": "./dist/version.txt"
+		"version.txt": "./dist/version.txt",
+		"assets/index.html": "./lib/cli/assets/index.html",
+		"assets/script.js": "./lib/cli/assets/script.js",
+		"assets/overlay.png": "./lib/cli/assets/overlay.png"
 	}
 }

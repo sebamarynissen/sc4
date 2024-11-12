@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' class='size-6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776' /%3E%3C/svg%3E%0A">
+	<title>Pick an icon</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		html {
+			width: 100%;
+			height: 100%;
+		}
+		body {
+			font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+			width: 100%;
+			height: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: background 0.3s ease;
+			font-size: 16px;
+		}
+		form {
+			width: 512px;
+		}
+		h1 {
+			font-size: inherit;
+			font-weight: inherit;
+			margin-bottom: 1em;
+			font-size: 18px;
+		}
+		canvas {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+		input[type="file"] {
+			margin-bottom: 12px;
+			width: 100%;
+		}
+		p {
+			font-size: 14px;
+			color: #44403c;
+			max-width: 24rem;
+		}
+		button, input[type="file"] {
+			font-size: inherit;
+		}
+		button.save {
+			padding-left: 4px;
+			padding-right: 4px;
+		}
+		button.save svg {
+			width: 12px;
+			height: 12px;
+		}
+		form:has(input[type="file"]:invalid) button.save {
+			visibility: hidden;
+		}
+		div.cta {
+			margin-top: 12px;
+		}
+		label {
+			display: flex;
+			align-items: center;
+			margin-bottom: 0.24rem;
+		}
+		label > input {
+			margin-right: 0.5rem;
+		}
+	</style>
+	<script type="module" src="./script.js"></script>
+</head>
+<body>
+	<form action="/upload" method="POST">
+		<h1></h1>
+		<canvas id="canvas" width="176" height="44"></canvas>
+		<div>
+			<input type="file" name="icon" accept="image/png, image/jpeg" required>
+		</div>
+		<div>
+			<label>
+				<input type="checkbox" name="raw">
+				Use raw image
+			</label>
+		</div>
+		<p>
+			Select an image to be used as icon. You can also drag & drop a file, or paste a url or raw image.
+		</p>
+		<div class="cta">
+			<button id="choose" class="save">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+ 					<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+				</svg>
+				Use as icon
+			</button>
+		</div>
+	</form>
+</body>
+</html>
