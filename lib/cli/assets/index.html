@@ -64,6 +64,14 @@
 		div.cta {
 			margin-top: 12px;
 		}
+		label {
+			display: flex;
+			align-items: center;
+			margin-bottom: 0.24rem;
+		}
+		label > input {
+			margin-right: 0.5rem;
+		}
 	</style>
 	<script type="module" src="./script.js"></script>
 </head>
@@ -72,7 +80,13 @@
 		<h1></h1>
 		<canvas id="canvas" width="176" height="44"></canvas>
 		<div>
-			<input type="file" accept="image/png, image/jpeg" required>
+			<input type="file" name="icon" accept="image/png, image/jpeg" required>
+		</div>
+		<div>
+			<label>
+				<input type="checkbox" name="raw">
+				Use raw image
+			</label>
 		</div>
 		<p>
 			Select an image to be used as icon. You can also drag & drop a file, or paste a url or raw image.
