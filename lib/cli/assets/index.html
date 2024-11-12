@@ -26,15 +26,26 @@
 			font-size: 16px;
 		}
 		form {
-			width: 312px;
+			width: 512px;
 		}
 		h1 {
 			font-size: inherit;
 			font-weight: inherit;
 			margin-bottom: 1em;
+			font-size: 18px;
+		}
+		canvas {
+			margin-top: 12px;
+			margin-bottom: 12px;
 		}
 		input[type="file"] {
-			margin-bottom: 0.5rem;
+			margin-bottom: 12px;
+			width: 100%;
+		}
+		p {
+			font-size: 14px;
+			color: #44403c;
+			max-width: 24rem;
 		}
 		button, input[type="file"] {
 			font-size: inherit;
@@ -48,7 +59,10 @@
 			height: 12px;
 		}
 		form:has(input[type="file"]:invalid) button.save {
-			display: none;
+			visibility: hidden;
+		}
+		div.cta {
+			margin-top: 12px;
 		}
 	</style>
 	<script type="module" src="./script.js"></script>
@@ -60,12 +74,15 @@
 		<div>
 			<input type="file" accept="image/png, image/jpeg" required>
 		</div>
-		<div>
+		<p>
+			Select an image to be used as icon. You can also drag & drop a file, or paste a url or raw image.
+		</p>
+		<div class="cta">
 			<button id="choose" class="save">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
  					<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
 				</svg>
-				Use this icon
+				Use as icon
 			</button>
 		</div>
 	</form>
