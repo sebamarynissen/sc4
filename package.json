@@ -9,7 +9,9 @@
     "./core": "./lib/core/index.js",
     "./utils": "./lib/utils/index.js",
     "./utils/register": "./lib/utils/register-debug-utils.js",
+    "./threading/*": "./lib/threading/*",
     "./cli": "./lib/cli/cli.js",
+    "./index/*": "./lib/index/*",
     "./api": "./lib/api/api.js",
     "./api/*": "./lib/api/*"
   },
