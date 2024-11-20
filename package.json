@@ -29,7 +29,9 @@
     "lint": "eslint lib",
     "test": "mocha lib/**/*-test.js test/**/*.js",
     "build": "build\\sea.bat",
-    "build:bundle": "esbuild lib/cli/cli.js --bundle --platform=node --target=node22 --outfile=dist/sc4.js --minify --format=cjs --metafile=dist/buildmanifest.json",
+    "build:bundle": "npm run build:bundle:main && npm run build:thread",
+    "build:bundle:main": "esbuild lib/cli/cli.js --bundle --platform=node --target=node22 --outfile=dist/sc4.js --minify --format=cjs --metafile=dist/buildmanifest.json",
+    "build:thread": "esbuild lib/index/file-index-thread.js --bundle --platform=node --target=node22 --outfile=dist/file-index-thread.js --minify --format=cjs --metafile=dist/thread.buildmanifest.json",
     "build:postject": "postject dist/sc4.exe NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
     "electron": "electron lib/gui/app.js"
   },
