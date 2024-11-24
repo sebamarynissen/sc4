@@ -7,6 +7,6 @@
 		"assets/index.html": "./lib/cli/assets/index.html",
 		"assets/script.js": "./lib/cli/assets/script.js",
 		"assets/overlay.png": "./lib/cli/assets/overlay.png",
-		"threads/file-index-thread.js": "./dist/file-index-thread.js"
+		"threads/plugin-index-thread.js": "./dist/plugin-index-thread.js"
 	}
 }
