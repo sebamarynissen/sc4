@@ -89,9 +89,9 @@
     "ora": "^8.1.1",
     "p-queue": "^8.0.1",
     "package-up": "^5.0.0",
-    "qfs-compression": "^0.2.1",
+    "qfs-compression": "^0.2.3",
     "semver": "^7.3.5",
-    "smart-buffer": "^4.1.0",
+    "smart-arraybuffer": "^1.0.0-alpha.2",
     "tar": "^6.1.8",
     "uint8array-extras": "^1.4.0",
     "yaml": "^2.6.0"
