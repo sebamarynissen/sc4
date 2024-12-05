@@ -33,6 +33,7 @@ Currently you can perform the following actions in interactive mode:
  - **Create a new submenu** You can use this to add a custom submenu to the game, which basically automates [this flow](https://github.com/memo33/submenus-dll?tab=readme-ov-file#creating-a-new-submenu-button). You will be prompted to specify an image as icon, with the option to automatically apply [this icon template](https://github.com/memo33/submenus-dll/releases/download/1.0.0/memo-icon-template-0.2.xcf).
  - **Scan plugins for submenus** This action can be used to scan a certain folder - which defaults to your configured plugins folder - for existing submenus. Any submenus that are found which are not present in your config yet will be stored in the config and hence be available from then on to be used when adding lots to a certain submenu.
  - **Change a menu icon** This action can be used to change the icon for a menu item. This works for lots, but also for submenus that have been generated with the command above. As with most actions, you can drag & drop a `.sc4lot` or `.dat` file on the exe to automatically select it.
+ - **Plop all lots of a collection** This action can be used to plop all lots contained in a set of files. This is highly experimental and **MUST NOT** be used in established cities. It is meant to ensure you have all required dependencies installed for the set of lots because it allows you to verify no brown boxes are present.
 
 The tool has been designed in a way that if you drag & drop files on the `sc4.exe` binary and then run on of the actions above, it is automatically assumed that you want to modify the files you drag & dropped.
 This becomes especially powerful for cities if you combine it with configuring Windows to open all `.sc4` files with the `sc4.exe`.
@@ -60,6 +61,8 @@ Commands:
   create-submenu-patch [options] [files...]  Adds all specified lots to the given menu using the Exemplar Patching method
   create-new-submenu [options] <icon>        Generates a new submenu button
   pipes <city>                               Create the optimal pipe layout in the given city
+  plop-all [options] <city> [patterns...]    Plops all lots that match the patterns in the city. DO NOT use this on established cities!
+  track [options] [patterns...]              Finds all dependencies for the files that match the given patterns
   tileset [options] [dir]                    Set the tilesets for all buildings in the given directory
   backup [options]                           Backup a region or your entire plugins folder
   dump <city>                                Give a human-readable representation of all lots in the city
