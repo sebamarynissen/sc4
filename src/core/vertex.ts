@@ -1,5 +1,7 @@
 // # vertex.js
 import Color from './color.js';
+import type WriteBuffer from './write-buffer.js';
+import type Stream from './stream.js';
 
 // # Vertex
 // In quite a lot of subfiles often the sequence x, y, z, u, v, r, g, b, a 
@@ -9,18 +11,15 @@ import Color from './color.js';
 // class.
 export default class Vertex {
 
-	// ## constructor()
-	constructor() {
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
-		this.u = 0;
-		this.v = 0;
-		this.color = new Color();
-	}
+	x = 0;
+	y = 0;
+	z = 0;
+	u = 0;
+	v = 0;
+	color = new Color();
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		this.x = rs.float();
 		this.y = rs.float();
 		this.z = rs.float();
@@ -30,7 +29,7 @@ export default class Vertex {
 	}
 
 	// ## write(ws)
-	write(ws) {
+	write(ws: WriteBuffer) {
 		ws.float(this.x);
 		ws.float(this.y);
 		ws.float(this.z);

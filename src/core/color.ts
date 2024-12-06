@@ -1,12 +1,13 @@
 // # color.js
 export default class Color {
+	r = 0;
+	g = 0;
+	b = 0;
+	a = 0xff;
 	constructor(r = 0, g = 0, b = 0, a = 0xff) {
-		this.r = r;
-		this.g = g;
-		this.b = b;
-		this.a = a;
+		Object.assign(this, { r, g, b, a });
 	}
-	[Symbol.toPrimitive]() {
+	[Symbol.toPrimitive](): string {
 		let { r, g, b, a } = this;
 		return '#'+pad(r)+pad(g)+pad(b)+pad(a);
 	}
@@ -15,6 +16,6 @@ export default class Color {
 	}
 }
 
-function pad(value) {
+function pad(value: number) {
 	return value.toString(16).padStart(2, '0');
 }
