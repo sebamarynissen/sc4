@@ -7,7 +7,8 @@
 				"node_modules"
 			],
 			"file_exclude_patterns": [
-				"package-lock.json"
+				"package-lock.json",
+				"dist/*.js"
 			]
 		}
 	]
