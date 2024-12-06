@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/get-version
 
       - name: Build
-        run: npm run build
+        run: npm run build:exe
 
       # Push the version bump
       - name: Push version bump
@@ -73,6 +73,7 @@ jobs:
       - run: npm ci
       - name: Build
         run: |
+          npm run build
           node -e "const fs = require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');fs.writeFileSync('dist/version.txt', require('./package.json').version)"
           npm run build:bundle
           node --experimental-sea-config build/sea-config.json
@@ -118,6 +119,7 @@ jobs:
           node-version-file: package.json
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
+      - run: npm run build
       - id: read-version
         name: Read version
         uses: ./.github/actions/get-version

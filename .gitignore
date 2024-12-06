@@ -1,5 +1,6 @@
 **/node_modules/**
 *.sublime-workspace
 dist/**
+lib/**
 
 test/output/**

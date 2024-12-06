@@ -1,6 +1,6 @@
 // # worker-pool.js
 import sea from 'node:sea';
-import BaseWorkerPool from 'sc4/threading/worker-pool.js';
+import { WorkerPool as BaseWorkerPool } from 'sc4/threading';
 
 // # WorkerPool()
 // Small helper class that overrides our basic worker pool so that we handle the 
