@@ -4,9 +4,9 @@
 	"disableExperimentalSEAWarning": true,
 	"assets": {
 		"version.txt": "./dist/version.txt",
-		"assets/index.html": "./lib/cli/assets/index.html",
-		"assets/script.js": "./lib/cli/assets/script.js",
-		"assets/overlay.png": "./lib/cli/assets/overlay.png",
+		"assets/index.html": "./src/cli/assets/index.html",
+		"assets/script.js": "./src/cli/assets/script.js",
+		"assets/overlay.png": "./src/cli/assets/overlay.png",
 		"threads/plugin-index-thread.js": "./dist/plugin-index-thread.js"
 	}
 }
