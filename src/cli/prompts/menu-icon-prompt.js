@@ -1,6 +1,5 @@
 // # menu-icon-prompt.js
 import path from 'node:path';
-import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import sea from 'node:sea';
 import http from 'node:http';
@@ -13,6 +12,7 @@ import {
 	usePrefix,
 	makeTheme,
 } from '@inquirer/core';
+import { concatUint8Arrays, isUint8Array, uint8ArrayToBase64 } from 'uint8array-extras';
 
 // The prompt that we use when requesting menu icons from the user. We'll do 
 // this by starting a server where the browser is doing the job of compiling the 
@@ -41,9 +41,8 @@ export const menuIcon = createPrompt((config, done) => {
 
 // # defaultToUrl(file)
 function defaultToUrl(file) {
-	if (Buffer.isBuffer(file)) {
-		let buffer = Buffer.from(file);
-		return `data:image/png;base64,${buffer.toString('base64')}`;
+	if (isUint8Array(file)) {
+		return `data:image/png;base64,${uint8ArrayToBase64(file)}`;
 	} else {
 		return pathToFileURL(file);
 	}
@@ -80,7 +79,7 @@ function runServer(config) {
 			}
 			res.statusCode = 202;
 			res.end();
-			ready.resolve(Buffer.concat(parts));
+			ready.resolve(concatUint8Arrays(parts));
 		} else {
 			let id = req.url === '/' ? '/index.html' : req.url;
 			send(res, id);
@@ -129,7 +128,7 @@ function getSendHandler() {
 
 // # sendSea(res, key)
 function sendSea(res, key) {
-	let asset = Buffer.from(sea.getAsset(`assets${key}`));
+	let asset = new Uint8Array(sea.getAsset(`assets${key}`));
 	sendType(res, key);
 	res.end(asset);
 }
