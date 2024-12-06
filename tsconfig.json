@@ -10,6 +10,7 @@
 			"sc4/threading": ["src/threading/index.js"],
 			"sc4/api": ["src/api/api.js"],
 			"sc4/api/*": ["src/api/*"],
+			"sc4/types": ["src/types/types.ts"],
 		},
 		"lib": ["es2022"],
 		"target": "es2022",
@@ -17,6 +18,7 @@
 		"moduleResolution": "nodenext",
 		"verbatimModuleSyntax": true,
 		"declaration": true,
+		"noImplicitAny": true,
 
 		// AllowJs has to be true as long as we haven't migrated everything yet.
 		"allowJs": true,

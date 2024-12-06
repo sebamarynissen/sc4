@@ -59,6 +59,8 @@
   "devDependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
+    "@types/chai": "^5.0.1",
+    "@types/mocha": "^10.0.10",
     "@whisthub/eslint-config": "^3.1.0",
     "buffer": "^6.0.3",
     "chai": "^5.1.2",
@@ -73,6 +75,7 @@
     "rimraf": "^6.0.1",
     "string-argv": "^0.3.1",
     "tsx": "^4.19.2",
+    "type-fest": "^4.30.0",
     "typescript": "^5.7.2",
     "xml2js": "^0.6.2"
   },

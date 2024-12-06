@@ -3,14 +3,17 @@ import { expect } from 'chai';
 import Index from '../tgi-index.js';
 
 class TGI {
-	constructor(type, group, instance) {
+	type = 0;
+	group = 0;
+	instance = 0;
+	constructor(type: number, group: number, instance: number) {
 		this.type = type;
 		this.group = group;
 		this.instance = instance;
 	}
 }
 
-const fn = create => () => {
+const fn = (create: (arr: any[]) => Index) => () => {
 	describe('#find()', function() {
 
 		it('queries by TGI', function() {
