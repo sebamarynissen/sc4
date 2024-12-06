@@ -7,7 +7,7 @@ import type { FileTypeConstructor } from './types.js'
 // specified, we hence return the type id of this constructor, if it's an 
 // instance we look it up in the constructor.
 export function getClassType(
-	object: FileTypeConstructor | { constructor: FileTypeConstructor },
+	object: FileTypeConstructor | InstanceType<FileTypeConstructor>,
 ) {
 	if (kFileType in object) {
 		return object[kFileType];

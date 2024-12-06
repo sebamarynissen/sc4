@@ -1,20 +1,27 @@
 // # pointer.js
 // Small helper class that represents a pointer to a certain record in the 
 // subfile.
-import { hex } from 'sc4/utils';
+import { hex, type uint32 } from 'sc4/utils';
 import { getTypeFromInstance } from './filetype-map.js';
+import type { SavegameRecord } from './types.js';
+
+// # Pointer
 export default class Pointer {
+	type: uint32 = 0x00000000;
+	address: uint32 = 0x00000000;
 
 	// ## constructor(object, address)
 	// We can construct a pointer in two ways. Either directly from a type and 
 	// address, or from a record itself.
-	constructor(object, address = 0x00000000) {
-		if (typeof object === 'number') {
-			this.type = object;
+	constructor(object: SavegameRecord);
+	constructor(type: uint32, address: uint32);
+	constructor(objectOrType: SavegameRecord | number, address = 0x00000000) {
+		if (typeof objectOrType === 'number') {
+			this.type = objectOrType;
 			this.address = address;
 		} else {
-			this.type = getTypeFromInstance(object);
-			this.address = object.mem;
+			this.type = getTypeFromInstance(objectOrType);
+			this.address = objectOrType.mem;
 		}
 	}
 
@@ -29,7 +36,7 @@ export default class Pointer {
 
 	// ## get [Symbol.toPrimitive](hint)
 	// Allows you to get the numerical value of the pointer by using +pointer.
-	[Symbol.toPrimitive](hint) {
+	[Symbol.toPrimitive](hint: 'number' | 'string') {
 		return hint === 'number' ? this.address : hex(this.address);
 	}
 
