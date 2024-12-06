@@ -2,9 +2,8 @@
 // Contains the JavaScript api of the cli. This separates concerns nicely: the 
 // api does the actual job, while the cli is merely responsible for the 
 // options parsing.
-import { fs, path, crypto } from 'sc4/utils';
+import { fs, path, crypto, hex } from 'sc4/utils';
 import { Savegame, FileType, SimGrid } from 'sc4/core';
-import { hex } from 'sc4/utils';
 
 // # historical(opts)
 // The api function that makes buildings historical within a savegame.
