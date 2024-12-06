@@ -1,4 +1,4 @@
-// # tgi-index.js
+// # tgi-index.ts
 import type { TGIQuery, TGILiteral } from 'sc4/types';
 
 type SingleResult<T> = T | null;

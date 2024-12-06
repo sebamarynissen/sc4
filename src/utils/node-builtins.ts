@@ -1,4 +1,4 @@
-// # fs.js
+// # node-builtins.ts
 // We want to avoid importing builtin node modules becuase we might be running 
 // in the browser as well. That's where process.getBuiltinModule comes to the 
 // rescue. This allows us to avoid importing those modules, and conditionally 
