@@ -1,6 +1,18 @@
 import type { SetOptional } from 'type-fest';
 
+export type byte = number;
+export type uint8 = number;
+export type uint16 = number;
 export type uint32 = number;
+export type uint64 = bigint;
+export type sint8 = number;
+export type sint16 = number;
+export type sint32 = number;
+export type sint64 = bigint;
+export type float = number;
+export type double = number;
+export type dword = uint32;
+export type word = uint16;
 export type TGILiteral = {
 	type: uint32;
 	group: uint32;

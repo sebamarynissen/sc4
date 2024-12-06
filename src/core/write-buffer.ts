@@ -4,6 +4,20 @@ import xcrc from './crc.js';
 import type Color from './color.js';
 import type Vertex from './vertex.js';
 import type Pointer from './pointer.js';
+import type {
+	byte,
+	double,
+	dword,
+	float,
+	sint8,
+	sint16,
+	sint32,
+	sint64,
+	uint8,
+	uint16,
+	uint32,
+	word,
+} from 'sc4/types';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -51,19 +65,19 @@ export default class WriteBuffer extends SmartBuffer {
 	}
 
 	// Simple aliases.
-	int8(offset?: number) { this.writeInt8(offset); }
-	int16(offset?: number) { this.writeInt16LE(offset); }
-	int32(offset?: number) { this.writeInt32LE(offset); }
-	bigint64(offset?: number) { this.writeBigInt64LE(BigInt(offset)); }
-	float(offset?: number) { this.writeFloatLE(offset); }
-	double(offset?: number) { this.writeDoubleLE(offset); }
-	uint8(offset?: number) { this.writeUInt8(offset); }
-	byte(offset?: number) { this.writeUInt8(offset); }
-	bool(offset?: number) { this.writeUInt8(Number(offset)); }
-	uint16(offset?: number) { this.writeUInt16LE(offset); }
-	word(offset?: number) { this.writeUInt16LE(offset); }
-	uint32(offset?: number) { this.writeUInt32LE(offset); }
-	dword(offset?: number) { this.writeUInt32LE(offset); }
+	int8(value: sint8) { this.writeInt8(value); }
+	int16(value: sint16) { this.writeInt16LE(value); }
+	int32(value: sint32) { this.writeInt32LE(value); }
+	bigint64(value: sint64) { this.writeBigInt64LE(BigInt(value)); }
+	float(value: float) { this.writeFloatLE(value); }
+	double(value: double) { this.writeDoubleLE(value); }
+	uint8(value: uint8) { this.writeUInt8(value); }
+	byte(value: byte) { this.writeUInt8(value); }
+	bool(value: boolean) { this.writeUInt8(Number(value)); }
+	uint16(value: uint16) { this.writeUInt16LE(value); }
+	word(value: word) { this.writeUInt16LE(value); }
+	uint32(value: uint32) { this.writeUInt32LE(value); }
+	dword(value: dword) { this.writeUInt32LE(value); }
 
 	// ## n()
 	// Fills the buffer with the given amount of zeroes.
