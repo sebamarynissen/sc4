@@ -1,7 +1,7 @@
 // # plugin-index-thread.js
 // This file runs in a separate thread and is used by the plugin index to 
 // parallelize certain tasks.
-import thread from 'sc4/threading/worker-thread.js';
+import { thread } from 'sc4/threading';
 import os from 'node:os';
 import { DBPF } from 'sc4/core';
 import PQueue from 'p-queue';

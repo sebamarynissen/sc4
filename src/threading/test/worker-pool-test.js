@@ -1,8 +1,10 @@
 // # worker-pool-test.js
 import { expect } from 'chai';
 import chalk from 'chalk';
-import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import esbuild from 'esbuild';
 import WorkerPool from '../worker-pool.js';
+import { uint8ArrayToString } from 'uint8array-extras';
 
 // # logUsage()
 // Helper function for logging the current usage of a worker pool.
@@ -20,7 +22,10 @@ describe('A worker pool', function(argument) {
 
 	it('accepts a url', async function() {
 
-		let pool = new WorkerPool({ url: import.meta.resolve('./thread-timeout.js') });
+		let pool = new WorkerPool({
+			n: 1,
+			url: import.meta.resolve('./thread-timeout.js'),
+		});
 		let tasks = [];
 		for (let i = 0; i < 32; i++) {
 			let task = pool.run({ nr: i, max: 20 });
@@ -32,10 +37,19 @@ describe('A worker pool', function(argument) {
 
 	});
 
-	it('accepts source code', async function() {
+	it('accepts bundled source code', async function() {
 
-		let script = fs.readFileSync(new URL(import.meta.resolve('./thread-timeout.js')))+'';
-		let pool = new WorkerPool({ script });
+		let source = new URL(import.meta.resolve('./thread-timeout.js'));
+		let { outputFiles: [{ contents: bundle }] } = await esbuild.build({
+			entryPoints: [fileURLToPath(source)],
+			bundle: true,
+			platform: 'node',
+			target: 'node22',
+			format: 'cjs',
+			write: false,
+		});
+
+		let pool = new WorkerPool({ script: uint8ArrayToString(bundle) });
 		let tasks = [];
 		let n = 64;
 		for (let i = 0; i < n; i++) {

@@ -1,8 +1,10 @@
 // # worker-pool.js
+import path from 'node:path';
 import { AsyncResource } from 'node:async_hooks';
 import { EventEmitter } from 'node:events';
 import { Worker } from 'node:worker_threads';
 import os from 'node:os';
+import { stringToBase64 } from 'uint8array-extras';
 
 const kTaskInfo = Symbol('kTaskInfo');
 const kWorkerFreedEvent = Symbol('kWorkerFreedEvent');
@@ -34,9 +36,11 @@ export default class WorkerPool extends EventEmitter {
 			url,
 			n: numThreads = os.availableParallelism(),
 			script = null,
+			ts = typeof describe === 'function' && typeof it === 'function',
 		} = opts;
 		super();
 		this.url = url;
+		this.ts = ts;
 		this.script = script;
 		this.numThreads = numThreads;
 		this.workers = [];
@@ -59,10 +63,23 @@ export default class WorkerPool extends EventEmitter {
 	}
 
 	// ## addNewWorker()
+	// IMPORTANT! If we're running as tsx, then our esm loader is not 
+	// automatically registered. Hence we'll figure out automatically whether 
+	// we're running a TypeScript file or not. Note that as long as we haven't 
+	// migrated, we still need to handle .js files as well!
 	addNewWorker() {
-		const worker = new Worker(this.script ?? new URL(this.url), {
-			eval: !!this.script,
-		});
+		let worker;
+		if (this.ts && this.url) {
+			worker = new Worker(`
+				import { register } from 'tsx/esm/api';
+				register();
+				await import(${JSON.stringify(this.url)});
+			`, { eval: true });
+		} else {
+			worker = new Worker(this.script ?? new URL(this.url), {
+				eval: !!this.script,
+			});
+		}
 		worker[kTaskInfo] = Object.create(null);
 		worker.on('message', ({ type, id, result }) => {
 

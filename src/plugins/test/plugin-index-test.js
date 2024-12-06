@@ -4,7 +4,7 @@ import Index from '../plugin-index.js';
 import { FileType } from 'sc4/core';
 import { resource } from '#test/files.js';
 
-describe('The file index', function() {
+describe('The plugin index', function() {
 
 	this.slow(1000);
 

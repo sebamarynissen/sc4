@@ -7,7 +7,7 @@
 			"sc4/core": ["src/core/index.js"],
 			"sc4/utils": ["src/utils/index.js"],
 			"sc4/plugins": ["src/plugins/index.js"],
-			"sc4/threading/*": ["src/threading/*"],
+			"sc4/threading": ["src/threading/index.js"],
 			"sc4/api": ["src/api/api.js"],
 			"sc4/api/*": ["src/api/*"],
 		},
