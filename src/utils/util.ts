@@ -185,25 +185,26 @@ export function getCityPath(city: string, region = 'Experiments') {
 
 // # duplicateAsync(generator)
 // Allows re-using the same code for both a synchronous and asynchronous api.
-export function duplicateAsync(
-	generator: (...args: any[]) => Generator<any, any, any>,
+export function duplicateAsync<Y, R, N>(
+	generator: (...args: any[]) => Generator<Y, R, N>,
 ) {
+	type Params = Parameters<typeof generator>;
 	return {
-		sync(...args: any[]) {
-			let it = generator.call(this, ...args);
+		sync(...args: Params) {
+			let it = generator(...args);
 			let { done, value } = it.next();
 			while (!done) {
-				({ done, value } = it.next(value));
+				({ done, value } = it.next(value as N));
 			}
-			return value;
+			return value as R;
 		},
-		async async(...args: any[]) {
-			let it = generator.call(this, ...args);
+		async async(...args: Params) {
+			let it = generator(...args);
 			let { done, value } = it.next();
 			while (!done) {
-				({ done, value } = it.next(await value));
+				({ done, value } = it.next(await value as N));
 			}
-			return value;
+			return value as R;
 		},
 	};
 }

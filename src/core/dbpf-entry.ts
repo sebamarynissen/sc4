@@ -1,13 +1,13 @@
 // # dbpf-entry.ts
+import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync, type uint32, type TGILiteral } from 'sc4/utils';
 import WriteBuffer from './write-buffer.js';
-import { decompress } from 'qfs-compression';
 import { getConstructorByType, hasConstructorByType } from './filetype-map.js';
 import Stream from './stream.js';
+import { getTypeLabel } from './helpers.js';
 import type DBPF from './dbpf.js';
 import type { FileTypeConstructor, FileTypeInstance, FileTypeValue } from './types.js';
 import type { InspectOptions } from 'node:util';
-import { getTypeLabel } from './helpers.js';
 
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
@@ -179,7 +179,7 @@ export default class Entry {
 	// Tries to convert the raw buffer of the entry into a known file type. If 
 	// this fails, we'll simply return the raw buffer, but decompressed if the 
 	// entry was compressed.
-	read() {
+	read(): FileTypeConstructor {
 		return dual.read.sync.call(this, () => this.decompress());
 	}
 
@@ -198,12 +198,12 @@ export default class Entry {
 
 	// ## readAsync()
 	// Same as read, but in an async way.
-	async readAsync() {
+	async readAsync(): Promise<FileTypeConstructor> {
 		return dual.read.async.call(this, () => this.decompressAsync());
 	}
 
 	// ## toBuffer()
-	toBuffer() {
+	toBuffer(): Uint8Array {
 
 		// If the entry has a file instance attached to it, we always construct 
 		// the buffer from here. This has highest priority as it's the highest 
@@ -280,7 +280,7 @@ const dual = {
 	// # decompress()
 	// Decompressing an entry can be done in both a sync and asynchronous way, 
 	// so we use the async duplicator function.
-	decompress: duplicateAsync(function*(readRaw: reader<Uint8Array>) {
+	decompress: duplicateAsync(function*(this: Entry, readRaw: reader<Uint8Array>) {
 
 		// If we've already decompressed, just return the buffer as is.
 		if (this.buffer) return this.buffer;
@@ -304,7 +304,7 @@ const dual = {
 
 	// # read()
 	// Same for actually reading an entry. Can be done both sync and async.
-	read: duplicateAsync(function*(decompress: reader<Uint8Array>) {
+	read: duplicateAsync(function*(this: Entry, decompress: reader<Uint8Array>) {
 
 		// If the entry was already read, don't read it again. Note that it's 
 		// possible to dispose the entry to free up some memory if required.
@@ -344,7 +344,7 @@ const dual = {
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
 function readArrayFile(Constructor: FileTypeConstructor, buffer: Uint8Array) {
-	let array = [];
+	let array: FileTypeConstructor[] = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {
 
