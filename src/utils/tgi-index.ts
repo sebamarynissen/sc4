@@ -36,9 +36,16 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	findOne(type: number, group: number, instance: number): SingleResult<T>;
 	findOne(query: TGIQuery): SingleResult<T>;
 	findOne(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
-	findOne(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T>;
 	findOne(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
-		return this.findAll(query, g, i).at(-1) || null;
+		let result;
+		if (typeof query === 'number') {
+			result = this.findAll(query, g, i);
+		} else if (typeof query === 'function') {
+			result = this.findAll(query, g);
+		} else {
+			result = this.findAll(query);
+		}
+		return result.at(-1) ?? null;
 	}
 
 	// ## find(type, group, instance)
@@ -49,7 +56,13 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	find(query: TGIQuery): SingleResult<T>;
 	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
 	find(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
-		return this.findOne(query, g, i);
+		if (typeof query === 'number') {
+			return this.findOne(query, g, i);
+		} else if (typeof query === 'function') {
+			return this.findOne(query, g);
+		} else {
+			return this.findOne(query);
+		}
 	}
 
 	// ## findAll(query)
@@ -60,7 +73,6 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	findAll(type: number, group: number, instance: number): ArrayResult<T>;
 	findAll(query: TGIQuery): ArrayResult<T>;
 	findAll(predicate: TGIPredicate<T>, thisArg?: any): ArrayResult<T>;
-	findAll(query: FindArg<T>, group?: number | any, instance?: number): ArrayResult<T>;
 	findAll(query: FindArg<T>, group?: number | any, instance?: number): ArrayResult<T> {
 
 		// If the query is specified as a function, use it as such.
