@@ -29,6 +29,7 @@
     "lint": "eslint src",
     "test": "mocha src/**/*-test.js src/**/*-test.ts",
     "prebuild": "rimraf lib",
+    "typecheck": "tsc --noEmit",
     "build": "tsc && copyfiles -u 1 src/cli/assets/* lib",
     "build:exe": "npm run build && build\\sea.bat",
     "build:bundle": "npm run build:bundle:main && npm run build:thread",
