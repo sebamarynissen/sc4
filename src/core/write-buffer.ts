@@ -1,6 +1,13 @@
-// # smart-buffer.js
+// # write-buffer.ts
 import { SmartBuffer } from 'smart-arraybuffer';
 import xcrc from './crc.js';
+import type Color from './color.js';
+import type Vertex from './vertex.js';
+import type Pointer from './pointer.js';
+
+type HasWrite = { write: (arr: WriteBuffer) => any };
+type HasToBuffer = { toBuffer: () => Uint8Array };
+type Writable = Uint8Array | HasWrite | HasToBuffer;
 
 // # WriteBuffer()
 // The WriteBuffer class replaces the WriteStream class by making not 
@@ -12,29 +19,29 @@ import xcrc from './crc.js';
 const encoder = new TextEncoder();
 export default class WriteBuffer extends SmartBuffer {
 
-	// ## write(buffer, ...rest)
+	// ## write(buffer, )
 	// The write method is used for writing a raw buffer.
-	write(buffer, ...rest) {
+	write(buffer: Writable, offset?: number) {
 
 		// If an object was passed instead of a raw buffer, we'll check if 
 		// either:
 		//  - the object supports writing to the buffer.
 		//  - the object has a `toBuffer()` method.
 		if (!(buffer instanceof Uint8Array)) {
-			if (buffer.write) {
+			if ('write' in buffer) {
 				buffer.write(this);
 				return;
 			} else {
 				buffer = buffer.toBuffer();
 			}
 		}
-		super.writeBuffer(buffer, ...rest);
+		super.writeBuffer(buffer, offset);
 	}
 
 	// ## string(str)
 	// Writing a string will first write the string length as a uint32 and 
 	// then the string itself.
-	string(str, opts = {}) {
+	string(str: string, opts: { length?: number } = {}) {
 		let { length = true } = opts;
 		let buffer = encoder.encode(str);
 		if (length) {
@@ -44,30 +51,33 @@ export default class WriteBuffer extends SmartBuffer {
 	}
 
 	// Simple aliases.
-	int8(x) { this.writeInt8(x); }
-	int16(x) { this.writeInt16LE(x); }
-	int32(x) { this.writeInt32LE(x); }
-	bigint64(x) { this.writeBigInt64LE(BigInt(x)); }
-	float(x) { this.writeFloatLE(x); }
-	double(x) { this.writeDoubleLE(x); }
-	uint8(x) { this.writeUInt8(x); }
-	byte(x) { this.writeUInt8(x); }
-	bool(x) { this.writeUInt8(Number(x)); }
-	uint16(x) { this.writeUInt16LE(x); }
-	word(x) { this.writeUInt16LE(x); }
-	uint32(x) { this.writeUInt32LE(x); }
-	dword(x) { this.writeUInt32LE(x); }
+	int8(offset?: number) { this.writeInt8(offset); }
+	int16(offset?: number) { this.writeInt16LE(offset); }
+	int32(offset?: number) { this.writeInt32LE(offset); }
+	bigint64(offset?: number) { this.writeBigInt64LE(BigInt(offset)); }
+	float(offset?: number) { this.writeFloatLE(offset); }
+	double(offset?: number) { this.writeDoubleLE(offset); }
+	uint8(offset?: number) { this.writeUInt8(offset); }
+	byte(offset?: number) { this.writeUInt8(offset); }
+	bool(offset?: number) { this.writeUInt8(Number(offset)); }
+	uint16(offset?: number) { this.writeUInt16LE(offset); }
+	word(offset?: number) { this.writeUInt16LE(offset); }
+	uint32(offset?: number) { this.writeUInt32LE(offset); }
+	dword(offset?: number) { this.writeUInt32LE(offset); }
 
 	// ## n()
 	// Fills the buffer with the given amount of zeroes.
-	zeroes(n) {
+	zeroes(n: number) {
 		for (let i = 0; i < n; i++) this.uint8(0);
 	}
 
 	// ## array(arr)
 	// Helper function for writing away an array of objects. We first insert 
 	// the array's length and then try to convert to buffers.
-	array(arr, fn = buffer => this.write(buffer)) {
+	array<T extends Writable>(
+		arr: T[],
+		fn = (object: Writable) => this.write(object),
+	) {
 		this.uint32(arr.length);
 		for (let item of arr) {
 			fn(item);
@@ -77,7 +87,7 @@ export default class WriteBuffer extends SmartBuffer {
 	// ## pointer(ptr)
 	// Writes a pointer data structure to the buffer. If the pointer is 
 	// nullish, we write away 0x00000000, i.e. a null pointer.
-	pointer(ptr) {
+	pointer(ptr: Pointer | null) {
 		if (!ptr) {
 			this.dword(0x00000000);
 			return;
@@ -91,25 +101,23 @@ export default class WriteBuffer extends SmartBuffer {
 
 	// ## color(color)
 	// Writes a color data structure to the buffer.
-	color(color) {
+	color(color: Color) {
 		this.byte(color.r);
 		this.byte(color.g);
 		this.byte(color.b);
 		this.byte(color.a);
-		return this;
 	}
 
 	// ## vertex(vertex)
 	// Writes a vertex data structure to the buffer.
-	vertex(vertex) {
+	vertex(vertex: Vertex) {
 		vertex.write(this);
-		return this;
 	}
 
 	// ## seal()
 	// This method returns a new buffer where the checksum and size have been 
 	// prepended. We use this all the time.
-	seal() {
+	seal(): Uint8Array {
 
 		// First of all we'll calculate the CRC checksum for the buffer.
 		let buffer = this.toUint8Array();
