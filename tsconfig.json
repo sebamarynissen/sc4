@@ -1,10 +1,32 @@
 {
 	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"baseUrl": "./",
+		"paths": {
+			"sc4/core": ["src/core/index.ts"],
+			"sc4/utils": ["src/utils/index.ts"],
+			"sc4/plugins": ["src/plugins/index.ts"],
+			"sc4/threading/*": ["src/threading/*"],
+			"sc4/api": ["src/api/api.ts"],
+			"sc4/api/*": ["src/api/*"],
+		},
 		"lib": ["es2022"],
 		"target": "es2022",
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
-		"moduleSyntax": "verbatim",
-		"allowImportingTsExtensions": true
-	}
+		"verbatimModuleSyntax": true,
+		"declaration": true,
+
+		// AllowJs has to be true as long as we haven't migrated everything yet.
+		"allowJs": true,
+
+	},
+	"include": [
+		"./src/**/*",
+	],
+	"exclude": [
+		"**/test/**",
+		"src/gui/**",
+	],
 }

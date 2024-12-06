@@ -26,9 +26,9 @@
     "node": ">=22.3.0"
   },
   "scripts": {
-    "lint": "eslint lib",
-    "test": "mocha lib/**/*-test.js test/**/*.js",
-    "build": "build\\sea.bat",
+    "lint": "eslint src",
+    "test": "mocha src/**/*-test.js src/**/*-test.ts",
+    "build": "tsc",
     "build:exe": "build\\sea.bat",
     "build:bundle": "npm run build:bundle:main && npm run build:thread",
     "build:bundle:main": "esbuild lib/cli/cli.js --bundle --platform=node --target=node22 --outfile=dist/sc4.js --minify --format=cjs --metafile=dist/buildmanifest.json",
@@ -50,8 +50,7 @@
     "url": "git+https://github.com/sebamarynissen/sc4.git"
   },
   "files": [
-    "lib",
-    "!lib/**/test"
+    "lib"
   ],
   "mocha": {
     "import": "tsx"
