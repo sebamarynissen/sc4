@@ -1,10 +1,21 @@
-// # dbpf-entry.js
-import { tgi, inspect, duplicateAsync } from 'sc4/utils';
+// # dbpf-entry.ts
+import { tgi, inspect, duplicateAsync, type uint32, type TGILiteral } from 'sc4/utils';
 import WriteBuffer from './write-buffer.js';
-import FileType from './file-types.js';
 import { decompress } from 'qfs-compression';
 import { getConstructorByType, hasConstructorByType } from './filetype-map.js';
 import Stream from './stream.js';
+import type DBPF from './dbpf.js';
+import type { FileTypeConstructor, FileTypeInstance, FileTypeValue } from './types.js';
+import type { InspectOptions } from 'node:util';
+import { getTypeLabel } from './helpers.js';
+
+type EntryConstructorOptions = {
+	dbpf?: DBPF;
+};
+type EntryParseOptions = {
+    minor?: number;
+    buffer?: Uint8Array | null;
+};
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -13,13 +24,17 @@ import Stream from './stream.js';
 // it will be parsed appropriately.
 const kTypeArray = Symbol.for('sc4.type.array');
 export default class Entry {
-	type = 0;
-	group = 0;
-	instance = 0;
+	type: uint32;
+	group: uint32 = 0;
+	instance: uint32 = 0;
 	fileSize = 0;
 	compressedSize = 0;
 	offset = 0;
 	compressed = false;
+
+	// This property is rebound as non-enumerable in the constructor, but it is 
+	// needed for TypeScript to properly handle it.
+	dbpf: DBPF;
 
 	// Below are three properties that can represent the contents of the 
 	// entry:
@@ -34,17 +49,17 @@ export default class Entry {
 	//    this, it can be found here. It's mainly this property that you'll 
 	//    be interfacing with to modify things in a certian subfile of the 
 	//    DBPF as this means you don't have to work with the raw binary data.
-	raw = null;
-	buffer = null;
-	file = null;
+	raw: Uint8Array = null;
+	buffer: Uint8Array = null;
+	file: FileTypeInstance = null;
 
 	// ## constructor(opts)
-	constructor(opts = {}) {
+	constructor(opts: EntryConstructorOptions = {}) {
 		let { dbpf, ...rest } = opts;
 		Object.defineProperty(this, 'dbpf', {
 			value: dbpf,
 			enumerable: false,
-			witable: false,
+			writable: false,
 		});
 		Object.assign(this, rest);
 	}
@@ -56,7 +71,7 @@ export default class Entry {
 
 	// ## get tgi()
 	get tgi() { return [this.type, this.group, this.instance]; }
-	set tgi(tgi) {
+	set tgi(tgi: [uint32, uint32, uint32] | TGILiteral) {
 		if (Array.isArray(tgi)) {
 			[this.type, this.group, this.instance] = tgi;
 		} else {
@@ -118,12 +133,12 @@ export default class Entry {
 
 	// ## parse(rs, opts)
 	// Parses the entry from the given stream-wrapper buffer.
-	parse(rs, opts = {}) {
+	parse(rs: Stream, opts: EntryParseOptions = {}): this {
 		const {
 			minor = 0,
 			buffer = null,
 		} = opts;
-		this.type = rs.uint32();
+		this.type = rs.uint32() as FileTypeValue;
 		this.group = rs.uint32();
 		this.instance = rs.uint32();
 		if (minor > 0) {
@@ -149,14 +164,14 @@ export default class Entry {
 	// ## readRaw()
 	// **Synchronously** reads the entry's raw buffer and stores it in the 
 	// "raw" property.
-	readRaw() {
+	readRaw(): Uint8Array {
 		return this.dbpf.readBytes(this.offset, this.compressedSize);
 	}
 
 	// ## decompress()
 	// Returns the decompressed raw entry buffer. If the entry is not 
 	// compressed, then the buffer is returned as is.
-	decompress() {
+	decompress(): Uint8Array {
 		return dual.decompress.sync.call(this, () => this.readRaw());
 	}
 
@@ -171,13 +186,13 @@ export default class Entry {
 	// ## readRawAsync()
 	// Asynchronously reads the entry's raw buffer and stores it in the raw 
 	// property.
-	async readRawAsync() {
+	async readRawAsync(): Promise<Uint8Array> {
 		return await this.dbpf.readBytesAsync(this.offset, this.compressedSize);
 	}
 
 	// ## decompressAsync()
 	// Same as decompress, but asynchronously.
-	async decompressAsync() {
+	async decompressAsync(): Promise<Uint8Array> {
 		return dual.decompress.async.call(this, () => this.readRawAsync());
 	}
 
@@ -236,10 +251,15 @@ export default class Entry {
 	// ## [util.inspect.custom](depth, opts, inspect)
 	// If we console.log an entry in node we want to convert the TGI to their 
 	// hex equivalents so that it's easier to debug.
-	[Symbol.for('nodejs.util.inspect.custom')](depth, opts, defaultInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](
+		_depth: number,
+		opts: InspectOptions,
+		defaultInspect: Function,
+	) {
+		let label = getTypeLabel(this.type);
 		return 'DBPF Entry '+defaultInspect({
 			dbpf: this.dbpf.file,
-			type: inspect.type(FileType[this.type]) ?? inspect.hex(this.type),
+			type: inspect.type(label) ?? inspect.hex(this.type),
 			group: inspect.hex(this.group),
 			instance: inspect.hex(this.instance),
 			fileSize: this.fileSize,
@@ -254,12 +274,13 @@ export default class Entry {
 
 }
 
+type reader<T> = () => T | Promise<T>;
 const dual = {
 
 	// # decompress()
 	// Decompressing an entry can be done in both a sync and asynchronous way, 
 	// so we use the async duplicator function.
-	decompress: duplicateAsync(function*(readRaw) {
+	decompress: duplicateAsync(function*(readRaw: reader<Uint8Array>) {
 
 		// If we've already decompressed, just return the buffer as is.
 		if (this.buffer) return this.buffer;
@@ -283,7 +304,7 @@ const dual = {
 
 	// # read()
 	// Same for actually reading an entry. Can be done both sync and async.
-	read: duplicateAsync(function*(decompress) {
+	read: duplicateAsync(function*(decompress: reader<Uint8Array>) {
 
 		// If the entry was already read, don't read it again. Note that it's 
 		// possible to dispose the entry to free up some memory if required.
@@ -322,7 +343,7 @@ const dual = {
 // # readArrayFile()
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
-function readArrayFile(Constructor, buffer) {
+function readArrayFile(Constructor: FileTypeConstructor, buffer: Uint8Array) {
 	let array = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {

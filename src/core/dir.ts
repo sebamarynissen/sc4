@@ -1,23 +1,30 @@
-// # dir.js
+// # dir.ts
+import type Entry from './dbpf-entry.js';
 import { FileType } from './enums.js';
+import type Stream from './stream.js';
+import { kFileType } from './symbols.js';
 import WriteBuffer from './write-buffer.js';
+
+type ToBufferOptions = {
+    major?: number;
+    minor?: number;
+};
 
 // # DIR
 // A class representing a DatabaseDirectoryFile, more commonly known as a DIR 
 // record.
 export default class DIR extends Array {
 
-	static [Symbol.for('sc4.type')] = FileType.DIR;
+	static [kFileType] = FileType.DIR;
 
 	// ## parse(rs, opts)
-	parse(rs, opts = {}) {
+	parse(rs: Stream, opts: { entry?: Entry } = {}) {
 
 		// In DBPF 7.1, DIR records have a length of 20 bytes. This is normally 
 		// not used in SimCity 4, but we still support it though.
-		let { entry = {} } = opts;
-		let { dbpf = null } = entry;
-		let major = dbpf?.header.indexMajor ?? 7;
-		let minor = dbpf?.header.indexMinor ?? 0;
+		let { entry = null } = opts;
+		let major = entry?.dbpf?.header.indexMajor ?? 7;
+		let minor = entry?.dbpf?.header.indexMinor ?? 0;
 		let shouldSkip = major === 7 && minor > 1;
 
 		// Reset our length and then read in the entire DIR record.
@@ -35,10 +42,10 @@ export default class DIR extends Array {
 	}
 
 	// ## toBuffer(opts)
-	toBuffer(opts = {}) {
+	toBuffer(opts: ToBufferOptions = {}) {
 		let { major = 7, minor = 0 } = opts;
 		let byteLength = major === 7 && minor > 1 ? 20 : 16;
-		let ws = new WriteBuffer({ size: this.length*this.byteLength });
+		let ws = new WriteBuffer({ size: this.length*byteLength });
 		for (let row of this) {
 			ws.uint32(row.type);
 			ws.uint32(row.group);
