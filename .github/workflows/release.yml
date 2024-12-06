@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/get-version
 
       - name: Build
-        run: npm run build
+        run: npm run build:exe
 
       # Push the version bump
       - name: Push version bump

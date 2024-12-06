@@ -29,6 +29,7 @@
     "lint": "eslint lib",
     "test": "mocha lib/**/*-test.js test/**/*.js",
     "build": "build\\sea.bat",
+    "build:exe": "build\\sea.bat",
     "build:bundle": "npm run build:bundle:main && npm run build:thread",
     "build:bundle:main": "esbuild lib/cli/cli.js --bundle --platform=node --target=node22 --outfile=dist/sc4.js --minify --format=cjs --metafile=dist/buildmanifest.json",
     "build:thread": "esbuild lib/plugins/plugin-index-thread.js --bundle --platform=node --target=node22 --outfile=dist/plugin-index-thread.js --minify --format=cjs --metafile=dist/thread.buildmanifest.json",
