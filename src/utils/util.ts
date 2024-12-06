@@ -1,7 +1,7 @@
 // # util.ts
 import { util } from './node-builtins.js';
 import type { Constructor, UnknownRecord } from 'type-fest';
-import type { uint32, TGILiteral } from 'sc4/types';
+import type { uint32, TGILiteral } from 'sc4/utils';
 import type { InspectOptionsStylized } from 'node:util';
 
 // Julian day offset between unix epoch and Julian Date 0.
@@ -167,25 +167,6 @@ export function bin(nr: number) {
 // identifying files.
 export function tgi(type: uint32, group: uint32, id: uint32) {
 	return [type, group, id].map(x => hex(x)).join('-');
-}
-
-const kType = Symbol.for('sc4.type');
-type TypeLabeledObject = {
-	[kType]: number;
-};
-
-// # getClassType(object)
-// Inspects the object and returns its Type ID. If a class constructor is 
-// specified, we hence return the type id of this constructor, if it's an 
-// instance we look it up in the constructor.
-export function getClassType(
-	object: TypeLabeledObject | { constructor: TypeLabeledObject },
-) {
-	if (kType in object) {
-		return object[kType];
-	} else {
-		return object.constructor[kType];
-	}
 }
 
 // # getCityPath(city, region)
