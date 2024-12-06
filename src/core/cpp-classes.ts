@@ -165,4 +165,4 @@ export default {
 	0x096e75f5: 'cSC4Watercraft',
 	0x02bf1dfa: 'cSC4OrdinanceWaterConservation',
 	0x00d0723d: 'cSC4OrdinanceCommunityCPRTraining',
-};
+} as const;
