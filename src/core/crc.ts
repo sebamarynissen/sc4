@@ -1,4 +1,4 @@
-// # crc.js
+// # crc.ts
 import table from './crc-table.js';
 const IV = 0xffffffff;
 const MAX = 250000;

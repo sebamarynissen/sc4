@@ -1,4 +1,4 @@
-// # vertex.js
+// # vertex.ts
 import Color from './color.js';
 import type WriteBuffer from './write-buffer.js';
 import type Stream from './stream.js';
