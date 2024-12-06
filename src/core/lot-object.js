@@ -102,7 +102,7 @@ export default class LotObject {
 
 	// ## [inspect.symbol]()
 	// Allows easily inspecting a LotObject.
-	[inspect.symbol]() {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return {
 			...this,
 			type: inspect.hex(this.type, 2),

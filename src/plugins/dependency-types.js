@@ -122,7 +122,7 @@ export class Lot extends Dependency {
 		return lines;
 	}
 
-	[inspect.symbol](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
 		let { entry, ...rest } = this;
 		return `Lot ${nodeInspect({
 			entry: inspect.tgi(entry, 'Entry'),
@@ -208,7 +208,7 @@ export class Texture extends Dependency {
 			this.entry.dbpf.file,
 		)];
 	}
-	[inspect.symbol](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
 		return inspect.tgi(this.entry, 'Texture');
 	}
 }
@@ -230,7 +230,7 @@ export class Model extends Dependency {
 		return lines;
 	}
 
-	[inspect.symbol](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
 		return inspect.tgi(this.entry, 'Model');
 	}
 }
@@ -333,7 +333,7 @@ export class Exemplar extends Dependency {
 		return lines;
 	}
 
-	[inspect.symbol](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
 		let { entry, ...rest } = this;
 		return `Exemplar ${nodeInspect({
 			entry: inspect.tgi(entry, 'Entry'),
@@ -361,7 +361,7 @@ export class Raw extends Dependency {
 		return [$(width, line, this.entry.dbpf.file)];
 	}
 
-	[inspect.symbol](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
 		return inspect.tgi(this.entry, this.label);
 	}
 }
@@ -387,7 +387,7 @@ export class Missing extends Dependency {
 		const { type = 0, group = 0, instance = 0 } = this.entry;
 		return `missing/${type}-${group}-${instance}`;
 	}
-	[inspect.symbol]() {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return inspect.tgi(this.entry, util.styleText('red', 'MISSING'));
 	}
 }
