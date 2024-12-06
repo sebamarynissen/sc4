@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"lib": ["es2022"],
+		"target": "es2022",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"moduleSyntax": "verbatim",
+		"allowImportingTsExtensions": true
+	}
+}
