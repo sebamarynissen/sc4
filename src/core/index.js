@@ -1,5 +1,6 @@
 // # index.js
 export * from './enums.js';
+export * from './symbols.js';
 export { default as DBPF } from './dbpf.js';
 export { default as Savegame } from './savegame.js';
 export { default as LotObject } from './lot-object.js';

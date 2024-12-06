@@ -80,12 +80,12 @@ const TYPES = {
 	// instance.
 	TerrainMap: 0xa9dd6ff4,
 
-};
+} as const;
 export default TYPES;
 
 // Make them inversely available as well. Note that we risk overwriting 
 // duplicates, but that's ok.
-for (let key in TYPES) {
-	let value = TYPES[key];
-	TYPES[value] = key;
-}
+// for (let key in TYPES) {
+// 	let value = TYPES[key];
+// 	TYPES[value] = key;
+// }
