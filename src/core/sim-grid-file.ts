@@ -2,6 +2,9 @@
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type { FileTypeValue } from './types.js';
+import type { ConstructorOptions } from 'sc4/types';
 
 const TypedArrays = {
 	[FileType.SimGridUint8]: Uint8Array,
@@ -10,7 +13,7 @@ const TypedArrays = {
 	[FileType.SimGridSint16]: Int16Array,
 	[FileType.SimGridUint32]: Uint32Array,
 	[FileType.SimGridFloat32]: Float32Array,
-};
+} as const;
 const Readers = {
 	[FileType.SimGridUint8]: Stream.prototype.uint8,
 	[FileType.SimGridSint8]: Stream.prototype.int8,
@@ -18,7 +21,7 @@ const Readers = {
 	[FileType.SimGridSint16]: Stream.prototype.int16,
 	[FileType.SimGridUint32]: Stream.prototype.uint32,
 	[FileType.SimGridFloat32]: Stream.prototype.float,
-};
+} as const;
 const Writers = {
 	[FileType.SimGridUint8]: WriteBuffer.prototype.uint8,
 	[FileType.SimGridSint8]: WriteBuffer.prototype.int8,
@@ -26,52 +29,69 @@ const Writers = {
 	[FileType.SimGridSint16]: WriteBuffer.prototype.int16,
 	[FileType.SimGridUint32]: WriteBuffer.prototype.uint32,
 	[FileType.SimGridFloat32]: WriteBuffer.prototype.float,
-};
+} as const;
+
+type SimGridType = {
+	[K in keyof typeof TypedArrays as number]: K
+}[FileTypeValue];
+type SimGridTypedArray<T extends SimGridType> = InstanceType<(typeof TypedArrays)[T]>;
+
+// # getTypedArray(type)
+// Returns the typed array constructor to use for a specific type of SimGrid, 
+// independent.
+function getTypedArray<T extends SimGridType>(type: T) {
+	return TypedArrays[type];
+}
+
+// The resolutions & powers have to come from a specific set of values.
+type Resolution = 1 | 2 | 4 | 8 | 16 | 32 | 64;
+type ResolutionExponent = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+// The size of the grid depends on the city size and resolution. If the 
+type GridSize = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256;
+
+// The options that can be specified to the constructor are anything that's 
+// allowed.
+type SimGridOptions<T extends SimGridType> = Omit<ConstructorOptions<SimGrid<T>>, 'type'>;
 
 // # SimGrid
 // SimCity4 has different classes for each SimGrid, so we'll reflect this as 
 // well. We want them to have similar behavior though, so we'll extend the class 
 // from the base class automatically.
-class SimGrid {
+abstract class SimGrid<T extends SimGridType> {
 
-	static [Symbol.for('sc4.type.array')] = true;
-
-	// ## constructor()
-	constructor() {
-
-		// Note: I think some of the unknowns identifies the data type, where 
-		// 0x01 is UInt8 etc. Not sure though, we should investigate this 
-		// deeper.
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0001;
-		this.u1 = 0x01;
-		this.type = 0x00000000;
-		this.dataId = 0x00000000;
-		this.resolution = 0x00000001;
-		this.resolutionPower = 0x00000000;
-		this.xSize = 0x00000040;
-		this.zSize = 0x00000040;
-		this.u6 = 0x00000000;
-		this.u7 = 0x00000000;
-		this.u8 = 0x00000000;
-		this.u9 = 0x00000000;
-		this.data = null;
-	}
+	// Note: I think some of the unknowns identifies the data type, where 
+	// 0x01 is UInt8 etc. Not sure though, we should investigate this 
+	// deeper.
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0001;
+	u1 = 0x01;
+	type: T;
+	data: SimGridTypedArray<T>;
+	dataId = 0x00000000;
+	resolution: Resolution = 0x00000001;
+	resolutionExponent: ResolutionExponent = 0x00000000;
+	xSize: GridSize = 0x00000040;
+	zSize: GridSize = 0x00000040;
+	u6 = 0x00000000;
+	u7 = 0x00000000;
+	u8 = 0x00000000;
+	u9 = 0x00000000;
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
 		this.u1 = rs.byte();
-		this.type = rs.dword();
+		this.type = rs.type() as T;
 		this.dataId = rs.dword();
-		this.resolution = rs.dword();
-		this.resolutionPower = rs.dword();
-		this.xSize = rs.dword();
-		this.zSize = rs.dword();
+		this.resolution = rs.dword() as Resolution;
+		this.resolutionExponent = rs.dword() as ResolutionExponent;
+		this.xSize = rs.dword() as GridSize;
+		this.zSize = rs.dword() as GridSize;
 		this.u6 = rs.dword();
 		this.u7 = rs.dword();
 		this.u8 = rs.dword();
@@ -83,10 +103,10 @@ class SimGrid {
 		// Note: we could directly copy the arraybuffer, but it's pretty error 
 		// prone apparently, especially with the offsets and stuff. Hence 
 		// we'll write in manually.
-		const Typed = TypedArrays[ this.type ];
-		const reader = Readers[ this.type ];
+		const TypedArray = getTypedArray(this.type);
+		const reader = Readers[this.type];
 		const count = this.xSize * this.zSize;
-		let data = this.data = new Typed(count);
+		let data = this.data = new TypedArray(count) as SimGridTypedArray<T>;
 		for (let i = 0; i < count; i++) {
 			data[i] = reader.call(rs);
 		}
@@ -112,7 +132,7 @@ class SimGrid {
 		ws.dword(this.type);
 		ws.dword(this.dataId);
 		ws.dword(this.resolution);
-		ws.dword(this.resolutionPower);
+		ws.dword(this.resolutionExponent);
 		ws.dword(this.xSize);
 		ws.dword(this.zSize);
 		ws.dword(this.u6);
@@ -122,7 +142,7 @@ class SimGrid {
 
 		// Use the underlying buffer of our data view. At least on LE systems 
 		// this should be good to be used directly.
-		const writer = Writers[ this.type ];
+		const writer = Writers[this.type];
 		for (let value of this.data) {
 			writer.call(ws, value);
 		}
@@ -132,15 +152,15 @@ class SimGrid {
 
 	// ## get(x, z)
 	// Returns the value stored in cell (x, z)
-	get(x, z) {
+	get(x: number, z: number) {
 		let { zSize } = this;
-		return this.data[ x*zSize + z ];
+		return this.data[x*zSize + z];
 	}
 
 	// ## set(x, z)
 	// Sets the value stored in cell (x, z)
-	set(x, z, value) {
-		this.data[ x*this.zSize+z ] = value;
+	set(x: number, z: number, value: number) {
+		this.data[x*this.zSize+z] = value;
 		return this;
 	}
 
@@ -148,7 +168,7 @@ class SimGrid {
 	// Clears the entire simgrid again. Note that some simgrids might be cleared 
 	// with different values - like -128 for exammple - so this need sto be 
 	// customizable.
-	clear(value = 0) {
+	clear(value: number = 0) {
 		this.data.fill(value);
 	}
 
@@ -157,66 +177,40 @@ class SimGrid {
 	// way.
 	createProxy() {
 		return new Proxy(this, {
-			get(target, prop, receiver) {
+			get(target, prop: string) {
 				let x = +prop;
 				return new Proxy(target, {
-					get(target, prop, receiver) {
+					get(target, prop: string) {
 						let z = +prop;
 						let { zSize, data } = target;
-						return data[ x*zSize + z];
+						return data[x*zSize + z];
 					},
 				});
 			},
 		});
 	}
 
-	// ## paint()
-	// Creates a visual representation of the sim grid on a canvas. Of course 
-	// this can only be used in HTML environments that properly support canvas!
-	paint() {
-		let canvas = document.createElement('canvas');
-		canvas.width = this.xSize;
-		canvas.height = this.zSize;
-
-		// Find the max value in the data.
-		const data = this.data;
-		let max = Math.max(...data);
-		if (max === 0) max = 1;
-
-		// Create a canvas context.
-		let ctx = canvas.getContext('2d');
-		let imgData = ctx.createImageData(canvas.width, canvas.height);
-
-		// Fill up the image data. Note that we have to flip unfortunately, 
-		// but that's manageable.
-		for (let z = 0; z < this.zSize; z++) {
-			for (let x = 0; x < this.xSize; x++) {
-				let value = data[ x*this.zSize+z ];
-				let offset = 4*(z*this.xSize+x);
-				let alpha = (value / max)*0xff;
-				imgData.data[offset+3] = alpha;
-			}
-		}
-		ctx.putImageData(imgData, 0, 0);
-
-		return canvas;
-
-	}
-
 }
 
-// # TypedSimGrid()
-// Factory function that generates a typed SimGrid from the base class.
-const hType = Symbol.for('sc4.type');
-function TypedSimGrid(type) {
-	return class extends SimGrid {
-		static [hType] = type;
+// Helper function for creating the actual class.
+function createClass<T extends SimGridType>(type: T) {
+	return class extends SimGrid<T> {
+		type = type;
+		static [kFileType] = type;
+		static [kFileTypeArray] = type;
+
+		// ## constructor()
+		// constructor(opts?: Partial<ConditionalExcept<T, Function>>) {
+		// 	super();
+		// 	Object.assign(this, opts);
+		// }
+
 	};
 }
 
-export const SimGridUint8 = TypedSimGrid(FileType.SimGridUint8);
-export const SimGridSint8 = TypedSimGrid(FileType.SimGridSint8);
-export const SimGridUint16 = TypedSimGrid(FileType.SimGridUint16);
-export const SimGridSint16 = TypedSimGrid(FileType.SimGridSint16);
-export const SimGridUint32 = TypedSimGrid(FileType.SimGridUint32);
-export const SimGridFloat32 = TypedSimGrid(FileType.SimGridFloat32);
+export class SimGridUint8 extends createClass<typeof FileType.SimGridUint8>(FileType.SimGridUint8) {};
+export class SimGridSint8 extends createClass<typeof FileType.SimGridSint8>(FileType.SimGridSint8) {};
+export class SimGridUint16 extends createClass<typeof FileType.SimGridUint16>(FileType.SimGridUint16) {};
+export class SimGridSint16 extends createClass<typeof FileType.SimGridSint16>(FileType.SimGridSint16) {};
+export class SimGridUint32 extends createClass<typeof FileType.SimGridUint32>(FileType.SimGridUint32) {};
+export class SimGridFloat32 extends createClass<typeof FileType.SimGridFloat32>(FileType.SimGridFloat32) {}
