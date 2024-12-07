@@ -1,6 +1,11 @@
 // # lot-file.js
 import WriteBuffer from './write-buffer.js';
 import { FileType, ZoneType, DemandSourceIndex } from './enums.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type SGProp from './sgprop.js';
+import type { OptionalKeysOf } from 'type-fest';
+import type Stream from './stream.js';
+import type { byte } from 'sc4/types';
 
 // Predefined bit-flags.
 const Flags = {
@@ -13,43 +18,51 @@ const Flags = {
 // Represents a single lot from the lot file
 export default class Lot {
 
-	static [Symbol.for('sc4.type')] = FileType.LotFile;
-	static [Symbol.for('sc4.type.array')] = true;
+	static [kFileType] = FileType.LotFile;
+	static [kFileTypeArray] = true;
+
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0008;
+	IID = 0x00000000;
+	flag1 = 0b01000000;
+	minX = 0x00;
+	minZ = 0x00;
+	maxX = 0x00;
+	maxZ = 0x00;
+	commuteX = 0x00;
+	commuteZ = 0x00;
+	yPos = 0;
+	ySlope1 = 0
+	ySlope2 = 0
+	width = 0x00;
+	depth = 0x00;
+	orientation = 0x00;
+	flag2 = 0x03;
+	flag3 = 0x00;
+	zoneType = 0x00;
+	zoneWealth = 0x00;
+	dateCreated = 0x00000000;
+	buildingIID = 0x00000000;
+	unknown5 = 0x00;
+	linkedIndustrial = 0x00000000;
+	linkedAgricultural = 0x00000000;
+	jobCapacities: any[] = [];
+	jobTotalCapacities: any[] = [];
+	$ = 0;
+	$$ = 0;
+	$$$ = 0;
+	unknown6 = 0x0002;
+	sgprops: SGProp[] = [];
+	commutes: any[] = [];
+	commuteBuffer: Uint8Array = null;
+	debug = 0x00;
 
 	// ## constructor()
 	// Pre-initialize the lot properties with correct types to produce better 
 	// optimized vm code. This is inherent to how V8 optimizes Object 
 	// properties.
-	constructor(opts) {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0008;
-		this.IID = 0x00000000;
-		this.flag1 = 0b01000000;
-		this.maxZ = this.maxX = this.minZ = this.minX = 0x00;
-		this.commuteZ = this.commuteX = 0x00;
-		this.ySlope2 = this.ySlope1 = this.yPos = 0;
-		this.depth = this.width = 0x00;
-		this.orientation = 0x00;
-		this.flag2 = 0x03;
-		this.flag3 = 0x00;
-		this.zoneType = 0x00;
-		this.zoneWealth = 0x00;
-		this.dateCreated = 0x00000000;
-		this.buildingIID = 0x00000000;
-		this.unknown5 = 0x00;
-		this.linkedIndustrial = 0x00000000;
-		this.linkedAgricultural = 0x00000000;
-		this.jobCapacities = [];
-		this.jobTotalCapacities = [];
-		this.$ = 0;
-		this.$$ = 0;
-		this.$$$ = 0;
-		this.unknown6 = 0x0002;
-		this.sgprops = [];
-		this.commutes = [];
-		this.commuteBuffer = null;
-		this.debug = 0x00;
+	constructor(opts: OptionalKeysOf<Lot>) {
 		Object.assign(this, opts);
 	}
 
@@ -100,8 +113,8 @@ export default class Lot {
 		for (let job of jobs) {
 			switch (job.demandSourceIndex) {
 				case DemandSourceIndex.CS$:
-				case DemandSourceIndex.C$$:
-				case DemandSourceIndex.C$$$:
+				case DemandSourceIndex.CS$$:
+				case DemandSourceIndex.CS$$$:
 				case DemandSourceIndex.CO$$:
 				case DemandSourceIndex.CO$$$:
 					return true;
@@ -160,7 +173,9 @@ export default class Lot {
 	// ## move(dx, dz)
 	// Moves the lot according to the given vector. Note that this doesn't 
 	// affect any buildings or props on the lot!
-	move(dx, dz) {
+	move(dx: number, dz: number): this;
+	move([dx, dz]: [number, number]): this;
+	move(dx: number | [number, number], dz?: number): this {
 		if (Array.isArray(dx)) {
 			[dx, dz] = dx;
 		}
@@ -173,12 +188,11 @@ export default class Lot {
 		this.maxZ += dz;
 		this.commuteZ += dz;
 		return this;
-
 	}
 
 	// ## parse(rs)
 	// Parses the load from a buffer wrapped up in a readable stream.
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -360,20 +374,17 @@ export default class Lot {
 // eslint-disable-next-line no-unused-vars
 class CommuteBlock {
 
-	// ## constructor()
-	constructor() {
-		this.paths = [];
-		this.unknown1 = 0x00;
-		this.unknown2 = 0x00;
-		this.unknown3 = 0x08;
-		this.destinationX = 0x00;
-		this.destinationY = 0x00;
-		this.tripLength = 0;
-		this.unknown4 = 0x00000002;
-	}
+	paths: any[] = [];
+	unknown1 = 0x00;
+	unknown2 = 0x00;
+	unknown3 = 0x08;
+	destinationX = 0x00;
+	destinationY = 0x00;
+	tripLength = 0;
+	unknown4 = 0x00000002;
 
 	// ## parse(rs)
-	parse(rs, debug) {
+	parse(rs: Stream) {
 
 		let pathCount = rs.dword();
 		this.paths.length = pathCount;
@@ -391,14 +402,10 @@ class CommuteBlock {
 
 // # CommutePath
 class CommutePath {
+	startType = 0x00;
+	coords = [0x00, 0x00];
 
-	// ## constructor()
-	constructor() {
-		this.startType = 0x00;
-		this.coords = [0x00, 0x00];
-	}
-
-	parse(rs) {
+	parse(rs: Stream) {
 
 		// Read the full path buffer.
 		// let pos = rs.i;
@@ -426,6 +433,6 @@ class CommutePath {
 }
 
 // Helper function for switching bit flags on & off.
-function set(bit, flag, on) {
+function set(bit: byte, flag: byte, on: boolean) {
 	return on ? bit | flag : bit & 0xff - flag;
 }
