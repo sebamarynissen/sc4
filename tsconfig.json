@@ -22,6 +22,7 @@
 
 		// Prevent TypeScript from checking d.ts files.
 		"skipLibCheck": true,
+		"strictNullChecks": true,
 
 		// AllowJs has to be true as long as we haven't migrated everything yet.
 		"allowJs": true,

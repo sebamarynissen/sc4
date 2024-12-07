@@ -54,4 +54,6 @@ describe('A SimGrid', function() {
 
 	});
 
+	it('figures out the size from the constructor');
+
 });

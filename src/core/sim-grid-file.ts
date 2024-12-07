@@ -4,7 +4,6 @@ import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type { FileTypeValue } from './types.js';
-import type { ConstructorOptions } from 'sc4/types';
 
 const TypedArrays = {
 	[FileType.SimGridUint8]: Uint8Array,
@@ -34,7 +33,7 @@ const Writers = {
 type SimGridType = {
 	[K in keyof typeof TypedArrays as number]: K
 }[FileTypeValue];
-type SimGridTypedArray<T extends SimGridType> = InstanceType<(typeof TypedArrays)[T]>;
+type TypedArray<T extends SimGridType> = InstanceType<(typeof TypedArrays)[T]>;
 
 // # getTypedArray(type)
 // Returns the typed array constructor to use for a specific type of SimGrid, 
@@ -50,9 +49,19 @@ type ResolutionExponent = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 // The size of the grid depends on the city size and resolution. If the 
 type GridSize = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256;
 
-// The options that can be specified to the constructor are anything that's 
-// allowed.
-type SimGridOptions<T extends SimGridType> = Omit<ConstructorOptions<SimGrid<T>>, 'type'>;
+// Write the SimGridOptions type manually because we can't get it to work with 
+// TypeScript removing all function properties. Might have something to do with 
+// the generics I guess.
+type SimGridOptions<T extends SimGridType> = {
+	mem?: number,
+	data?: number[] | TypedArray<T>,
+	dataId?: number,
+	resolution?: Resolution,
+	resolutionExponent?: ResolutionExponent,
+	size?: GridSize,
+	xSize?: GridSize,
+	zSize?: GridSize,
+};
 
 // # SimGrid
 // SimCity4 has different classes for each SimGrid, so we'll reflect this as 
@@ -68,7 +77,7 @@ abstract class SimGrid<T extends SimGridType> {
 	major = 0x0001;
 	u1 = 0x01;
 	type: T;
-	data: SimGridTypedArray<T>;
+	data: TypedArray<T>;
 	dataId = 0x00000000;
 	resolution: Resolution = 0x00000001;
 	resolutionExponent: ResolutionExponent = 0x00000000;
@@ -78,6 +87,41 @@ abstract class SimGrid<T extends SimGridType> {
 	u7 = 0x00000000;
 	u8 = 0x00000000;
 	u9 = 0x00000000;
+
+	// ## constructor(opts)
+	// The SimGrid constructor allows us to construct a SimGrid easily by 
+	// automically figuring out a bunch of properties. For example, if a single 
+	// "size" field is specified, it assumes that we're dealing with a square - 
+	// which is simply always the case.
+	constructor(opts: SimGridOptions<T> = {}) {
+		let {
+			data,
+			size = 0,
+			xSize = size,
+			zSize = size,
+			resolution = 1,
+			resolutionExponent = Math.log2(resolution),
+			...rest
+		} = opts;
+		if (data) {
+			if (Array.isArray(data)) {
+				const TypedArray = getTypedArray(this.type);
+				this.data = new TypedArray(data) as TypedArray<T>;
+			} else {
+				this.data = data;
+			}
+		} else {
+			const TypedArray = getTypedArray(this.type);
+			this.data = new TypedArray(size) as TypedArray<T>;
+		}
+		Object.assign(this, {
+			xSize,
+			zSize,
+			resolution,
+			resolutionExponent,
+			...rest,
+		});
+	}
 
 	// ## parse(rs)
 	parse(rs: Stream) {
@@ -106,7 +150,7 @@ abstract class SimGrid<T extends SimGridType> {
 		const TypedArray = getTypedArray(this.type);
 		const reader = Readers[this.type];
 		const count = this.xSize * this.zSize;
-		let data = this.data = new TypedArray(count) as SimGridTypedArray<T>;
+		let data = this.data = new TypedArray(count) as TypedArray<T>;
 		for (let i = 0; i < count; i++) {
 			data[i] = reader.call(rs);
 		}
@@ -198,13 +242,6 @@ function createClass<T extends SimGridType>(type: T) {
 		type = type;
 		static [kFileType] = type;
 		static [kFileTypeArray] = type;
-
-		// ## constructor()
-		// constructor(opts?: Partial<ConditionalExcept<T, Function>>) {
-		// 	super();
-		// 	Object.assign(this, opts);
-		// }
-
 	};
 }
 
