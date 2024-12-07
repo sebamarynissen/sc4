@@ -20,7 +20,8 @@ import type {
     uint8,
     word,
 } from 'sc4/types';
-import type { Constructor } from 'type-fest';
+import type { Class } from 'type-fest';
+import type { FileTypeValue } from './types.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -97,6 +98,12 @@ export default class Stream extends SmartBuffer {
 	qword(offset?: number): qword { return this.biguint64(offset); }
 	bool(offset?: number) { return Boolean(this.uint8(offset)); }
 
+	// When using TypeScript, it's beneficial to be explicict about when we're 
+	// reading in a file type so that we can properly type it.
+	type<T extends FileTypeValue = FileTypeValue>(offset?: number): T {
+		return this.dword(offset) as T;
+	}
+
 	// ## size()
 	// The size of a record is simply a dword, but it makes it clearer that 
 	// we're reading in a size, so we use an alias.
@@ -145,7 +152,7 @@ export default class Stream extends SmartBuffer {
 	// ## struct(Constructor)
 	// Helper method for reading in a specific data structure. The premisse is 
 	// that the class implements a `parse(rs)` method.
-	struct<T extends { parse: (rs: Stream) => any }>(Constructor: Constructor<T>): T {
+	struct<T extends { parse: (rs: Stream) => any }>(Constructor: Class<T>): T {
 		let struct = new Constructor();
 		struct.parse(this);
 		return struct;
