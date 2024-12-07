@@ -1,9 +1,28 @@
 // # stream.js
-import { SmartBuffer } from 'smart-arraybuffer';
+import { SmartBuffer, type SmartBufferOptions } from 'smart-arraybuffer';
 import Pointer from './pointer.js';
 import SGProp from './sgprop.js';
 import Color from './color.js';
 import Vertex from './vertex.js';
+import type {
+    byte,
+    double,
+    dword,
+    float,
+    qword,
+    sint16,
+	sint32,
+	sint64,
+	sint8,
+    uint16,
+    uint32,
+    uint64,
+    uint8,
+    word,
+} from 'sc4/types';
+import type { Constructor } from 'type-fest';
+
+type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
 // # Stream
 // Helper class that provides some methods for reading from a buffer 
@@ -11,7 +30,7 @@ import Vertex from './vertex.js';
 export default class Stream extends SmartBuffer {
 
 	// ## constructor(opts)
-	constructor(opts) {
+	constructor(opts?: StreamOptions) {
 		if (opts instanceof Uint8Array || opts instanceof ArrayBuffer) {
 			super({ buff: opts });
 		} else if (opts instanceof Stream) {
@@ -29,7 +48,7 @@ export default class Stream extends SmartBuffer {
 	}
 
 	// ## read()
-	read(length) {
+	read(length?: number) {
 		return this.readUint8Array(length);
 	}
 
@@ -60,28 +79,28 @@ export default class Stream extends SmartBuffer {
 		return this.readBuffer();
 	}
 
-	int8(offset) { return this.readInt8(offset); }
-	int16(offset) { return this.readInt16LE(offset); }
-	int32(offset) { return this.readInt32LE(offset); }
-	bigint64(offset) { return this.readBigInt64LE(offset); }
-	float(offset) { return this.readFloatLE(offset); }
-	double(offset) { return this.readDoubleLE(offset); }
-	uint8(offset) { return this.readUInt8(offset); }
-	uint16(offset) { return this.readUInt16LE(offset); }
-	uint32(offset) { return this.readUInt32LE(offset); }
-	biguint64(offset) { return this.readBigUInt64BE(offset); }
+	int8(offset?: number): sint8 { return this.readInt8(offset); }
+	int16(offset?: number): sint16 { return this.readInt16LE(offset); }
+	int32(offset?: number): sint32 { return this.readInt32LE(offset); }
+	bigint64(offset?: number): sint64 { return this.readBigInt64LE(offset); }
+	float(offset?: number): float { return this.readFloatLE(offset); }
+	double(offset?: number): double { return this.readDoubleLE(offset); }
+	uint8(offset?: number): uint8 { return this.readUInt8(offset); }
+	uint16(offset?: number): uint16 { return this.readUInt16LE(offset); }
+	uint32(offset?: number): uint32 { return this.readUInt32LE(offset); }
+	biguint64(offset?: number): uint64 { return this.readBigUInt64BE(offset); }
 
 	// Some aliases.
-	byte(offset) { return this.uint8(offset); }
-	word(offset) { return this.uint16(offset); }
-	dword(offset) { return this.uint32(offset); }
-	qword(offset) { return this.biguint64(offset); }
-	bool(offset) { return Boolean(this.uint8(offset)); }
+	byte(offset?: number): byte { return this.uint8(offset); }
+	word(offset?: number): word { return this.uint16(offset); }
+	dword(offset?: number): dword { return this.uint32(offset); }
+	qword(offset?: number): qword { return this.biguint64(offset); }
+	bool(offset?: number) { return Boolean(this.uint8(offset)); }
 
 	// ## size()
 	// The size of a record is simply a dword, but it makes it clearer that 
 	// we're reading in a size, so we use an alias.
-	size(offset) { return this.dword(offset); }
+	size(offset?: number) { return this.dword(offset); }
 
 	// Helper function for reading a pointer. Those are given as [pointer, 
 	// Type ID]. Note that if no address was given, we return "null" (i.e. a 
@@ -115,7 +134,7 @@ export default class Stream extends SmartBuffer {
 	// Helper function for reading in an array. We first read in the length 
 	// and then fill up the array. It's important that the function passed 
 	// properly consumers the readable stream though!
-	array(fn) {
+	array<T>(fn: (this: this, rs?: this, i?: number) => T): T[] {
 		let arr = new Array(this.dword());
 		for (let i = 0; i < arr.length; i++) {
 			arr[i] = fn.call(this, this, i);
@@ -126,7 +145,7 @@ export default class Stream extends SmartBuffer {
 	// ## struct(Constructor)
 	// Helper method for reading in a specific data structure. The premisse is 
 	// that the class implements a `parse(rs)` method.
-	struct(Constructor) {
+	struct<T extends { parse: (rs: Stream) => any }>(Constructor: Constructor<T>): T {
 		let struct = new Constructor();
 		struct.parse(this);
 		return struct;
