@@ -1,4 +1,4 @@
-// # occupant-groups.js
+// # occupant-groups.ts
 // All Maxis-defined occupant groups, taken from https://www.sc4devotion.com/
 // forums/index.php?topic=2378.msg533652#msg533652
 export default {
@@ -354,4 +354,4 @@ export default {
     ['Watercraft Towable']: 0x4417,
     ['Watercraft Open Water']: 0x4418,
 
-};
+} as const;

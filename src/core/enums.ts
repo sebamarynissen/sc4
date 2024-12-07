@@ -3,19 +3,15 @@
 // something. Kind of like enums, but JavaScript doesn't have them so we use 
 // plain objects instead.
 // # alias(source, map)
-// Helper function for defining some aliases.
-function alias(source, map) {
-	for (let key in map) {
-		source[key] = source[map[key]];
-	}
-	return source;
-}
+import type { Primitive } from 'type-fest';
 
-function makeEnum(target) {
+type LiteralObject = { [key: string | symbol]: Primitive };
+
+function makeEnum<T extends LiteralObject>(target: T) {
 	return new Proxy(target, {
 		get(target, key) {
-			if (!Object.hasOwn(target, key)) {
-				throw new Error(`Enum does not have property "${key}"!`);
+			if (!(key in target)) {
+				throw new Error(`Enum does not have property "${String(key)}"!`);
 			}
 			return target[key];
 		},
@@ -49,15 +45,15 @@ export const ZoneType = {
 
 export const DemandSourceIndex = {
 
-	'R§': 0x00001010,
-	'R§§': 0x00001020,
-	'R§§§': 0x00001030,
+	R$: 0x00001010,
+	R$$: 0x00001020,
+	R$$$: 0x00001030,
 
-	'CS§': 0x00003110,
-	'CS§§': 0x00003120,
-	'CS§§§': 0x00003130,
-	'CO§§': 0x00003320,
-	'CO§§§': 0x00003330,
+	CS$: 0x00003110,
+	CS$$: 0x00003120,
+	CS$$$: 0x00003130,
+	CO$$: 0x00003320,
+	CO$$$: 0x00003330,
 
 	IR: 0x00004100,
 	ID: 0x00004200,
@@ -65,19 +61,6 @@ export const DemandSourceIndex = {
 	IHT: 0x00004400,
 
 };
-
-// Define some aliases using $ instead of §.
-alias(DemandSourceIndex, {
-	R$: 'R§',
-	R$$: 'R§§',
-	R$$$: 'R§§§',
-
-	CS$: 'CS§',
-	CS$$: 'CS§§',
-	CS$$$: 'CS§§§',
-	CO$$: 'CO§§',
-	CO$$$: 'CO§§§',
-});
 
 export { default as OccupantGroups } from './occupant-groups.js';
 export { default as FileType } from './file-types.js';
@@ -96,7 +79,7 @@ export const SimGrid = {
 		ZoneData: ZoneType,
 	},
 
-};
+} as const;
 
 export const LotObjectType = makeEnum({
 	Building: 0x00,
@@ -107,7 +90,7 @@ export const LotObjectType = makeEnum({
 	Water: 0x05,
 	Land: 0x06,
 	Network: 0x07,
-});
+} as const);
 
 export const ExemplarProperty = makeEnum({
 	ExemplarType: 0x10,
@@ -132,4 +115,4 @@ export const ExemplarProperty = makeEnum({
 	SimulatorDateInterval: 0x0a751675,
 	SimulatorDateDuration: 0x4a764564,
 	LotConfigPropertyLotObject: 0x88edc900,
-});
+} as const);

@@ -51,7 +51,7 @@ export default class Entry {
 	//    DBPF as this means you don't have to work with the raw binary data.
 	raw: Uint8Array = null;
 	buffer: Uint8Array = null;
-	file: FileTypeInstance = null;
+	file: FileTypeInstance | FileTypeInstance[];
 
 	// ## constructor(opts)
 	constructor(opts: EntryConstructorOptions = {}) {
