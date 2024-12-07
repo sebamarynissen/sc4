@@ -16,6 +16,7 @@ type EntryParseOptions = {
     minor?: number;
     buffer?: Uint8Array | null;
 };
+type EntryFile = Uint8Array | FileTypeInstance;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -179,7 +180,7 @@ export default class Entry {
 	// Tries to convert the raw buffer of the entry into a known file type. If 
 	// this fails, we'll simply return the raw buffer, but decompressed if the 
 	// entry was compressed.
-	read(): FileTypeConstructor {
+	read(): EntryFile {
 		return dual.read.sync.call(this, () => this.decompress());
 	}
 
@@ -198,7 +199,7 @@ export default class Entry {
 
 	// ## readAsync()
 	// Same as read, but in an async way.
-	async readAsync(): Promise<FileTypeConstructor> {
+	async readAsync(): Promise<EntryFile> {
 		return dual.read.async.call(this, () => this.decompressAsync());
 	}
 
