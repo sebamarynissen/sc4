@@ -27,9 +27,7 @@ export default class LineItem {
 	// Parses the budget line item from a buffer wrapped up in a readable 
 	// stream.
 	parse(rs: Stream) {
-
-		let start = rs.i;
-		let size = rs.dword();
+		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
@@ -39,12 +37,7 @@ export default class LineItem {
 		this.cost = rs.qword();
 		this.expense = rs.qword();
 		this.revenue = rs.qword();
-
-		// Skip all the rest now.
-		let read = rs.i - start;
-		let rest = size - read;
-		this.unknown2 = rs.read(rest);
-
+		this.unknown2 = rs.read();
 	}
 
 	// ## toBuffer()
