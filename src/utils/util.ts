@@ -18,8 +18,8 @@ export function getUnixFromJulian(d: number) {
 }
 
 // # getJulianFromUnix(ms)
-export function getJulianFromUnix(ms: number) {
-	return ms/MS_DAY + JULIAN_OFFSET;
+export function getJulianFromUnix(ms: number | Date) {
+	return +ms/MS_DAY + JULIAN_OFFSET;
 }
 
 // # invertMap(map)

@@ -1,44 +1,48 @@
-// # flora-file.js
+// # flora-file.ts
 import WriteBuffer from './write-buffer.js';
 import SGProp from './sgprop.js';
 import { FileType } from './enums.js';
 import { getUnixFromJulian, getJulianFromUnix } from 'sc4/utils';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type Stream from './stream.js';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
 // **Flora.Array** as file for the DBPF files, not the flora class itself!
 export default class Flora {
-	static [Symbol.for('sc4.type')] = FileType.FloraFile;
-	static [Symbol.for('sc4.type.array')] = true;
 
-	// ## constructor()
-	constructor() {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0003;
-		this.minor = 0x0004;
-		this.zot = 0x0000;
-		this.u1 = 0x00;
-		this.appearance = 0b00001101;
-		this.u2 = 0x74758926;
-		this.zMinTract = this.xMinTract = 0x00;
-		this.zMaxTract = this.zMinTract = 0x00;
-		this.zTractSize = this.xTractSize = 0x0002;
-		this.sgprops = [];
-		this.GID = 0x00000000;
-		this.TID = 0x00000000;
-		this.IID = 0x00000000;
-		this.IID1 = 0x00000000;
-		this.z = this.y = this.x = 0;
-		this.cycleDate = new Date();
-		this.appearanceDate = new Date();
-		this.state = 0x00;
-		this.orientation = 0x00;
-		this.objectId = 0x00000000;
-	}
+	static [kFileType] = FileType.FloraFile;
+	static [kFileTypeArray] = true;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0003;
+	minor = 0x0004;
+	zot = 0x0000;
+	u1 = 0x00;
+	appearance = 0b00001101;
+	u2 = 0x74758926;
+	xMinTract = 0x00;
+	zMinTract = 0x00;
+	xMaxTract = 0x00;
+	zMaxTract = 0x00;
+	xTractSize = 0x0002;
+	zTractSize = 0x0002;
+	sgprops: SGProp[] = [];
+	GID = 0x00000000;
+	TID = 0x00000000;
+	IID = 0x00000000;
+	IID1 = 0x00000000;
+	x = 0;
+	y = 0;
+	z = 0;
+	cycleDate = new Date();
+	appearanceDate = new Date();
+	state = 0x00;
+	orientation = 0x00;
+	objectId = 0x00000000;
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 
 		rs.size();
 		this.crc = rs.dword();
