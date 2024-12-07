@@ -1,23 +1,23 @@
 // # region-view-file.js
 import Stream from './stream.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
 
 // # RegionViewFile
 export default class RegionViewFile {
 
-	static [Symbol.for('sc4.type')] = FileType.RegionViewFile;
+	static [kFileType] = FileType.RegionViewFile;
 
-	// ## constructor()
-	constructor() {
-		this.buffer = null;
-		this.major = 0x0001;
-		this.minor = 0x000d;
-		this.z = this.x = 0;
-		this.zSize = this.zSize = 0;
-	}
+	buffer: Uint8Array = null;
+	major = 0x0001;
+	minor = 0x000d;
+	x = 0;
+	z = 0;
+	xSize = 0;
+	zSize = 0;
 
 	// ## parse(buff)
-	parse(buff) {
+	parse(buff: Uint8Array) {
 		this.buffer = buff;
 		let rs = new Stream(this.buffer);
 
@@ -32,8 +32,8 @@ export default class RegionViewFile {
 
 	}
 
-	// ## toBuffer(opts)
-	toBuffer(opts) {
+	// ## toBuffer()
+	toBuffer() {
 		return this.buffer;
 	}
 

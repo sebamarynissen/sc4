@@ -1,14 +1,16 @@
 // # line-item.js
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type Stream from './stream.js';
 
 // # LineItem
 // A line item is part of the city budget simulator. It contains the monthly 
 // expenses or income from a specific building.
 export default class LineItem {
 
-	static [Symbol.for('sc4.type')] = FileType.LineItem;
-	static [Symbol.for('sc4.type.array')] = true;
+	static [kFileType] = FileType.LineItem;
+	static [kFileTypeArray] = true;
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0004;
@@ -18,13 +20,13 @@ export default class LineItem {
 	cost = 0n;
 	expense = 0n;
 	revenue = 0n;
-	unknown2 = null;
+	unknown2: Uint8Array = null;
 	foo = this;
 
 	// ## parse(rs)
 	// Parses the budget line item from a buffer wrapped up in a readable 
 	// stream.
-	parse(rs) {
+	parse(rs: Stream) {
 
 		let start = rs.i;
 		let size = rs.dword();

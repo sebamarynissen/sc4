@@ -1,4 +1,4 @@
-// # register-file-types.js
+// # file-classes.ts
 export { Exemplar, Cohort } from './exemplar.js';
 export { default as DIR } from './dir.js';
 export { default as LTEXT } from './ltext.js';

@@ -17,6 +17,7 @@ import type {
 	uint16,
 	uint32,
 	word,
+    qword,
 } from 'sc4/types';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
@@ -78,6 +79,7 @@ export default class WriteBuffer extends SmartBuffer {
 	word(value: word) { this.writeUInt16LE(value); }
 	uint32(value: uint32) { this.writeUInt32LE(value); }
 	dword(value: dword) { this.writeUInt32LE(value); }
+	qword(value: qword) { this.writeBigUInt64LE(value); }
 
 	// ## n()
 	// Fills the buffer with the given amount of zeroes.

@@ -1,11 +1,13 @@
-// # ltext.js
+// # ltext.ts
 import { FileType } from './enums.js';
+import type Stream from './stream.js';
+import { kFileType } from './symbols.js';
 import WriteBuffer from './write-buffer.js';
 
 // # LTEXT
 // Implementation of the LTEXT file type.
 export default class LText {
-	static [Symbol.for('sc4.type')] = FileType.LTEXT;
+	static [kFileType] = FileType.LTEXT;
 
 	value = '';
 	constructor(value = '') {
@@ -18,7 +20,7 @@ export default class LText {
 	}
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		let length = rs.word();
 		rs.skip(2);
 		let value = '';

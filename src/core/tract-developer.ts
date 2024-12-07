@@ -1,7 +1,9 @@
-// # tract-developer.js
+// # tract-developer.ts
+import type { dword } from 'sc4/types';
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
 
 // # TractDeveloper
 // See https://community.simtropolis.com/forums/topic/758810-partial-
@@ -10,24 +12,21 @@ import { FileType } from './enums.js';
 // currently active in the city.
 export default class TractDeveloper {
 
-	static [Symbol.for('sc4.type')] = FileType.TractDeveloper;
+	static [kFileType] = FileType.TractDeveloper;
 
-	// ## constructor()
-	constructor() {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.u1 = 0x0003;
-		this.u2 = 0x0000;
-		this.u3 = 0x0000;
-		this.u4 = 0x0000;
-		this.u5 = 0x0000;
-		this.u6 = 0x01;
-		this.styles = [];
-		this.years = 5;
-	}
+	crc = 0x00000000;
+	mem = 0x00000000;
+	u1 = 0x0003;
+	u2 = 0x0000;
+	u3 = 0x0000;
+	u4 = 0x0000;
+	u5 = 0x0000;
+	u6 = 0x01;
+	styles: dword[] = [];
+	years = 5;
 
 	// ## parse(buff)
-	parse(buff) {
+	parse(buff: Stream | Uint8Array) {
 		let rs = new Stream(buff);
 		rs.size();
 		this.crc = rs.dword();
@@ -39,9 +38,9 @@ export default class TractDeveloper {
 		this.u5 = rs.word();
 		this.u6 = rs.byte();
 		const length = rs.dword();
-		let styles = this.styles = [];
+		this.styles = [];
 		for (let i = 0; i < length; i++) {
-			styles.push(rs.dword());
+			this.styles.push(rs.dword());
 		}
 		this.years = rs.dword();
 		return this;

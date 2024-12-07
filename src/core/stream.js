@@ -69,12 +69,13 @@ export default class Stream extends SmartBuffer {
 	uint8(offset) { return this.readUInt8(offset); }
 	uint16(offset) { return this.readUInt16LE(offset); }
 	uint32(offset) { return this.readUInt32LE(offset); }
+	biguint64(offset) { return this.readBigUInt64BE(offset); }
 
 	// Some aliases.
 	byte(offset) { return this.uint8(offset); }
 	word(offset) { return this.uint16(offset); }
 	dword(offset) { return this.uint32(offset); }
-	qword(offset) { return this.bigint64(offset); }
+	qword(offset) { return this.biguint64(offset); }
 	bool(offset) { return Boolean(this.uint8(offset)); }
 
 	// ## size()

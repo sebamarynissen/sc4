@@ -1,4 +1,7 @@
 // # matrix.js
+import type Stream from './stream.js';
+import type WriteBuffer from './write-buffer.js';
+
 // # Matrix
 // Class for representing a transformation matrix.
 export default class Matrix extends Float32Array {
@@ -16,7 +19,7 @@ export default class Matrix extends Float32Array {
 
 	// ## vector(a, b, c)
 	// Helper function for returning a vector with the given components.
-	vector(a, b = a+4, c=b+4) {
+	vector(a: number, b = a+4, c = b+4) {
 		return [this[a], this[b], this[c]];
 	}
 
@@ -41,7 +44,7 @@ export default class Matrix extends Float32Array {
 	// ## parse(rs)
 	// Parse the transformation matrix from a readable stream. We just read in 
 	// all 16 float values.
-	parse(rs) {
+	parse(rs: Stream) {
 		for (let i = 0; i < this.length; i++) {
 			this[i] = rs.float();
 		}
@@ -49,7 +52,7 @@ export default class Matrix extends Float32Array {
 	}
 
 	// ## write(ws)
-	write(ws) {
+	write(ws: WriteBuffer) {
 		for (let i = 0; i < this.length; i++) {
 			ws.float(this[i]);
 		}

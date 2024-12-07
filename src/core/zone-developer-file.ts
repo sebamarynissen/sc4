@@ -1,24 +1,23 @@
 // # zone-developer-file.js
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
+import type Pointer from './pointer.js';
+import type Stream from './stream.js';
 
 // # ZoneDeveloperFile
 export default class ZoneDeveloperFile {
 
-	static [Symbol.for('sc4.type')] = FileType.ZoneDeveloperFile;
-
-	// ## constructor()
-	constructor() {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0001;
-		this.xSize = 0x00000040;
-		this.zSize = 0x00000040;
-		this.cells = [];
-	}
+	static [kFileType] = FileType.ZoneDeveloperFile;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0001;
+	xSize = 0x00000040;
+	zSize = 0x00000040;
+	cells: Pointer[][] = [];
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -45,7 +44,7 @@ export default class ZoneDeveloperFile {
 	// ## isOccupied(x, z)
 	// Returns whether the tile (x, z) is currently occupied. Note that we'll 
 	// also consider a tile as occupied if it's outside the boundaries.
-	isOccupied(x, z) {
+	isOccupied(x: number, z: number) {
 		const { cells } = this;
 		if (x >= cells.length || x < 0) return true;
 		const col = cells[x];
@@ -62,8 +61,8 @@ export default class ZoneDeveloperFile {
 		}
 	}
 
-	// ## toBuffer(opts)
-	toBuffer(opts) {
+	// ## toBuffer()
+	toBuffer() {
 		let ws = new WriteBuffer();
 		ws.dword(this.mem);
 		ws.word(this.major);

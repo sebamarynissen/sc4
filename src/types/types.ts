@@ -11,8 +11,9 @@ export type sint32 = number;
 export type sint64 = bigint;
 export type float = number;
 export type double = number;
-export type dword = uint32;
 export type word = uint16;
+export type dword = uint32;
+export type qword = uint64;
 export type TGILiteral = {
 	type: uint32;
 	group: uint32;

@@ -1,4 +1,6 @@
-// # matrix-3.js
+// # matrix-3.ts
+import type Stream from "./stream.js";
+import type WriteBuffer from "./write-buffer.js";
 
 // # Matrix3
 // Class for representing a 2D transformation matrix.
@@ -14,7 +16,7 @@ export default class Matrix3 extends Float32Array {
 	// ## parse(rs)
 	// Parses the transformation matrix from a readable stream. We just read 
 	// in all 9 float values.
-	parse(rs) {
+	parse(rs: Stream) {
 		for (let i = 0; i < this.length; i++) {
 			this[i] = rs.float();
 		}
@@ -22,7 +24,7 @@ export default class Matrix3 extends Float32Array {
 	}
 
 	// ## write(ws)
-	write(ws) {
+	write(ws: WriteBuffer) {
 		for (let i = 0; i < this.length; i++) {
 			ws.float(this[i]);
 		}

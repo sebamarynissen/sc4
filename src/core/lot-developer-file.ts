@@ -1,28 +1,27 @@
-// # lot-developer-file.js
+// # lot-developer-file.ts
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
+import type Pointer from './pointer.js';
 
 // # LotDeveloperFile
 export default class LotDeveloperFile {
 
-	static [Symbol.for('sc4.type')] = FileType.LotDeveloperFile;
+	static [kFileType] = FileType.LotDeveloperFile;
 
-	// ## constructor()
-	constructor() {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0001;
-		this.tileSize = 0x00000041;
-		this.width = 0x44800000;
-		this.depth = 0x44800000;
-		this.buildings = [];
-		this.u3 = 0x00000000;
-		this.u4 = 0x0000;
-	}
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0001;
+	tileSize = 0x00000041;
+	width = 0x44800000;
+	depth = 0x44800000;
+	buildings: Pointer[] = [];
+	u3 = 0x00000000;
+	u4 = 0x0000;
 
 	// ## parse(buffer)
-	parse(buffer) {
+	parse(buffer: Uint8Array | Stream) {
 		let rs = new Stream(buffer);
 		rs.size();
 		this.crc = rs.dword();
