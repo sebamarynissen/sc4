@@ -1,7 +1,6 @@
 // # dbpf.js
 import { compress } from 'qfs-compression';
 import { concatUint8Arrays, isUint8Array, uint8ArrayToHex } from 'uint8array-extras';
-import { register } from './filetype-map.js';
 import Header from './dbpf-header.js';
 import Entry from './dbpf-entry.js';
 import DIR from './dir.js';
@@ -484,15 +483,6 @@ export default class DBPF {
 	// Allow iterating over the dbpf file by looping all it's entries.
 	*[Symbol.iterator]() {
 		yield* this.entries;
-	}
-
-	// ## static register(Constructor)
-	// It should be possible to register new file types on the fly so that 
-	// people can write plugins for certain unknown filetypes. This can be 
-	// done by calling DBPF.register(Ctor). Subsequently if entry.read() 
-	// is called, the type id might be recognized and hence parsed accordingly.
-	static register(Constructor) {
-		register(Constructor);
 	}
 
 }

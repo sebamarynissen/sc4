@@ -2,7 +2,7 @@
 // Small helper class that represents a pointer to a certain record in the 
 // subfile.
 import { hex, type uint32 } from 'sc4/utils';
-import { getTypeFromInstance } from './filetype-map.js';
+import { getClassType } from './helpers.js';
 import type { SavegameRecord } from './types.js';
 
 // # Pointer
@@ -20,7 +20,7 @@ export default class Pointer {
 			this.type = objectOrType;
 			this.address = address;
 		} else {
-			this.type = getTypeFromInstance(objectOrType);
+			this.type = getClassType(objectOrType);
 			this.address = objectOrType.mem;
 		}
 	}

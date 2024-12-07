@@ -6,6 +6,7 @@ import type { uint32 } from 'sc4/types';
 
 // Contains all *valid* file types, as uint32 numbers.
 export type FileTypeValue = (typeof FileType)[keyof typeof FileType];
+export type FileType = FileTypeValue;
 
 // Some types that are shared, but specific to the core module.
 export type FileTypeConstructor = Constructor<any> & {

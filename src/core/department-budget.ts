@@ -23,9 +23,9 @@ export default class DepartmentBudget {
 	u1 = 0x00;
 	u2 = 0x00000000;
 	name = '';
-	u3: Uint8Array = null;
+	u3: Uint8Array;
 	lineItems: Pointer[] = [];
-	buildings: Pointer[] = [];
+	buildings: Building[] = [];
 	u4 = 0x00000000;
 	u5 = 0x00000000;
 

@@ -2,7 +2,7 @@
 import WriteBuffer from './write-buffer.js';
 import Pointer from './pointer.js';
 import { FileType } from './enums.js';
-import { getTypeFromInstance } from './filetype-map.js';
+import { getClassType } from './helpers.js';
 
 // # ItemIndex
 export default class ItemIndex extends Array {
@@ -93,7 +93,7 @@ export default class ItemIndex extends Array {
 	// automatically, but you can specify it yourself as well. Note that the 
 	// item needs to expose min and max tract coordinates, but they do so 
 	// quite often!
-	add(item, type = getTypeFromInstance(item)) {
+	add(item, type = getClassType(item)) {
 		for (let x = item.xMinTract; x <= item.xMaxTract; x++) {
 			for (let z = item.zMinTract; z <= item.zMaxTract; z++) {
 				this[x][z].push(new Pointer(type, item.mem));

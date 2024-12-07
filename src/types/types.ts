@@ -1,4 +1,4 @@
-import type { SetOptional } from 'type-fest';
+import type { ConditionalExcept } from 'type-fest';
 
 export type byte = number;
 export type uint8 = number;
@@ -19,4 +19,8 @@ export type TGILiteral = {
 	group: uint32;
 	instance: uint32;
 }
-export type TGIQuery = SetOptional<TGILiteral, keyof TGILiteral>;
+export type TGIQuery = Partial<TGILiteral>;
+
+// We often want to accept all non-function properties of a class constructor. 
+// This helper type ensures this.
+export type ConstructorOptions<T> = Partial<ConditionalExcept<T, Function>>;

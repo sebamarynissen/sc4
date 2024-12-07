@@ -2,7 +2,6 @@
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync, type uint32, type TGILiteral } from 'sc4/utils';
 import WriteBuffer from './write-buffer.js';
-import { getConstructorByType, hasConstructorByType } from './filetype-map.js';
 import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import type DBPF from './dbpf.js';
@@ -50,8 +49,8 @@ export default class Entry {
 	//    this, it can be found here. It's mainly this property that you'll 
 	//    be interfacing with to modify things in a certian subfile of the 
 	//    DBPF as this means you don't have to work with the raw binary data.
-	raw: Uint8Array = null;
-	buffer: Uint8Array = null;
+	raw: Uint8Array;
+	buffer: Uint8Array;
 	file: FileTypeInstance | FileTypeInstance[];
 
 	// ## constructor(opts)
