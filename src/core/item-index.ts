@@ -3,36 +3,60 @@ import WriteBuffer from './write-buffer.js';
 import Pointer from './pointer.js';
 import { FileType } from './enums.js';
 import { getClassType } from './helpers.js';
+import { kFileType } from './symbols.js';
+import { type SavegameFileType } from './file-types.js';
+import type { ValueOf } from 'type-fest';
+import type { SavegameRecord } from './types.js';
+import type Stream from './stream.js';
+
+const SIZE = 192;
+type CitySize = 1024 | 2048 | 4096;
+type TractSize = 16 | 32 | 64;
+type TileSize = 64 | 128 | 256;
+type SavegameType = ValueOf<typeof SavegameFileType>;
 
 // # ItemIndex
-export default class ItemIndex extends Array {
-	static [Symbol.for('sc4.type')] = FileType.ItemIndexFile;
+export default class ItemIndex {
+	static [kFileType] = FileType.ItemIndex;
+
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0001;
+	width: CitySize = 1024;
+	depth: CitySize = 1024;
+	tractWidth: TractSize = 16;
+	tractDepth: TractSize = 16;
+	tileWidth: TileSize = 64;
+	tileDepth: TileSize = 64;
+	elements: Cell[][] = [];
+
+	// Array-like functionality.
+	get length() { return this.elements.length; }
+	set length(length: number) { this.elements.length = length; }
+	*[Symbol.iterator]() { yield* this.elements; }
 
 	// ## constructor(x, z)
 	// Creates the item index. You can specify a size *in tracts* to set up 
 	// the item index more easily. 16 tracts is a small city, 32 medium and 64 
 	// is large.
-	constructor(x = 0x10, z = x) {
-		super(0);
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0001;
-		this.width = 64*x;
-		this.depth = 64*z;
+	constructor(x: TractSize = 0x10, z: TractSize = x) {
+		this.width = 64*x as CitySize;
+		this.depth = 64*z as CitySize;
 		this.tractWidth = x;
 		this.tractDepth = z;
-		this.tileWidth = 4*x;
-		this.tileDepth = 4*z;
+		this.tileWidth = 4*x as TileSize;
+		this.tileDepth = 4*z as TileSize;
 	}
 
-	// ## fill(columns = 192, rows = columns)
+	// ## fill()
 	// Fills up the item index with cells. This is useful when not parsing an 
 	// item index, but generating a city from scratch where you need an empty 
 	// item index.
-	fill(columns = 192, rows = columns) {
-		this.length = columns;
-		for (let x = 0; x < columns; x++) {
-			let column = this[x] = new Array(rows);
+	fill() {
+		let { elements } = this;
+		elements.length = SIZE;
+		for (let x = 0; x < elements.length; x++) {
+			let column = elements[x] = new Array(SIZE) as Cell[];
 			for (let z = 0; z < column.length; z++) {
 				column[z] = new Cell(x, z);
 			}
@@ -43,7 +67,7 @@ export default class ItemIndex extends Array {
 	// ## rebuild(type, file)
 	// Rebuilds the index so that it puts all entries of the given file in 
 	// their correct tracts.
-	rebuild(type, file) {
+	rebuild(type: SavegameType, file: SavegameRecord[]) {
 
 		// From now on we need a specific file type because certain arrays might 
 		// be empty, in which case we don't know what type of values the array 
@@ -65,7 +89,7 @@ export default class ItemIndex extends Array {
 			let { mem } = record;
 			for (let x = record.xMinTract; x <= record.xMaxTract; x++) {
 				for (let z = record.zMinTract; z <= record.zMaxTract; z++) {
-					this[x][z].push(new Pointer(type, mem));
+					this.elements[x][z].push(new Pointer(type, mem));
 				}
 			}
 		}
@@ -74,10 +98,10 @@ export default class ItemIndex extends Array {
 
 	// ## filter(fn)
 	// Helper method for filtering all cells in the item index.
-	filter(fn) {
+	filter(...params: Parameters<Cell['filter']>): this {
 		for (let row of this) {
 			for (let cell of row) {
-				cell.filter(fn);
+				cell.filter(...params);
 			}
 		}
 		return this;
@@ -93,39 +117,41 @@ export default class ItemIndex extends Array {
 	// automatically, but you can specify it yourself as well. Note that the 
 	// item needs to expose min and max tract coordinates, but they do so 
 	// quite often!
-	add(item, type = getClassType(item)) {
+	add(item: SavegameRecord, type = getClassType(item)) {
 		for (let x = item.xMinTract; x <= item.xMaxTract; x++) {
 			for (let z = item.zMinTract; z <= item.zMaxTract; z++) {
-				this[x][z].push(new Pointer(type, item.mem));
+				this.elements[x][z].push(new Pointer(type, item.mem));
 			}
 		}
 	}
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
-		this.width = rs.float();
-		this.depth = rs.float();
-		this.tractWidth = rs.dword();
-		this.tractDepth = rs.dword();
-		this.tileWidth = rs.dword();
-		this.tileDepth = rs.dword();
+		this.width = rs.float() as CitySize;
+		this.depth = rs.float() as CitySize;
+		this.tractWidth = rs.dword() as TractSize;
+		this.tractDepth = rs.dword() as TractSize;
+		this.tileWidth = rs.dword() as TileSize;
+		this.tileDepth = rs.dword() as TileSize;
  
 		let columns = rs.dword();
 		this.length = columns;
 		for (let x = 0; x < columns; x++) {
 			let rows = rs.dword();
 			let column = new Array(rows);
-			this[x] = column;
+			this.elements[x] = column;
 			for (let z = 0; z < rows; z++) {
 				let count = rs.dword();
 				let cell = new Cell(x, z);
 				column[z] = cell;
 				for (let i = 0; i < count; i++) {
-					cell.push(rs.pointer());
+					let ptr = rs.pointer();
+					if (ptr === null) continue;
+					cell.push(ptr);
 				}
 			}
 		}
@@ -136,24 +162,12 @@ export default class ItemIndex extends Array {
 
 	}
 
-	// ## *flat()
-	// Returns an iterator so that all cells can be iterated over easily at 
-	// once, not on a per row basis, which is the normal iterator behavior.
-	*flat() {
-		for (let column of this) {
-			for (let cell of column) {
-				yield cell;
-			}
-		}
-	}
-
 	// ## toBuffer()
 	// Serializes the item index into a binary buffer.
 	// Generator function that will yield buffer chunks. Note that we can only 
 	// ever yield 1 buffer chunk because we need to calculate its checksum and 
 	// we need the entire buffer for this!
 	toBuffer() {
-
 		let ws = new WriteBuffer();
 		ws.dword(this.mem);
 		ws.word(this.major);
@@ -175,7 +189,6 @@ export default class ItemIndex extends Array {
 				}
 			}
 		}
-
 		return ws.seal();
 
 	}
@@ -184,8 +197,10 @@ export default class ItemIndex extends Array {
 
 // # Cell
 // Tiny class for representing a cell within the item index.
-class Cell extends Array {
-	constructor(x, z) {
+class Cell extends Array<Pointer> {
+	x = 0;
+	z = 0;
+	constructor(x = 0, z = 0) {
 		super();
 		this.x = x;
 		this.z = z;
@@ -195,13 +210,15 @@ class Cell extends Array {
 	// Overrides the native array filter function to filter the cell *in 
 	// place*, which is useful because we don't replace cells in the item 
 	// index!
-	filter(fn) {
+	filter(
+		fn: (ptr: Pointer, index: number, cell: Cell) => boolean,
+	): this {
 
 		// We'll first collect all the indices that need to be removed.
 		const { length } = this;
 		let indices = [];
 		for (let i = 0; i < length; i++) {
-			if (!fn(this[i], this)) {
+			if (!fn(this[i], i, this)) {
 				indices.push(i);
 			}
 		}
