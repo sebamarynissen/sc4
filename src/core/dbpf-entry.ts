@@ -2,7 +2,7 @@
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
 import type { uint32, TGILiteral } from 'sc4/types';
-import type { ValueOf } from 'type-fest';
+import type { Class, Constructor } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
@@ -20,9 +20,22 @@ type KnownTypeId = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
 
-// A type that matches all of our registered file classes.
-type FileConstructor = ValueOf<typeof FileClasses>;
-type File = InstanceType<FileConstructor>;
+// Instead of making our types too narrow by restricting it to all the known 
+// filetypes - which has very little benefit as far as typechecking goes 
+// actually - we now make our types as broad as possible instead: let's make use 
+// of the structurally typed type system at its best. Only define what is 
+// absolutely needed to work here.
+type File = {
+	parse(rs: Stream, ...args: any[]): any,
+};
+type FileConstructor = Class<File>;
+
+// A serializable file must implement a `.toBuffer()` method. Note that it's 
+// possible that for read-only files no `.toBuffer()` method is implemented. In 
+// that case we just return the raw buffer as was read when serializing a DBPF.
+type SerializableFile = File & {
+	toBuffer: (...args: any) => Uint8Array,
+};
 
 // Create a mapped type that contains all the allowed *values* of the known file 
 // types and maps them to the corresopnding keys where they can be found in the 
@@ -31,34 +44,13 @@ type TypeIdToStringKey = {
 	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
 };
 
-// Contains all the types of the *instances* that are part of an array. This 
-// means that we match stuff like "Lot", "Building" etc. More specifically, all 
-// classes that define { static [kFileTypeArray] }
-type ArrayFileTypeConstructor = Extract<ValueOf<typeof FileClasses>, {
-	[ kFileTypeArray]: any;
-}>;
-type ArrayFileType = InstanceType<ArrayFileTypeConstructor>;
-
-// Contains all file types that implement a `toBuffer()` method
-type SerializableFileType = Extract<
-	File,
-	{ toBuffer: (...args: any[]) => Uint8Array }
->;
-
 // A type that matches a constructor based on the *numeric* type id.
-type ConstructorFromType<T extends KnownTypeId> = (typeof FileClasses)[TypeIdToStringKey[T]];
+type TypeIdToFileConstructor<T extends KnownTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
+type TypeIdToFile<T extends KnownTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
 
-// A type that maps a known file type (a number) to an actual *instance type*.
-type FileFromType<T extends KnownTypeId> = InstanceType<
-	ConstructorFromType<T>
->;
-
-// We still have to take into account that certain files - most notably savegame 
-// files - are actually given as *arrays*. To detect this
-type PossibleArray<T extends KnownTypeId> = 
-	ConstructorFromType<T> extends { [kFileTypeArray]: any }
-		? Array<FileFromType<T>>
-		: FileFromType<T>;
+type TypeIdToReadResult<T extends KnownTypeId> = TypeIdToFileConstructor<T> extends { [kFileTypeArray]: any }
+	? Array<TypeIdToFile<T>>
+	: TypeIdToFile<T>;
 
 // Generic type that we use to narrow down the entry to indicate that we know 
 // the file type, but we don't know yet whether it is an array or not.
@@ -68,18 +60,11 @@ interface EntryOfPossibleArrayType<T extends File> extends Entry {
 	fileConstructor: FileConstructor;
 }
 
-// The main magic for the type narrowing happens here with an interface that 
-// extends the entry and defines what the return type of the "read" function 
-// becomes.
-interface EntryOfType<T extends File | File[]> extends Entry {
+// The interface where the magic happens of narrowing down the return type of 
+// the read() function.
+interface EntryWithReadResult<T> extends Entry {
 	read: () => T;
 	file: T | null;
-}
-
-// Generic type for when we know this entry is an array type. In that case we 
-// know that the fileConstructor is for sure one of the array constructors.
-interface EntryOfArrayType<T extends ArrayFileType> extends EntryOfType<T[]> {
-	fileConstructor: ArrayFileTypeConstructor;
 }
 
 type EntryConstructorOptions = {
@@ -151,7 +136,7 @@ export default class Entry {
 	// A predicate function that allows us to narrow down what filetype this 
 	// entry contains. Using this function will infer the return type of the 
 	// `.read()` function.
-	isType<T extends KnownTypeId>(type: T): this is EntryOfType<PossibleArray<T>>  {
+	isType<T extends KnownTypeId>(type: T): this is EntryWithReadResult<TypeIdToReadResult<T>> {
 		return this.type === type;
 	}
 
@@ -160,19 +145,9 @@ export default class Entry {
 	// meaning we'll automatically handle the array deserialization without the 
 	// need for the file class itself to support this. Just implement a class 
 	// for every item in the array.
-	isArrayType(): this is EntryOfArrayType<ArrayFileType> {
+	isArrayType(): this is EntryWithReadResult<File[]> {
 		if (!this.fileConstructor) return false;
 		return kFileTypeArray in this.fileConstructor;
-	}
-
-	// ## isSerializableType()
-	// Returns whether this file type has implemented a `.toBuffer()` method. 
-	// Not all entries need this because some entries might be read-only. In 
-	// that case, there's no need to serialize them, we'll just re-use the 
-	// buffer then.
-	isSerializableType(): this is EntryOfPossibleArrayType<SerializableFileType> {
-		if (!this.fileConstructor) return false;
-		return 'toBuffer' in this.fileConstructor.prototype;
 	}
 
 	// ## get id()
@@ -308,21 +283,26 @@ export default class Entry {
 	// there are a few cases we have to take into account. The highest priority 
 	// is obviously when the file was parsed, then we serialize the file back 
 	// into a buffer.
-	toBuffer(): Uint8Array {
-		if (this.file && this.isSerializableType()) {
-			if (Array.isArray(this.file)) {
-				let buffer = new WriteBuffer();
-				for (let file of this.file) {
-					buffer.writeUint8Array(file.toBuffer());
-				}
-				return buffer.toUint8Array();
-			} else {
-				return this.file.toBuffer();
+	toBuffer(): Uint8Array | null {
+		if (Array.isArray(this.file)) {
+			let array = this.file as File[];
+			let buffer = new WriteBuffer();
+			for (let file of array) {
+
+				// If we notice *at runtime* that the array contains read-only 
+				// files, then we won't serialize one by one, but return a 
+				// buffer instead.
+				if (!isSerializableFile(file)) return this.buffer;
+				buffer.writeUint8Array(file.toBuffer());
+
 			}
-		} else if (this.buffer) {
-			return this.buffer;
+			return buffer.toUint8Array();
+		} else if (this.file !== null) {
+			let struct = this.file as File;
+			if (!isSerializableFile(struct)) return this.buffer;
+			return struct.toBuffer();
 		} else {
-			return new Uint8Array();
+			return this.buffer;
 		}
 	}
 
@@ -408,10 +388,6 @@ const dual = {
 	// Same for actually reading an entry. Can be done both sync and async.
 	read: duplicateAsync(function*(this: Entry, decompress: reader<Uint8Array>) {
 
-		if (this.isArrayType()) {
-			console.log(this.file);
-		}
-
 		// If the entry was already read, don't read it again. Note that it's 
 		// possible to dispose the entry to free up some memory if required.
 		if (this.file !== null) {
@@ -447,11 +423,23 @@ const dual = {
 
 };
 
+// # isSerializableFile(file)
+// Figures out whether the file instance is serializable. During development 
+// it's possible that a certain file type did not implement a `.toBuffer()` 
+// method yet, which is fine, we'll re-use the original buffer then, meaning 
+// that we can't make any changes - hence "readonly".
+function isSerializableFile(file: File): file is SerializableFile {
+	return 'toBuffer' in file;
+}
+
 // # readArrayFile()
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
-function readArrayFile(Constructor: ArrayFileTypeConstructor, buffer: Uint8Array) {
-	let array: ArrayFileType[] = [];
+function readArrayFile<T extends Constructor<any>>(
+	Constructor: T,
+	buffer: Uint8Array
+) {
+	let array: InstanceType<T>[] = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {
 
