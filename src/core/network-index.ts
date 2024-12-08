@@ -3,34 +3,32 @@ import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import Unknown from './unknown.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
+import type Pointer from './pointer.js';
+import type { dword, word } from 'sc4/types';
 
 // # NetworkIndex
 export default class NetworkIndex {
-
-	static [Symbol.for('sc4.type')] = FileType.NetworkIndex;
-
-	// ## constructor()
-	constructor() {
-		let u = new Unknown(this);
-		this.mem = 0x00000000;
-		this.crc = 0x00000000;
-		this.major = 0x0007;
-		this.cityTiles = 4096;
-		this.tiles = [];
-		this.intersections = [];
-		this.transitEnabledTiles = [];
-		u.dword(0x00000000);
-		u.dword(0x00000000);
-		this.tileX = 0x00000000;
-		this.tileZ = 0x00000000;
-		u.bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-		this.yIntersections = [];
-	}
+	static[kFileType] = FileType.NetworkIndex;
+	mem = 0x00000000;
+	crc = 0x00000000;
+	major = 0x0007;
+	cityTiles = 4096;
+	tiles: NetworkIndexTile[] = [];
+	intersections: NetworkIntersection[] = [];
+	transitEnabledTiles: TransitEnabledTile[] = [];
+	tileX = 0x00000000;
+	tileZ = 0x00000000;
+	yIntersections: ComplexIntersection[] = [];
+	u = new Unknown()
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
 	// ## parse(buffer)
-	parse(buffer) {
-		const u = new Unknown(this);
+	parse(buffer: Stream | Uint8Array) {
 		let rs = new Stream(buffer);
+		const u = this.u.reader(rs);
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -43,11 +41,11 @@ export default class NetworkIndex {
 		});
 
 		// Don't know what happens below lol.
-		u.dword(rs.dword());
-		u.dword(rs.dword());
+		u.dword();
+		u.dword();
 		this.tileX = rs.dword();
 		this.tileZ = rs.dword();
-		u.bytes(rs.read(10));
+		u.bytes(10);
 
 		// Next another array of pointers follows, either of type 0xc9c05c6e
 		// (NetworkOccupant), or 0x49c1a034 (
@@ -66,19 +64,19 @@ export default class NetworkIndex {
 
 	// ## toBuffer()
 	toBuffer() {
-		const unknown = this.unknown.generator();
 		let ws = new WriteBuffer();
+		const unknown = this.u.writer(ws);
 		ws.dword(this.mem);
 		ws.word(this.major);
 		ws.dword(this.cityTiles);
 		ws.array(this.tiles);
 		ws.array(this.intersections);
 		ws.array(this.transitEnabledTiles);
-		ws.dword(unknown());
-		ws.dword(unknown());
+		unknown.dword();
+		unknown.dword();
 		ws.dword(this.tileX);
 		ws.dword(this.tileZ);
-		ws.write(unknown());
+		unknown.bytes();
 		ws.array(this.yIntersections);
 		return ws.seal();
 	}
@@ -86,8 +84,8 @@ export default class NetworkIndex {
 	// ## tile(opts)
 	// Helper function for creating a new tile. Note that it doesn't insert 
 	// it, you have to do this manually!
-	tile(...args) {
-		return new NetworkIndexTile(...args);
+	tile() {
+		return new NetworkIndexTile();
 	}
 
 }
@@ -95,31 +93,27 @@ export default class NetworkIndex {
 // # NetworkIndexTile
 // Class for representing a tile in the network index.
 class NetworkIndexTile {
-
-	// ## constructor()
-	constructor() {
-		let u = new Unknown(this);
-		this.nr = 0;
-		this.pointer = null;
-		this.blocks = [];
-		this.automata = [];
-		u.byte(0x00);
-		u.dword(0x00000000);
-		u.dword(0x00000000);
-		u.dword(0x00000000);
-		this.reps = [
-			new Uint8Array(12),
-			new Uint8Array(12),
-			new Uint8Array(12),
-			new Uint8Array(12),
-		];
-		u.dword(0x00000000);
-		this.reps2 = [];
-	}
+	nr = 0;
+	pointer: Pointer | null = null;
+	blocks: any[];
+	automata: any[];
+	reps: Uint8Array[] = [
+		new Uint8Array(12),
+		new Uint8Array(12),
+		new Uint8Array(12),
+		new Uint8Array(12),
+	];
+	reps2: any[] = [];
+	u = new Unknown()
+		.byte(0x00)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.word(0x0000);
 
 	// ## parse(rs)
-	parse(rs) {
-		let u = new Unknown(this);
+	parse(rs: Stream) {
+		let u = this.u.reader(rs);
 		this.nr = rs.dword();
 		this.pointer = rs.pointer();
 		this.blocks = rs.array(() => {
@@ -130,16 +124,16 @@ class NetworkIndexTile {
 			};
 		});
 		this.automata = rs.array(() => rs.pointer());
-		u.byte(rs.byte());
-		u.dword(rs.dword());
-		u.dword(rs.dword());
-		u.dword(rs.dword());
+		u.byte();
+		u.dword();
+		u.dword();
+		u.dword();
 		this.reps = [];
 		for (let i = 0; i < 4; i++) {
 			this.reps.push(rs.read(12));
 		}
 
-		u.word(rs.word());
+		u.word();
 
 		// Next follows an array where each record counts 10 bytes.
 		this.reps2 = rs.array(() => {
@@ -152,23 +146,23 @@ class NetworkIndexTile {
 	}
 
 	// ## write(ws)
-	write(ws) {
-		let unknown = this.unknown.generator();
+	write(ws: WriteBuffer) {
+		let u = this.u.writer(ws);
 		ws.dword(this.nr);
 		ws.pointer(this.pointer);
 		ws.array(this.blocks, block => {
 			ws.dword(block.nr);
-			ws.array(block.bytes, bytes => ws.write(bytes));
+			ws.array(block.bytes, bytes => ws.write(bytes as Uint8Array));
 		});
 		ws.array(this.automata, ptr => ws.pointer(ptr));
-		ws.byte(unknown());
-		ws.dword(unknown());
-		ws.dword(unknown());
-		ws.dword(unknown());
+		u.byte();
+		u.dword();
+		u.dword();
+		u.dword();
 		for (let rep of this.reps) {
 			ws.write(rep);
 		}
-		ws.word(unknown());
+		u.word();
 		ws.array(this.reps2, item => {
 			ws.dword(item.nr);
 			ws.write(item.bytes);
@@ -187,14 +181,22 @@ class NetworkIndexTile {
 // tiles already appear as well in the normal tiles array! This is just an 
 // additional structure somehow.
 class NetworkIntersection {
+	pointer: Pointer | null = null;
+	west: any = null;
+	north: any = null;
+	east: any = null;
+	south: any = null;
+	u = new Unknown()
+		.byte(0x00)
+		.dword(0x00000000);
 
 	// ## parse(rs)
-	parse(rs) {
-		let u = new Unknown(this);
+	parse(rs: Stream) {
+		const u = this.u.reader(rs);
 		this.pointer = rs.pointer();
-		u.byte(rs.byte());
-		u.dword(rs.dword());
-		for (let dir of ['west', 'north', 'east', 'south']) {
+		u.byte();
+		u.dword();
+		for (let dir of ['west', 'north', 'east', 'south'] as Dirs[]) {
 
 			// Next the game does something strange. We have to read in a 
 			// count, but it does not specify the size of an array, instead it 
@@ -218,14 +220,14 @@ class NetworkIntersection {
 	}
 
 	// ## write(ws)
-	write(ws) {
-		let unknown = this.unknown.generator();
+	write(ws: WriteBuffer) {
+		let u = this.u.writer(ws);
 		ws.pointer(this.pointer);
-		ws.byte(unknown());
-		ws.dword(unknown());
-		for (let dir of ['west', 'north', 'east', 'south']) {
+		u.byte();
+		u.dword();
+		for (let dir of ['west', 'north', 'east', 'south'] as Dirs[]) {
 			let { array, bool } = this[dir];
-			let { length } = array.filter(({ ignore }) => !ignore);
+			let { length } = array.filter(({ ignore }: { ignore: boolean }) => !ignore);
 			ws.dword(length);
 			ws.bool(bool);
 			for (let { bytes } of array) {
@@ -239,17 +241,13 @@ class NetworkIntersection {
 // # TransitEnabledTile
 // The class for representing a transit enabled tile in the network index.
 class TransitEnabledTile {
-
-	// ## constructor()
-	constructor() {
-		this.x = 0x0000;
-		this.z = 0x0000;
-		this.dword = 0x00000000;
-		this.pointer = null;
-	}
+	x: word = 0x0000;
+	z: word = 0x0000;
+	dword: dword = 0x00000000;
+	pointer: Pointer | null = null;
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		this.z = rs.word();
 		this.x = rs.word();
 		this.dword = rs.dword();
@@ -257,7 +255,7 @@ class TransitEnabledTile {
 	}
 
 	// ## write(ws)
-	write(ws) {
+	write(ws: WriteBuffer) {
 		ws.word(this.z);
 		ws.word(this.x);
 		ws.dword(this.dword);
@@ -269,21 +267,23 @@ class TransitEnabledTile {
 // # ComplexIntersection
 // The class for representing complex Y intersections in the network index. 
 // They are not fully understood yet though.
-class ComplexIntersection {
+type Dirs = keyof ComplexIntersection & keyof NetworkIntersection & ('west' | 'north' | 'east' | 'south');
+type DirType = {
+	array: dword[];
+	word: word;
+};
 
-	// ## constructor()
-	constructor() {
-		this.pointer = null;
-		this.west = null;
-		this.north = null;
-		this.east = null;
-		this.south = null;
-	}
+class ComplexIntersection {
+	pointer: Pointer | null = null;
+	west: DirType | null = null;
+	north: DirType | null = null;
+	east: DirType | null = null;
+	south: DirType | null = null;
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		this.pointer = rs.pointer();
-		for (let dir of ['west', 'north', 'east', 'south']) {
+		for (let dir of ['west', 'north', 'east', 'south'] as Dirs[]) {
 			this[dir] = {
 				array: rs.array(() => rs.dword()),
 				word: rs.word(),
@@ -292,10 +292,10 @@ class ComplexIntersection {
 	}
 
 	// ## write(ws)
-	write(ws) {
+	write(ws: WriteBuffer) {
 		ws.pointer(this.pointer);
-		for (let dir of ['west', 'north', 'east', 'south']) {
-			let struct = this[dir];
+		for (let dir of ['west', 'north', 'east', 'south'] as Dirs[]) {
+			let struct = this[dir] as DirType;
 			ws.array(struct.array, dword => ws.dword(dword));
 			ws.word(struct.word);
 		}

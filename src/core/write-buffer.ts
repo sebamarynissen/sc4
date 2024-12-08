@@ -90,10 +90,9 @@ export default class WriteBuffer extends SmartBuffer {
 	// ## array(arr)
 	// Helper function for writing away an array of objects. We first insert 
 	// the array's length and then try to convert to buffers.
-	array<T extends Writable>(
-		arr: T[],
-		fn = (object: Writable) => this.write(object),
-	) {
+	array<T extends Writable>(arr: T[]): void;
+	array<T>(arr: T[], fn: (item: T) => any): void;
+	array<T>(arr: T[], fn: (item: any) => any = (item => this.write(item))): void {
 		this.uint32(arr.length);
 		for (let item of arr) {
 			fn(item);

@@ -35,6 +35,7 @@ export default class Unknown extends Array<UnknownType> {
 
 	// ## reader(rs)
 	reader(rs: Stream) {
+		this.clear();
 		return new UnknownReader(this, rs);
 	}
 
@@ -74,6 +75,17 @@ export default class Unknown extends Array<UnknownType> {
 				}
 			},
 		});
+	}
+
+	// ## clear()
+	// Clears the unknown again. This is useful because the labels that might 
+	// have been set for the values are actually kept. This means that you can 
+	// set up the initial unknown from the constructor with the labels, and then 
+	// the labels don't have to be re-assigned later on when actually parsing 
+	// from a file.
+	clear() {
+		this.length = 0;
+		return this;
 	}
 
 }
