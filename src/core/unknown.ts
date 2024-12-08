@@ -8,19 +8,29 @@ type UnknownType = number | boolean | bigint | Uint8Array;
 // Helper class that we use for easily managing unknown values in data 
 // structures used by the game.
 export default class Unknown extends Array<UnknownType> {
-	bool(value: boolean ) { this.push(value); }
-	byte(value: byte) { this.push(value); }
-	word(value: word) { this.push(value); }
-	dword(value: dword) { this.push(value); }
-	qword(value: qword) { this.push(value); }
-	float(value: float) { this.push(value); }
-	double(value: double) { this.push(value); }
+	bool(value: boolean) { this.push(value); return this; }
+	byte(value: byte) { this.push(value); return this; }
+	word(value: word) { this.push(value); return this; }
+	dword(value: dword) { this.push(value); return this; }
+	qword(value: qword) { this.push(value); return this; }
+	float(value: float) { this.push(value); return this; }
+	double(value: double) { this.push(value); return this; }
 	bytes(value: number[] | Uint8Array) {
 		if (Array.isArray(value)) {
 			this.push(new Uint8Array(value));
 		} else {
 			this.push(value);
 		}
+		return this;
+	}
+
+	// ## repeat()
+	// Helper for repeating a certain pattern a few times.
+	repeat(n: number, fn: (u: Unknown) => any): this {
+		for (let i = 0; i < n; i++) {
+			fn(this);
+		}
+		return this;
 	}
 
 	// ## reader(rs)
@@ -85,6 +95,15 @@ class UnknownReader {
 	float() { this.unknown.float(this.rs.float()); }
 	double() { this.unknown.double(this.rs.double()); }
 	bytes(length?: number) { this.unknown.bytes(this.rs.read(length)); }
+
+	// ## repeat()
+	// Helper for repeating a certain pattern a few times.
+	repeat(n: number, fn: () => void): void {
+		for (let i = 0; i < n; i++) {
+			fn();
+		}
+	}
+
 }
 
 // # UnkownWriter
@@ -104,4 +123,13 @@ class UnknownWriter {
 	double() { this.ws.double(this.generator.double()) };
 	bytes() { this.ws.write(this.generator.bytes()) };
 	assert() { this.generator.assert(); }
+
+	// ## repeat()
+	// Helper for repeating a certain pattern a few times.
+	repeat(n: number, fn: () => void): void {
+		for (let i = 0; i < n; i++) {
+			fn();
+		}
+	}
+
 }
