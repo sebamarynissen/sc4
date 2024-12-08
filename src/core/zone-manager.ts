@@ -4,6 +4,8 @@ import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import Pointer from './pointer.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
+import type { ConstructorOptions, dword } from 'sc4/types';
 
 // Some type ids. We should put them within the FileType's though!
 const cSC4SimGridSint8 = 0x49b9e603;
@@ -16,46 +18,45 @@ const cSC4BudgetSimulator = 0xe990be01;
 // # ZoneManager
 // Not sure what it does yet, still decoding.
 export default class ZoneManager {
+	static [kFileType] = FileType.ZoneManager;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0001;
 
-	static [Symbol.for('sc4.type')] = FileType.ZoneManager;
+	// Pointer to the ZoneView grid.
+	grid = new Pointer(cSC4SimGridSint8);
+	u1: number[] = Array(16).fill(0x00000000);
+
+	// Note even though the size is repeated multiple times when parsing, 
+	// we'll only assign it once.
+	size = 0x00000000;
+
+	// From now on follows a part that always seems to be fixed.
+	u2 = hexToUint8Array(fixed);
+
+	// Pointers to other subfiles.
+	city = new Pointer(cSC4City);
+	occupantManager = new Pointer(cSC4OccupantManager);
+	terrain = new Pointer(cSTETerrain);
+	pollutionSimulator = new Pointer(cSC4PollutionSimulator);
+	budgetSimulator = new Pointer(cSC4BudgetSimulator);
 
 	// ## constructor(opts)
-	constructor(opts) {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0001;
-
-		// Pointer to the ZoneView grid.
-		this.grid = new Pointer(cSC4SimGridSint8);
-		this.u1 = Array(16).fill(0x00000000);
-
-		// Note even though the size is repeated multiple times when parsing, 
-		// we'll only assign it once.
-		this.size = 0x00000000;
-
-		// From now on follows a part that always seems to be fixed.
-		this.u2 = hexToUint8Array(fixed);
-
-		// Pointers to other subfiles.
-		this.city = new Pointer(cSC4City);
-		this.occupantManager = new Pointer(cSC4OccupantManager);
-		this.terrain = new Pointer(cSTETerrain);
-		this.pollutionSimulator = new Pointer(cSC4PollutionSimulator);
-		this.budgetSimulator = new Pointer(cSC4BudgetSimulator);
+	constructor(opts: ConstructorOptions<ZoneManager>) {
 		Object.assign(this, opts);
 	}
 
 	// ## parse(buff)
-	parse(buff) {
+	parse(buff: Stream | Uint8Array) {
 		let rs = new Stream(buff);
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
-		this.grid = rs.pointer();
+		this.grid = rs.pointer() as Pointer;
 
 		// Read in the unknowns.
-		let arr = this.u1 = [];
+		let arr: dword[] = this.u1 = [];
 		for (let i = 0; i < 16; i++) {
 			arr.push(rs.dword());
 		}
@@ -68,15 +69,15 @@ export default class ZoneManager {
 		this.u2 = rs.read(533);
 
 		// More pointers follow now.
-		this.city = rs.pointer();
-		this.occupantManager = rs.pointer();
-		this.terrain = rs.pointer();
-		this.pollutionSimulator = rs.pointer();
-		this.budgetSimulator = rs.pointer();
+		this.city = rs.pointer() as Pointer;
+		this.occupantManager = rs.pointer() as Pointer;
+		this.terrain = rs.pointer() as Pointer;
+		this.pollutionSimulator = rs.pointer() as Pointer;
+		this.budgetSimulator = rs.pointer() as Pointer;
 
 	}
 
-	// ## toBuffer();
+	// ## toBuffer()
 	toBuffer() {
 		let ws = new WriteBuffer();
 		ws.dword(this.mem);
