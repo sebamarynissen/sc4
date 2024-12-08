@@ -77,7 +77,7 @@ export default class Stream extends SmartBuffer {
 	// ## rest()
 	// Helper function for reading the rest of the buffer - as a slice.
 	rest() {
-		return this.readBuffer();
+		return this.readUint8Array();
 	}
 
 	int8(offset?: number): sint8 { return this.readInt8(offset); }
