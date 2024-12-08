@@ -20,8 +20,7 @@ export default class LineItem {
 	cost = 0n;
 	expense = 0n;
 	revenue = 0n;
-	unknown2: Uint8Array = null;
-	foo = this;
+	unknown2: Uint8Array;
 
 	// ## parse(rs)
 	// Parses the budget line item from a buffer wrapped up in a readable 

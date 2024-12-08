@@ -52,7 +52,7 @@ hex.register = function() {
 		// eslint-disable-next-line no-extend-native
 		Object.defineProperty(Number.prototype, 'hex', {
 			value(pad?: number) {
-				return util.styleText('yellow', hex(this, pad));
+				return util!.styleText('yellow', hex(this, pad));
 			},
 		});
 	}
@@ -68,14 +68,14 @@ export const inspect = {
 		if (!value) return value;
 		return {
 			[kInspect]() {
-				return util.styleText('cyan', value);
+				return util!.styleText('cyan', value);
 			},
 		};
 	},
 	constructor(value: Constructor<any>) {
 		return {
 			[kInspect]() {
-				return util.styleText('cyan', value.name);
+				return util!.styleText('cyan', value.name);
 			},
 		};
 	},

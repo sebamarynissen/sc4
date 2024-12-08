@@ -1,16 +1,16 @@
 // # tgi-index.ts
-import type { TGIQuery, TGILiteral } from 'sc4/types';
+import type { TGIQuery, TGILiteral, uint32 } from 'sc4/types';
 
-type SingleResult<T> = T | null;
+type SingleResult<T> = T | undefined;
 type ArrayResult<T> = SingleResult<T>[];
-type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => boolean;
+type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => entry is T;
 type FindArg<T> = number | TGIQuery | TGIPredicate<T>;
 
 // # TGIIndex
 // A data structure that allows for efficiently querying objects by (type, 
 // group, instance).
 export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T> {
-	index: Index<T> = null;
+	index: Index<T>;
 	dirty = false;
 
 	// ## build()
@@ -39,13 +39,13 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	findOne(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
 		let result;
 		if (typeof query === 'number') {
-			result = this.findAll(query, g, i);
+			result = this.findAll(query, g, i!);
 		} else if (typeof query === 'function') {
 			result = this.findAll(query, g);
 		} else {
 			result = this.findAll(query);
 		}
-		return result.at(-1) ?? null;
+		return result.at(-1);
 	}
 
 	// ## find(type, group, instance)
@@ -57,7 +57,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
 	find(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
 		if (typeof query === 'number') {
-			return this.findOne(query, g, i);
+			return this.findOne(query, g, i!);
 		} else if (typeof query === 'function') {
 			return this.findOne(query, g);
 		} else {
@@ -133,10 +133,10 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	remove(query: FindArg<T>, g?: number, i?: number): number {
 		let removed;
 		if (typeof query === 'function') {
-			removed = filterInPlace(this, query);
+			removed = filterInPlace<T>(this, query);
 		} else {
 			let fn = createFilter(normalize(query, g, i));
-			removed = filterInPlace(this, fn);
+			removed = filterInPlace<T>(this, fn);
 		}
 		if (this.index) {
 			this.dirty = true;
@@ -174,7 +174,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 
 }
 
-const known = (x: any) => x !== undefined;
+const known = (x: uint32 | undefined): x is uint32 => x !== undefined;
 
 // # Index
 // Our actual index data structure. It's nothing more than a hash table 
@@ -281,9 +281,9 @@ function normalize(
 function createFilter<T extends TGILiteral>({ type, group, instance }: TGIQuery) {
 	return (entry: T) => {
 		return (
-			(type > -1 ? entry.type === type : true) &&
-			(group > -1 ? entry.group === group : true) &&
-			(instance > -1 ? entry.instance === instance : true)
+			(type! > -1 ? entry.type === type : true) &&
+			(group! > -1 ? entry.group === group : true) &&
+			(instance! > -1 ? entry.instance === instance : true)
 		);
 	};
 }

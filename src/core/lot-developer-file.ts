@@ -8,7 +8,7 @@ import type Pointer from './pointer.js';
 // # LotDeveloperFile
 export default class LotDeveloperFile {
 
-	static [kFileType] = FileType.LotDeveloperFile;
+	static [kFileType] = FileType.LotDeveloper;
 
 	crc = 0x00000000;
 	mem = 0x00000000;
@@ -35,7 +35,7 @@ export default class LotDeveloperFile {
 		let count = rs.dword();
 		this.buildings = new Array(count);
 		for (let i = 0; i < count; i++) {
-			this.buildings[i] = rs.pointer();
+			this.buildings[i] = rs.pointer() as Pointer;
 		}
 
 		// Read in the rest.

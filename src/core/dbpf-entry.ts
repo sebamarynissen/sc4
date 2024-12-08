@@ -49,8 +49,8 @@ export default class Entry {
 	//    this, it can be found here. It's mainly this property that you'll 
 	//    be interfacing with to modify things in a certian subfile of the 
 	//    DBPF as this means you don't have to work with the raw binary data.
-	raw: Uint8Array;
-	buffer: Uint8Array;
+	raw: Uint8Array | null;
+	buffer: Uint8Array | null;
 	file: FileTypeInstance | FileTypeInstance[];
 
 	// ## constructor(opts)

@@ -4,7 +4,7 @@
 // rescue. This allows us to avoid importing those modules, and conditionally 
 // require them instead.
 function resolve() {
-	if (globalThis.process?.getBuiltinModule) {
+	if ('process' in globalThis && 'getBuiltinModule' in globalThis.process) {
 		const { getBuiltinModule } = globalThis.process;
 		return {
 			fs: getBuiltinModule('fs'),

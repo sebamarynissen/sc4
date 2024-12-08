@@ -18,7 +18,7 @@ const Flags = {
 // Represents a single lot from the lot file
 export default class Lot {
 
-	static [kFileType] = FileType.LotFile;
+	static [kFileType] = FileType.Lot;
 	static [kFileTypeArray] = true;
 
 	crc = 0x00000000;
@@ -55,7 +55,7 @@ export default class Lot {
 	unknown6 = 0x0002;
 	sgprops: SGProp[] = [];
 	commutes: any[] = [];
-	commuteBuffer: Uint8Array = null;
+	commuteBuffer: Uint8Array;
 	debug = 0x00;
 
 	// ## constructor()

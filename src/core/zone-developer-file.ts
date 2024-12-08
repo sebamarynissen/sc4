@@ -8,13 +8,13 @@ import type Stream from './stream.js';
 // # ZoneDeveloperFile
 export default class ZoneDeveloperFile {
 
-	static [kFileType] = FileType.ZoneDeveloperFile;
+	static [kFileType] = FileType.ZoneDeveloper;
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0001;
 	xSize = 0x00000040;
 	zSize = 0x00000040;
-	cells: Pointer[][] = [];
+	cells: (Pointer | null)[][] = [];
 
 	// ## parse(rs)
 	parse(rs: Stream) {

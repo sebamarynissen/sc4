@@ -11,7 +11,7 @@ import type Stream from './stream.js';
 // **Flora.Array** as file for the DBPF files, not the flora class itself!
 export default class Flora {
 
-	static [kFileType] = FileType.FloraFile;
+	static [kFileType] = FileType.Flora;
 	static [kFileTypeArray] = true;
 	crc = 0x00000000;
 	mem = 0x00000000;
