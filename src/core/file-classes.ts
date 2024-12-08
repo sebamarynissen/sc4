@@ -18,7 +18,7 @@ import ItemIndex from './item-index.js';
 import RegionView from './region-view.js';
 import ZoneDeveloper from './zone-developer-file.js';
 import LotDeveloper from './lot-developer-file.js';
-import COMSerializer from './com-serializer-file.js';
+import COMSerializer from './com-serializer.js';
 import ZoneManager from './zone-manager.js';
 import TractDeveloper from './tract-developer.js';
 import PlumbingSimulator from './plumbing-simulator.js';

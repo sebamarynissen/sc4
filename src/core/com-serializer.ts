@@ -2,28 +2,24 @@
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType } from './symbols.js';
 
 // # COMSerializerFile
 export default class COMSerializerFile {
-
-	static [Symbol.for('sc4.type')] = FileType.COMSerializer;
-
-	// ## constructor()
-	constructor() {
-		this.u1 = 0x00000001;
-		this.u2 = 0x00000000;
-		this.index = new Map();
-	}
+	static [kFileType] = FileType.COMSerializer;
+	u1 = 0x00000001;
+	u2 = 0x00000000;
+	index: Map<number, number> = new Map();
 
 	// ## get(type)
 	// Returns the amount of serialized objects of the given type.
-	get(type) {
+	get(type: number) {
 		return this.index.get(type);
 	}
 
 	// ## set(type, count)
 	// Sets the amount of serialized objects of the given type.
-	set(type, count) {
+	set(type: number, count: number) {
 		this.index.set(type, count);
 		return this;
 	}
@@ -31,18 +27,17 @@ export default class COMSerializerFile {
 	// ## update(type, array)
 	// Updates the amount of serialized objects for the given array. Makes it 
 	// easier than having to user `set(type, count)` all the time.
-	update(type, array) {
+	update(type: number, array: any[]) {
 		this.set(type, array.length);
 		return this;
 	}
 
 	// ## parse(buff)
 	// Parses the COMSerializerfile from the given buffer.
-	parse(buff) {
-
-		let rs = new Stream(buff);
+	parse(streamOrBuffer: Stream | Uint8Array) {
 
 		// Is this the version number. Don't know. Always seems to be 1.
+		let rs = new Stream(streamOrBuffer);
 		this.u1 = rs.dword();
 		let count = rs.dword();
 		this.u2 = rs.dword();
