@@ -1,7 +1,7 @@
 // # util.ts
 import { util } from './node-builtins.js';
 import type { Constructor, UnknownRecord } from 'type-fest';
-import type { uint32, TGILiteral } from 'sc4/utils';
+import type { uint32, TGILiteral } from 'sc4/types';
 import type { InspectOptionsStylized } from 'node:util';
 
 // Julian day offset between unix epoch and Julian Date 0.

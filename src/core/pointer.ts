@@ -1,7 +1,8 @@
 // # pointer.ts
 // Small helper class that represents a pointer to a certain record in the 
 // subfile.
-import { hex, type uint32 } from 'sc4/utils';
+import { hex } from 'sc4/utils';
+import type { uint32 } from 'sc4/types';
 import { getClassType } from './helpers.js';
 import type { SavegameRecord } from './types.js';
 
