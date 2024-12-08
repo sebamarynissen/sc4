@@ -3,7 +3,6 @@ import WriteBuffer from './write-buffer.js';
 import { FileType, ZoneType, DemandSourceIndex } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type SGProp from './sgprop.js';
-import type { OptionalKeysOf } from 'type-fest';
 import type Stream from './stream.js';
 import type { byte } from 'sc4/types';
 
@@ -62,7 +61,7 @@ export default class Lot {
 	// Pre-initialize the lot properties with correct types to produce better 
 	// optimized vm code. This is inherent to how V8 optimizes Object 
 	// properties.
-	constructor(opts: OptionalKeysOf<Lot>) {
+	constructor(opts?: Partial<Lot>) {
 		Object.assign(this, opts);
 	}
 

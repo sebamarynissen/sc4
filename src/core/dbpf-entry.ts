@@ -2,6 +2,7 @@
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
 import type { uint32, TGILiteral } from 'sc4/types';
+import type { ValueOf } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
@@ -16,7 +17,7 @@ import type { kFileTypeArray } from './symbols.js';
 // which means that a class has been implemented for it. In order to do this, we 
 // first need a subset type that contains all values of the FileType enum that 
 // have a corresponding class.
-type KnownFileType = (typeof FileType)[
+type KnownTypeId = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
 
@@ -27,16 +28,27 @@ type InvertedTypes = {
 	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
 };
 
-type ConstructorFromType<T extends KnownFileType> = (typeof FileClasses)[InvertedTypes[T]];
+// Contains all the types of the *instances* that are part of an array. This 
+// means that we match stuff like "Lot", "Building" etc. More specifically, all 
+// classes that define { static [kFileTypeArray] }
+type ArrayFileType = InstanceType<
+	Extract<
+		ValueOf<typeof FileClasses>,
+		{ [kFileTypeArray]: any; }
+	>
+>;
+
+// A type that matches a constructor based on the *numeric* type id.
+type ConstructorFromType<T extends KnownTypeId> = (typeof FileClasses)[InvertedTypes[T]];
 
 // A type that maps a known file type (a number) to an actual *instance type*.
-type InstanceFromType<T extends KnownFileType> = InstanceType<
+type InstanceFromType<T extends KnownTypeId> = InstanceType<
 	ConstructorFromType<T>
 >;
 
 // We still have to take into account that certain files - most notably savegame 
 // files - are actually given as *arrays*. To detect this
-type PossibleArray<T extends KnownFileType> = 
+type PossibleArray<T extends KnownTypeId> = 
 	ConstructorFromType<T> extends { [kFileTypeArray]: any }
 		? Array<InstanceFromType<T>>
 		: InstanceFromType<T>;
@@ -44,9 +56,17 @@ type PossibleArray<T extends KnownFileType> =
 // The final magic for type narrowing happens here: by using an interface that 
 // extends from entry, we can define what type the read method returns. Dynamism 
 // with static typing, this is great!
-interface KnownEntryType<T extends KnownFileType> extends Entry {
-	file: PossibleArray<T> | null;
-	read: () => PossibleArray<T>;
+// type KnownEntryType<T extends KnownFileType> extends Entry {
+// 	file: PossibleArray<T> | null;
+// 	read: () => PossibleArray<T>;
+// }
+
+// The main magic for the type narrowing happens here with an interface that 
+// extends the entry and defines what the return type of the "read" function 
+// becomes.
+interface EntryOfType<T> extends Entry {
+	file: T | null;
+	read: () => T;
 }
 
 type EntryConstructorOptions = {
@@ -109,8 +129,18 @@ export default class Entry {
 	// A predicate function that allows us to narrow down what filetype this 
 	// entry contains. Using this function will infer the return type of the 
 	// `.read()` function.
-	isType<T extends KnownFileType>(type: T): this is KnownEntryType<T>  {
+	isType<T extends KnownTypeId>(type: T): this is EntryOfType<PossibleArray<T>>  {
 		return this.type === type;
+	}
+
+	// ## get isArrayType()
+	// Returns whether this file type is registered as an array file type, 
+	// meaning we'll automatically handle the array deserialization without the 
+	// need for the file class itself to support this. Just implement a class 
+	// for every item in the array.
+	isArrayType(): this is EntryOfType<ArrayFileType[]> {
+		const Constructor = this.fileConstructor;
+		return !!Constructor[kTypeArray];
 	}
 
 	// ## get id()
@@ -152,16 +182,6 @@ export default class Entry {
 	// is an array type or not.
 	get fileConstructor() {
 		return getConstructorByType(this.type);
-	}
-
-	// ## get isArrayType()
-	// Returns whether this file type is registered as an array file type, 
-	// meaning we'll automatically handle the array deserialization without the 
-	// need for the file class itself to support this. Just implement a class 
-	// for every item in the array.
-	get isArrayType() {
-		const Constructor = this.fileConstructor;
-		return !!Constructor[kTypeArray];
 	}
 
 	// ## get isKnownType()
@@ -258,7 +278,8 @@ export default class Entry {
 		// the buffer from here. This has highest priority as it's the highest 
 		// level of abstraction.
 		if (this.file) {
-			if (this.isArrayType) {
+			if (this.isArrayType()) {
+				let foo = this.file;
 				let buffer = new WriteBuffer();
 				for (let file of this.file) {
 					buffer.writeUint8Array(file.toBuffer());
@@ -267,8 +288,10 @@ export default class Entry {
 			} else {
 				return this.file.toBuffer();
 			}
-		} else {
+		} else if (this.buffer) {
 			return this.buffer;
+		} else {
+			return new Uint8Array();
 		}
 
 	}
@@ -337,7 +360,7 @@ const dual = {
 		// If we haven't read in the raw - potentially compressed - buffer, we 
 		// have to do this first. Can be done synchronously, or asynchronously.
 		if (!this.raw) {
-			this.raw = yield readRaw();
+			this.raw = (yield readRaw()) as Uint8Array;
 		}
 
 		// If the entry is compressed, decompress it.
@@ -377,7 +400,7 @@ const dual = {
 		// as an array. If nothing is found, just return the buffer. Third party 
 		// code might still know how to interpret the buffer.
 		const Constructor = this.fileConstructor;
-		if (this.isArrayType) {
+		if (this.isArrayType()) {
 			this.file = readArrayFile(Constructor, this.buffer);
 		} else {
 			let file = this.file = new Constructor();
@@ -411,9 +434,6 @@ function readArrayFile(Constructor: FileTypeConstructor, buffer: Uint8Array) {
 }
 
 let entry = new Entry();
-if (entry.isType(FileType.Lot)) {
-	let lots = entry.read();
-	for (let lot of lots) {
-		console.log(lot.$);
-	}
+if (entry.isArrayType()) {
+	let foo = entry.read();
 }
