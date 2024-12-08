@@ -1,12 +1,36 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
-import { tgi, inspect, duplicateAsync, type uint32, type TGILiteral } from 'sc4/utils';
+import { tgi, inspect, duplicateAsync } from 'sc4/utils';
+import type { uint32, TGILiteral } from 'sc4/types';
+import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import type DBPF from './dbpf.js';
-import type { FileTypeConstructor, FileTypeInstance, FileTypeValue } from './types.js';
-import type { InspectOptions } from 'node:util';
+import type { FileTypeConstructor, FileTypeValue } from './types.js';
+import type FileClasses from './file-classes.js';
+import FileType from './file-types.js';
+
+// The .read() method of an entry will automatically look for known file types, 
+// which means that a class has been implemented for it. In order to do this, we 
+// first need a subset type that contains all values of the FileType enum that 
+// have a corresponding class.
+type KnownFileType = (typeof FileType)[
+	keyof typeof FileClasses & keyof typeof FileType
+];
+
+// Create a map containing the inverted
+type InvertedTypes = {
+	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
+	// [K in keyof typeof FileType as (typeof FileType)[K]]: K;
+};
+
+// type GetInstanceTypeByFileType<T = number> = T extends KnownFileType
+// 	? InstanceType<>
+
+interface KnownEntryType<T extends KnownFileType> extends Entry {
+	read: () => InstanceType<(typeof FileClasses)[InvertedTypes[T]]>;
+}
 
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
@@ -15,7 +39,7 @@ type EntryParseOptions = {
     minor?: number;
     buffer?: Uint8Array | null;
 };
-type EntryFile = Uint8Array | FileTypeInstance;
+type EntryFile = Uint8Array | unknown;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -51,7 +75,7 @@ export default class Entry {
 	//    DBPF as this means you don't have to work with the raw binary data.
 	raw: Uint8Array | null;
 	buffer: Uint8Array | null;
-	file: FileTypeInstance | FileTypeInstance[];
+	file: unknown | unknown[];
 
 	// ## constructor(opts)
 	constructor(opts: EntryConstructorOptions = {}) {
@@ -62,6 +86,14 @@ export default class Entry {
 			writable: false,
 		});
 		Object.assign(this, rest);
+	}
+
+	// ## isType()
+	// A predicate function that allows us to narrow down what filetype this 
+	// entry contains. Using this function will infer the return type of the 
+	// `.read()` function.
+	isType<T extends KnownFileType>(type: T): this is KnownEntryType<T>  {
+		return this.type === type;
 	}
 
 	// ## get id()
