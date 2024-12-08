@@ -9,7 +9,8 @@ import { getTypeLabel } from './helpers.js';
 import type DBPF from './dbpf.js';
 import type { FileTypeConstructor, FileTypeValue } from './types.js';
 import type FileClasses from './file-classes.js';
-import FileType from './file-types.js';
+import type FileType from './file-types.js';
+import type { kFileTypeArray } from './symbols.js';
 
 // The .read() method of an entry will automatically look for known file types, 
 // which means that a class has been implemented for it. In order to do this, we 
@@ -19,17 +20,33 @@ type KnownFileType = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
 
-// Create a map containing the inverted
+// Create a mapped type that contains all the allowed *values* of the known file 
+// types and maps them to the corresopnding keys where they can be found in the 
+// FileClasses map.
 type InvertedTypes = {
 	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
-	// [K in keyof typeof FileType as (typeof FileType)[K]]: K;
 };
 
-// type GetInstanceTypeByFileType<T = number> = T extends KnownFileType
-// 	? InstanceType<>
+type ConstructorFromType<T extends KnownFileType> = (typeof FileClasses)[InvertedTypes[T]];
 
+// A type that maps a known file type (a number) to an actual *instance type*.
+type InstanceFromType<T extends KnownFileType> = InstanceType<
+	ConstructorFromType<T>
+>;
+
+// We still have to take into account that certain files - most notably savegame 
+// files - are actually given as *arrays*. To detect this
+type PossibleArray<T extends KnownFileType> = 
+	ConstructorFromType<T> extends { [kFileTypeArray]: any }
+		? Array<InstanceFromType<T>>
+		: InstanceFromType<T>;
+
+// The final magic for type narrowing happens here: by using an interface that 
+// extends from entry, we can define what type the read method returns. Dynamism 
+// with static typing, this is great!
 interface KnownEntryType<T extends KnownFileType> extends Entry {
-	read: () => InstanceType<(typeof FileClasses)[InvertedTypes[T]]>;
+	file: PossibleArray<T> | null;
+	read: () => PossibleArray<T>;
 }
 
 type EntryConstructorOptions = {
@@ -39,7 +56,7 @@ type EntryParseOptions = {
     minor?: number;
     buffer?: Uint8Array | null;
 };
-type EntryFile = Uint8Array | unknown;
+type EntryFile = unknown;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -391,4 +408,12 @@ function readArrayFile(Constructor: FileTypeConstructor, buffer: Uint8Array) {
 
 	}
 	return array;
+}
+
+let entry = new Entry();
+if (entry.isType(FileType.Lot)) {
+	let lots = entry.read();
+	for (let lot of lots) {
+		console.log(lot.$);
+	}
 }
