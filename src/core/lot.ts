@@ -4,7 +4,7 @@ import { FileType, ZoneType, DemandSourceIndex } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type SGProp from './sgprop.js';
 import type Stream from './stream.js';
-import type { byte } from 'sc4/types';
+import type { byte, ConstructorOptions } from 'sc4/types';
 
 // Predefined bit-flags.
 const Flags = {
@@ -16,10 +16,8 @@ const Flags = {
 // # Lot
 // Represents a single lot from the lot file
 export default class Lot {
-
 	static [kFileType] = FileType.Lot;
 	static [kFileTypeArray] = true;
-
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0008;
@@ -57,11 +55,7 @@ export default class Lot {
 	commuteBuffer: Uint8Array;
 	debug = 0x00;
 
-	// ## constructor()
-	// Pre-initialize the lot properties with correct types to produce better 
-	// optimized vm code. This is inherent to how V8 optimizes Object 
-	// properties.
-	constructor(opts?: Partial<Lot>) {
+	constructor(opts?: ConstructorOptions<Lot>) {
 		Object.assign(this, opts);
 	}
 

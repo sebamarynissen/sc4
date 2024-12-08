@@ -1,43 +1,47 @@
 // # base-texture-file.js
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type { ConstructorOptions } from 'sc4/types';
+import type Stream from './stream.js';
 
 // # LotBaseTexture
 export default class LotBaseTexture {
-
-	static [Symbol.for('sc4.type')] = FileType.BaseTexture;
-	static [Symbol.for('sc4.type.array')] = true;
-
-	// ## constructor(opts)
-	constructor(opts) {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0002;
-		this.minor = 0x0004;
-		this.u1 = 0x00;
-		this.u2 = 0x00;
-		this.u3 = 0x00;
-		this.u4 = 0x05;
-		this.u5 = 0x497f6d9d;
-		this.xMinTract = 0x40;
-		this.zMinTract = 0x40;
-		this.xMaxTract = 0x40;
-		this.zMaxTract = 0x40;
-		this.xTractSize = 0x0002;
-		this.zTractSize = 0x0002;
-		this.u6 = 0x00000000;
-		this.u7 = 0x00000000;
-		this.u8 = 0x00000000;
-		this.u9 = 0x00000000;
-		this.minZ = this.minY = this.minX = 0;
-		this.maxZ = this.maxY = this.maxX = 0;
-		this.u10 = 0x02;
-		this.textures = [];
+	static [kFileType] = FileType.BaseTexture;
+	static [kFileTypeArray] = true;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0002;
+	minor = 0x0004;
+	u1 = 0x00;
+	u2 = 0x00;
+	u3 = 0x00;
+	u4 = 0x05;
+	u5 = 0x497f6d9d;
+	xMinTract = 0x40;
+	zMinTract = 0x40;
+	xMaxTract = 0x40;
+	zMaxTract = 0x40;
+	xTractSize = 0x0002;
+	zTractSize = 0x0002;
+	u6 = 0x00000000;
+	u7 = 0x00000000;
+	u8 = 0x00000000;
+	u9 = 0x00000000;
+	minX = 0;
+	minY = 0;
+	minZ = 0;
+	maxX = 0;
+	maxY = 0
+	maxZ = 0;
+	u10 = 0x02;
+	textures: Texture[] = [];
+	constructor(opts?: ConstructorOptions<LotBaseTexture>) {
 		Object.assign(this, opts);
 	}
 
 	// ## move(dx, dz)
-	move(dx, dz) {
+	move(dx: [number, number] | number, dz: number) {
 		if (Array.isArray(dx)) {
 			[dx, dz] = dx;
 		}
@@ -59,13 +63,11 @@ export default class LotBaseTexture {
 			texture.x += dx;
 			texture.z += dz;
 		}
-
 		return this;
-
 	}
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -141,7 +143,7 @@ export default class LotBaseTexture {
 
 	// ## add(opts)
 	// Adds a single texture into the array of all textures.
-	add(opts) {
+	add(opts: ConstructorOptions<Texture>) {
 		let texture = new Texture(opts);
 		this.textures.push(texture);
 		return texture;
@@ -151,24 +153,23 @@ export default class LotBaseTexture {
 
 // # Texture
 class Texture {
-
-	// ## constructor(opts)
-	constructor(opts) {
-		this.IID = 0x00000000;
-		this.z = this.x = 0;
-		this.orientation = 0;
-		this.priority = 0x00;
-		this.r = 0xff;
-		this.g = 0xff;
-		this.b = 0xff;
-		this.alpha = 0xff;
-		this.u6 = 0xff;
-		this.u7 = 0x00;
+	IID = 0x00000000;
+	x = 0;
+	z = 0;
+	orientation = 0;
+	priority = 0x00;
+	r = 0xff;
+	g = 0xff;
+	b = 0xff;
+	alpha = 0xff;
+	u6 = 0xff;
+	u7 = 0x00;
+	constructor(opts?: ConstructorOptions<Texture>) {
 		Object.assign(this, opts);
 	}
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 		this.IID = rs.dword();
 		this.x = rs.byte();
 		this.z = rs.byte();
@@ -183,8 +184,8 @@ class Texture {
 		return this;
 	}
 
-	// ## toBuffer(opts)
-	toBuffer(opts) {
+	// ## toBuffer()
+	toBuffer() {
 		let ws = new WriteBuffer();
 		ws.dword(this.IID);
 		ws.byte(this.x);

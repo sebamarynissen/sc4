@@ -1,6 +1,10 @@
 // # lot-object.js
 const scale = 0x00100000;
+import type { ConstructorOptions, MinLengthArray, uint32 } from 'sc4/types';
 import { inspect } from 'sc4/utils';
+
+type ValuesArray = MinLengthArray<uint32, 12>;
+type LotObjectOptions = ConstructorOptions<LotObject> | ValuesArray;
 
 // # LotObject
 // A class for easier manipulation of LotConfigPropertyLotObject properties. 
@@ -31,7 +35,7 @@ export default class LotObject {
 	IIDs = [];
 
 	// ## constructor(config)
-	constructor(config) {
+	constructor(config: LotObjectOptions) {
 		if (Array.isArray(config)) {
 			let [
 				type,
@@ -62,7 +66,7 @@ export default class LotObject {
 		} else {
 			const { IID, ...rest } = config;
 			Object.assign(this, {
-				...IID && { IIDs: [IID] },
+				...(IID ? { IIDs: [IID] } : {}),
 				...rest,
 			});
 		}
@@ -77,7 +81,7 @@ export default class LotObject {
 	// ## toArray()
 	// Converts the lotObject back to an array. This is needed for saving an 
 	// exemplar again.
-	toArray() {
+	toArray(): ValuesArray {
 		let {
 			type, lod, orientation,
 			x, y, z, minX, minZ, maxX, maxZ,
@@ -119,7 +123,7 @@ export default class LotObject {
 // Helper function that ensures certain 32 bit integers are considered as 
 // signed.
 let arr = new Int32Array([0]);
-function signed(x) {
+function signed(x: number) {
 	arr[0] = x;
 	return arr[0];
 }
@@ -128,7 +132,7 @@ function signed(x) {
 // Helper function that ensures a signed integer is convert back to an unsigned 
 // integer.
 let u = new Uint32Array([0]);
-function uint(x) {
+function uint(x: number) {
 	u[0] = x;
 	return u[0];
 }

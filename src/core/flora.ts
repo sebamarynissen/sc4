@@ -5,6 +5,7 @@ import { FileType } from './enums.js';
 import { getUnixFromJulian, getJulianFromUnix } from 'sc4/utils';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
+import type { ConstructorOptions } from 'sc4/types';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
@@ -40,6 +41,10 @@ export default class Flora {
 	state = 0x00;
 	orientation = 0x00;
 	objectId = 0x00000000;
+
+	constructor(opts?: ConstructorOptions<Flora>) {
+		Object.assign(this, opts);
+	}
 
 	// ## parse(rs)
 	parse(rs: Stream) {

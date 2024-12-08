@@ -40,7 +40,7 @@ export default class Building {
 	scaffold = 0x01;
 
 	// ## constructor()
-	constructor(opts: ConstructorOptions<Building>) {
+	constructor(opts?: ConstructorOptions<Building>) {
 		Object.assign(this, opts);
 	}
 
