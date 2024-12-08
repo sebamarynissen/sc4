@@ -191,7 +191,7 @@ export function duplicateAsync<Y, R, N>(
 	type Params = Parameters<typeof generator>;
 	return {
 		sync(...args: Params) {
-			let it = generator(...args);
+			let it = generator.call(this, ...args);
 			let { done, value } = it.next();
 			while (!done) {
 				({ done, value } = it.next(value as N));
@@ -199,7 +199,7 @@ export function duplicateAsync<Y, R, N>(
 			return value as R;
 		},
 		async async(...args: Params) {
-			let it = generator(...args);
+			let it = generator.call(this, ...args);
 			let { done, value } = it.next();
 			while (!done) {
 				({ done, value } = it.next(await value as N));

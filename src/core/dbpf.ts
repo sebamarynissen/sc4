@@ -1,7 +1,7 @@
 // # dbpf.js
 import { compress } from 'qfs-compression';
 import { concatUint8Arrays, isUint8Array, uint8ArrayToHex } from 'uint8array-extras';
-import Header from './dbpf-header.js';
+import Header, { type HeaderOptions } from './dbpf-header.js';
 import Entry from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
@@ -11,11 +11,23 @@ import { cClass, FileType } from './enums.js';
 import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 
+type DBPFOptions = {
+	file?: string;
+	buffer?: Uint8Array;
+	parse?: boolean;
+	header?: HeaderOptions;
+	entries?: any;
+};
+
 // # DBPF()
 // A class that represents a DBPF file. A DBPF file is basically just a custom 
 // file archive format, a bit like .zip etc. as it contains other files that 
 // might be compressed etc.
 export default class DBPF {
+	file: string | null = null;
+	buffer: Uint8Array | null = null;
+	header: Header;
+	entries: TGIIndex<Entry>;
 
 	// ## constructor(opts)
 	// Constructs the dbpf for the given file. For backwards compatibility and 
@@ -25,7 +37,7 @@ export default class DBPF {
 	// from files, **not** from buffers. As such we don't have to keep the 
 	// entire buffer in memory and we can read the required parts of the file 
 	// "on the fly". That's what the DBPF format was designed for!
-	constructor(opts = {}) {
+	constructor(opts: DBPFOptions = {}) {
 
 		// If the file specified is actually a buffer, store that we don't 
 		// have a file. Note that this is not recommended: we need to be able 
@@ -83,8 +95,9 @@ export default class DBPF {
 
 	// ## find(...args)
 	// Proxies to entries.find()
-	find(...args) {
-		return this.entries.find(...args);
+	find(...args: any): string {
+		return 'foo';
+		// return this.entries.find(...args);
 	}
 
 	// ## findAll(...args)
@@ -135,7 +148,7 @@ export default class DBPF {
 	// Returns a buffer contain the bytes starting at offset and with the 
 	// given length. We use this method so that we can use a buffer or a file 
 	// as underlying source interchangeably.
-	readBytes(offset, length) {
+	readBytes(offset: number, length: number) {
 
 		// If the buffer was loaded in memory, then it will be fastest to read 
 		// from memory of course.
@@ -147,9 +160,9 @@ export default class DBPF {
 		// that specific part.
 		if (this.file) {
 			let buffer = new Uint8Array(length);
-			let fd = fs.openSync(this.file);
-			fs.readSync(fd, buffer, 0, length, offset);
-			fs.closeSync(fd);
+			let fd = fs!.openSync(this.file, 'r');
+			fs!.readSync(fd, buffer, 0, length, offset);
+			fs!.closeSync(fd);
 			return buffer;
 		}
 
@@ -162,11 +175,11 @@ export default class DBPF {
 	// Same as readBytes, but in an async way. You normally shouldn't use this 
 	// for modding tasks, but we use it for reading in large plugin folders in 
 	// parallel.
-	async readBytesAsync(offset, length) {
+	async readBytesAsync(offset: number, length: number) {
 		if (this.buffer) return this.buffer.subarray(offset, offset+length);
 		else if (this.file) {
 			let buffer = new Uint8Array(length);
-			let fh = await fs.promises.open(this.file);
+			let fh = await fs!.promises.open(this.file);
 			await fh.read(buffer, 0, length, offset);
 			await fh.close();
 			return buffer;
@@ -180,7 +193,7 @@ export default class DBPF {
 	// reading.
 	parse() {
 		const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
-			fn(entry.read());
+			fn(entry!.read());
 		});
 		return parse.sync.call(
 			this,
@@ -214,7 +227,7 @@ export default class DBPF {
 		const { file = this.file, ...rest } = opts;
 		this.header.modified = new Date();
 		let buff = this.toBuffer(rest);
-		return fs.writeFileSync(file, buff);
+		return fs!.writeFileSync(file, buff);
 		// return fs.promises.writeFile(opts.file, buff);
 	}
 
@@ -512,7 +525,7 @@ const parse = duplicateAsync(function* parse(read, readDirs) {
 
 // # fillIndex(dbpf, buffer)
 // Reads & parses the buffer containing the file index.
-function fillIndex(dbpf, buffer) {
+function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
 	let rs = new Stream(buffer);
 	let index = dbpf.entries = new TGIIndex(dbpf.header.indexCount);
 	for (let i = 0; i < index.length; i++) {

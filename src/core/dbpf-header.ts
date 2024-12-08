@@ -3,6 +3,8 @@ import type { ConstructorOptions } from 'sc4/types';
 import WriteBuffer from './write-buffer.js';
 import type Stream from './stream.js';
 
+export type HeaderOptions = Omit<ConstructorOptions<Header>, 'id'>;
+
 // # Header
 export default class Header {
 	id = 'DBPF';
@@ -20,7 +22,7 @@ export default class Header {
 	indexMinor = 0;
 
 	// ## constructor(opts)
-	constructor(opts: Omit<ConstructorOptions<Header>, 'id'> = {}) {
+	constructor(opts: HeaderOptions = {}) {
 		let { created, modified = created, ...rest } = opts;
 		Object.assign(this, rest);
 		if (created) this.created = new Date(created);

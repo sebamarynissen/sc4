@@ -14,13 +14,6 @@ export type FileTypeConstructor = Constructor<any> & {
 };
 export type FileTypeInstance = InstanceType<FileTypeConstructor>;
 
-// Certain file types - such as the lot and prop subfiles - need to be read as 
-// arrays. The classes indicate this by defining the kFileTypeArray as "true". 
-// The DBPF entry will then know how to handle them.
-export type FileTypeArrayClass = FileTypeConstructor & {
-	[kFileTypeArray]: true;
-};
-
 // Files that are found in savegames go a little bit further than simply being 
 // an instance of a class with the "type" symbol set: they also need to have a 
 // memory address! That way we can ensure that they can be used in pointers.

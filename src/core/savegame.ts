@@ -1,7 +1,10 @@
 // # savegame.js
 import DBPF from './dbpf.js';
 import FileType from './file-types.js';
-import { getConstructorByType } from './filetype-map.js';
+import type FileClasses from './file-classes.js';
+type KnownTypeId = (typeof FileType)[
+	keyof typeof FileClasses & keyof typeof FileType
+];
 
 // # Savegame()
 // A class specifically designed for some Savegame functionality. Obviously 
@@ -15,7 +18,7 @@ export default class Savegame extends DBPF {
 
 	// ## get lotFile()
 	get lotFile() {
-		return this.readByType(FileType.LotFile);
+		return this.readByType(FileType.Lot);
 	}
 	get lots() {
 		return this.lotFile;
@@ -23,7 +26,7 @@ export default class Savegame extends DBPF {
 
 	// ## get buildingFile()
 	get buildingFile() {
-		return this.readByType(FileType.BuildingFile);
+		return this.readByType(FileType.Building);
 	}
 	get buildings() {
 		return this.buildingFile;
@@ -32,7 +35,7 @@ export default class Savegame extends DBPF {
 	// ## get propFile()
 	// Getter for the propfile. If it doesn't exist yet, we'll create it.
 	get propFile() {
-		return this.readByType(FileType.PropFile);
+		return this.readByType(FileType.Prop);
 	}
 	get props() {
 		return this.propFile;
@@ -40,7 +43,7 @@ export default class Savegame extends DBPF {
 
 	// ## get baseTextureFile()
 	get baseTextureFile() {
-		return this.readByType(FileType.BaseTextureFile);
+		return this.readByType(FileType.BaseTexture);
 	}
 	get textures() {
 		return this.baseTextureFile;
@@ -48,7 +51,7 @@ export default class Savegame extends DBPF {
 
 	// ## get itemIndexFile()
 	get itemIndexFile() {
-		return this.readByType(FileType.ItemIndexFile);
+		return this.readByType(FileType.ItemIndex);
 	}
 	get itemIndex() {
 		return this.itemIndexFile;
@@ -56,7 +59,7 @@ export default class Savegame extends DBPF {
 
 	// ## get zoneDeveloperFile()
 	get zoneDeveloperFile() {
-		return this.readByType(FileType.ZoneDeveloperFile);
+		return this.readByType(FileType.ZoneDeveloper);
 	}
 	get zones() {
 		return this.zoneDeveloperFile;
@@ -64,12 +67,12 @@ export default class Savegame extends DBPF {
 
 	// ## get lotDeveloperFile()
 	get lotDeveloperFile() {
-		return this.readByType(FileType.LotDeveloperFile);
+		return this.readByType(FileType.LotDeveloper);
 	}
 
 	// ## get floraFile()
 	get floraFile() {
-		return this.readByType(FileType.FloraFile);
+		return this.readByType(FileType.Flora);
 	}
 
 	// ## get zoneManager()
@@ -79,7 +82,7 @@ export default class Savegame extends DBPF {
 
 	// ## get COMSerializerFile()
 	get COMSerializerFile() {
-		return this.readByType(FileType.COMSerializerFile);
+		return this.readByType(FileType.COMSerializer);
 	}
 
 	// ## get lineItemFile()
@@ -97,7 +100,7 @@ export default class Savegame extends DBPF {
 
 	// ## get pipes()
 	get pipes() {
-		return this.readByType(FileType.PipeFile);
+		return this.readByType(FileType.Pipe);
 	}
 
 	// ## get plumbingSimulator()
@@ -107,7 +110,7 @@ export default class Savegame extends DBPF {
 
 	// ## get regionView()
 	get regionView() {
-		return this.readByType(FileType.RegionViewFile);
+		return this.readByType(FileType.RegionView);
 	}
 
 	// ## get terrain()
@@ -121,7 +124,7 @@ export default class Savegame extends DBPF {
 
 	// ## get network()
 	get network() {
-		return this.readByType(FileType.NetworkFile);
+		return this.readByType(FileType.Network);
 	}
 
 	// ## get prebuiltNetwork()
@@ -173,25 +176,28 @@ export default class Savegame extends DBPF {
 	// # getByType(type)
 	// This method returns an entry in the savegame by type. If it doesn't 
 	// exist yet, it is created.
-	getByType(type) {
-		let entry = this.find({ type });
-		if (!entry) {
-			let Constructor = getConstructorByType(type);
-			if (Constructor) {
-				let tgi = [type, this.GID, 0];
-				if (Constructor[Symbol.for('sc4.type.array')]) {
-					entry = this.add(tgi, []);
-				} else {
-					entry = this.add(tgi, new Constructor());
-				}
-			}
-		}
-		return entry || null;
+	getByType(type: KnownTypeId) {
+		let entries = [...this.entries];
+		return entries.find(entry => entry.isType(type));
+		// return this.entries.find(entry => entry.isType(type))
+		// let entry = this.find({ type });
+		// if (!entry) {
+		// 	let Constructor = getConstructorByType(type);
+		// 	if (Constructor) {
+		// 		let tgi = [type, this.GID, 0];
+		// 		if (Constructor[Symbol.for('sc4.type.array')]) {
+		// 			entry = this.add(tgi, []);
+		// 		} else {
+		// 			entry = this.add(tgi, new Constructor());
+		// 		}
+		// 	}
+		// }
+		// return entry || null;
 	}
 
 	// ## readByType(type)
 	// Helper function that reads an entry when it can be returned.
-	readByType(type) {
+	readByType(type: KnownTypeId) {
 		let entry = this.getByType(type);
 		return entry ? entry.read() : null;
 	}
