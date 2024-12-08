@@ -2,47 +2,65 @@
 import WriteBuffer from './write-buffer.js';
 import SGProp from './sgprop.js';
 import { FileType } from './enums.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type { ConstructorOptions } from 'sc4/types';
+import type Stream from './stream.js';
+
+type Timing = {
+	interval: number;
+	duration: number;
+	start: number;
+	end: number;
+};
 
 // # Prop
 // Represents a single prop from the prop file.
 export default class Prop {
-
-	static [Symbol.for('sc4.type')] = FileType.Prop;
-	static [Symbol.for('sc4.type.array')] = true;
+	static [kFileType] = FileType.Prop;
+	static [kFileTypeArray] = true;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0006;
+	minor = 0x0004;
+	zot = 0x0000;
+	unknown1 = 0x00;
+	appearance = 0b00000101;
+	unknown2 = 0xA823821E;
+	xMinTract = 0x00;
+	zMinTract = 0x00;
+	xMaxTract = 0x00;
+	zMaxTract = 0x00;
+	xTractSize = 0x0002;
+	zTractSize = 0x0002;
+	sgprops: SGProp[] = [];
+	GID = 0x00000000;
+	TID = 0x00000000;
+	IID = 0x00000000;
+	IID1 = 0x00000000;
+	minX = 0;
+	minY = 0;
+	minZ = 0;
+	maxX = 0;
+	maxY = 0;
+	maxZ = 0;
+	orientation = 0x00;
+	state = 0x00;
+	start = 0x00
+	stop = 0x00;
+	timing: Timing | null = null;
+	chance = 100;
+	lotType = 0x02;
+	OID = 0x00000000;
+	condition = 0x00;
 
 	// ## constructor(opts)
-	constructor(opts) {
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0006;
-		this.minor = 0x0004;
-		this.zot = 0x0000;
-		this.unknown1 = 0x00;
-		this.appearance = 0b00000101;
-		this.unknown2 = 0xA823821E;
-		this.zMinTract = this.xMinTract = 0x00;
-		this.zMaxTract = this.xMaxTract = 0x00;
-		this.zTractSize = this.xTractSize = 0x0002;
-		this.sgprops = [];
-		this.GID = 0x00000000;
-		this.TID = 0x00000000;
-		this.IID1 = this.IID = 0x00000000;
-		this.minZ = this.minY = this.minX = 0;
-		this.maxZ = this.maxY = this.maxX = 0;
-		this.orientation = 0x00;
-		this.state = 0x00;
-		this.stop = this.start = 0x00;
-		this.timing = null;
-		this.chance = 100;
-		this.lotType = 0x02;
-		this.OID = 0x00000000;
-		this.condition = 0x00;
+	constructor(opts?: ConstructorOptions<Prop>) {
 		Object.assign(this, opts);
 	}
 
 	// ## parse(rs)
 	// Parses the prop from the given readable stream.
-	parse(rs) {
+	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -58,15 +76,7 @@ export default class Prop {
 		this.zMaxTract = rs.byte();
 		this.xTractSize = rs.word();
 		this.zTractSize = rs.word();
-
-		// Parse SGProps.
-		let count = rs.dword();
-		this.sgprops.length = count;
-		for (let i = 0; i < count; i++) {
-			let prop = this.sgprops[i] = new SGProp();
-			prop.parse(rs);
-		}
-
+		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
 		this.IID = rs.dword();
@@ -83,7 +93,7 @@ export default class Prop {
 		this.stop = rs.byte();
 
 		// Parse interal.
-		count = rs.byte();
+		let count = rs.byte();
 		if (count) {
 			this.timing = {
 				interval: rs.dword(),
