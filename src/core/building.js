@@ -7,7 +7,7 @@ import SGProp from './sgprop.js';
 // Represents a single building from the building file.
 export default class Building {
 
-	static [Symbol.for('sc4.type')] = FileType.BuildingFile;
+	static [Symbol.for('sc4.type')] = FileType.Building;
 	static [Symbol.for('sc4.type.array')] = true;
 
 	// ## constructor(opts)

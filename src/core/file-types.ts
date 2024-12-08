@@ -38,7 +38,7 @@ export const SavegameFileType = {
 	Occupant: 0xa9bc9ab6,
 	Pedestrian: 0x896e75af,
 	ItemIndex: 0x098F964D,
-	RegionViewFile: 0xCA027EDB,
+	RegionView: 0xCA027EDB,
 	ZoneDeveloper: 0x498f9b01,
 	LotDeveloper: 0xa990bfe0,
 	PropDeveloper: 0x89c48f47,
@@ -49,7 +49,7 @@ export const SavegameFileType = {
 	TractDeveloper: 0x2990c142,
 	LineItem: 0xaa313c9f,
 	DepartmentBudget: 0xe990bffc,
-	PipeFile: 0x49c05b9f,
+	Pipe: 0x49c05b9f,
 	PlumbingSimulator: 0x0990c075,
 	ZoneManager: 0x298f9b2d,
 

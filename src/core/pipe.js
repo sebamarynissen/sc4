@@ -12,7 +12,7 @@ import Vertex from './vertex.js';
 // Their structure mostly corresponds to the 
 export default class Pipe {
 
-	static [Symbol.for('sc4.type')] = FileType.PipeFile;
+	static [Symbol.for('sc4.type')] = FileType.Pipe;
 	static [Symbol.for('sc4.type.array')] = true;
 
 	// ## constructor(opts)

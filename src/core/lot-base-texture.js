@@ -5,7 +5,7 @@ import { FileType } from './enums.js';
 // # LotBaseTexture
 export default class LotBaseTexture {
 
-	static [Symbol.for('sc4.type')] = FileType.BaseTextureFile;
+	static [Symbol.for('sc4.type')] = FileType.BaseTexture;
 	static [Symbol.for('sc4.type.array')] = true;
 
 	// ## constructor(opts)

@@ -5,7 +5,7 @@ import { kFileType } from './symbols.js';
 
 // # RegionViewFile
 export default class RegionViewFile {
-	static [kFileType] = FileType.RegionViewFile;
+	static [kFileType] = FileType.RegionView;
 	buffer: Uint8Array;
 	major = 0x0001;
 	minor = 0x000d;

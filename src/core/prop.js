@@ -7,7 +7,7 @@ import { FileType } from './enums.js';
 // Represents a single prop from the prop file.
 export default class Prop {
 
-	static [Symbol.for('sc4.type')] = FileType.PropFile;
+	static [Symbol.for('sc4.type')] = FileType.Prop;
 	static [Symbol.for('sc4.type.array')] = true;
 
 	// ## constructor(opts)

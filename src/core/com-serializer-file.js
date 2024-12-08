@@ -6,7 +6,7 @@ import { FileType } from './enums.js';
 // # COMSerializerFile
 export default class COMSerializerFile {
 
-	static [Symbol.for('sc4.type')] = FileType.COMSerializerFile;
+	static [Symbol.for('sc4.type')] = FileType.COMSerializer;
 
 	// ## constructor()
 	constructor() {

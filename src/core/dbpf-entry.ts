@@ -2,16 +2,15 @@
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
 import type { uint32, TGILiteral } from 'sc4/types';
-import type { Constructor, Class, ValueOf } from 'type-fest';
+import type { ValueOf } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import type DBPF from './dbpf.js';
-import type FileClasses from './file-classes.js';
-import type FileType from './file-types.js';
+import FileClasses from './file-classes.js';
+import FileType from './file-types.js';
 import { kFileTypeArray } from './symbols.js';
-import { Exemplar } from './file-classes.js';
 
 // The .read() method of an entry will automatically look for known file types, 
 // which means that a class has been implemented for it. In order to do this, we 
@@ -22,7 +21,8 @@ type KnownTypeId = (typeof FileType)[
 ];
 
 // A type that matches all of our registered file classes.
-type File = InstanceType<ValueOf<typeof FileClasses>>;
+type FileConstructor = ValueOf<typeof FileClasses>;
+type File = InstanceType<FileConstructor>;
 
 // Create a mapped type that contains all the allowed *values* of the known file 
 // types and maps them to the corresopnding keys where they can be found in the 
@@ -34,9 +34,10 @@ type TypeIdToStringKey = {
 // Contains all the types of the *instances* that are part of an array. This 
 // means that we match stuff like "Lot", "Building" etc. More specifically, all 
 // classes that define { static [kFileTypeArray] }
-type ArrayFileType = InstanceType<Extract<ValueOf<typeof FileClasses>, {
+type ArrayFileTypeConstructor = Extract<ValueOf<typeof FileClasses>, {
 	[ kFileTypeArray]: any;
-}>>;
+}>;
+type ArrayFileType = InstanceType<ArrayFileTypeConstructor>;
 
 // Contains all file types that implement a `toBuffer()` method
 type SerializableFileType = Extract<
@@ -64,6 +65,7 @@ type PossibleArray<T extends KnownTypeId> =
 interface EntryOfPossibleArrayType<T extends File> extends Entry {
 	read: () => T | T[];
 	file: T | T[] | null;
+	fileConstructor: FileConstructor;
 }
 
 // The main magic for the type narrowing happens here with an interface that 
@@ -74,6 +76,12 @@ interface EntryOfType<T extends File | File[]> extends Entry {
 	file: T | null;
 }
 
+// Generic type for when we know this entry is an array type. In that case we 
+// know that the fileConstructor is for sure one of the array constructors.
+interface EntryOfArrayType<T extends ArrayFileType> extends EntryOfType<T[]> {
+	fileConstructor: ArrayFileTypeConstructor;
+}
+
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
 };
@@ -82,6 +90,16 @@ type EntryParseOptions = {
     buffer?: Uint8Array | null;
 };
 type EntryFile = unknown;
+
+// Invert the file types so that we can easily access a constructor by its 
+// numeric id.
+const map = new Map(
+	Object.keys(FileClasses).map((key: keyof typeof FileClasses) => {
+		let id = FileType[key];
+		let constructor = FileClasses[key];
+		return [id, constructor];
+	}),
+) as Map<number, FileConstructor>;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -142,7 +160,8 @@ export default class Entry {
 	// meaning we'll automatically handle the array deserialization without the 
 	// need for the file class itself to support this. Just implement a class 
 	// for every item in the array.
-	isArrayType(): this is EntryOfType<ArrayFileType[]> {
+	isArrayType(): this is EntryOfArrayType<ArrayFileType> {
+		if (!this.fileConstructor) return false;
 		return kFileTypeArray in this.fileConstructor;
 	}
 
@@ -152,7 +171,8 @@ export default class Entry {
 	// that case, there's no need to serialize them, we'll just re-use the 
 	// buffer then.
 	isSerializableType(): this is EntryOfPossibleArrayType<SerializableFileType> {
-		return 'toBuffer' in this.fileConstructor.property;
+		if (!this.fileConstructor) return false;
+		return 'toBuffer' in this.fileConstructor.prototype;
 	}
 
 	// ## get id()
@@ -192,15 +212,15 @@ export default class Entry {
 	// ## get fileConstructor()
 	// Returns the class to use for this file type, regardless of whether this 
 	// is an array type or not.
-	get fileConstructor() {
-		return getConstructorByType(this.type);
+	get fileConstructor(): FileConstructor | undefined {
+		return map.get(this.type);
 	}
 
 	// ## get isKnownType()
 	// Returns whether the type of this entry is a known file type, meaning that 
 	// a class has been registered for it that can properly parse the buffer.
-	get isKnownType() {
-		return hasConstructorByType(this.type);
+	isKnownType(): this is EntryOfPossibleArrayType<File> {
+		return map.has(this.type);
 	}
 
 	// ## free()
@@ -407,16 +427,17 @@ const dual = {
 
 		// If the entry does not contain a known file type, just return the 
 		// buffer as is.
-		if (!this.isKnownType) return this.buffer;
+		if (!this.isKnownType()) return this.buffer;
 
 		// If the file type is actually an array file type, then it has been 
 		// registered as [Constructor], in which case we need to read the file 
 		// as an array. If nothing is found, just return the buffer. Third party 
 		// code might still know how to interpret the buffer.
-		const Constructor = this.fileConstructor;
 		if (this.isArrayType()) {
+			const Constructor = this.fileConstructor;
 			this.file = readArrayFile(Constructor, this.buffer!);
 		} else {
+			const Constructor = this.fileConstructor;
 			let file = this.file = new Constructor();
 			file.parse(new Stream(this.buffer!), { entry: this });
 		}
@@ -429,7 +450,7 @@ const dual = {
 // # readArrayFile()
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
-function readArrayFile(Constructor: Constructor<ArrayFileType>, buffer: Uint8Array) {
+function readArrayFile(Constructor: ArrayFileTypeConstructor, buffer: Uint8Array) {
 	let array: ArrayFileType[] = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {

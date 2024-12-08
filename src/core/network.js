@@ -8,7 +8,7 @@ import Vertex from './vertex.js';
 // A class for representing a single network tile.
 export default class Network {
 
-	static [Symbol.for('sc4.type')] = FileType.NetworkFile;
+	static [Symbol.for('sc4.type')] = FileType.Network;
 	static [Symbol.for('sc4.type.array')] = true;
 
 	// ## constructor()
