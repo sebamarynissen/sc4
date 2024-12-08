@@ -110,9 +110,9 @@ class UnknownReader {
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.
-	repeat(n: number, fn: () => void): void {
+	repeat(n: number, fn: (unknown: this) => void): void {
 		for (let i = 0; i < n; i++) {
-			fn();
+			fn(this);
 		}
 	}
 
@@ -138,9 +138,9 @@ class UnknownWriter {
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.
-	repeat(n: number, fn: () => void): void {
+	repeat(n: number, fn: (unknown: this) => void): void {
 		for (let i = 0; i < n; i++) {
-			fn();
+			fn(this);
 		}
 	}
 

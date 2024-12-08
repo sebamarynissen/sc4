@@ -4,48 +4,57 @@ import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
 import Pointer from './pointer.js';
 import Unknown from './unknown.js';
+import { kFileType } from './symbols.js';
+import type { byte, dword } from 'sc4/types';
+
+type Building = {
+	xAnchor: dword;
+	zAnchor: dword;
+	xMin: dword;
+	zMin: dword;
+	xMax: dword;
+	zMax: dword;
+	capacity: dword;
+	actualCapacity: dword;
+	pointer: Pointer;
+};
 
 // # PlumbingSimulator
 // The class that is used for the plumbing simulator.
 export default class PlumbingSimulator {
-
-	static [Symbol.for('sc4.type')] = FileType.PlumbingSimulator;
-
-	// # constructor(opts)
-	constructor(opts) {
-		new Unknown(this);
-		this.crc = 0x00000000;
-		this.mem = 0x00000000;
-		this.major = 0x0004;
-		this.grid1 = new Pointer(FileType.SimGridUint8);
-		this.grid2 = new Pointer(FileType.SimGridUint8);
-		this.xSize = 0x00000040;
-		this.zSize = 0x00000040;
-		this.cells = [];
-		this.revision = 0x00000000;
-		repeat(3, () => this.unknown.dword(0x00000000));
-		this.unknown.dword(0x00000000);
-		this.buildings = [];
-		repeat(9, () => this.unknown.dword(0x00000000));
-		this.unknown.byte(0x02);
-		this.unknown.dword(0x00000000);
-		this.citySize = 0x00000040;
-		this.unknown.dword(0x00000001);
-		this.unknown.dword(0x00000000);
-		this.unknown.dword(0x00000000);
-		this.xTiles = 0x0000003f;
-		this.zTiles = 0x0000003f;
-		this.filterCapacity = 0x00000000;
-		this.unknown.dword(0x00000000);
-		this.pipes = [];
-		this.unknown.dword(0x00000000);
-		this.unknown.dword(0x00000000);
-		this.departmentBudget = new Pointer(FileType.DepartmentBudget);
-		this.totalProduced = 0x00000000;
-		this.unknown.dword(0x00000000);
-		this.actualFilterCapacity = 0x00000000;
-		repeat(5, () => this.unknown.dword(0x00000000));
-	}
+	static [kFileType] = FileType.PlumbingSimulator;
+	crc = 0x00000000;
+	mem = 0x00000000;
+	major = 0x0004;
+	grid1 = new Pointer(FileType.SimGridUint8);
+	grid2 = new Pointer(FileType.SimGridUint8);
+	xSize = 0x00000040;
+	zSize = 0x00000040;
+	cells: byte[][] = [];
+	revision = 0x00000000;
+	buildings: Building[] = [];
+	citySize = 0x00000040;
+	xTiles = 0x0000003f;
+	zTiles = 0x0000003f;
+	filterCapacity = 0x00000000;
+	pipes: Pointer[] = [];
+	departmentBudget = new Pointer(FileType.DepartmentBudget);
+	totalProduced = 0x00000000;
+	actualFilterCapacity = 0x00000000;
+	u = new Unknown()
+		.repeat(3, u => u.dword(0x00000000))
+		.dword(0x00000000)
+		.repeat(9, u => u.dword(0x00000000))
+		.byte(0x02)
+		.dword(0x00000000)
+		.dword(0x00000001)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.dword(0x00000000)
+		.repeat(5, u => u.dword(0x00000000));
 
 	// ## clear()
 	// Will clear all entries in the plumbing simulator.
@@ -58,15 +67,15 @@ export default class PlumbingSimulator {
 	}
 
 	// ## parse(buff)
-	parse(buff) {
-		new Unknown(this);
+	parse(buff: Stream | Uint8Array) {
 		const rs = new Stream(buff);
+		const unkown = this.u.reader(rs);
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
-		this.grid1 = rs.pointer();
-		this.grid2 = rs.pointer();
+		this.grid1 = rs.pointer() as Pointer;
+		this.grid2 = rs.pointer() as Pointer;
 		this.xSize = rs.dword();
 		this.zSize = rs.dword();
 		let cells = this.cells = new Array(this.zSize);
@@ -77,9 +86,9 @@ export default class PlumbingSimulator {
 			}
 		}
 		this.revision = rs.dword();
-		repeat(3, () => this.unknown.dword(rs.dword()));
+		unkown.repeat(3, u => u.dword());
 		let buildings = this.buildings = new Array(rs.dword());
-		this.unknown.dword(rs.dword());
+		unkown.dword();
 		for (let i = 0; i < buildings.length; i++) {
 			buildings[i] = {
 				xAnchor: rs.dword(),
@@ -93,35 +102,35 @@ export default class PlumbingSimulator {
 				pointer: rs.pointer(),
 			};
 		}
-		repeat(9, () => this.unknown.dword(rs.dword()));
-		this.unknown.byte(rs.byte());
-		this.unknown.dword(rs.dword());
+		unkown.repeat(9, u => u.dword());
+		unkown.byte();
+		unkown.dword();
 		this.citySize = rs.dword();
-		this.unknown.dword(rs.dword());
-		this.unknown.dword(rs.dword());
-		this.unknown.dword(rs.dword());
+		unkown.dword();
+		unkown.dword();
+		unkown.dword();
 		this.xTiles = rs.dword();
 		this.zTiles = rs.dword();
 		this.filterCapacity = rs.dword();
-		this.unknown.dword(rs.dword());
+		unkown.dword();
 		let pipes = this.pipes = new Array(rs.dword());
-		this.unknown.dword(rs.dword());
-		this.unknown.dword(rs.dword());
+		unkown.dword();
+		unkown.dword();
 		for (let i = 0; i < this.pipes.length; i++) {
 			pipes[i] = rs.pointer();
 		}
-		this.departmentBudget = rs.pointer();
+		this.departmentBudget = rs.pointer() as Pointer;
 		this.totalProduced = rs.dword();
-		this.unknown.dword(rs.dword());
+		unkown.dword();
 		this.actualFilterCapacity = rs.dword();
-		repeat(5, () => this.unknown.dword(rs.dword()));
+		unkown.repeat(5, u => u.dword());
 		rs.assert();
 	}
 
 	// ## toBuffer()
 	toBuffer() {
-		let unknown = this.unknown.generator();
 		let ws = new WriteBuffer();
+		let unknown = this.u.writer(ws);
 		ws.dword(this.mem);
 		ws.word(this.major);
 		ws.pointer(this.grid1);
@@ -135,9 +144,9 @@ export default class PlumbingSimulator {
 			}
 		}
 		ws.dword(this.revision);
-		repeat(3, () => ws.dword(unknown()));
+		unknown.repeat(3, u => u.dword());
 		ws.dword(this.buildings.length);
-		ws.dword(unknown());
+		unknown.dword();
 		for (let building of this.buildings) {
 			ws.dword(building.xAnchor);
 			ws.dword(building.zAnchor);
@@ -149,33 +158,29 @@ export default class PlumbingSimulator {
 			ws.dword(building.actualCapacity);
 			ws.pointer(building.pointer);
 		}
-		repeat(9, () => ws.dword(unknown()));
-		ws.byte(unknown());
-		ws.dword(unknown());
+		unknown.repeat(9, u => u.dword());
+		unknown.byte();
+		unknown.dword();
 		ws.dword(this.citySize);
-		ws.dword(unknown());
-		ws.dword(unknown());
-		ws.dword(unknown());
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
 		ws.dword(this.xTiles);
 		ws.dword(this.zTiles);
 		ws.dword(this.filterCapacity);
-		ws.dword(unknown());
+		unknown.dword();
 		ws.dword(this.pipes.length);
-		ws.dword(unknown());
-		ws.dword(unknown());
+		unknown.dword();
+		unknown.dword();
 		for (let ptr of this.pipes) {
 			ws.pointer(ptr);
 		}
 		ws.pointer(this.departmentBudget);
 		ws.dword(this.totalProduced);
-		ws.dword(unknown());
+		unknown.dword();
 		ws.dword(this.actualFilterCapacity);
-		repeat(5, () => ws.dword(unknown()));
+		unknown.repeat(5, u => u.dword());
 		return ws.seal();
 	}
 
-}
-
-function repeat(n, fn) {
-	for (let i = 0; i < n; i++) fn();
 }
