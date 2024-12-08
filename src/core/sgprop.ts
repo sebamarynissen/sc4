@@ -1,4 +1,6 @@
-// # sgprop.js
+// # sgprop.ts
+import type { sint32, uint16, uint32, uint8, float } from 'sc4/types';
+import type Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 const DataType = Object.freeze({
 	UInt8: 0x01,
@@ -11,22 +13,19 @@ const DataType = Object.freeze({
 	String: 0x0c,
 });
 
+type SGPropPrimitive = uint8 | uint16 | uint32 | sint32 | bigint | float | boolean;
+type SGPropValue = null | string | SGPropPrimitive | SGPropPrimitive[];
+
 // # SGProp()
 export default class SGProp {
-
-	// ## constructor()
-	// Pre-initializing the values to correct types to produce better 
-	// optimized V8 code.
-	constructor() {
-		this.name = 0x000000;
-		this.unknown0 = 0x000000;
-		this.type = 0x00;
-		this.value = null;
-		this.unknown1 = 0x0000;
-	}
+	name = 0x000000;
+	unknown0 = 0x000000;
+	type = 0x00;
+	value: SGPropValue = null;
+	unknown1 = 0x0000;
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 
 		// Name is doubled for some reason.
 		this.name = (rs.dword(), rs.dword());
@@ -84,7 +83,7 @@ export default class SGProp {
 			ws.string(value);
 		} else {
 			const writer = writers[this.type];
-			writer(ws, value);
+			writer(ws, value as SGPropPrimitive);
 		}
 
 		// Don't forget to convert the smart buffer into a *normal* buffer!
@@ -94,25 +93,28 @@ export default class SGProp {
 
 }
 
-const readers = new Array(0x0c).fill(x => x);
-readers[0x01] = rs => rs.uint8();
-readers[0x02] = rs => rs.uint16();
-readers[0x03] = rs => rs.uint32();
-readers[0x07] = rs => rs.int32();
-readers[0x08] = rs => rs.bigint64();
-readers[0x09] = rs => rs.float();
-readers[0x0b] = rs => rs.bool();
+type Reader = (rs: Stream) => SGPropPrimitive;
+type Writer = (ws: WriteBuffer, value: SGPropPrimitive) => any;
 
-const writers = new Array(0x0c).fill(x => x);
-writers[0x01] = (ws, value) => ws.uint8(value);
-writers[0x02] = (ws, value) => ws.uint16(value);
-writers[0x03] = (ws, value) => ws.uint32(value);
-writers[0x07] = (ws, value) => ws.int32(value);
-writers[0x08] = (ws, value) => ws.bigint64(value);
-writers[0x09] = (ws, value) => ws.float(value);
-writers[0x0b] = (ws, value) => ws.bool(value);
+const readers: Reader[] = new Array(0x0c);
+readers[0x01] = (rs: Stream) => rs.uint8();
+readers[0x02] = (rs: Stream) => rs.uint16();
+readers[0x03] = (rs: Stream) => rs.uint32();
+readers[0x07] = (rs: Stream) => rs.int32();
+readers[0x08] = (rs: Stream) => rs.bigint64();
+readers[0x09] = (rs: Stream) => rs.float();
+readers[0x0b] = (rs: Stream) => rs.bool();
 
-const sizes = new Array(0x0c).fill(0);
+const writers: Writer[] = new Array(0x0c);
+writers[0x01] = (ws: WriteBuffer, value: uint8) => ws.uint8(value);
+writers[0x02] = (ws: WriteBuffer, value: uint16) => ws.uint16(value);
+writers[0x03] = (ws: WriteBuffer, value: uint32) => ws.uint32(value);
+writers[0x07] = (ws: WriteBuffer, value: sint32) => ws.int32(value);
+writers[0x08] = (ws: WriteBuffer, value: bigint) => ws.bigint64(value);
+writers[0x09] = (ws: WriteBuffer, value: float) => ws.float(value);
+writers[0x0b] = (ws: WriteBuffer, value: boolean) => ws.bool(value);
+
+const sizes: number[] = new Array(0x0c).fill(0);
 sizes[0x01] = sizes[0x0b] = sizes[0x0c] = 1;
 sizes[0x02] = 2;
 sizes[0x03] = sizes[0x07] = sizes[0x09] = 4;
