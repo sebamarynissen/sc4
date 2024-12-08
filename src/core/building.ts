@@ -4,6 +4,7 @@ import FileType from './file-types.js';
 import SGProp from './sgprop.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
+import type { ConstructorOptions } from 'sc4/types';
 
 // # Building()
 // Represents a single building from the building file.
@@ -37,6 +38,11 @@ export default class Building {
 	maxZ = 0;
 	orientation = 0x00;
 	scaffold = 0x01;
+
+	// ## constructor()
+	constructor(opts: ConstructorOptions<Building>) {
+		Object.assign(this, opts);
+	}
 
 	// ## move(dx, dy, dz)
 	// The move vector of the building contains [dx, dy, dz] and should be 

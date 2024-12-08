@@ -1,9 +1,10 @@
 // # dbpf-header.js
+import type { ConstructorOptions } from 'sc4/types';
 import WriteBuffer from './write-buffer.js';
+import type Stream from './stream.js';
 
 // # Header
 export default class Header {
-
 	id = 'DBPF';
 	majorVersion = 1;
 	minorVersion = 0;
@@ -19,7 +20,7 @@ export default class Header {
 	indexMinor = 0;
 
 	// ## constructor(opts)
-	constructor(opts = {}) {
+	constructor(opts: Omit<ConstructorOptions<Header>, 'id'> = {}) {
 		let { created, modified = created, ...rest } = opts;
 		Object.assign(this, rest);
 		if (created) this.created = new Date(created);
@@ -27,7 +28,7 @@ export default class Header {
 	}
 
 	// ## parse(rs)
-	parse(rs) {
+	parse(rs: Stream) {
 
 		// if the DBPF file is not actually a DBPF file, we stop reading 
 		// immediately.
@@ -62,7 +63,7 @@ export default class Header {
 	// ## toBuffer()
 	toBuffer() {
 		let buffer = new WriteBuffer({ size: 96 });
-		buffer.string(this.id, { length: false });
+		buffer.writeString(this.id);
 		buffer.uint32(this.majorVersion);
 		buffer.uint32(this.minorVersion);
 		buffer.zeroes(12);
