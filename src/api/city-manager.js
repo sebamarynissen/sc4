@@ -555,11 +555,11 @@ export default class CityManager {
 		props.push(prop);
 
 		// Put the prop in the index.
-		this.addToItemIndex(prop, FileType.PropFile, lotObject);
+		this.addToItemIndex(prop, FileType.Prop, lotObject);
 
 		// Update the COM serializer and we're done.
 		let com = dbpf.COMSerializerFile;
-		com.set(FileType.PropFile, props.length);
+		com.set(FileType.Prop, props.length);
 		return props;
 
 	}
@@ -678,7 +678,7 @@ export default class CityManager {
 		};
 		clear(FileType.Lot);
 		clear(FileType.BuildingFile);
-		clear(FileType.PropFile);
+		clear(FileType.Prop);
 		clear(FileType.FloraFile);
 		clear(FileType.BaseTextureFile);
 
