@@ -2,7 +2,7 @@
 import { compress } from 'qfs-compression';
 import { concatUint8Arrays, isUint8Array, uint8ArrayToHex } from 'uint8array-extras';
 import Header, { type HeaderOptions } from './dbpf-header.js';
-import Entry from './dbpf-entry.js';
+import Entry, { type TypeIdToEntry } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
@@ -10,6 +10,9 @@ import crc32 from './crc.js';
 import { cClass, FileType } from './enums.js';
 import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
+import type { TGIQuery, uint32 } from 'sc4/types';
+import type { FindParameters } from 'src/utils/tgi-index.js';
+import type { DecodedFileTypeId } from './types.js';
 
 type DBPFOptions = {
 	file?: string;
@@ -90,19 +93,26 @@ export default class DBPF {
 	// Shortcut for accessing the DIR file, which every dbpf should have (at 
 	// least when parsed).
 	get dir() {
-		return this.find({ type: FileType.DIR });
+		let entry = this.find({ type: FileType.DIR });
+		return entry ? entry.read() : null;
 	}
 
 	// ## find(...args)
-	// Proxies to entries.find()
-	find(...args: any): string {
-		return this.entries.find(...args);
+	// Proxies to entries.find().
+	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T> | undefined;
+	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T> | undefined;
+	find(...params: FindParameters<Entry>): Entry | undefined;
+	find(...args: FindParameters<Entry>) {
+		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
 	}
 
 	// ## findAll(...args)
 	// Proxies to entries.findAll()
-	findAll(...args) {
-		return this.entries.findAll(...args);
+	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T>[];
+	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T>[];
+	findAll(...params: FindParameters<Entry>): Entry[]
+	findAll(...args: FindParameters<Entry>): Entry[] {
+		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
 	}
 
 	// ## add(tgi, file)

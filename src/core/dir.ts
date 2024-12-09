@@ -14,7 +14,6 @@ type ToBufferOptions = {
 // A class representing a DatabaseDirectoryFile, more commonly known as a DIR 
 // record.
 export default class DIR extends Array {
-
 	static [kFileType] = FileType.DIR;
 
 	// ## parse(rs, opts)

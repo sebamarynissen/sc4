@@ -1,10 +1,16 @@
 // # tgi-index.ts
 import type { TGIQuery, TGILiteral, uint32 } from 'sc4/types';
 
-type SingleResult<T> = T | undefined;
-type ArrayResult<T> = SingleResult<T>[];
-type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => entry is T;
-type FindArg<T> = number | TGIQuery | TGIPredicate<T>;
+export type { TGIQuery, TGILiteral };
+export type SingleResult<T> = T | undefined;
+export type ArrayResult<T> = T[];
+export type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => entry is T;
+export type FindArg<T> = number | TGIQuery | TGIPredicate<T>;
+
+export type FindParameters<T> =
+	| [type: uint32, group: uint32, instance: uint32]
+	| [query: TGIQuery]
+	| [predicate: TGIPredicate<T>, thisArg?: any];
 
 // # TGIIndex
 // A data structure that allows for efficiently querying objects by (type, 
@@ -32,11 +38,11 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		return this;
 	}
 
-	// ## findOne(type, group, instance)
-	findOne(type: number, group: number, instance: number): SingleResult<T>;
-	findOne(query: TGIQuery): SingleResult<T>;
-	findOne(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
-	findOne(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
+	// ## find(type, group, instance)
+	find(type: number, group: number, instance: number): SingleResult<T>;
+	find(query: TGIQuery): SingleResult<T>;
+	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
+	find(query: FindParameters<T>[0], g?: FindParameters<T>[1], i?: FindParameters<T>[2]): SingleResult<T> {
 		let result;
 		if (typeof query === 'number') {
 			result = this.findAll(query, g, i!);
@@ -46,23 +52,6 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 			result = this.findAll(query);
 		}
 		return result.at(-1);
-	}
-
-	// ## find(type, group, instance)
-	// Using `.find()` is discouraged because it is better to be explicit with 
-	// One or All, but for backwards compatibility, `find` is an alias for 
-	// `findOne()`.
-	find(type: number, group: number, instance: number): SingleResult<T>;
-	find(query: TGIQuery): SingleResult<T>;
-	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
-	find(query: number | TGIQuery | TGIPredicate<T>, g?: number | any, i?: number): SingleResult<T> {
-		if (typeof query === 'number') {
-			return this.findOne(query, g, i!);
-		} else if (typeof query === 'function') {
-			return this.findOne(query, g);
-		} else {
-			return this.findOne(query);
-		}
 	}
 
 	// ## findAll(query)

@@ -14,12 +14,16 @@ export type double = number;
 export type word = uint16;
 export type dword = uint32;
 export type qword = uint64;
-export type TGILiteral = {
-	type: uint32;
-	group: uint32;
-	instance: uint32;
-}
-export type TGIQuery = Partial<TGILiteral>;
+export type TGILiteral<
+	T extends uint32 = uint32,
+	G extends uint32 = uint32,
+	I extends uint32 = uint32
+> = { type: T; group: G; instance: I; }
+export type TGIQuery<
+	T extends uint32 = uint32,
+	G extends uint32 = uint32,
+	I extends uint32 = uint32
+> = Partial<TGILiteral<T, G, I>>;
 
 // A type that we often use to allow all non-function keys of a class to be 
 // specified as options.

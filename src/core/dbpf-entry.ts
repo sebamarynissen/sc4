@@ -55,6 +55,11 @@ interface EntryWithReadResult<T extends File | File[]> extends Entry {
 	file: T | null;
 }
 
+// Export a type that can be used by our dbpf class in the find() methods to 
+// automatically infer the return type of an entry.
+export type TypeIdToEntry<T extends DecodedFileTypeId> =
+	EntryWithReadResult<TypeIdToReadResult<T>>;
+
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
 };
