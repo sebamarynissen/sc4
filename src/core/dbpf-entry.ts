@@ -57,12 +57,6 @@ interface EntryWithReadResult<T extends File | File[]> extends Entry {
 	file: T | null;
 }
 
-// Some type assertions might reveal that the entry will surely return a buffer 
-// frmo the `.toBuffer()` function.
-interface EntryWithBuffer extends Entry {
-	toBuffer(): Uint8Array;
-}
-
 // Export a type that can be used by our dbpf class in the find() methods to 
 // automatically infer the return type of an entry.
 export type TypeIdToEntry<T extends DecodedFileTypeId> =
@@ -173,12 +167,12 @@ export default class Entry {
 		return !!this.raw || !!this.buffer;
 	}
 
-	// ## get isTouched()
+	// ## isTouched()
 	// Returns whether the entry was either read, *or* we do have a decoded 
 	// file. This typically happens when adding a new file to a savegame - for 
 	// example a prop file. If there were no props before, then the entry should 
 	// still be included in the serialization!
-	isTouched(): this is EntryWithBuffer {
+	isTouched() {
 		return !!this.file || this.isRead;
 	}
 
