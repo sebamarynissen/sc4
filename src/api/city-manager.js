@@ -439,7 +439,7 @@ export default class CityManager {
 
 		// Don't forget to update the COMSerializer to include the updated 
 		// length! Otherwise the lot won't show up!
-		let com = dbpf.COMSerializerFile;
+		let com = dbpf.COMSerializer;
 		com.set(FileType.Lot, lots.length);
 
 		// Return the lot that we've just created.
@@ -494,7 +494,7 @@ export default class CityManager {
 		dev.buildings.push(new Pointer(building));
 
 		// At last update the COMSerializer file.
-		let com = dbpf.COMSerializerFile;
+		let com = dbpf.COMSerializer;
 		com.set(FileType.Building, buildings.length);
 		return building;
 
@@ -558,7 +558,7 @@ export default class CityManager {
 		this.addToItemIndex(prop, FileType.Prop, lotObject);
 
 		// Update the COM serializer and we're done.
-		let com = dbpf.COMSerializerFile;
+		let com = dbpf.COMSerializer;
 		com.set(FileType.Prop, props.length);
 		return props;
 
@@ -618,7 +618,7 @@ export default class CityManager {
 		// COMSerializer as well.
 		let { dbpf } = this;
 		dbpf.textures.push(texture);
-		let com = dbpf.COMSerializerFile;
+		let com = dbpf.COMSerializer;
 		com.set(FileType.BaseTextureFile, dbpf.textures.length);
 
 		// Update the item index as well.
@@ -667,7 +667,7 @@ export default class CityManager {
 	clear() {
 		const { city } = this;
 		const index = city.itemIndex;
-		const com = city.COMSerializerFile;
+		const com = city.COMSerializer;
 		const clear = type => {
 			let file = city.readByType(type);
 			if (file) {
