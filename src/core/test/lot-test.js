@@ -8,17 +8,17 @@ import { resource, output } from '#test/files.js';
 
 describe('A lot subfile', function() {
 
-	it('should be parsed & serialized correctly', function() {
+	it('is parsed & serialized correctly', function() {
 
 		let dbpf = new Savegame(resource('city.sc4'));
 
 		let entry = dbpf.entries.find({ type: FileType.Lot });
-		let lotFile = entry.read();
+		let lots = entry.read();
 
 		// Check the crc checksums. We didn't modify the lot, so they should 
 		// still match. This also ensures that the serialization process is 
 		// correct as well!
-		for (let lot of lotFile) {
+		for (let lot of lots) {
 
 			// Note: toBuffer() updates the crc, so make sure to grab the old 
 			// one!
@@ -36,11 +36,11 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should detect Residential, Commercial, Agricultural & Industry correctly', function() {
+	it('detects Residential, Commercial, Agricultural & Industry correctly', function() {
 		let dbpf = new Savegame(resource('City - RCI.sc4'));
 
 		// Get the lotfile.
-		let lots = dbpf.lotFile;
+		let { lots } = dbpf;
 		expect(lots[0].isResidential).to.be.true;
 		expect(lots[1].isIndustrial).to.be.true;
 		expect(lots[2].isAgricultural).to.be.true;
@@ -49,15 +49,15 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should re-save after making buildings historical', async function() {
+	it('re-saves after making buildings historical', async function() {
 		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		// Mark all lots as historical.
 		let entry = dbpf.entries.find({ type: FileType.Lot });
-		let lotFile = entry.read();
-		for (let lot of lotFile) {
+		let lots = entry.read();
+		for (let lot of lots) {
 			expect(lot.historical).to.be.false;
 			lot.historical = true;
 			expect(lot.historical).to.be.true;
@@ -71,7 +71,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should change a plopped building into a grown one', async function() {
+	it('changes a plopped building into a grown one', async function() {
 
 		let file = resource('plopped.sc4');
 		let buff = fs.readFileSync(file);
@@ -91,24 +91,18 @@ describe('A lot subfile', function() {
 		let to = output('plopped-mod.sc4');
 		await dbpf.save({ file: to });
 
-		// console.log(hex(lots[1].zoneType));
-		// console.log(hex(lots[0].zoneType));
-		// for (let lot of lotFile) {
-
-		// }
-
 	});
 
-	it('should check for plopped residentials', function() {
+	it('checks for plopped residentials', function() {
 
 		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.entries.find({ type: FileType.Lot });
-		let lotFile = entry.read();
+		let lots = entry.read();
 
-		for (let lot of lotFile) {
+		for (let lot of lots) {
 			expect(lot.isPloppedResidential).to.be.false;
 			if (lot.isResidential) {
 				lot.zoneType = 0x0f;
@@ -118,7 +112,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should move a lot under a bridge', async function() {
+	it('moves a lot under a bridge', async function() {
 		let file = resource('dumbo-offset.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
@@ -135,7 +129,7 @@ describe('A lot subfile', function() {
 
 	});
 
-	it('should growify industry', async function() {
+	it('growifies industry', async function() {
 		let file = resource('City - Plopped Industry - source.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);

@@ -364,16 +364,15 @@ export class Cohort extends BaseExemplar {
 // # Property()
 // Wrapper class around an Exemplar property.
 class Property {
-
 	id = 0x00000000;
 	type: PropertyValueType = Uint32Array;
-	value: PropertyValue;
+	value: PropertyValue | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data?: PropertyOptions) {
+	constructor(data?: PropertyOptions | Property) {
 		let isClone = data instanceof Property;
-		let { id = 0, type = Uint32Array, value = 0 } = data || {};
+		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
 		this.type = type;
 		this.value = isClone ? structuredClone(value) : value;
@@ -519,7 +518,9 @@ class Property {
 			case Uint32:
 				tf = (x: any) => inspect.hex(x);
 		}
-		value = Array.isArray(value) ? value.map(tf) : tf(value);
+		if (value !== undefined) {
+			value = Array.isArray(value) ? value.map(tf) : tf(value);
+		}
 		return {
 			id: inspect.hex(this.id),
 			name: this.name,

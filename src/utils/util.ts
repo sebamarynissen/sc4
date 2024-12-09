@@ -149,7 +149,7 @@ export function chunk(format: number[], str: string) {
 chunk.register = function() {
 	if (!('chunk' in String.prototype)) {
 		// eslint-disable-next-line no-extend-native
-		Object.defineProperty(String, 'prototype', {
+		Object.defineProperty(String.prototype, 'chunk', {
 			value(format: number[] = []) {
 				return chunk([...format, ...Array(100).fill(8)], this);
 			},

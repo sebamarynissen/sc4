@@ -11,7 +11,7 @@ describe('The ZoneDeveloper Subfile', function() {
 		let file = resource('City - RCI.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let dev = dbpf.zoneDeveloperFile;
+		let dev = dbpf.zoneDeveloper;
 		expect(dev.xSize).to.equal(64);
 		expect(dev.zSize).to.equal(64);
 		expect(dev.cells).to.have.length(64);

@@ -162,8 +162,11 @@ describe('The Exemplar file', function() {
 						expect(cloned.value).to.equal(prop.value);
 					}
 				}
-				expect(Object.keys(exemplar.table)).to.eql(Object.keys(clone.table));
 				expect(clone.toBuffer()).to.eql(buffer);
+				for (let prop of exemplar) {
+					let cloned = clone.prop(prop.id);
+					expect(cloned).to.eql(prop);
+				}
 			}
 
 		});

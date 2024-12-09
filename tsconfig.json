@@ -5,7 +5,8 @@
 		"baseUrl": "./",
 		"paths": {
 			"sc4/core": ["src/core/index.js"],
-			"sc4/utils": ["src/utils/index.js"],
+			"sc4/utils": ["src/utils/index.ts"],
+			"sc4/utils/register": ["src/utils/register-debug-utils.ts"],
 			"sc4/plugins": ["src/plugins/index.js"],
 			"sc4/threading": ["src/threading/index.js"],
 			"sc4/api": ["src/api/api.js"],
