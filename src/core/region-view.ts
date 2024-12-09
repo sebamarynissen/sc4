@@ -3,8 +3,8 @@ import Stream from './stream.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 
-// # RegionViewFile
-export default class RegionViewFile {
+// # RegionView
+export default class RegionView {
 	static [kFileType] = FileType.RegionView;
 	major = 0x0001;
 	minor = 0x000d;

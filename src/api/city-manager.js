@@ -486,11 +486,11 @@ export default class CityManager {
 		this.addToItemIndex(building, FileType.Building);
 
 		// Push in the file with all buildings.
-		let buildings = dbpf.buildingFile;
+		let { buildings } = dbpf;
 		buildings.push(building);
 
 		// Add to the lot developer file as well.
-		let dev = dbpf.lotDeveloperFile;
+		let dev = dbpf.lotDeveloper;
 		dev.buildings.push(new Pointer(building));
 
 		// At last update the COMSerializer file.
@@ -683,7 +683,7 @@ export default class CityManager {
 		clear(FileType.BaseTexture);
 
 		// Clear both the lot and zone developer files as well.
-		city.lotDeveloperFile.clear();
+		city.lotDeveloper.clear();
 		city.zoneDeveloper.clear();
 
 		// Clear some simgrids.

@@ -402,9 +402,9 @@ export function factory(program) {
 			}
 
 			let dbpf = new DBPF(buff);
-			let lotFile = dbpf.find({ type: FileType.Lot }).read();
+			let lots = dbpf.find({ type: FileType.Lot }).read();
 			let all = [];
-			for (let lot of lotFile) {
+			for (let lot of lots) {
 				let str = JSON.stringify(lot, replacer, 2);
 				all.push(str);
 			}

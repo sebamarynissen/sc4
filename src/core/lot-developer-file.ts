@@ -5,11 +5,9 @@ import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 import type Pointer from './pointer.js';
 
-// # LotDeveloperFile
-export default class LotDeveloperFile {
-
+// # LotDeveloper
+export default class LotDeveloper {
 	static [kFileType] = FileType.LotDeveloper;
-
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0001;

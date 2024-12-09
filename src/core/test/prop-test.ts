@@ -11,11 +11,11 @@ describe('A prop subfile', function() {
 		let dbpf = new DBPF(resource('city.sc4'));
 
 		let entry = dbpf.find({ type: FileType.Prop })!;
-		let propFile = entry.read();
+		let props = entry.read();
 
 		// Check the crc checksums. When we didn't modify a prop, they should 
 		// still match.
-		for (let prop of propFile) {
+		for (let prop of props) {
 
 			// Note: toBuffer() updates the crc, so make sure to grab the old
 			// one!
