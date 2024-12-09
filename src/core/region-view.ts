@@ -6,7 +6,6 @@ import { kFileType } from './symbols.js';
 // # RegionViewFile
 export default class RegionViewFile {
 	static [kFileType] = FileType.RegionView;
-	buffer: Uint8Array;
 	major = 0x0001;
 	minor = 0x000d;
 	x = 0;
@@ -15,24 +14,16 @@ export default class RegionViewFile {
 	zSize = 0;
 
 	// ## parse(buff)
-	parse(buff: Uint8Array) {
-		this.buffer = buff;
-		let rs = new Stream(this.buffer);
-
-		// Partially read in. This stuff is pretty much read-only for now, no 
-		// need to fully parse it yet.
+	// Partially read in. This stuff is pretty much read-only for now, no 
+	// need to fully parse it yet.
+	parse(buff: Stream | Uint8Array) {
+		let rs = new Stream(buff);
 		this.major = rs.word();
 		this.minor = rs.word();
 		this.x = rs.dword();
 		this.z = rs.dword();
 		this.xSize = rs.dword();
 		this.zSize = rs.dword();
-
-	}
-
-	// ## toBuffer()
-	toBuffer() {
-		return this.buffer;
 	}
 
 }

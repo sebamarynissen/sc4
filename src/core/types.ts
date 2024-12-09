@@ -1,8 +1,10 @@
 // # types.ts
 import type { uint32 } from 'sc4/types';
 import type FileType from './file-types.js';
-import type FileClasses from './file-classes.js';
+import FileClasses from './file-classes.js';
 import type Stream from './stream.js';
+import type { ValueOf } from 'type-fest';
+import type { kFileTypeArray } from './symbols.js';
 
 // Contains the type definition that a class implementing a DBPF file should 
 // minimally adhere to. The only requirement here is that it can be parsed from 
@@ -38,6 +40,19 @@ export type FileTypeId = (typeof FileType)[keyof typeof FileType];
 export type DecodedFileTypeId = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
+
+// Some dbpf files - mostly savegame files - are actually arrays of those 
+// structures. The entry class needs to know this, so we use a literal type for 
+// that as well.
+type TypeIdToStringKey = {
+	[K in keyof typeof FileClasses & keyof typeof FileType as typeof FileType[K]]: K;
+};
+type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
+export type ArrayFileTypeId = ValueOf<{
+	[K in DecodedFileTypeId]: TypeIdToFileConstructor<K> extends {
+		[kFileTypeArray]: any
+	} ? K : never;
+}>;
 
 // Sometimes we'd also like to reference file types using their string names, as 
 // that avoids having to import FileType all the time. Hence we create a literal 

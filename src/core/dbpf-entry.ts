@@ -13,7 +13,8 @@ import FileType from './file-types.js';
 import { kFileTypeArray } from './symbols.js';
 import type {
 	DBPFFile as File,
-	DecodedFileTypeId
+	DecodedFileTypeId,
+    ArrayFileTypeId
 } from './types.js';
 
 type FileConstructor = Class<File>;
@@ -32,11 +33,10 @@ type TypeIdToStringKey = {
 	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
 };
 
-// A type that matches a constructor based on the *numeric* type id.
+// In order to figure out what the result will be of a call to `entry.read()`, 
 type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
 type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
-
-type TypeIdToReadResult<T extends DecodedFileTypeId> = TypeIdToFileConstructor<T> extends { [kFileTypeArray]: any }
+type TypeIdToReadResult<T extends DecodedFileTypeId> = T extends ArrayFileTypeId
 	? Array<TypeIdToFile<T>>
 	: TypeIdToFile<T>;
 
@@ -50,7 +50,7 @@ interface EntryOfPossibleArrayType<T extends File> extends Entry {
 
 // The interface where the magic happens of narrowing down the return type of 
 // the read() function.
-interface EntryWithReadResult<T> extends Entry {
+interface EntryWithReadResult<T extends File | File[]> extends Entry {
 	read: () => T;
 	file: T | null;
 }
@@ -105,9 +105,9 @@ export default class Entry {
 	//    this, it can be found here. It's mainly this property that you'll 
 	//    be interfacing with to modify things in a certian subfile of the 
 	//    DBPF as this means you don't have to work with the raw binary data.
-	raw: Uint8Array | null;
-	buffer: Uint8Array | null;
-	file: unknown;
+	raw: Uint8Array | null = null;
+	buffer: Uint8Array | null = null;
+	file: File | File[] | null = null;
 
 	// ## constructor(opts)
 	constructor(opts: EntryConstructorOptions = {}) {
@@ -124,7 +124,13 @@ export default class Entry {
 	// A predicate function that allows us to narrow down what filetype this 
 	// entry contains. Using this function will infer the return type of the 
 	// `.read()` function.
-	isType<T extends DecodedFileTypeId>(type: T): this is EntryWithReadResult<TypeIdToReadResult<T>> {
+	// IMPORTANT! This needs to be a *generic* function. If we don't do this,
+	// but set type: DecodedFileTypeId instead, then the predicate returns 
+	// Exemplar | Lot[] | Prop[] ... By using a *generic* type, we narrow this 
+	// down properly! This is a bit subtle to grasp, I know!
+	isType<T extends DecodedFileTypeId>(type: T):
+		this is EntryWithReadResult<TypeIdToReadResult<T>>
+	{
 		return this.type === type;
 	}
 
@@ -378,7 +384,7 @@ const dual = {
 
 		// If the entry was already read, don't read it again. Note that it's 
 		// possible to dispose the entry to free up some memory if required.
-		if (this.file !== null) {
+		if (this.file) {
 			return this.file;
 		}
 
