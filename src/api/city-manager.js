@@ -371,7 +371,7 @@ export default class CityManager {
 
 		// Read in the size of the lot because we'll still need it.
 		let { dbpf } = this;
-		let lots = dbpf.lotFile;
+		let { lots } = dbpf;
 		let { exemplar, x, z, building, orientation = 0 } = opts;
 		let file = exemplar.read();
 		let [width, depth] = this.getPropertyValue(
@@ -483,7 +483,7 @@ export default class CityManager {
 
 		// Put the building in the index at the correct spot.
 		let { dbpf } = this;
-		this.addToItemIndex(building, FileType.BuildingFile);
+		this.addToItemIndex(building, FileType.Building);
 
 		// Push in the file with all buildings.
 		let buildings = dbpf.buildingFile;
@@ -495,7 +495,7 @@ export default class CityManager {
 
 		// At last update the COMSerializer file.
 		let com = dbpf.COMSerializerFile;
-		com.set(FileType.BuildingFile, buildings.length);
+		com.set(FileType.Building, buildings.length);
 		return building;
 
 	}
@@ -677,7 +677,7 @@ export default class CityManager {
 			}
 		};
 		clear(FileType.Lot);
-		clear(FileType.BuildingFile);
+		clear(FileType.Building);
 		clear(FileType.Prop);
 		clear(FileType.FloraFile);
 		clear(FileType.BaseTextureFile);
