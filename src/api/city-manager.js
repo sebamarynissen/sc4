@@ -357,8 +357,8 @@ export default class CityManager {
 		}
 
 		// At last update the com serializer.
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.LotFile, lots.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.Lot, lots.length);
 
 		// Return the created zone.
 		return lot;
@@ -428,7 +428,7 @@ export default class CityManager {
 
 		// Now put the lot in the zone developer file as well. TODO: We should 
 		// actually check first and ensure that no building exists yet here!
-		let zones = dbpf.zoneDeveloperFile;
+		let zones = dbpf.zoneDeveloper;
 		let grid = dbpf.getSimGrid(SimGrid.ZoneData);
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
@@ -440,7 +440,7 @@ export default class CityManager {
 		// Don't forget to update the COMSerializer to include the updated 
 		// length! Otherwise the lot won't show up!
 		let com = dbpf.COMSerializerFile;
-		com.set(FileType.LotFile, lots.length);
+		com.set(FileType.Lot, lots.length);
 
 		// Return the lot that we've just created.
 		return lot;
@@ -676,7 +676,7 @@ export default class CityManager {
 				com.set(type, 0);
 			}
 		};
-		clear(FileType.LotFile);
+		clear(FileType.Lot);
 		clear(FileType.BuildingFile);
 		clear(FileType.PropFile);
 		clear(FileType.FloraFile);
@@ -684,7 +684,7 @@ export default class CityManager {
 
 		// Clear both the lot and zone developer files as well.
 		city.lotDeveloperFile.clear();
-		city.zoneDeveloperFile.clear();
+		city.zoneDeveloper.clear();
 
 		// Clear some simgrids.
 		city.getSimGrid(SimGrid.ZoneData).clear();

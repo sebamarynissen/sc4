@@ -5,8 +5,8 @@ import { kFileType } from './symbols.js';
 import type Pointer from './pointer.js';
 import type Stream from './stream.js';
 
-// # ZoneDeveloperFile
-export default class ZoneDeveloperFile {
+// # ZoneDeveloper
+export default class ZoneDeveloper {
 
 	static [kFileType] = FileType.ZoneDeveloper;
 	crc = 0x00000000;
