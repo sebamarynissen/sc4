@@ -6,7 +6,7 @@ import type { Class, Constructor } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
-import { getTypeLabel } from './helpers.js';
+import { getConstructorByType, getTypeLabel, hasConstructorByType } from './helpers.js';
 import type DBPF from './dbpf.js';
 import FileClasses from './file-classes.js';
 import FileType from './file-types.js';
@@ -16,7 +16,6 @@ import type {
 	DecodedFileTypeId,
     ArrayFileTypeId
 } from './types.js';
-
 type FileConstructor = Class<File>;
 
 // A serializable file must implement a `.toBuffer()` method. Note that it's 
@@ -34,9 +33,9 @@ type TypeIdToStringKey = {
 };
 
 // In order to figure out what the result will be of a call to `entry.read()`, 
-type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
+export type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
 type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
-type TypeIdToReadResult<T extends DecodedFileTypeId> = T extends ArrayFileTypeId
+export type TypeIdToReadResult<T extends DecodedFileTypeId> = T extends ArrayFileTypeId
 	? Array<TypeIdToFile<T>>
 	: TypeIdToFile<T>;
 
@@ -77,16 +76,6 @@ type EntryParseOptions = {
 };
 type EntryFile = File | File[];
 type ReadResult = EntryFile | Uint8Array;
-
-// Invert the file types so that we can easily access a constructor by its 
-// numeric id.
-const map = new Map(
-	Object.keys(FileClasses).map((key: keyof typeof FileClasses) => {
-		let id = FileType[key];
-		let constructor = FileClasses[key];
-		return [id, constructor];
-	}),
-) as Map<number, FileConstructor>;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
@@ -196,14 +185,14 @@ export default class Entry {
 	// Returns the class to use for this file type, regardless of whether this 
 	// is an array type or not.
 	get fileConstructor(): FileConstructor | undefined {
-		return map.get(this.type);
+		return getConstructorByType(this.type);
 	}
 
 	// ## get isKnownType()
 	// Returns whether the type of this entry is a known file type, meaning that 
 	// a class has been registered for it that can properly parse the buffer.
 	isKnownType(): this is EntryOfPossibleArrayType<File> {
-		return map.has(this.type);
+		return hasConstructorByType(this.type);
 	}
 
 	// ## free()

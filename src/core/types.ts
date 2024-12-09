@@ -1,6 +1,6 @@
 // # types.ts
 import type { uint32 } from 'sc4/types';
-import type FileType from './file-types.js';
+import type { FileType, SimGridFileType } from './file-types.js';
 import FileClasses from './file-classes.js';
 import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
@@ -40,6 +40,9 @@ export type FileTypeId = (typeof FileType)[keyof typeof FileType];
 export type DecodedFileTypeId = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
+
+// A literal type containing the type ids of the simgrids.
+export type SimGridFileType = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
 // Some dbpf files - mostly savegame files - are actually arrays of those 
 // structures. The entry class needs to know this, so we use a literal type for 

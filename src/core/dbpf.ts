@@ -121,6 +121,7 @@ export default class DBPF {
 
 	// ## add(tgi, file)
 	// Adds the given file to the DBPF with the specified tgi.
+	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): TypeIdToEntry<T>;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;

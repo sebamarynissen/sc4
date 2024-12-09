@@ -60,9 +60,17 @@ export const SavegameFileType = {
 
 } as const;
 
+export const SimGridFileType = {
+	SimGridUint8: 0x49b9e602,
+	SimGridSint8: 0x49b9e603,
+	SimGridUint16: 0x49b9e604,
+	SimGridSint16: 0x49b9e605,
+	SimGridUint32: 0x49b9e606,
+	SimGridFloat32: 0x49b9e60a,
+} as const;
+
 // Zip all known file types together now.
 export const FileType = {
-
 	Exemplar: 0x6534284A,
 	Cohort: 0x05342861,
 	DIR: 0xE86B1EEF,
@@ -78,15 +86,7 @@ export const FileType = {
 	CURSOR: 0xaa5c3144,
 	LUA: 0xca63e2a3,
 	EffectDir: 0xea5118b0,
-
-	// Sim grids
-	SimGridFloat32: 0x49b9e60a,
-	SimGridUint32: 0x49b9e606,
-	SimGridSint16: 0x49b9e605,
-	SimGridUint16: 0x49b9e604,
-	SimGridSint8: 0x49b9e603,
-	SimGridUint8: 0x49b9e602,
-
+	...SimGridFileType,
 	...SavegameFileType,
 
 } as const;
