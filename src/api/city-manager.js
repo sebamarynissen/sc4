@@ -619,10 +619,10 @@ export default class CityManager {
 		let { dbpf } = this;
 		dbpf.textures.push(texture);
 		let com = dbpf.COMSerializer;
-		com.set(FileType.BaseTextureFile, dbpf.textures.length);
+		com.set(FileType.BaseTexture, dbpf.textures.length);
 
 		// Update the item index as well.
-		this.addToItemIndex(texture, FileType.BaseTextureFile);
+		this.addToItemIndex(texture, FileType.BaseTexture);
 
 		// Return the base texture that we've created.
 		return texture;
@@ -680,7 +680,7 @@ export default class CityManager {
 		clear(FileType.Building);
 		clear(FileType.Prop);
 		clear(FileType.Flora);
-		clear(FileType.BaseTextureFile);
+		clear(FileType.BaseTexture);
 
 		// Clear both the lot and zone developer files as well.
 		city.lotDeveloperFile.clear();
