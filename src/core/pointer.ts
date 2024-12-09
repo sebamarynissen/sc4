@@ -15,7 +15,7 @@ export default class Pointer {
 	// We can construct a pointer in two ways. Either directly from a type and 
 	// address, or from a record itself.
 	constructor(object: SavegameRecord);
-	constructor(type: uint32, address: uint32);
+	constructor(type: uint32, address?: uint32);
 	constructor(objectOrType: SavegameRecord | number, address = 0x00000000) {
 		if (typeof objectOrType === 'number') {
 			this.type = objectOrType;
