@@ -16,7 +16,7 @@ describe('#historical()', function() {
 		});
 		
 		// Check the dbpf file now. Everything should be historical.
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			expect(lot.historical).to.be.true;
 		}
 
@@ -28,7 +28,7 @@ describe('#historical()', function() {
 			residential: true,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			expect(lot.historical).to.equal(lot.isResidential);
 		}
 
@@ -40,7 +40,7 @@ describe('#historical()', function() {
 			commercial: true,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			expect(lot.historical).to.equal(lot.isCommercial);
 		}
 
@@ -52,7 +52,7 @@ describe('#historical()', function() {
 			industrial: true,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			expect(lot.historical).to.equal(lot.isIndustrial);
 		}
 
@@ -64,7 +64,7 @@ describe('#historical()', function() {
 			agricultural: true,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			expect(lot.historical).to.equal(lot.isAgricultural);
 		}
 
@@ -79,7 +79,7 @@ describe('#growify', function() {
 		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (lot.isPloppedResidential) plopped.add(lot);
 		}
 		expect(plopped.size).to.be.above(0);
@@ -89,7 +89,7 @@ describe('#growify', function() {
 			residential: ZoneType.RMedium,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (plopped.has(lot)) {
 				expect(lot.zoneType).to.equal(ZoneType.RMedium);
 				expect(lot.isPlopped).to.be.false;
@@ -103,7 +103,7 @@ describe('#growify', function() {
 		let buff = fs.readFileSync(resource('City - labP01.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (lot.isPloppedIndustrial) plopped.add(lot);
 		}
 		expect(plopped.size).to.be.above(0);
@@ -113,7 +113,7 @@ describe('#growify', function() {
 			industrial: ZoneType.IHigh,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (plopped.has(lot)) {
 				expect(lot.zoneType).to.equal(ZoneType.IHigh);
 				expect(lot.isPlopped).to.be.false;
@@ -127,7 +127,7 @@ describe('#growify', function() {
 		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
 		let plopped = new Set();
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (lot.isPloppedAgricultural) plopped.add(lot);
 		}
 		expect(plopped.size).to.be.above(0);
@@ -137,7 +137,7 @@ describe('#growify', function() {
 			agricultural: ZoneType.ILow,
 		});
 
-		for (let lot of dbpf.lotFile) {
+		for (let lot of dbpf.lots) {
 			if (plopped.has(lot)) {
 				expect(lot.zoneType).to.equal(ZoneType.ILow);
 				expect(lot.isPlopped).to.be.false;

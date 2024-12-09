@@ -30,7 +30,7 @@ let material = new three.MeshStandardMaterial({
 	"roughness": 0.75
 });
 
-let buildings = dbpf.buildingFile;
+let { buildings } = dbpf;
 let box = new three.BoxBufferGeometry(1, 1, 1);
 for (let building of buildings) {
 
@@ -53,7 +53,7 @@ for (let building of buildings) {
 let light = new three.DirectionalLight();
 light.intensity = 0.8;
 light.position.set(16*128, 1000, 16*128);
-light.lookAt(16*128, 0, 16*128)
+light.lookAt(16*128, 0, 16*128);
 renderer.add(light);
 
 // Paint baby.

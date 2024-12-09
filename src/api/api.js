@@ -14,7 +14,7 @@ export async function historical(opts = {}) {
 	let dbpf = open(opts.dbpf);
 
 	let i = 0;
-	for (let lot of dbpf.lotFile) {
+	for (let lot of dbpf.lots) {
 
 		// Skip lots that are already historical.
 		if (lot.historical) continue;
@@ -87,7 +87,7 @@ export async function growify(opts = {}) {
 	}
 
 	let rCount = 0, cCount = 0, iCount = 0, aCount = 0;
-	for (let lot of dbpf.lotFile) {
+	for (let lot of dbpf.lots) {
 		if (opts.residential && lot.isPloppedResidential) {
 			setType(lot, opts.residential);
 			rCount++;
