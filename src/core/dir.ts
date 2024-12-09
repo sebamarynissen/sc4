@@ -1,19 +1,22 @@
 // # dir.ts
+import type { uint32 } from 'sc4/types';
 import type Entry from './dbpf-entry.js';
 import { FileType } from './enums.js';
 import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import WriteBuffer from './write-buffer.js';
 
-type ToBufferOptions = {
-    major?: number;
-    minor?: number;
+type DirRecord = {
+	type: uint32,
+	group: uint32,
+	instance: uint32,
+	size: number,
 };
 
 // # DIR
 // A class representing a DatabaseDirectoryFile, more commonly known as a DIR 
 // record.
-export default class DIR extends Array {
+export default class DIR extends Array<DirRecord> {
 	static [kFileType] = FileType.DIR;
 
 	// ## parse(rs, opts)
@@ -41,7 +44,7 @@ export default class DIR extends Array {
 	}
 
 	// ## toBuffer(opts)
-	toBuffer(opts: ToBufferOptions = {}) {
+	toBuffer(opts: { major?: number, minor?: number } = {}) {
 		let { major = 7, minor = 0 } = opts;
 		let byteLength = major === 7 && minor > 1 ? 20 : 16;
 		let ws = new WriteBuffer({ size: this.length*byteLength });

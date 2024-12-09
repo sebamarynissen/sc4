@@ -23,7 +23,7 @@ type FileConstructor = Class<File>;
 // possible that for read-only files no `.toBuffer()` method is implemented. In 
 // that case we just return the raw buffer as was read when serializing a DBPF.
 type SerializableFile = File & {
-	toBuffer: (...args: any) => Uint8Array,
+	toBuffer(...args: any): Uint8Array,
 };
 
 // Create a mapped type that contains all the allowed *values* of the known file 
@@ -43,7 +43,8 @@ type TypeIdToReadResult<T extends DecodedFileTypeId> = T extends ArrayFileTypeId
 // Generic type that we use to narrow down the entry to indicate that we know 
 // the file type, but we don't know yet whether it is an array or not.
 interface EntryOfPossibleArrayType<T extends File> extends Entry {
-	read: () => T | T[];
+	read(): T | T[];
+	readAsync(): Promise<T | T[]>;
 	file: T | T[] | null;
 	fileConstructor: FileConstructor;
 }
@@ -51,8 +52,15 @@ interface EntryOfPossibleArrayType<T extends File> extends Entry {
 // The interface where the magic happens of narrowing down the return type of 
 // the read() function.
 interface EntryWithReadResult<T extends File | File[]> extends Entry {
-	read: () => T;
+	read(): T;
+	readAsync(): Promise<T>;
 	file: T | null;
+}
+
+// Some type assertions might reveal that the entry will surely return a buffer 
+// frmo the `.toBuffer()` function.
+interface EntryWithBuffer extends Entry {
+	toBuffer(): Uint8Array;
 }
 
 // Export a type that can be used by our dbpf class in the find() methods to 
@@ -67,7 +75,8 @@ type EntryParseOptions = {
     minor?: number;
     buffer?: Uint8Array | null;
 };
-type EntryFile = unknown;
+type EntryFile = File | File[];
+type ReadResult = EntryFile | Uint8Array;
 
 // Invert the file types so that we can easily access a constructor by its 
 // numeric id.
@@ -179,7 +188,7 @@ export default class Entry {
 	// file. This typically happens when adding a new file to a savegame - for 
 	// example a prop file. If there were no props before, then the entry should 
 	// still be included in the serialization!
-	get isTouched() {
+	isTouched(): this is EntryWithBuffer {
 		return !!this.file || this.isRead;
 	}
 
@@ -254,7 +263,7 @@ export default class Entry {
 	// Tries to convert the raw buffer of the entry into a known file type. If 
 	// this fails, we'll simply return the raw buffer, but decompressed if the 
 	// entry was compressed.
-	read(): EntryFile {
+	read(): ReadResult {
 		return dual.read.sync.call(this, () => this.decompress());
 	}
 
@@ -273,7 +282,7 @@ export default class Entry {
 
 	// ## readAsync()
 	// Same as read, but in an async way.
-	async readAsync(): Promise<EntryFile> {
+	async readAsync(): Promise<ReadResult> {
 		return dual.read.async.call(this, () => this.decompressAsync());
 	}
 

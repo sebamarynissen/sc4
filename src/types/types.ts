@@ -24,6 +24,11 @@ export type TGIQuery<
 	G extends uint32 = uint32,
 	I extends uint32 = uint32
 > = Partial<TGILiteral<T, G, I>>;
+export type TGIArray<
+	T extends uint32 = uint32,
+	G extends uint32 = uint32,
+	I extends uint32 = uint32
+> = [type: T, group: G, instance: I];
 
 // A type that we often use to allow all non-function keys of a class to be 
 // specified as options.

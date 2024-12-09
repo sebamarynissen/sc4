@@ -10,16 +10,20 @@ import crc32 from './crc.js';
 import { cClass, FileType } from './enums.js';
 import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
-import type { TGIQuery, uint32 } from 'sc4/types';
+import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
-import type { DecodedFileTypeId } from './types.js';
+import type { DBPFFile, DecodedFileTypeId } from './types.js';
 
-type DBPFOptions = {
+export type DBPFOptions = {
 	file?: string;
 	buffer?: Uint8Array;
 	parse?: boolean;
 	header?: HeaderOptions;
 	entries?: any;
+};
+
+export type DBPFSaveOptions = string | {
+	file?: string;
 };
 
 // # DBPF()
@@ -117,7 +121,7 @@ export default class DBPF {
 
 	// ## add(tgi, file)
 	// Adds the given file to the DBPF with the specified tgi.
-	add(tgi, file) {
+	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;
 		this.entries.add(entry);
@@ -204,12 +208,12 @@ export default class DBPF {
 		// const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
 		// 	fn(entry!.read());
 		// });
-		const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
+		const dirs = (fn: DirCallback) => this.findAll({ type: FileType.DIR }).map(entry => {
 			fn(entry.read());
 		});
 		return parse.sync.call(
 			this,
-			(...args) => this.readBytes(...args),
+			(...args: Parameters<DBPF['readBytes']>) => this.readBytes(...args),
 			dirs,
 		);
 	}
@@ -217,14 +221,14 @@ export default class DBPF {
 	// ## parseAsync()
 	// Same as parse, but in an async way.
 	async parseAsync() {
-		const dirs = async fn => await Promise.all(
+		const dirs = async (fn: DirCallback) => await Promise.all(
 			this.findAll({ type: FileType.DIR }).map(async entry => {
 				fn(await entry.readAsync());
 			}),
 		);
 		return await parse.async.call(
 			this,
-			(...args) => this.readBytesAsync(...args),
+			(...args: Parameters<DBPF['readBytesAsync']>) => this.readBytesAsync(...args),
 			dirs,
 		);
 	}
@@ -232,13 +236,16 @@ export default class DBPF {
 	// ## save(opts)
 	// Saves the DBPF to a file. Note: we're going to do this in a sync way, 
 	// it's just easier.
-	save(opts = {}) {
+	save(opts: string | DBPFSaveOptions = {}) {
 		if (typeof opts === 'string') {
 			opts = { file: opts };
 		}
-		const { file = this.file, ...rest } = opts;
+		const { file = this.file } = opts;
 		this.header.modified = new Date();
-		let buff = this.toBuffer(rest);
+		let buff = this.toBuffer();
+		if (!file) {
+			throw new TypeError('No file given to save the DBPF to!');
+		}
 		return fs!.writeFileSync(file, buff);
 		// return fs.promises.writeFile(opts.file, buff);
 	}
@@ -276,7 +283,7 @@ export default class DBPF {
 				group: entry.group,
 				instance: entry.instance,
 			};
-			if (entry.isTouched) {
+			if (entry.isTouched()) {
 				let buffer = entry.toBuffer();
 				let fileSize = buffer.byteLength;
 				if (entry.compressed) {
@@ -382,14 +389,15 @@ export default class DBPF {
 	recordCount() {
 		let list = [];
 		for (let entry of this) {
-			let buff = entry.decompress();
+			let raw = entry.decompress();
+			let buff = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength);
 			let size = buff.readUInt32LE();
 
 			// Skip the entries that don't seem to hold size crc mem records.
 			if (size > buff.byteLength) {
 				continue;
 			}
-			let slice = buff.slice(0, size);
+			let slice = buff.subarray(0, size);
 			let crc = crc32(slice, 8);
 			if (crc !== buff.readUInt32LE(4)) {
 				continue;
@@ -400,12 +408,12 @@ export default class DBPF {
 			while (buff.length > 4) {
 				i++;
 				let size = buff.readUInt32LE(0);
-				buff = buff.slice(size);
+				buff = buff.subarray(size);
 			}
 			if (buff.length > 0) {
 				console.log('size mismatch');
 			}
-			list.push([cClass[entry.type], i]);
+			list.push([cClass[entry.type as keyof typeof cClass], i]);
 
 		}
 		return list;
@@ -418,7 +426,8 @@ export default class DBPF {
 	memRefs() {
 		let all = [];
 		for (let entry of this) {
-			let buff = entry.decompress();
+			let raw = entry.decompress();
+			let buff = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength);
 			if (buff.byteLength < 4) continue;
 			let size = buff.readUInt32LE();
 
@@ -430,7 +439,7 @@ export default class DBPF {
 			// going to parse them one by one and calculate the checksum. If 
 			// the checksum matches, we're considering them to have the 
 			// structure "SIZE CRC MEM".
-			let slice = buff.slice(0, size);
+			let slice = buff.subarray(0, size);
 			let crc = crc32(slice, 8);
 			if (crc !== buff.readUInt32LE(4)) continue;
 
@@ -443,10 +452,10 @@ export default class DBPF {
 				index: 0,
 			});
 			let index = size;
-			buff = buff.slice(size);
+			buff = buff.subarray(size);
 			while (buff.length > 4) {
 				let size = buff.readUInt32LE(0);
-				let slice = buff.slice(0, size);
+				let slice = buff.subarray(0, size);
 				let mem = slice.readUInt32LE(8);
 				all.push({
 					mem,
@@ -455,7 +464,7 @@ export default class DBPF {
 					index,
 				});
 				index += size;
-				buff = buff.slice(size);
+				buff = buff.subarray(size);
 			}
 
 		}
@@ -464,7 +473,7 @@ export default class DBPF {
 
 	// ## memSearch(refs)
 	// Searches all entries for a reference to the given memory address.
-	memSearch(refs) {
+	memSearch(refs: uint32 | uint32[]) {
 		let original = refs;
 		if (!Array.isArray(refs)) {
 			refs = [refs];
@@ -479,7 +488,6 @@ export default class DBPF {
 			out[i] = [];
 			let ref = refs[i];
 			view.setUint32(0, ref, true);
-			help.writeUInt32LE(ref);
 			strings[i] = uint8ArrayToHex(help);
 		}
 
@@ -492,7 +500,7 @@ export default class DBPF {
 				let index = raw.indexOf(hex);
 				if (index > -1) {
 					out[i].push({
-						class: cClass[entry.type],
+						class: cClass[entry.type as keyof typeof cClass],
 						entry,
 						index,
 					});
@@ -515,6 +523,7 @@ export default class DBPF {
 // # parse()
 // Parsing a DBPF can be done both in a sync and async way, but the underlying 
 // logic is the same.
+type DirCallback = (dir: DIR) => void;
 const parse = duplicateAsync(function* parse(read, readDirs) {
 
 	// First of all we need to read the header, and only the header. From 
@@ -526,11 +535,11 @@ const parse = duplicateAsync(function* parse(read, readDirs) {
 	// Header is parsed which means we now know the offset of the index. 
 	// Read in the bytes of the index and then build up the index.
 	let index = yield read(header.indexOffset, header.indexSize);
-	fillIndex(this, index);
+	fillIndex(this, index as Uint8Array);
 
 	// We're not done yet. The last thing we need to do is read in all the 
 	// DIR files to mark which entries in the DBPF are compressed.
-	yield readDirs(dir => handleDir(this, dir));
+	yield readDirs((dir: DIR) => handleDir(this, dir));
 	return this;
 
 });
@@ -553,8 +562,8 @@ function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
 // really know what the spec says about this, but it doesn't seem like the DIR 
 // has to be in a fixed order. Hence we'll assume that the *duplicate* entries 
 // have to appear in order.
-function handleDir(dbpf, dir) {
-	let counters = {};
+function handleDir(dbpf: DBPF, dir: DIR) {
+	let counters: Record<string, number> = {};
 	for (let { type, group, instance, size } of dir) {
 		let entries = dbpf.findAll({ type, group, instance });
 		if (entries.length === 0) continue;
