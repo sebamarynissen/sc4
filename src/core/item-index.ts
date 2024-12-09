@@ -48,11 +48,18 @@ export default class ItemIndex {
 		this.tileDepth = 4*z as TileSize;
 	}
 
+	// ## get(x: number, z: number)
+	get(x: number, z: number): Cell | undefined {
+		let column = this.elements[x];
+		if (!column) return undefined;
+		return column.at(z);
+	}
+
 	// ## fill()
 	// Fills up the item index with cells. This is useful when not parsing an 
 	// item index, but generating a city from scratch where you need an empty 
 	// item index.
-	fill() {
+	fill(): this {
 		let { elements } = this;
 		elements.length = SIZE;
 		for (let x = 0; x < elements.length; x++) {
@@ -191,6 +198,17 @@ export default class ItemIndex {
 		}
 		return ws.seal();
 
+	}
+
+	// ## *flat()
+	// Returns an iterator that iterates over every cell, instead of row by row. 
+	// Note that we might want to do make this the default iterator by the way!
+	*flat() {
+		for (let column of this) {
+			for (let cell of column) {
+				yield cell;
+			}
+		}
 	}
 
 }

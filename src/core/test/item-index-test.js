@@ -59,7 +59,7 @@ describe('An item index subfile', function() {
 		index.add(arr[0]);
 		for (let x = 0x40; x <= 0x42; x++) {
 			for (let z = 0x44; z <= 0x45; z++) {
-				let cell = index[x][z];
+				let cell = index.get(x, z);
 				expect(cell).to.have.length(1);
 				expect(+cell[0]).to.equal(arr[0].mem);
 				expect(cell[0].type).to.equal(type);
@@ -70,7 +70,7 @@ describe('An item index subfile', function() {
 		index.rebuild(type, arr);
 		for (let x = 0x40; x <= 0x42; x++) {
 			for (let z = 0x44; z <= 0x45; z++) {
-				let cell = index[x][z];
+				let cell = index.get(x, z);
 				expect(cell).to.have.length(1);
 				expect(+cell[0]).to.equal(arr[0].mem);
 				expect(cell[0].type).to.equal(type);
@@ -85,7 +85,7 @@ describe('An item index subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find(x => x.type === FileType.ItemIndexFile);
+		let entry = dbpf.entries.find({ type: FileType.ItemIndex });
 		let indexFile = entry.read();
 
 		expect(indexFile.width).to.equal(1024);

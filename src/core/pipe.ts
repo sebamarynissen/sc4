@@ -75,8 +75,11 @@ export default class Pipe {
 	u = new Unknown()
 		.byte(0x04)
 		.dword(0x00000000)
+		.dword(0xc772bf98)
+		.byte(0x05)
 		.bytes([0, 0, 0, 0, 0])
 		.bytes([0x02, 0, 0])
+		.dword(0x00000000)
 		.bytes([0x10, 0x00, 0x00])
 		.byte(0x10)
 		.repeat(4, u => u.dword(0x00000000))
@@ -86,7 +89,7 @@ export default class Pipe {
 		.float(1)
 		.dword(0x00000000)
 		.dword(0x00000000)
-		.dword(0x00000001)
+		.dword(0x00000001);
 
 	// ## constructor(opts)
 	constructor(opts: ConstructorOptions<Pipe> = {}) {
@@ -145,7 +148,7 @@ export default class Pipe {
 		this.zMax = rs.float();
 		unknown.bytes(3);
 		unknown.byte();
-		repeat(4, () => unknown.dword());
+		unknown.repeat(4, () => unknown.dword());
 		unknown.dword();
 		unknown.dword();
 		unknown.word();
@@ -177,7 +180,7 @@ export default class Pipe {
 	// ## toBuffer()
 	toBuffer(): Uint8Array {
 		const ws = new WriteBuffer();
-		const unknown = this.u.generator();
+		const unknown = this.u.writer(ws);
 		ws.dword(this.mem);
 		ws.word(this.major);
 		ws.word(this.minor);
@@ -222,7 +225,7 @@ export default class Pipe {
 		ws.float(this.zMax);
 		unknown.bytes();
 		unknown.byte();
-		repeat(4, () => unknown.dword());
+		unknown.repeat(4, () => unknown.dword());
 		unknown.dword();
 		unknown.dword();
 		unknown.word();
@@ -244,6 +247,7 @@ export default class Pipe {
 		ws.dword(this.subfileId);
 		unknown.dword();
 		unknown.dword();
+		unknown.assert();
 		return ws.seal();
 	}
 
@@ -309,10 +313,4 @@ class SideTextures extends Array<Vertex[]> {
 		return this.write(new WriteBuffer()).toBuffer();
 	}
 
-}
-
-function repeat(n: number, fn: () => void): void {
-	for (let i = 0; i < n; i++) {
-		fn();
-	}
 }

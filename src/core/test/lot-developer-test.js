@@ -12,7 +12,7 @@ describe('The LotDeveloper Subfile', function() {
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
-		let entry = dbpf.getByType(FileType.LotDeveloperFile);
+		let entry = dbpf.find({ type: FileType.LotDeveloper });
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(64+1);
 		expect(dev.buildings).to.have.length(buildings.length);
@@ -42,7 +42,7 @@ describe('The LotDeveloper Subfile', function() {
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
-		let entry = dbpf.getByType(FileType.LotDeveloperFile);
+		let entry = dbpf.find({ type: FileType.LotDeveloper });
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(128+1);
 		expect(dev.buildings).to.have.length(buildings.length);
@@ -58,7 +58,7 @@ describe('The LotDeveloper Subfile', function() {
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		let { buildings } = dbpf;
-		let entry = dbpf.getByType(FileType.LotDeveloperFile);
+		let entry = dbpf.find({ type: FileType.LotDeveloper });
 		let dev = entry.read();
 		expect(dev.tileSize).to.equal(256+1);
 		expect(dev.buildings).to.have.length(buildings.length);

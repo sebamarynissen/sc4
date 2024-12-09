@@ -13,7 +13,7 @@ describe('The COM serializer file', function() {
 		let dbpf = new Savegame(fs.readFileSync(file));
 
 		// Find the com serializer file.
-		let entry = dbpf.getByType(FileType.COMSerializerFile);
+		let entry = dbpf.find({ type: FileType.COMSerializer });
 		let com = entry.read();
 
 		// Assertions.

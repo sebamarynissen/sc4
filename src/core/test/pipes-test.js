@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { compareUint8Arrays } from 'uint8array-extras';
 import fs from '#test/fs.js';
-import { DBPF } from 'sc4/core';
+import { DBPF, Pipe } from 'sc4/core';
 import { resource } from '#test/files.js';
 
 describe('The pipes subfile', function() {
@@ -18,6 +18,14 @@ describe('The pipes subfile', function() {
 		entry.read();
 		let out = entry.toBuffer();
 		expect(compareUint8Arrays(out, raw)).to.equal(0);
+
+	});
+
+	it('serializes an empty pipe to a buffer', function() {
+
+		let pipe = new Pipe();
+		let buffer = pipe.toBuffer();
+		expect(buffer).to.be.ok;
 
 	});
 

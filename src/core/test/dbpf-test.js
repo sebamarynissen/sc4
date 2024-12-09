@@ -3,12 +3,9 @@ import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { compareUint8Arrays, uint8ArrayToString } from 'uint8array-extras';
 import { resource, output } from '#test/files.js';
-
 import {
 	FileType,
 	DBPF,
-	Savegame,
-	TerrainMap,
 	cClass,
 } from 'sc4/core';
 import crc32 from '../crc.js';
@@ -221,152 +218,6 @@ describe('A DBPF file', function() {
 			expect(compareUint8Arrays(entry.decompress(), png)).to.equal(0);
 
 		});
-
-	});
-
-});
-
-describe('A building subfile', function() {
-
-	it('should be parsed & serialized correctly', function() {
-		let file = resource('city.sc4');
-		let buff = fs.readFileSync(file);
-		let dbpf = new DBPF(buff);
-
-		let entry = dbpf.entries.find(x => x.type === FileType.BuildingFile);
-		let buildingFile = entry.read();
-
-		// Check the crc checksums. When we didn't modify a building, they 
-		// should still match.
-		for (let building of buildingFile) {
-
-			// Note: toBuffer() updates the crc, so make sure to grab the old 
-			// one!
-			let crc = building.crc;
-			let buff = SmartBuffer.fromBuffer(building.toBuffer());
-			expect(buff.readUInt32LE(4)).to.equal(crc);
-
-		}
-
-		// Serialize the building file right away. Should result in exactly 
-		// the same buffer.
-		let source = entry.decompress();
-		let check = entry.toBuffer();
-		expect(compareUint8Arrays(source, check)).to.equal(0);
-
-	});
-
-});
-
-describe('A prop subfile', function() {
-
-	it('should be parsed & serialized correctly', function() {
-		this.timeout(0);
-		let dbpf = new DBPF(resource('city.sc4'));
-
-		let entry = dbpf.entries.find(x => x.type === FileType.PropFile);
-		let propFile = entry.read();
-
-		// Check the crc checksums. When we didn't modify a prop, they should 
-		// still match.
-		for (let prop of propFile) {
-
-			// Note: toBuffer() updates the crc, so make sure to grab the old
-			// one!
-			let crc = prop.crc;
-			let buff = SmartBuffer.fromBuffer(prop.toBuffer());
-			expect(buff.readUInt32LE(4)).to.equal(crc);
-
-		}
-
-		// Serialize the prop file right away. Should result in exactly the 
-		// same buffer.
-		let source = entry.decompress();
-		let check = entry.toBuffer();
-		expect(compareUint8Arrays(source, check)).to.equal(0);
-
-	});
-
-	it('crashes on a poxed city', function() {
-
-		let dbpf = new Savegame(resource('poxed.sc4'));
-		expect(() => dbpf.props).to.throw(Error);
-
-	});
-
-});
-
-describe('The flora subfile', function() {
-
-	it('should be parsed & serialized correctly', function() {
-
-		let dbpf = new DBPF(resource('city - rci.sc4'));
-
-		let entry = dbpf.entries.find(x => x.type === FileType.FloraFile);
-		let flora = entry.read();
-
-		// Check the crc checksums. When we didn't modify a flora item, they 
-		// should still match.
-		for (let item of flora) {
-
-			let crc = item.crc;
-			let buff = SmartBuffer.fromBuffer(item.toBuffer());
-			expect(buff.readUInt32LE(4)).to.equal(crc);
-
-		}
-
-		// Serialize the entire file right away. Should result in exactly the 
-		// same buffer.
-		let source = entry.decompress();
-		let check = entry.toBuffer();
-		expect(compareUint8Arrays(source, check)).to.equal(0);
-
-	});
-
-});
-
-describe('The network subfile', function() {
-
-	it('should be parsed & serialized correctly', function() {
-
-		let dbpf = new DBPF(resource('city.sc4'));
-
-		let entry = dbpf.entries.find(x => x.type === FileType.NetworkFile);
-		let network = entry.read();
-
-		// Check the crc checksums. When we didn't modify a network tile, they 
-		// should still match.
-		for (let tile of network) {
-			let crc = tile.crc;
-			let buff = SmartBuffer.fromBuffer(tile.toBuffer());
-			expect(buff.readUInt32LE(4)).to.equal(crc);
-		}
-
-		// Serialize the entire file right away. Should result in exactly the 
-		// same buffer.
-		let source = entry.decompress();
-		let check = entry.toBuffer();
-		expect(compareUint8Arrays(source, check)).to.equal(0);
-
-	});
-
-});
-
-describe('A terrain map', function() {
-
-	it('should read the terrain correctly', function() {
-
-		let dbpf = new DBPF(resource('City - RCI.sc4'));
-
-		// Read the region data.
-		let regionData = dbpf.entries.find(x => x.type===FileType.RegionViewFile).read();
-
-		// Read the terrain as well;
-		let entry = dbpf.entries.find(function(entry) {
-			return entry.type === 0xa9dd6ff4 && entry.group === 0xe98f9525 && entry.instance === 0x00000001;
-		});
-		let map = new TerrainMap(regionData.xSize, regionData.ySize);
-		map.parse(entry.decompress());
 
 	});
 

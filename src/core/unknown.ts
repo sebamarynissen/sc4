@@ -70,6 +70,7 @@ export default class Unknown extends Array<UnknownType> {
 			double: () => fn() as double,
 			bytes: () => fn() as Uint8Array,
 			assert: () => {
+				result = it.next();
 				if (!result.done) {
 					throw new Error(`The iterator has not been fully consumed! There is probably a mismatch between the amount of unknowns read and written.`)
 				}
