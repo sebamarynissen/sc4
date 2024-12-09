@@ -3,15 +3,14 @@ const scale = 0x00100000;
 import type { ConstructorOptions, MinLengthArray, uint32 } from 'sc4/types';
 import { inspect } from 'sc4/utils';
 
-type ValuesArray = MinLengthArray<uint32, 12>;
-type LotObjectOptions = ConstructorOptions<LotObject> | ValuesArray;
+export type LotObjectArray = MinLengthArray<uint32, 12>;
+export type LotObjectOptions = ConstructorOptions<LotObject> | LotObjectArray;
 
 // # LotObject
 // A class for easier manipulation of LotConfigPropertyLotObject properties. 
 // See www.wiki.sc4devotion.com/index.php?title=LotConfigPropertyLotObject, 
 // these represent all objects on a lot.
 export default class LotObject {
-
 	static Building = 0x00;
 	static Prop = 0x01;
 	static Texture = 0x02;
@@ -32,7 +31,7 @@ export default class LotObject {
 	maxZ = 0.0;
 	usage = 0x00;
 	OID = 0x00000000;
-	IIDs = [];
+	IIDs: number[] = [];
 
 	// ## constructor(config)
 	constructor(config: LotObjectOptions) {
@@ -81,7 +80,7 @@ export default class LotObject {
 	// ## toArray()
 	// Converts the lotObject back to an array. This is needed for saving an 
 	// exemplar again.
-	toArray(): ValuesArray {
+	toArray(): LotObjectArray {
 		let {
 			type, lod, orientation,
 			x, y, z, minX, minZ, maxX, maxZ,
