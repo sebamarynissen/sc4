@@ -12,7 +12,7 @@ describe('A base texture file', function() {
 
 		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
-		let entry = dbpf.getByType(FileType.BaseTextureFile);
+		let entry = dbpf.find({ type: FileType.BaseTexture });
 		let textureFile = entry.read();
 
 		// Loop all textures and see if we find different values for the 

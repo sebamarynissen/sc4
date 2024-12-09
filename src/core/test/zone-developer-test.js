@@ -38,7 +38,7 @@ describe('The ZoneDeveloper Subfile', function() {
 		let file = resource('City - Medium.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let entry = dbpf.getByType(FileType.ZoneDeveloperFile);
+		let entry = dbpf.find({ type: FileType.ZoneDeveloper });
 		let dev = entry.read();
 		expect(dev.xSize).to.equal(128);
 		expect(dev.zSize).to.equal(128);
@@ -51,7 +51,7 @@ describe('The ZoneDeveloper Subfile', function() {
 					// Apparently expect assertions are slow (don't know why), 
 					// so assert manually.
 					if (cell.mem === 0) throw new Error();
-					if (cell.type !== FileType.LotFile) throw new Error('Not a lot!');
+					if (cell.type !== FileType.Lot) throw new Error('Not a lot!');
 				}
 			}
 		}
@@ -68,7 +68,7 @@ describe('The ZoneDeveloper Subfile', function() {
 		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let entry = dbpf.getByType(FileType.ZoneDeveloperFile);
+		let entry = dbpf.find({ type: FileType.ZoneDeveloper });
 		let dev = entry.read();
 		expect(dev.xSize).to.equal(256);
 		expect(dev.zSize).to.equal(256);
@@ -81,7 +81,7 @@ describe('The ZoneDeveloper Subfile', function() {
 					// Apparently expect assertions are slow (don't know why), 
 					// so assert manually.
 					if (cell.mem === 0) throw new Error();
-					if (cell.type !== FileType.LotFile) throw new Error('Not a lot!');
+					if (cell.type !== FileType.Lot) throw new Error('Not a lot!');
 				}
 			}
 		}

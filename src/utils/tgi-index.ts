@@ -83,7 +83,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		// If we have no index, then we have no choice but to loop everything 
 		// manually.
 		let q = normalize(query, group, instance);
-		if (this.index === null) {
+		if (!this.index) {
 			return super.filter(createFilter(q));
 		}
 

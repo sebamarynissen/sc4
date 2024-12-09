@@ -27,8 +27,8 @@ const fn = (create: (arr: any[]) => Index) => () => {
 			let index = create(values);
 
 			expect(index.findOne(1, 10, 0)).to.equal(values[1]);
-			expect(index.findOne(1, 11, 0)).to.be.null;
-			expect(index.findOne(1, 10, 1)).to.be.null;
+			expect(index.findOne(1, 11, 0)).to.be.undefined;
+			expect(index.findOne(1, 10, 1)).to.be.undefined;
 			expect(index.findOne(2, 3, 1)).to.equal(values[3]);
 
 		});
@@ -75,7 +75,7 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 			expect(index.findOne({ instance: 13 })).to.equal(values[1]);
 			expect(index.findOne({ instance: 12 })).to.equal(values[2]);
-			expect(index.findOne({ instance: 4 })).to.be.null;
+			expect(index.findOne({ instance: 4 })).to.be.undefined;
 
 		});
 
@@ -90,7 +90,7 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 			expect(index.findOne({ type: 5, instance: 13 })).to.equal(values[0]);
 			expect(index.findOne({ type: 6, instance: 13 })).to.equal(values[1]);
-			expect(index.findOne({ type: 7, instance: 13 })).to.be.null;
+			expect(index.findOne({ type: 7, instance: 13 })).to.be.undefined;
 
 		});
 
@@ -104,7 +104,7 @@ const fn = (create: (arr: any[]) => Index) => () => {
 			let result = index.findAll(tgi => tgi.type === 1);
 			expect(result).to.have.length(1);
 			expect(result[0]).to.equal(values[1]);
-			expect(index.find(() => false)).to.be.null;
+			expect(index.find(() => false)).to.be.undefined;
 
 		});
 

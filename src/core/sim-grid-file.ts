@@ -110,7 +110,7 @@ abstract class SimGrid<T extends SimGridType> {
 			} else {
 				this.data = data;
 			}
-		} else {
+		} else if (this.type) {
 			const TypedArray = getTypedArray(this.type);
 			this.data = new TypedArray(size) as TypedArray<T>;
 		}
