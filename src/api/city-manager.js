@@ -679,7 +679,7 @@ export default class CityManager {
 		clear(FileType.Lot);
 		clear(FileType.Building);
 		clear(FileType.Prop);
-		clear(FileType.FloraFile);
+		clear(FileType.Flora);
 		clear(FileType.BaseTextureFile);
 
 		// Clear both the lot and zone developer files as well.
