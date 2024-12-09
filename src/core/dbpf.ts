@@ -12,7 +12,7 @@ import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
-import type { DBPFFile, DecodedFileTypeId } from './types.js';
+import type { DBPFFile, DecodedFileTypeId, FileTypeId } from './types.js';
 
 export type DBPFOptions = {
 	file?: string;
@@ -44,7 +44,7 @@ export default class DBPF {
 	// from files, **not** from buffers. As such we don't have to keep the 
 	// entire buffer in memory and we can read the required parts of the file 
 	// "on the fly". That's what the DBPF format was designed for!
-	constructor(opts: DBPFOptions = {}) {
+	constructor(opts: DBPFOptions | string | Uint8Array = {}) {
 
 		// If the file specified is actually a buffer, store that we don't 
 		// have a file. Note that this is not recommended: we need to be able 
@@ -122,6 +122,7 @@ export default class DBPF {
 	// ## add(tgi, file)
 	// Adds the given file to the DBPF with the specified tgi.
 	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): TypeIdToEntry<T>;
+	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;

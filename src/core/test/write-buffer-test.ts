@@ -43,7 +43,7 @@ describe('A WriteBuffer', function() {
 	it('converts numbers to bigints', function() {
 
 		let buffer = new WriteBuffer();
-		buffer.bigint64(10);
+		buffer.bigint64(10n);
 		let out = new DataView(buffer.toArrayBuffer());
 		expect(out.getBigInt64(0, true)).to.equal(10n);
 
@@ -54,7 +54,7 @@ describe('A WriteBuffer', function() {
 		let buffer = new WriteBuffer();
 		buffer.dword(4);
 		buffer.word(2);
-		buffer.bool(1);
+		buffer.bool(true);
 		expect(buffer).to.have.length(7);
 
 	});

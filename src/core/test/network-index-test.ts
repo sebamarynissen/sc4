@@ -1,4 +1,4 @@
-// # network-test.js
+// # network-test.ts
 import fs from '#test/fs.js';
 import { expect } from 'chai';
 import { compareUint8Arrays } from 'uint8array-extras';
@@ -13,7 +13,7 @@ describe('The network index', function() {
 		let buffer = fs.readFileSync(file);
 		let dbpf = new Savegame(buffer);
 		let { networkIndex } = dbpf;
-		let raw = dbpf.find(FileType.NetworkIndex).decompress();
+		let raw = dbpf.find({ type: FileType.NetworkIndex })!.decompress();
 		let out = networkIndex.toBuffer();
 		expect(compareUint8Arrays(out, raw)).to.equal(0);
 

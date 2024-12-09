@@ -13,7 +13,7 @@ describe('The pipes subfile', function() {
 		let buffer = fs.readFileSync(file);
 		let dbpf = new DBPF(buffer);
 
-		let entry = dbpf.find(0x49c05b9f);
+		let entry = dbpf.find({ type: 0x49c05b9f })!;
 		let raw = entry.decompress();
 		entry.read();
 		let out = entry.toBuffer();

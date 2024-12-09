@@ -1,4 +1,4 @@
-// # item-index-test.js
+// # item-index-test.ts
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { DBPF, FileType, ItemIndex } from 'sc4/core';

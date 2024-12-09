@@ -12,12 +12,11 @@ describe('A building subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find({ type: FileType.Building });
-		let buildingFile = entry.read();
+		let entry = dbpf.find({ type: FileType.Building });
 
 		// Check the crc checksums. When we didn't modify a building, they 
 		// should still match.
-		for (let building of buildingFile) {
+		for (let building of entry!.read()) {
 
 			// Note: toBuffer() updates the crc, so make sure to grab the old 
 			// one!
@@ -29,9 +28,9 @@ describe('A building subfile', function() {
 
 		// Serialize the building file right away. Should result in exactly 
 		// the same buffer.
-		let source = entry.decompress();
-		let check = entry.toBuffer();
-		expect(compareUint8Arrays(source, check)).to.equal(0);
+		let source = entry!.decompress();
+		let check = entry!.toBuffer();
+		expect(compareUint8Arrays(source, check!)).to.equal(0);
 
 	});
 

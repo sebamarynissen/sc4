@@ -1,4 +1,4 @@
-// # crc-test.js
+// # crc-test.ts
 import { expect } from 'chai';
 import { SmartBuffer } from 'smart-arraybuffer';
 import crc32 from '../crc.js';

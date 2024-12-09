@@ -1,6 +1,6 @@
 // # pointer-test.js
 import { expect } from 'chai';
-import { Pointer } from 'sc4/core';
+import { kFileType, Pointer } from 'sc4/core';
 
 describe('A pointer', function() {
 
@@ -16,10 +16,12 @@ describe('A pointer', function() {
 		it('is constructed from a record', function() {
 
 			class Record {
-				static [Symbol.for('sc4.type')] = 0xaabbccdd;
-				constructor(mem) {
+				static [kFileType] = 0xaabbccdd;
+				mem: number;
+				constructor(mem: number) {
 					this.mem = mem;
 				}
+				parse() {}
 			}
 			let record = new Record(0x11223344);
 			let ptr = new Pointer(record);

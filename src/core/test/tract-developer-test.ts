@@ -13,7 +13,7 @@ describe('The tract developer file', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find(x => x.type === FileType.TractDeveloper);
+		let entry = dbpf.find({ type: FileType.TractDeveloper })!;
 		let tract = entry.read();
 
 		let source = entry.decompress();

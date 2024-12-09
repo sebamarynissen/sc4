@@ -1,4 +1,4 @@
-// # plumbing-simulator-test.js
+// # plumbing-simulator-test.ts
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { SmartBuffer } from 'smart-arraybuffer';

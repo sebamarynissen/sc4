@@ -1,4 +1,4 @@
-// # exemplar-test.js
+// # exemplar-test.ts
 import fs from '#test/fs.js';
 import { uint8ArrayToHex } from 'uint8array-extras';
 import { expect } from 'chai';
@@ -60,15 +60,15 @@ describe('The Exemplar file', function() {
 
 		// Check an entry in the first DIR.
 		let entry = dbpf.find(0x6534284a, 0xe83e0437, 0xfd160370);
-		expect(entry.compressed).to.be.true;
-		let exemplar = entry.read();
+		expect(entry!.compressed).to.be.true;
+		let exemplar = entry!.read();
 		let value = exemplar.value(0x29244DB5);
 		expect(value).to.equal(0x0d);
 
 		// Check an entry in the second DIR.
 		entry = dbpf.find(0x6534284a, 0xe83e0437, 0xfd160360);
-		expect(entry.compressed).to.be.true;
-		exemplar = entry.read();
+		expect(entry!.compressed).to.be.true;
+		exemplar = entry!.read();
 		value = exemplar.value(0x29244DB5);
 		expect(value).to.equal(0x0d);
 
@@ -79,7 +79,7 @@ describe('The Exemplar file', function() {
 		let dbpf = new DBPF(resource('exemplar edge cases.dat'));
 
 		let entry = dbpf.find(0x6534284a, 0x0e274fb2, 0x30d11119);
-		let exemplar = entry.read();
+		let exemplar = entry!.read();
 		let value = exemplar.value(Props.Family);
 		expect(value).to.be.undefined;
 
@@ -89,7 +89,7 @@ describe('The Exemplar file', function() {
 
 		let dbpf = new DBPF(resource('exemplar edge cases.dat'));
 		let entry = dbpf.find(0x6534284a, 0x348c219a, 0xd52e756e);
-		let exemplar = entry.read();
+		let exemplar = entry!.read();
 
 		let value = exemplar.value(Props.kSC4BuildingModelRotationProperty);
 		expect(value).to.be.undefined;
@@ -104,13 +104,13 @@ describe('The Exemplar file', function() {
 			group: 0xa8fbd372,
 			instance: 0x8a73e853,
 		});
-		let exemplar = entry.read();
+		let exemplar = entry!.read();
 		let objects = exemplar.lotObjects;
 		expect(objects).to.have.length(561);
 
 		// Serialize & then read in again to ensure everything is still correct.
 		let buffer = exemplar.toBuffer();
-		expect(buffer.byteLength).to.equal(entry.decompress().byteLength);
+		expect(buffer.byteLength).to.equal(entry!.decompress().byteLength);
 		let cloned = new Exemplar(buffer);
 		expect(cloned.props).to.have.length(exemplar.props.length);
 		for (let prop of exemplar) {
@@ -128,7 +128,7 @@ describe('The Exemplar file', function() {
 			group: 0xa8fbd372,
 			instance: 0x8a73e853,
 		});
-		let exemplar = entry.read();
+		let exemplar = entry!.read();
 		exemplar.lotObjects = [];
 
 		let clone = new Exemplar(exemplar.toBuffer());

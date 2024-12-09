@@ -1,4 +1,4 @@
-// # lot-developer-test.js
+// # lot-developer-test.ts
 import { expect } from 'chai';
 import { SmartBuffer } from 'smart-arraybuffer';
 import fs from '#test/fs.js';
@@ -13,7 +13,7 @@ describe('The LotDeveloper Subfile', function() {
 
 		let { buildings } = dbpf;
 		let entry = dbpf.find({ type: FileType.LotDeveloper });
-		let dev = entry.read();
+		let dev = entry!.read();
 		expect(dev.tileSize).to.equal(64+1);
 		expect(dev.buildings).to.have.length(buildings.length);
 
@@ -43,7 +43,7 @@ describe('The LotDeveloper Subfile', function() {
 
 		let { buildings } = dbpf;
 		let entry = dbpf.find({ type: FileType.LotDeveloper });
-		let dev = entry.read();
+		let dev = entry!.read();
 		expect(dev.tileSize).to.equal(128+1);
 		expect(dev.buildings).to.have.length(buildings.length);
 
@@ -59,7 +59,7 @@ describe('The LotDeveloper Subfile', function() {
 
 		let { buildings } = dbpf;
 		let entry = dbpf.find({ type: FileType.LotDeveloper });
-		let dev = entry.read();
+		let dev = entry!.read();
 		expect(dev.tileSize).to.equal(256+1);
 		expect(dev.buildings).to.have.length(buildings.length);
 

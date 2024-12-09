@@ -1,4 +1,4 @@
-// # dbpf-test.js
+// # dbpf-test.ts
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { compareUint8Arrays, uint8ArrayToString } from 'uint8array-extras';
@@ -10,6 +10,7 @@ import {
 } from 'sc4/core';
 import crc32 from '../crc.js';
 import { SmartBuffer } from 'smart-arraybuffer';
+import type Entry from '../dbpf-entry.js';
 
 describe('A DBPF file', function() {
 
@@ -21,15 +22,13 @@ describe('A DBPF file', function() {
 		let dbpf = new DBPF(file);
 
 		// Find an entry and verify that it gets read correctly.
-		let entry = dbpf.find(entry => {
-			return (
-				entry.type === 0x6534284a &&
-				entry.group === 0xa8fbd372 &&
-				entry.instance === 0x8a73e853
-			);
+		let entry = dbpf.find({
+			type: 0x6534284a,
+			group: 0xa8fbd372,
+			instance: 0x8a73e853,
 		});
-		let exemplar = entry.read();
-		expect(+exemplar.prop(0x10)).to.equal(0x10);
+		let exemplar = entry?.read();
+		expect(exemplar!.get(0x10)).to.equal(0x10);
 
 	});
 
@@ -40,15 +39,13 @@ describe('A DBPF file', function() {
 		let dbpf = new DBPF(buff);
 
 		// Find an entry and verify that it gets read correctly.
-		let entry = dbpf.find(entry => {
-			return (
-				entry.type === 0x6534284a &&
-				entry.group === 0xa8fbd372 &&
-				entry.instance === 0x8a73e853
-			);
+		let entry = dbpf.find({
+			type: 0x6534284a,
+			group: 0xa8fbd372,
+			instance: 0x8a73e853,
 		});
-		let exemplar = entry.read();
-		expect(+exemplar.prop(0x10)).to.equal(0x10);
+		let exemplar = entry?.read();
+		expect(exemplar!.get(0x10)).to.equal(0x10);
 
 	});
 
@@ -72,15 +69,13 @@ describe('A DBPF file', function() {
 		await dbpf.parseAsync();
 
 		// Find an entry and verify that it gets read correctly.
-		let entry = dbpf.find(entry => {
-			return (
-				entry.type === 0x6534284a &&
-				entry.group === 0xa8fbd372 &&
-				entry.instance === 0x8a73e853
-			);
+		let entry = dbpf.find({
+			type: 0x6534284a,
+			group: 0xa8fbd372,
+			instance: 0x8a73e853,
 		});
-		let exemplar = entry.read();
-		expect(+exemplar.prop(0x10)).to.equal(0x10);
+		let exemplar = entry?.read();
+		expect(exemplar!.get(0x10)).to.equal(0x10);
 
 	});
 
@@ -95,12 +90,10 @@ describe('A DBPF file', function() {
 			entry.read();
 			expect(entry.raw).to.be.ok;
 		}
-		let entry = dbpf.find(entry => {
-			return (
-				entry.type === 0x6534284a &&
-				entry.group === 0xa8fbd372 &&
-				entry.instance === 0x8a73e853
-			);
+		let entry = dbpf.find({
+			type: 0x6534284a,
+			group: 0xa8fbd372,
+			instance: 0x8a73e853,
 		});
 
 		// Free up the DBPF memory.
@@ -113,8 +106,8 @@ describe('A DBPF file', function() {
 
 		// Check that the DBPF gets automatically reloaded if we request to 
 		// read an entry.
-		let exemplar = entry.read();
-		expect(+exemplar.prop(0x10)).to.equal(0x10);
+		let exemplar = entry?.read();
+		expect(exemplar!.get(0x10)).to.equal(0x10);
 
 	});
 
@@ -129,12 +122,12 @@ describe('A DBPF file', function() {
 		let my = new DBPF(buff);
 		expect(my).to.have.length(dbpf.length);
 		
-		expect(my.created).to.eql(dbpf.created);
-		expect(my.modified).to.eql(dbpf.modified);
+		expect(my.header.created).to.eql(dbpf.header.created);
+		expect(my.header.modified).to.eql(dbpf.header.modified);
 		for (let entry of my.exemplars) {
 			let exemplar = entry.read();
 			let { type, group, instance } = entry;
-			let check = dbpf.find(type, group, instance).read();
+			let check = dbpf.find(type, group, instance)?.read();
 			expect(exemplar).to.eql(check);
 		}
 
@@ -161,7 +154,7 @@ describe('A DBPF file', function() {
 			let crc = crc32(entry.decompress(), 8);
 			if (crc === buff.readUInt32LE(4)) {
 				let type = entry.type;
-				let name = cClass[type].replace(/^cSC4/, '');
+				let name = cClass[type as keyof typeof cClass].replace(/^cSC4/, '');
 				all.push(name);
 			}
 
@@ -215,7 +208,7 @@ describe('A DBPF file', function() {
 			let buffer = dbpf.toBuffer();
 			let clone = new DBPF(buffer);
 			let entry = clone.find(FileType.PNG, 0x01, 0x02);
-			expect(compareUint8Arrays(entry.decompress(), png)).to.equal(0);
+			expect(compareUint8Arrays(entry!.decompress(), png)).to.equal(0);
 
 		});
 

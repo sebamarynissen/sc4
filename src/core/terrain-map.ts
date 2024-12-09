@@ -20,7 +20,7 @@ export default class TerrainMap extends Array<Float32Array> {
 	major: number;
 	xSize: number;
 	zSize: number;
-	private raw: Float32Array;
+	raw: Float32Array;
 
 	// ## constructor(xSize, zSize)
 	constructor(xSize: number = 0, zSize: number = xSize) {

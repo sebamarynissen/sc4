@@ -110,7 +110,7 @@ abstract class BaseExemplar {
 
 	// ## constructor(data = {})
 	// Creates a new exemplar. Note that this should support copy-constructing.
-	constructor(data: ExemplarOptions = {}) {
+	constructor(data: ExemplarOptions | Uint8Array = {}) {
 		if (isUint8Array(data)) {
 			this.parse(data);
 			return;

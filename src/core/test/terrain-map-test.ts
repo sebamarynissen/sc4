@@ -1,4 +1,4 @@
-// # terrain-map-test.js
+// # terrain-map-test.ts
 import { expect } from 'chai';
 import { SmartBuffer } from 'smart-arraybuffer';
 import { compareUint8Arrays } from 'uint8array-extras';
@@ -13,9 +13,10 @@ describe('The terrain map', function() {
 		let file = resource('city.sc4');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
-		let entry = dbpf.find(({ type, instance }) => {
-			return type === FileType.TerrainMap && instance === 0x00000001;
-		});
+		let entry = dbpf.find({
+			type: FileType.TerrainMap,
+			instance: 0x00000001,
+		})!;
 		let terrain = entry.read();
 		expect(terrain.xSize).to.equal(257);
 		expect(terrain.zSize).to.equal(257);

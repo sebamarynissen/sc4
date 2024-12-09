@@ -12,7 +12,7 @@ describe('A lot subfile', function() {
 
 		let dbpf = new Savegame(resource('city.sc4'));
 
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 
 		// Check the crc checksums. We didn't modify the lot, so they should 
@@ -31,7 +31,7 @@ describe('A lot subfile', function() {
 		// Serialize the building file right away. Should result in exactly 
 		// the same buffer.
 		let source = entry.decompress();
-		let check = entry.toBuffer();
+		let check = entry.toBuffer()!;
 		expect(compareUint8Arrays(source, check)).to.equal(0);
 
 	});
@@ -55,7 +55,7 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		// Mark all lots as historical.
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 		for (let lot of lots) {
 			expect(lot.historical).to.be.false;
@@ -78,7 +78,7 @@ describe('A lot subfile', function() {
 		let dbpf = new DBPF(buff);
 
 		// Read the lots
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 		let plopped = lots[26];
 
@@ -99,7 +99,7 @@ describe('A lot subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 
 		for (let lot of lots) {
@@ -117,7 +117,7 @@ describe('A lot subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 
 		let lot = lots[0];
@@ -134,7 +134,7 @@ describe('A lot subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find({ type: FileType.Lot });
+		let entry = dbpf.find({ type: FileType.Lot })!;
 		let lots = entry.read();
 
 		let lot = lots[0];

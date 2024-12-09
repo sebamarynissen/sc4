@@ -1,4 +1,4 @@
-// # sim-grid-test.js
+// # sim-grid-test.ts
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { Savegame, FileType } from 'sc4/core';

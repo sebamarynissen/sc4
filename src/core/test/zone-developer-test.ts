@@ -38,7 +38,7 @@ describe('The ZoneDeveloper Subfile', function() {
 		let file = resource('City - Medium.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let entry = dbpf.find({ type: FileType.ZoneDeveloper });
+		let entry = dbpf.find({ type: FileType.ZoneDeveloper })!;
 		let dev = entry.read();
 		expect(dev.xSize).to.equal(128);
 		expect(dev.zSize).to.equal(128);
@@ -68,7 +68,7 @@ describe('The ZoneDeveloper Subfile', function() {
 		let file = resource('city.sc4');
 		let dbpf = new Savegame(fs.readFileSync(file));
 
-		let entry = dbpf.find({ type: FileType.ZoneDeveloper });
+		let entry = dbpf.find({ type: FileType.ZoneDeveloper })!;
 		let dev = entry.read();
 		expect(dev.xSize).to.equal(256);
 		expect(dev.zSize).to.equal(256);

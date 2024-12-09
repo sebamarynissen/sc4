@@ -1,4 +1,4 @@
-// # com-serializer-file-test.js
+// # com-serializer-file-test.ts
 import { expect } from 'chai';
 import { compareUint8Arrays } from 'uint8array-extras';
 import fs from '#test/fs.js';
@@ -14,16 +14,16 @@ describe('The COM serializer file', function() {
 
 		// Find the com serializer file.
 		let entry = dbpf.find({ type: FileType.COMSerializer });
-		let com = entry.read();
+		let com = entry!.read();
 
 		// Assertions.
 		expect(com.u1).to.equal(1);
 		expect(com.index).to.be.an.instanceOf(Map);
 
 		// Serialize again, buffer should look the same.
-		let check = entry.buffer;
+		let check = entry!.buffer;
 		let buff = com.toBuffer();
-		expect(compareUint8Arrays(buff, check)).to.equal(0);
+		expect(compareUint8Arrays(buff, check!)).to.equal(0);
 
 	});
 

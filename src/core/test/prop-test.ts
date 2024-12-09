@@ -10,7 +10,7 @@ describe('A prop subfile', function() {
 		this.timeout(0);
 		let dbpf = new DBPF(resource('city.sc4'));
 
-		let entry = dbpf.entries.find({ type: FileType.Prop });
+		let entry = dbpf.find({ type: FileType.Prop })!;
 		let propFile = entry.read();
 
 		// Check the crc checksums. When we didn't modify a prop, they should 

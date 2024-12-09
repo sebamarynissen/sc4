@@ -281,7 +281,7 @@ export default class Entry {
 	// there are a few cases we have to take into account. The highest priority 
 	// is obviously when the file was parsed, then we serialize the file back 
 	// into a buffer.
-	toBuffer(): Uint8Array | null {
+	toBuffer(): Uint8Array {
 		if (Array.isArray(this.file)) {
 			let array = this.file as File[];
 			let buffer = new WriteBuffer();
@@ -290,17 +290,21 @@ export default class Entry {
 				// If we notice *at runtime* that the array contains read-only 
 				// files, then we won't serialize one by one, but return a 
 				// buffer instead.
-				if (!isSerializableFile(file)) return this.buffer;
+				if (!isSerializableFile(file)) {
+					return this.buffer || new Uint8Array();
+				}
 				buffer.writeUint8Array(file.toBuffer());
 
 			}
 			return buffer.toUint8Array();
 		} else if (this.file !== null) {
 			let struct = this.file as File;
-			if (!isSerializableFile(struct)) return this.buffer;
+			if (!isSerializableFile(struct)) {
+				return this.buffer || new Uint8Array();
+			}
 			return struct.toBuffer();
 		} else {
-			return this.buffer;
+			return this.buffer || new Uint8Array();
 		}
 	}
 
