@@ -31,7 +31,7 @@ export default class PipeManager {
 	get pipes() { return this.dbpf.pipes; }
 	get terrain() { return this.dbpf.terrain; }
 	get index() { return this.dbpf.itemIndex; }
-	get serializer() { return this.dbpf.COMSerializerFile; }
+	get serializer() { return this.dbpf.COMSerializer; }
 
 	// ## applyOptimalLayout()
 	// Applies the optimal pipe layout to the city.
@@ -62,8 +62,8 @@ export default class PipeManager {
 		// Now rebuild the item index and update the com serializer and we're 
 		// done!
 		sim.revision++;
-		this.index.rebuild(FileType.PipeFile, this.pipes);
-		this.serializer.update(FileType.PipeFile, this.pipes);
+		this.index.rebuild(FileType.Pipe, this.pipes);
+		this.serializer.update(FileType.Pipe, this.pipes);
 		return this;
 
 	}
