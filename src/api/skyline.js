@@ -79,7 +79,7 @@ export default function skyline(opts) {
 	// };
 
 	// Now loop all city tiles & plop away.
-	let zones = city.dbpf.zones;
+	let { zones } = city.dbpf;
 	const { xSize, zSize } = zones;
 	for (let x = 0; x < xSize; x++) {
 		outer:

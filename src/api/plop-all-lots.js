@@ -101,7 +101,7 @@ export default async function plopAllLots(opts = {}) {
 // Finds a suitable position for the given lot exemplar to plop.
 function findPosition(city, exemplar, bbox = []) {
 	const [width, depth] = exemplar.value(LotConfigPropertySize);
-	const { zones, width: cityWidth, depth: cityDepth } = city;
+	const { zoneDeveloper: zones, width: cityWidth, depth: cityDepth } = city;
 	const [minX = 0, minZ = 0, maxX = cityWidth, maxZ = cityDepth] = bbox;
 	for (let z = minZ; z < maxZ-depth; z++) {
 		outer:

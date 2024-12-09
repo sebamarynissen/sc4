@@ -43,6 +43,7 @@ export default class Savegame extends DBPF {
 	get flora() { return this.readByType(FileType.Flora); }
 	get itemIndex() { return this.readByType(FileType.ItemIndex); }
 	get zoneDeveloper() { return this.readByType(FileType.ZoneDeveloper); }
+	get zones() { return this.zoneDeveloper; }
 	get lotDeveloper() { return this.readByType(FileType.LotDeveloper); }
 	get zoneManager() { return this.readByType(FileType.ZoneManager); }
 	get COMSerializer() { return this.readByType(FileType.COMSerializer); }
