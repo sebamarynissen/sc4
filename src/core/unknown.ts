@@ -53,7 +53,7 @@ export default class Unknown extends Array<UnknownType> {
 		let result: IteratorResult<UnknownType>;
 		const fn = (): unknown => {
 			result = it.next();
-			if (!result.done) {
+			if (result.done) {
 				throw new Error(
 					`The generator of the unknown has been fully consumed already! There is probably a mismatch between the amount of unknowns read and written.`
 				);
@@ -120,9 +120,11 @@ class UnknownReader {
 
 // # UnkownWriter
 class UnknownWriter {
+	unknown: Unknown;
 	ws: WriteBuffer;
 	generator: ReturnType<Unknown['generator']>;
 	constructor(unknown: Unknown, ws: WriteBuffer) {
+		this.unknown = unknown;
 		this.generator = unknown.generator();
 		this.ws = ws;
 	}
