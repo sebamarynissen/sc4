@@ -96,8 +96,7 @@ export default class DBPF {
 	// ## find(...args)
 	// Proxies to entries.find()
 	find(...args: any): string {
-		return 'foo';
-		// return this.entries.find(...args);
+		return this.entries.find(...args);
 	}
 
 	// ## findAll(...args)
@@ -192,8 +191,11 @@ export default class DBPF {
 	// testing stuff out, but for bulk reading you should use the async 
 	// reading.
 	parse() {
+		// const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
+		// 	fn(entry!.read());
+		// });
 		const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
-			fn(entry!.read());
+			fn(entry.read());
 		});
 		return parse.sync.call(
 			this,
