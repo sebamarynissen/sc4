@@ -3,7 +3,7 @@ import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type { FileTypeValue } from './types.js';
+import type { FileTypeId } from './types.js';
 
 const TypedArrays = {
 	[FileType.SimGridUint8]: Uint8Array,
@@ -32,7 +32,7 @@ const Writers = {
 
 type SimGridType = {
 	[K in keyof typeof TypedArrays as number]: K
-}[FileTypeValue];
+}[FileTypeId];
 type TypedArray<T extends SimGridType> = InstanceType<(typeof TypedArrays)[T]>;
 
 // # getTypedArray(type)

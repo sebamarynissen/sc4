@@ -11,23 +11,11 @@ import type DBPF from './dbpf.js';
 import FileClasses from './file-classes.js';
 import FileType from './file-types.js';
 import { kFileTypeArray } from './symbols.js';
+import type {
+	DBPFFile as File,
+	DecodedFileTypeId
+} from './types.js';
 
-// The .read() method of an entry will automatically look for known file types, 
-// which means that a class has been implemented for it. In order to do this, we 
-// first need a subset type that contains all values of the FileType enum that 
-// have a corresponding class.
-type KnownTypeId = (typeof FileType)[
-	keyof typeof FileClasses & keyof typeof FileType
-];
-
-// Instead of making our types too narrow by restricting it to all the known 
-// filetypes - which has very little benefit as far as typechecking goes 
-// actually - we now make our types as broad as possible instead: let's make use 
-// of the structurally typed type system at its best. Only define what is 
-// absolutely needed to work here.
-type File = {
-	parse(rs: Stream, ...args: any[]): any,
-};
 type FileConstructor = Class<File>;
 
 // A serializable file must implement a `.toBuffer()` method. Note that it's 
@@ -45,10 +33,10 @@ type TypeIdToStringKey = {
 };
 
 // A type that matches a constructor based on the *numeric* type id.
-type TypeIdToFileConstructor<T extends KnownTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
-type TypeIdToFile<T extends KnownTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
+type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
+type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
 
-type TypeIdToReadResult<T extends KnownTypeId> = TypeIdToFileConstructor<T> extends { [kFileTypeArray]: any }
+type TypeIdToReadResult<T extends DecodedFileTypeId> = TypeIdToFileConstructor<T> extends { [kFileTypeArray]: any }
 	? Array<TypeIdToFile<T>>
 	: TypeIdToFile<T>;
 
@@ -136,7 +124,7 @@ export default class Entry {
 	// A predicate function that allows us to narrow down what filetype this 
 	// entry contains. Using this function will infer the return type of the 
 	// `.read()` function.
-	isType<T extends KnownTypeId>(type: T): this is EntryWithReadResult<TypeIdToReadResult<T>> {
+	isType<T extends DecodedFileTypeId>(type: T): this is EntryWithReadResult<TypeIdToReadResult<T>> {
 		return this.type === type;
 	}
 
@@ -214,7 +202,7 @@ export default class Entry {
 			minor = 0,
 			buffer = null,
 		} = opts;
-		this.type = rs.uint32() as KnownTypeId;
+		this.type = rs.uint32() as DecodedFileTypeId;
 		this.group = rs.uint32();
 		this.instance = rs.uint32();
 		if (minor > 0) {
@@ -435,11 +423,11 @@ function isSerializableFile(file: File): file is SerializableFile {
 // # readArrayFile()
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
-function readArrayFile<T extends Constructor<any>>(
+function readArrayFile<T extends Constructor<File>>(
 	Constructor: T,
 	buffer: Uint8Array
 ) {
-	let array: InstanceType<T>[] = [];
+	let array: File[] = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {
 

@@ -21,7 +21,7 @@ import type {
     word,
 } from 'sc4/types';
 import type { Class } from 'type-fest';
-import type { FileTypeValue } from './types.js';
+import type { FileTypeId } from './types.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -100,7 +100,7 @@ export default class Stream extends SmartBuffer {
 
 	// When using TypeScript, it's beneficial to be explicict about when we're 
 	// reading in a file type so that we can properly type it.
-	type<T extends FileTypeValue = FileTypeValue>(offset?: number): T {
+	type<T extends FileTypeId = FileTypeId>(offset?: number): T {
 		return this.dword(offset) as T;
 	}
 

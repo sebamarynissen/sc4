@@ -1,20 +1,48 @@
 // # types.ts
-import type { Constructor } from 'type-fest';
-import type FileType from './file-types.js';
-import { kFileType, kFileTypeArray } from './symbols.js';
 import type { uint32 } from 'sc4/types';
+import type FileType from './file-types.js';
+import type FileClasses from './file-classes.js';
+import type Stream from './stream.js';
 
-// Contains all *valid* file types, as uint32 numbers.
-export type FileTypeValue = (typeof FileType)[keyof typeof FileType];
-export type FileType = FileTypeValue;
-
-// Some types that are shared, but specific to the core module.
-export type FileTypeConstructor = Constructor<any> & {
-	[kFileType]: FileTypeValue;
+// Contains the type definition that a class implementing a DBPF file should 
+// minimally adhere to. The only requirement here is that it can be parsed from 
+// a readable stream. Note that it might optionally accept a buffer as well, but 
+// that is no hard requirement.
+export type DBPFFile = {
+	parse(rs: Stream, ...args: any[]): any;
 };
-export type FileTypeInstance = InstanceType<FileTypeConstructor>;
 
-// Files that are found in savegames go a little bit further than simply being 
-// an instance of a class with the "type" symbol set: they also need to have a 
-// memory address! That way we can ensure that they can be used in pointers.
-export type SavegameRecord = FileTypeInstance & { mem: uint32 };
+// Files that are found in Savegames are DBPFFiles, but they are also required 
+// to have a "mem" field set so that they can be referenced inside the savegame 
+// with pointers.
+export type SavegameRecord = DBPFFile & { mem: uint32 };
+
+// Certain savegame records are also required to have some information about 
+// their bounding box - given as xMinTrac etc. We'll call these SavegameObjects. 
+// Typical examples are Buildings, Props, Flora, etc. Basically anything that 
+// can be added to the item index.
+export type SavegameObject = SavegameRecord & {
+	xMinTract: number;
+	zMinTract: number;
+	xMaxTract: number;
+	zMaxTract: number;
+};
+
+// The FileTypeId is a literal type that contains all *known* type ids, as 
+// definied in the file-types.ts file. Note that it does not necessarily mean 
+// that it also has a file class associated with it.
+export type FileTypeId = (typeof FileType)[keyof typeof FileType];
+
+// File types that have been decoded, and hence a file class associated with 
+// them are stored in the literal file type "DecodedFileTypeId".
+export type DecodedFileTypeId = (typeof FileType)[
+	keyof typeof FileClasses & keyof typeof FileType
+];
+
+// Sometimes we'd also like to reference file types using their string names, as 
+// that avoids having to import FileType all the time. Hence we create a literal 
+// type for this as well.
+export type FileTypeName = [keyof typeof FileType];
+export type DecodedFileTypeName = [
+	keyof typeof FileClasses & keyof typeof FileType
+];

@@ -6,7 +6,7 @@ import { getClassType } from './helpers.js';
 import { kFileType } from './symbols.js';
 import { type SavegameFileType } from './file-types.js';
 import type { ValueOf } from 'type-fest';
-import type { SavegameRecord } from './types.js';
+import type { SavegameObject } from './types.js';
 import type Stream from './stream.js';
 
 const SIZE = 192;
@@ -67,7 +67,7 @@ export default class ItemIndex {
 	// ## rebuild(type, file)
 	// Rebuilds the index so that it puts all entries of the given file in 
 	// their correct tracts.
-	rebuild(type: SavegameType, file: SavegameRecord[]) {
+	rebuild(type: SavegameType, file: SavegameObject[]) {
 
 		// From now on we need a specific file type because certain arrays might 
 		// be empty, in which case we don't know what type of values the array 
@@ -117,7 +117,7 @@ export default class ItemIndex {
 	// automatically, but you can specify it yourself as well. Note that the 
 	// item needs to expose min and max tract coordinates, but they do so 
 	// quite often!
-	add(item: SavegameRecord, type = getClassType(item)) {
+	add(item: SavegameObject, type = getClassType(item)) {
 		for (let x = item.xMinTract; x <= item.xMaxTract; x++) {
 			for (let z = item.zMinTract; z <= item.zMaxTract; z++) {
 				this.elements[x][z].push(new Pointer(type, item.mem));
