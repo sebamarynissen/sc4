@@ -42,7 +42,7 @@ export default class ZoneManager {
 	budgetSimulator = new Pointer(cSC4BudgetSimulator);
 
 	// ## constructor(opts)
-	constructor(opts: ConstructorOptions<ZoneManager>) {
+	constructor(opts?: ConstructorOptions<ZoneManager>) {
 		Object.assign(this, opts);
 	}
 

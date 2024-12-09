@@ -8,7 +8,6 @@ import WriteBuffer from './write-buffer.js';
 // Implementation of the LTEXT file type.
 export default class LText {
 	static [kFileType] = FileType.LTEXT;
-
 	value = '';
 	constructor(value = '') {
 		this.value = value;

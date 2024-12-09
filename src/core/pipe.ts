@@ -15,10 +15,8 @@ import type { ConstructorOptions } from 'sc4/types';
 // Pipe tiles are suprisingly large data structures (usually about 700 bytes). 
 // Their structure mostly corresponds to the 
 export default class Pipe {
-
 	static [kFileType] = FileType.Pipe;
 	static [kFileTypeArray] = true;
-
 	crc: dword = 0x00000000;
 	mem: dword = 0x00000000;
 	major: word = 0x0003;

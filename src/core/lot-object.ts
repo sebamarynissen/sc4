@@ -34,7 +34,7 @@ export default class LotObject {
 	IIDs: number[] = [];
 
 	// ## constructor(config)
-	constructor(config: LotObjectOptions) {
+	constructor(config: LotObjectOptions = {}) {
 		if (Array.isArray(config)) {
 			let [
 				type,

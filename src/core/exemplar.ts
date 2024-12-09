@@ -4,9 +4,39 @@ import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import NAMES from './exemplar-props.js';
 import FileType from './file-types.js';
-import LotObject from './lot-object.js';
+import LotObject, { type LotObjectArray } from './lot-object.js';
 import { ExemplarProperty } from './enums.js';
 import { invertMap, hex, inspect } from 'sc4/utils';
+import { kFileType } from './symbols.js';
+import type { byte, float, sint32, sint64, TGIArray, uint16, uint32, uint8 } from 'sc4/types';
+import parseStringExemplar from './parse-string-exemplar.js';
+import type { Class } from 'type-fest';
+
+type ExemplarId = 'EQZB1###' | 'EQZT1###' | 'CQZB1###' | 'CQZT###';
+type PropertyValueType =
+ 	| typeof Uint8Array
+ 	| typeof Uint16Array
+ 	| typeof Uint32Array
+ 	| typeof Int32Array
+ 	| typeof BigInt64Array
+ 	| typeof Float32Array
+ 	| typeof Boolean
+ 	| typeof String;
+
+type PropertyPrimitive = uint8 | uint16 | uint32 | sint32 | float | boolean;
+export type PropertyValue = string | PropertyPrimitive | PropertyPrimitive[];
+
+export type ExemplarOptions = {
+	id?: ExemplarId;
+	parent?: TGIArray;
+	props?: Property[] | PropertyOptions[];
+};
+export type PropertyOptions = {
+	id: number;
+	type?: PropertyValueType;
+	value: PropertyValue;
+	comment?: string;
+};
 
 const LotObjectRange = [
 	ExemplarProperty.LotConfigPropertyLotObject,
@@ -27,7 +57,7 @@ const Sint64 = globalThis.BigInt64Array;
 const Float32 = Float32Array;
 const Bool = Boolean;
 
-const TYPE_TO_HEX = new Map([
+const TYPE_TO_HEX = new Map<PropertyValueType, number>([
 	[Uint8, 0x100],
 	[Uint16, 0x200],
 	[Uint32, 0x300],
@@ -39,7 +69,7 @@ const TYPE_TO_HEX = new Map([
 ]);
 const HEX_TO_TYPE = invertMap(TYPE_TO_HEX);
 
-function getByteLengthFromType(type) {
+function getByteLengthFromType(type: PropertyValueType) {
 	if ('BYTES_PER_ELEMENT' in type) {
 		return type.BYTES_PER_ELEMENT;
 	} else {
@@ -47,41 +77,40 @@ function getByteLengthFromType(type) {
 	}
 }
 
-const VALUE_READERS = new Map([
-	[Uint8, rs => rs.uint8()],
-	[Uint16, rs => rs.uint16()],
-	[Uint32, rs => rs.uint32()],
-	[Sint32, rs => rs.int32()],
-	[Sint64, rs => rs.bigint64()],
-	[Float32, rs => rs.float()],
-	[Bool, rs => Boolean(rs.uint8())],
-	[String, (rs, length) => rs.string(length)],
+const VALUE_READERS = new Map<PropertyValueType, Function>([
+	[Uint8, (rs: Stream) => rs.uint8()],
+	[Uint16, (rs: Stream) => rs.uint16()],
+	[Uint32, (rs: Stream) => rs.uint32()],
+	[Sint32, (rs: Stream) => rs.int32()],
+	[Sint64, (rs: Stream) => rs.bigint64()],
+	[Float32, (rs: Stream) => rs.float()],
+	[Bool, (rs: Stream) => Boolean(rs.uint8())],
+	[String, (rs: Stream, length: number) => rs.string(length)],
 ]);
 
-const VALUE_WRITERS = new Map([
-	[Uint8, (buff, ...rest) => buff.writeUInt8(...rest)],
-	[Uint16, (buff, ...rest) => buff.writeUInt16(...rest)],
-	[Uint32, (buff, ...rest) => buff.writeUInt32LE(...rest)],
-	[Sint32, (buff, ...rest) => buff.writeInt32LE(...rest)],
-	[Sint64, (buff, ...rest) => buff.writeBigInt64LE(...rest)],
-	[Float32, (buff, ...rest) => buff.writeFloatLE(...rest)],
-	[Bool, (buff, value, ...rest) => buff.writeUInt8(Number(value), ...rest)],
-	[String, (buff, ...rest) => buff.write(...rest)],
+const VALUE_WRITERS = new Map<PropertyValueType, Function>([
+	[Uint8, (buff: WriteBuffer, value: byte) => buff.writeUInt8(value)],
+	[Uint16, (buff: WriteBuffer, value: uint16) => buff.writeUInt16LE(value)],
+	[Uint32, (buff: WriteBuffer, value: uint32) => buff.writeUInt32LE(value)],
+	[Sint32, (buff: WriteBuffer, value: sint32) => buff.writeInt32LE(value)],
+	[Sint64, (buff: WriteBuffer, value: sint64) => buff.writeBigInt64LE(value)],
+	[Float32, (buff: WriteBuffer, value: float) => buff.writeFloatLE(value)],
+	[Bool, (buff: WriteBuffer, value: boolean) => buff.writeUInt8(Number(value))],
+	[String, (buff: WriteBuffer, str: string) => buff.string(str)],
 ]);
 
 // # Exemplar()
 // See https://www.wiki.sc4devotion.com/index.php?title=EXMP for the spec.
-export class Exemplar {
-
-	static [Symbol.for('sc4.type')] = FileType.Exemplar;
-	id = 'EQZB1###';
-	parent = [0, 0, 0];
-	props = [];
-	#lotObjects;
+abstract class BaseExemplar {
+	id: ExemplarId = 'EQZB1###';
+	parent: TGIArray = [0, 0, 0];
+	props: Property[] = [];
+	#lotObjects: LotObject[];
+	#table: Map<number, Property> = new Map();
 
 	// ## constructor(data = {})
 	// Creates a new exemplar. Note that this should support copy-constructing.
-	constructor(data = {}) {
+	constructor(data: ExemplarOptions = {}) {
 		if (isUint8Array(data)) {
 			this.parse(data);
 			return;
@@ -90,7 +119,7 @@ export class Exemplar {
 		this.id = data.id || 'EQZB1###';
 		this.parent = data.parent || [0, 0, 0];
 		this.props = [...data.props || []].map(def => {
-			return isClone ? new Property(def) : def;
+			return isClone ? new Property(def) : def as Property;
 		});
 		Object.defineProperty(this, 'table', {
 			enumerable: false,
@@ -106,7 +135,8 @@ export class Exemplar {
 
 	// ## clone()
 	clone() {
-		return new Exemplar(this);
+		const Constructor = this.constructor as Class<BaseExemplar>;
+		return new Constructor(this);
 	}
 
 	// ## get fileType()
@@ -127,13 +157,13 @@ export class Exemplar {
 	// we'll use the objects instead of the raw values in the properties!
 	get lotObjects() {
 		if (this.#lotObjects) return this.#lotObjects;
-		const table = this.table;
+		const table = this.#table;
 		let i = ExemplarProperty.LotConfigPropertyLotObject;
 		let out = [];
-		let entry = table[i];
+		let entry = table.get(i);
 		while (entry) {
-			out.push(new LotObject(entry.value));
-			entry = table[++i];
+			out.push(new LotObject(entry.value as LotObjectArray));
+			entry = table.get(++i);
 		}
 		this.#lotObjects = out;
 		return out;
@@ -147,28 +177,30 @@ export class Exemplar {
 
 	// ## prop(key)
 	// Helper function for accessing a property.
-	prop(key) {
-		return this.table[ key ];
+	prop(key: number): Property | undefined {
+		return this.#table.get(key);
 	}
 
 	// ## value(key)
 	// Helper function for directly accessing the value of a property.
-	value(key) {
+	value(key: number) {
 		let prop = this.prop(key);
 		return prop ? prop.value : undefined;
 	}
 
 	// ## get(key)
 	// Alias for `value(key)`
-	get(key) {
+	get(key: number) {
 		return this.value(key);
 	}
 
 	// ## set(key, value)
 	// Updates the value of a rop by key.
-	set(key, value) {
+	set(key: number, value: PropertyValue) {
 		let prop = this.prop(key);
-		prop.value = value;
+		if (prop) {
+			prop.value = value;
+		}
 		return this;
 	}
 
@@ -176,7 +208,7 @@ export class Exemplar {
 	// Ensures that the value return is never an array. This is to handle cases 
 	// where properties that normally shouldn't be arrays, are still stored as 
 	// 1-element arrays in an examplar,
-	singleValue(key) {
+	singleValue(key: number): string | PropertyPrimitive | undefined {
 		let value = this.value(key);
 		return Array.isArray(value) ? value[0] : value;
 	}
@@ -185,7 +217,11 @@ export class Exemplar {
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 
 	// something specific.
-	addProperty(id, value, typeHint = Uint32) {
+	addProperty(
+		id: number,
+		value: PropertyValue,
+		typeHint: PropertyValueType = Uint32,
+	) {
 		let type;
 		if (typeof value === 'string') {
 			type = String;
@@ -202,15 +238,15 @@ export class Exemplar {
 			value,
 		});
 		this.props.push(prop);
-		this.table[prop.id] = prop;
+		this.#table.set(prop.id, prop);
 	}
 
 	// ## parse(bufferOrStream)
 	// Parses an exemplar file from a buffer.
-	parse(bufferOrStream) {
+	parse(bufferOrStream: Stream | Uint8Array) {
 
 		const rs = new Stream(bufferOrStream);
-		let id = this.id = rs.string(8);
+		let id = this.id = rs.string(8) as ExemplarId;
 
 		// Check the id's 4the byte. If this is "T", then we're reading in a 
 		// text exemplar. Otherwise we're reading a binary one. Can't find any 
@@ -229,7 +265,7 @@ export class Exemplar {
 		// Read all properties one by one.
 		const count = rs.uint32();
 		const props = this.props = new Array(count);
-		this.table = Object.create(null);
+		this.#table = Object.create(null);
 		for (let i = 0; i < count; i++) {
 			let prop = props[i] = new Property();
 			prop.parse(rs);
@@ -243,51 +279,29 @@ export class Exemplar {
 	}
 
 	// ## parseFromString(str)
-	parseFromString(str) {
-		let obj = parseString(str);
+	parseFromString(str: string) {
+		let obj = parseStringExemplar(str);
 		this.parent = obj.parent;
 		this.props = obj.props.map(def => {
-			let type = ({
-				Uint8,
-				Uint16,
-				Uint32,
-				Sint32,
-				Sint64,
-				Float32,
-				Bool,
-				String,
-			})[def.type];
 			return new Property({
 				id: def.id,
-				type,
+				type: def.type,
 				value: def.value,
 			});
 		});
 
 		// Create the property table as well.
 		this.createTable();
-
 		return this;
 	}
 
 	// ## createTable()
 	createTable() {
-		const table = this.table = Object.create(null);
+		const table = this.#table = new Map();
 		for (let prop of this.props) {
-			for (let name of ['id', 'name']) {
-				name = prop[name];
-				if (name in table) {
-					let arr = table[name];
-					if (!Array.isArray(arr)) {
-						table[name] = arr = [arr];
-						arr = [arr];
-					}
-					arr.push(prop);
-				} else {
-					table[name] = prop;
-				}
-			}
+			table.set(prop.id, prop);
 		}
+		return this;
 	}
 
 	// ## toBuffer()
@@ -333,23 +347,33 @@ export class Exemplar {
 
 }
 
+// # Exemplar
+export class Exemplar extends BaseExemplar {
+	static [kFileType] = FileType.Exemplar;
+	id: ExemplarId = 'EQZB1###';
+}
+
 // # Cohort
 // A cohort is a specific kind of exemplar. There are no differences, except for 
 // the type id and the id field.
-export class Cohort extends Exemplar {
-	static [Symbol.for('sc4.type')] = FileType.Cohort;
-	id = 'CQZB1###';
+export class Cohort extends BaseExemplar {
+	static [kFileType] = FileType.Cohort;
+	id: ExemplarId = 'CQZB1###';
 }
 
 // # Property()
 // Wrapper class around an Exemplar property.
 class Property {
 
+	id = 0x00000000;
+	type: PropertyValueType = Uint32Array;
+	value: PropertyValue;
+
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data = {}) {
+	constructor(data?: PropertyOptions) {
 		let isClone = data instanceof Property;
-		let { id = 0, type = Uint32Array, value } = data;
+		let { id = 0, type = Uint32Array, value = 0 } = data || {};
 		this.id = +id;
 		this.type = type;
 		this.value = isClone ? structuredClone(value) : value;
@@ -362,7 +386,7 @@ class Property {
 
 	// ## [Symbol.toPrimitive]()
 	// Casting the prop to a number will return the numeric value.
-	[Symbol.toPrimitive](hint) {
+	[Symbol.toPrimitive](hint: string) {
 		return hint === 'number' ? this.value : this.hex;
 	}
 
@@ -375,8 +399,8 @@ class Property {
 	}
 
 	// ## get hexType()
-	get hexType() {
-		return TYPE_TO_HEX.get(this.type);
+	get hexType(): number {
+		return TYPE_TO_HEX.get(this.type) as number;
 	}
 
 	// ## get keyType()
@@ -398,19 +422,18 @@ class Property {
 	get byteLength() {
 		let { type, value } = this;
 		let bytes = getByteLengthFromType(type);
-		return this.multiple ? (4 + value.length * bytes) : bytes;
+		return this.multiple ? (4 + (value as PropertyValue[]).length * bytes) : bytes;
 	}
 
 	// ## parse(rs)
 	// Parses the property from a buffer wrapped up in a stream object that 
 	// allows for easier reading.
-	parse(rs) {
-
-		this.id = rs.uint32();
+	parse(rs: Stream) {
 
 		// Parse value type & associated reader.
+		this.id = rs.uint32();
 		let nr = rs.uint16();
-		let type = this.type = HEX_TO_TYPE.get(nr);
+		let type = this.type = HEX_TO_TYPE.get(nr) as PropertyValueType;
 		let reader = VALUE_READERS.get(type);
 
 		// Parse key type.
@@ -418,7 +441,7 @@ class Property {
 
 		if (keyType === 0) {
 			void rs.uint8();
-			this.value = reader(rs);
+			this.value = reader!(rs);
 		} else if (keyType === 0x80) {
 			void rs.uint8();
 			let reps = rs.uint32();
@@ -431,7 +454,7 @@ class Property {
 			} else {
 				let values = this.value = new Array(reps);
 				for (let i = 0; i < reps; i++) {
-					values[i] = reader(rs);
+					values[i] = reader!(rs) as PropertyPrimitive;
 				}
 			}
 		}
@@ -473,10 +496,10 @@ class Property {
 			if (Array.isArray(value)) {
 				buff.writeUInt32LE(value.length);
 				for (let entry of value) {
-					writer(buff, entry);
+					writer!(buff, entry);
 				}
 			} else {
-				writer(buff, value);
+				writer!(buff, value);
 			}
 		}
 		return buff.toUint8Array();
@@ -489,12 +512,12 @@ class Property {
 
 		// The value to be inspected depends on the type.
 		let { type, value } = this;
-		let tf = x => x;
+		let tf = (x: any) => x;
 		switch (type) {
 			case Uint8:
 			case Uint16:
 			case Uint32:
-				tf = x => inspect.hex(x);
+				tf = (x: any) => inspect.hex(x);
 		}
 		value = Array.isArray(value) ? value.map(tf) : tf(value);
 		return {
@@ -505,187 +528,4 @@ class Property {
 		};
 	}
 
-}
-
-let val;
-function parseString(str) {
-	val = str;
-
-	// Read the parent cohort.
-	until('ParentCohort'); ws();
-	until('='); ws();
-	until(':'); ws();
-
-	let parent = [
-		readHex(),
-		readHex(),
-		readHex(),
-	];
-
-	// Next hex we find is the prop count.
-	const propCount = readHex();
-	until('\n');
-
-	let props = [];
-	for (let i = 0; i < propCount; i++) {
-		props.push(readProp());
-	}
-
-	return {
-		parent,
-		props,
-	};
-
-}
-
-function advance(n) {
-	val = val.slice(n);
-}
-
-function until(token) {
-	let index = val.indexOf(token);
-	advance(index+token.length);
-}
-
-// Consumes whitespace, but only if follows.
-const whitespaceRegex = /\s+/;
-function ws() {
-	let match = val.match(whitespaceRegex);
-	if (!match) return;
-	if (match.index === 0) {
-		advance(match[0].length);
-	}
-}
-
-const hexRegex = /0x[0-9a-f]+/i;
-function readHexString() {
-	let match = val.match(hexRegex);
-	if (!match) return undefined;
-	advance(match.index+match[0].length);
-	return match[0];
-}
-
-function readHex() {
-	let str = readHexString();
-	if (str === undefined) return undefined;
-	return Number(str);
-}
-
-// Reads in a single property line.
-function readProp() {
-
-	// Work on a per-line basis so that we never surpass a line and read stuff 
-	// from another property by accident.
-	let index = val.indexOf('\n');
-	let line = val.slice(0, index);
-	advance(index);
-
-	let temp = val;
-	val = line;
-
-	let id = readHex();
-	until(':');
-
-	// Read a potential comment.
-	ws();
-	let comment = readComment();
-
-	// Read the values.
-	until('=');
-
-	// Read the type.
-	index = val.indexOf(':');
-	let type = val.slice(0, index);
-	advance(index+1);
-
-	// Read the resp.
-	index = val.indexOf(':');
-	let reps = Number(val.slice(0, index));
-	advance(index+1);
-
-	let value = readValue(type, reps);
-
-	// Restore.
-	val = temp;
-
-	// Consume trailing whitespace.
-	ws();
-
-	return { id, comment, type, value };
-
-}
-
-const commentRegex = /^{"(.*)"}/;
-function readComment() {
-	let match = val.match(commentRegex);
-	if (!match) return;
-	return match[1];
-}
-
-const stringRegex = /{"(.*)"}/;
-function readValue(type, reps) {
-	if (type === 'String') {
-		let match = val.match(stringRegex);
-		advance(match.index+match[0].length);
-		return match[1];
-	}
-
-	if (reps === 0) {
-		return readSingleValue(type);
-	} else {
-		let out = [];
-		for (let i = 0; i < reps; i++) {
-			out.push(readSingleValue(type));
-		}
-		return out;
-	}
-
-}
-
-function readSingleValue(type) {
-	switch (type) {
-		case 'Uint32':
-		case 'Uint16':
-		case 'Uint8':
-			return readHex();
-		case 'Float32':
-			return readFloat();
-		case 'Sint64':
-			return readBigInt();
-		case 'Sint32':
-			return readInt32();
-		case 'Bool':
-			return readBoolean();
-		default:
-			throw new Error('Unknown type "'+type+'"!');
-	}
-}
-
-const floatRegex = /([+-]?\d+(\.\d+)?)/;
-function readFloat(type) {
-	let match = val.match(floatRegex);
-	if (!match) return undefined;
-	advance(match.index + match[0].length);
-	return Number(match[1]);
-}
-
-function readBigInt() {
-	let hex = readHexString();
-	if (hex === undefined) return undefined;
-	return Number(hex);
-}
-
-function readInt32() {
-	let hex = readHexString();
-	if (hex === undefined) return undefined;
-	if (typeof BigInt === 'undefined') return +hex;
-	return BigInt(hex);
-}
-
-const boolRegex = /(true|false)/i;
-function readBoolean() {
-	let match = val.match(boolRegex);
-	if (!match) return undefined;
-	advance(match.index + match[0].length);
-	return String(match[0]).toLowerCase() === 'true';
 }
