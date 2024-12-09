@@ -5,7 +5,7 @@ import type { TypeIdToEntry, TypeIdToReadResult } from './dbpf-entry.js';
 import type { DecodedFileTypeId, SimGridFileType } from './types.js';
 import type TerrainMap from './terrain-map.js';
 import { kFileTypeArray } from './symbols.js';
-import { getConstructorByType } from './helpers.js';
+import { getConstructorByType } from './file-classes-helpers.js';
 import { type SimGrid } from './enums.js';
 import type {
 	SimGridFloat32,

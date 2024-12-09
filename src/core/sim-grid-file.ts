@@ -1,4 +1,4 @@
-// # sim-grid.js
+// # sim-grid.ts
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
