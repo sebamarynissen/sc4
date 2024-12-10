@@ -4,7 +4,8 @@ import type { ConstructorOptions, MinLengthArray, uint32 } from 'sc4/types';
 import { inspect } from 'sc4/utils';
 import type { ValueOf } from 'type-fest';
 
-export type LotObjectArray = MinLengthArray<uint32, 12>;
+export type LotObjectTypeId = ValueOf<typeof LotObjectType>;
+export type LotObjectArray = [LotObjectTypeId, ...MinLengthArray<uint32, 11>];
 export type LotObjectOptions = ConstructorOptions<LotObject> | LotObjectArray;
 
 const LotObjectType = {
@@ -64,11 +65,8 @@ export default class LotObject {
 
 			// IMPORTANT! If this is a network node, then we read the network 
 			// connection type and RULs as well.
-			let IID;
 			if (type === LotObjectType.Network) {
-				[this.networkType, this.RUL1, this.RUL2, IID] = rest;
-			} else {
-				[IID, ...rest] = rest;
+				[this.networkType, this.RUL1, this.RUL2, ...rest] = rest;
 			}
 			Object.assign(this, {
 				type,
@@ -83,7 +81,7 @@ export default class LotObject {
 				maxZ: 16*signed(maxZ)/scale,
 				usage,
 				OID,
-				IIDs: [IID, ...rest],
+				IIDs: rest,
 			});
 		} else {
 			const { IID, ...rest } = config;
@@ -96,7 +94,7 @@ export default class LotObject {
 
 	// ## IID()
 	// Returns the 
-	get IID() {
+	get IID(): number | undefined {
 		return this.IIDs[0];
 	}
 
@@ -109,7 +107,7 @@ export default class LotObject {
 			x, y, z, minX, minZ, maxX, maxZ,
 			usage, OID, IIDs,
 		} = this;
-		return [
+		let base: LotObjectArray = [
 			type,
 			lod,
 			orientation,
@@ -122,8 +120,13 @@ export default class LotObject {
 			uint(scale*maxZ/16),
 			usage,
 			OID,
-			...IIDs,
 		];
+		if (this.type === LotObjectType.Network) {
+			base.push(this.networkType, this.RUL1, this.RUL2, ...IIDs);
+		} else {
+			base.push(...IIDs);
+		}
+		return base;
 	}
 
 	// ## [inspect.symbol]()
