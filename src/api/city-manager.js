@@ -739,8 +739,8 @@ function orient([x, y], lot, opts = {}) {
 		return [x, y];
 	} else {
 		return [
-			16*(lot.minX + x),
-			16*(lot.minZ + y),
+			16*lot.minX + x,
+			16*lot.minZ + y,
 		];
 	}
 

@@ -52,7 +52,7 @@ export default class DependencyTracker {
 	plugins: folder | undefined = '';
 	installation: folder | undefined = '';
 	logger: Logger | undefined;
-	index: PluginIndex | null = null;
+	index: PluginIndex;
 	packages: PackageIndex | null = null;
 	options: DependencyTrackerOptions = {};
 	private [kIndex]?: Promise<any>;
@@ -213,7 +213,7 @@ class DependencyTrackingContext {
 	// ## constructor(tracker, files)
 	constructor(tracker: DependencyTracker, files: string[]) {
 		this.tracker = tracker;
-		this.index = tracker.index!;
+		this.index = tracker.index;
 		this.files = files;
 	}
 
@@ -619,6 +619,9 @@ class DependencyTrackingContext {
 
 // # DependencyTrackingResult
 // Small class for representing a dependency tracking result.
+type DependencyTrackingResultDumpOptions = {
+	format?: string;
+};
 class DependencyTrackingResult {
 	installation: folder;
 	plugins: folder;
@@ -633,7 +636,7 @@ class DependencyTrackingResult {
 	constructor(ctx: DependencyTrackingContext) {
 
 		// Report the installation & plugins folder that we scanned.
-		const { installation, plugins } = ctx.tracker.index!.options;
+		const { installation, plugins } = ctx.tracker.index.options;
 		this.installation = installation as string;
 		this.plugins = plugins as string;
 
@@ -676,7 +679,7 @@ class DependencyTrackingResult {
 	// ## dump(opts)
 	// Creates a nice human-readable dump of the result. Various formats are 
 	// possible.
-	dump({ format = 'sc4pac' } = {}) {
+	dump({ format = 'sc4pac' }: DependencyTrackingResultDumpOptions = {}) {
 
 		// Show the installation and plugins folder.
 		const { bold, cyan, red } = chalk;

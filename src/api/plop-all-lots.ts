@@ -17,14 +17,16 @@ type PlopAllLotsOptions = {
 	plugins?: folder;
 	logger?: any;
 	random?: number | boolean;
-	city: string;
+	city: Savegame | string;
 	clear?: boolean;
 	bbox?: [number, number, number, number];
 	save?: boolean;
 	backup?: Function;
 	output?: string;
 };
-export default async function plopAllLots(opts: PlopAllLotsOptions) {
+export default async function plopAllLots(opts: PlopAllLotsOptions)
+	: Promise<Savegame | false>
+{
 
 	// First thing we'll do is looking up all lot files with a file scanner.
 	let {
@@ -53,7 +55,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions) {
 	logger?.step('Building plugin index...');
 	const { installation, plugins } = opts;
 	const index = new PluginIndex({ installation, plugins });
-	await index.build();
+	await index.build({  });
 	logger?.progress('Indexing building & prop families...');
 	await index.buildFamilies();
 	logger?.succeed('Plugin index built');
