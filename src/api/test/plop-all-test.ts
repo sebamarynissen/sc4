@@ -16,6 +16,7 @@ describe('The plopall api function', function() {
 			city,
 			lots: '*.SC4Lot',
 			directory: diego,
+			plugins: diego,
 			save: false,
 			bbox: [16, 2, 32, 32],
 		}) as Savegame;

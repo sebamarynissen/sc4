@@ -3,6 +3,7 @@ import shuffle from 'knuth-shuffle-seeded';
 import { DBPF, Exemplar, Savegame } from 'sc4/core';
 import { PluginIndex, FileScanner } from 'sc4/plugins';
 import CityManager from './city-manager.js';
+import type { Logger } from 'sc4/types';
 
 const LotConfigPropertySize = 0x88edc790;
 
@@ -15,7 +16,7 @@ type PlopAllLotsOptions = {
 	directory?: folder;
 	installation?: folder;
 	plugins?: folder;
-	logger?: any;
+	logger?: Logger;
 	random?: number | boolean;
 	city: Savegame | string;
 	clear?: boolean;
@@ -83,7 +84,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 			let pos = findPosition(city, exemplar, bbox);
 			if (!pos) {
 				let name = exemplar.value(0x20);
-				logger.warn(`Unable to find a suitable position for ${name}`);
+				logger?.warn(`Unable to find a suitable position for ${name}`);
 				continue;
 			}
 			let { x, z, orientation } = pos;
