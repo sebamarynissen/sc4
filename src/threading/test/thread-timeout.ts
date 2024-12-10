@@ -1,4 +1,4 @@
-// # thread-timeout.js
+// # thread-timeout.ts
 import { thread } from 'sc4/threading';
 
 thread(({ nr, max = 20 }) => new Promise(cb => {

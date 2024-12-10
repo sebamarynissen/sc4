@@ -8,7 +8,7 @@ import { uint8ArrayToString } from 'uint8array-extras';
 
 // # logUsage()
 // Helper function for logging the current usage of a worker pool.
-function logUsage(pool) {
+function logUsage(pool: WorkerPool) {
 	return pool.getUsage().map(n => {
 		let color = ['gray', 'cyan', 'green', 'yellow', 'red', 'magentaBright'][n] || 'magenta';
 		return chalk[color](n);
@@ -16,7 +16,7 @@ function logUsage(pool) {
 	// console.log(usage);
 }
 
-describe('A worker pool', function(argument) {
+describe('A worker pool', function() {
 
 	this.slow(1000);
 
@@ -26,14 +26,14 @@ describe('A worker pool', function(argument) {
 			n: 1,
 			url: import.meta.resolve('./thread-timeout.js'),
 		});
-		let tasks = [];
+		let tasks: Promise<any>[] = [];
 		for (let i = 0; i < 32; i++) {
 			let task = pool.run({ nr: i, max: 20 });
 			tasks.push(task);
 		}
 		let result = await Promise.all(tasks);
 		pool.close();
-		expect(result).to.eql(Array(32).fill().map((_, i) => i));
+		expect(result).to.eql(Array(32).fill(0).map((_, i) => i));
 
 	});
 
@@ -50,7 +50,7 @@ describe('A worker pool', function(argument) {
 		});
 
 		let pool = new WorkerPool({ script: uint8ArrayToString(bundle) });
-		let tasks = [];
+		let tasks: Promise<any>[] = [];
 		let n = 64;
 		for (let i = 0; i < n; i++) {
 			let task = pool.run({ nr: i })
@@ -62,7 +62,7 @@ describe('A worker pool', function(argument) {
 		}
 		let result = await Promise.all(tasks);
 		pool.close();
-		expect(result).to.eql(Array(n).fill().map((_, i) => i));
+		expect(result).to.eql(Array(n).fill(0).map((_, i) => i));
 
 	});
 
