@@ -27,7 +27,7 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "test": "mocha src/**/*-test.js src/**/*-test.ts",
+    "test": "npm run typecheck && mocha src/**/*-test.js src/**/*-test.ts",
     "prebuild": "rimraf lib",
     "typecheck": "tsc --noEmit",
     "build": "tsc && copyfiles -u 1 src/cli/assets/* lib",
