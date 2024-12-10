@@ -1,7 +1,7 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
-import type { uint32, TGILiteral } from 'sc4/types';
+import type { uint32, TGILiteral, TGIArray } from 'sc4/types';
 import type { Class, Constructor } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
@@ -158,7 +158,7 @@ export default class Entry {
 	}
 
 	// ## get tgi()
-	get tgi() { return [this.type, this.group, this.instance]; }
+	get tgi(): TGIArray { return [this.type, this.group, this.instance]; }
 	set tgi(tgi: [uint32, uint32, uint32] | TGILiteral) {
 		if (Array.isArray(tgi)) {
 			[this.type, this.group, this.instance] = tgi;

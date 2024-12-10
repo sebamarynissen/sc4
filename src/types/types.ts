@@ -38,3 +38,16 @@ export type ConstructorOptions<T> = Omit<
 >;
 
 export type MinLengthArray<T, N extends number, R extends T[] = []> = R['length'] extends N ? [...R, ...T[]] : MinLengthArray<T, N, [T, ...R]>;
+
+// General logger type.
+export type Logger = {
+	ok: (...args: any[]) => any,
+	error: (...args: any[]) => any,
+	warn: (...args: any[]) => any,
+	info: (...args: any[]) => any,
+	log: (...args: any[]) => any,
+	step: (text: string) => any,
+	progress: (text: string) => any,
+	succeed: (text: string) => any,
+	fail: (text: string) => any,
+};

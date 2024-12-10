@@ -12,7 +12,7 @@ import * as Dep from './dependency-types.js';
 import type Entry from 'src/core/dbpf-entry.js';
 import type { EntryWithReadResult } from 'src/core/dbpf-entry.js';
 import type { DecodedFileTypeId, FileTypeId } from 'src/core/types.js';
-import type { TGIQuery } from 'sc4/types';
+import type { Logger, TGIQuery } from 'sc4/types';
 
 // Constants
 const LotConfigurations = 0x00000010;
@@ -34,7 +34,6 @@ const kIndex = Symbol('index');
 const kPackageIndex = Symbol('packageIndex');
 
 type folder = string;
-type Logger = any;
 type DependencyTrackerOptions = {
 	plugins?: folder;
 	installation?: folder;

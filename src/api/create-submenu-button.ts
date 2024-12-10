@@ -1,6 +1,7 @@
-// # create-submenu-button.js
+// # create-submenu-button.ts
 import { fs, path, randomId, hex } from 'sc4/utils';
 import { DBPF, Exemplar, LTEXT, FileType, OccupantGroups } from 'sc4/core';
+import type { Logger } from 'sc4/types';
 const Props = {
 	ExemplarType: 0x10,
 	ExemplarName: 0x20,
@@ -19,9 +20,24 @@ const Groups = {
 	Icon: 0x6a386d26,
 };
 
+type createSubmenuButtonOptions = {
+	name: string;
+	description?: string;
+	buttonId?: number;
+	icon: Uint8Array | string;
+	parent: number;
+	logger?: Logger;
+	save: boolean;
+	order?: number;
+	directory?: string;
+	output?: string;
+};
+
 // # creatSubmenuButton(opts)
 // Generates a .dat file that adds a submenu button to another menu.
-export default async function createSubmenuButton(opts) {
+export default async function createSubmenuButton(
+	opts: createSubmenuButtonOptions,
+) {
 
 	let {
 		name,

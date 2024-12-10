@@ -3,6 +3,7 @@ import { fs, path } from 'sc4/utils';
 import chalk from 'chalk';
 import { Glob } from 'glob';
 import { DBPF, Cohort, FileType } from 'sc4/core';
+import type { Logger } from 'sc4/types';
 
 // # random()
 // Returns a random number between 0x00000001 and 0xffffffff. Useful for 
@@ -11,8 +12,21 @@ function random() {
 	return Math.floor(Math.random() * 0xffffffff) + 1;
 }
 
+type CreateMenuPatchOptions = {
+	save?: boolean;
+	logger?: Logger;
+	output?: string;
+	directory?: string;
+	instance?: number | undefined;
+	recursive?: boolean;
+};
+
 // # createMenuPatch(menu, globsOrFiles, options = {})
-export default async function createMenuPatch(menu, globsOrFiles, options = {}) {
+export default async function createMenuPatch(
+	menu: number,
+	globsOrFiles: string[],
+	options: CreateMenuPatchOptions = {},
+) {
 
 	// We'll first find the files to read in. This is a bit complicated because 
 	// we support both globbing, or specifying files and directories explicitly.
@@ -20,7 +34,7 @@ export default async function createMenuPatch(menu, globsOrFiles, options = {}) 
 		directory = process.cwd(),
 		recursive = false,
 	} = options;
-	let files = new Set();
+	let files = new Set<string>();
 	for (let pattern of globsOrFiles) {
 		let fullPath = path.resolve(directory, pattern);
 		if (fs.existsSync(fullPath)) {
@@ -105,9 +119,9 @@ export default async function createMenuPatch(menu, globsOrFiles, options = {}) 
 // might actually be stored in a parent cohort. We'll hence look for the 
 // LotResourceKey, which is more or less guaranteed to not be stored in a parent 
 // cohort - though it technically could be.
-function collect(dbpf, logger) {
+function collect(dbpf: DBPF, logger?: Logger) {
 	let gis = [];
-	let entries = dbpf.entries.filter(entry => entry.type === FileType.Exemplar);
+	let entries = dbpf.findAll({ type: FileType.Exemplar });
 	for (let entry of entries) {
 		
 		// Check if the LotResourceKey exists.
@@ -122,8 +136,8 @@ function collect(dbpf, logger) {
 			gis.push(group, instance);
 
 			// In this case we'll also log the name of the lot we're adding.
-			let nameProp = ex.props.find(prop => prop.id === 0x20) || {};
-			let name = nameProp.value || 'Lot without a name';
+			let nameProp = ex.props.find(prop => prop.id === 0x20);
+			let name = nameProp?.value || 'Lot without a name';
 			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
 		} catch (e) {
 			logger?.warn(`Failed to parse exemplar ${entry.id} from ${dbpf.file}: ${e.message}`);
