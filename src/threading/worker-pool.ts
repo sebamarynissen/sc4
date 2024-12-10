@@ -5,7 +5,7 @@ import { Worker } from 'node:worker_threads';
 import os from 'node:os';
 import type { StructuredCloneable } from 'type-fest';
 
-type WorkerPoolOptions = {
+export type WorkerPoolOptions = {
 	url?: string | URL;
 	n?: number;
 	script?: string | null;

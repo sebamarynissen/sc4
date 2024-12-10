@@ -1,9 +1,23 @@
 // # dbpf-header.js
-import type { ConstructorOptions } from 'sc4/types';
 import WriteBuffer from './write-buffer.js';
 import type Stream from './stream.js';
 
-export type HeaderOptions = Omit<ConstructorOptions<Header>, 'id'>;
+export type HeaderOptions = {
+	id?: string;
+	majorVersion?: 1;
+	minorVersion?: 0;
+	created?: Date | string;
+	modified?: Date | string;
+	indexMajor?: number;
+	indexCount?: number;
+	indexOffset?: number;
+	indexSize?: number;
+	holesCount?: number;
+	holesOffset?: number;
+	holesSize?: number;
+	indexMinor?: number;
+};
+export type HeaderJSON = Required<HeaderOptions>;
 
 // # Header
 export default class Header {

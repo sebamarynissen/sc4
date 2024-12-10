@@ -1,8 +1,8 @@
 // # dbpf.js
 import { compress } from 'qfs-compression';
 import { concatUint8Arrays, isUint8Array, uint8ArrayToHex } from 'uint8array-extras';
-import Header, { type HeaderOptions } from './dbpf-header.js';
-import Entry, { type TypeIdToEntry } from './dbpf-entry.js';
+import Header, { type HeaderJSON, type HeaderOptions } from './dbpf-header.js';
+import Entry, { type EntryJSON, type TypeIdToEntry } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
@@ -24,6 +24,12 @@ export type DBPFOptions = {
 
 export type DBPFSaveOptions = string | {
 	file?: string;
+};
+
+export type DBPFJSON = {
+	file: string;
+	header: HeaderJSON;
+	entries: EntryJSON;
 };
 
 // # DBPF()

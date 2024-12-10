@@ -1,16 +1,23 @@
 // # tgi-index.ts
-import type { TGIQuery, TGILiteral, uint32 } from 'sc4/types';
+import type { TGIQuery, TGILiteral, uint32, TGIArray } from 'sc4/types';
 
 export type { TGIQuery, TGILiteral };
 export type SingleResult<T> = T | undefined;
 export type ArrayResult<T> = T[];
 export type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => entry is T;
-export type FindArg<T> = number | TGIQuery | TGIPredicate<T>;
 
 export type FindParameters<T> =
 	| [type: uint32, group: uint32, instance: uint32]
 	| [query: TGIQuery]
+	| [query: TGIArray]
 	| [predicate: TGIPredicate<T>, thisArg?: any];
+
+export type TGIIndexJSON = {
+	tgi: [IndexKey, IndexValue][];
+	ti: [IndexKey, IndexValue][];
+	t: [IndexKey, IndexValue][];
+	i: [IndexKey, IndexValue][];
+};
 
 // # TGIIndex
 // A data structure that allows for efficiently querying objects by (type, 
@@ -41,16 +48,10 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// ## find(type, group, instance)
 	find(type: number, group: number, instance: number): SingleResult<T>;
 	find(query: TGIQuery): SingleResult<T>;
+	find(query: TGIArray): SingleResult<T>;
 	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
-	find(query: FindParameters<T>[0], g?: FindParameters<T>[1], i?: FindParameters<T>[2]): SingleResult<T> {
-		let result;
-		if (typeof query === 'number') {
-			result = this.findAll(query, g, i!);
-		} else if (typeof query === 'function') {
-			result = this.findAll(query, g);
-		} else {
-			result = this.findAll(query);
-		}
+	find(...args: FindParameters<T>): SingleResult<T> {
+		let result = this.findAll(...args as Parameters<TGIIndex<T>['findAll']>);
 		return result.at(-1);
 	}
 
@@ -61,8 +62,9 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// index, which is fine in edge cases.
 	findAll(type: number, group: number, instance: number): ArrayResult<T>;
 	findAll(query: TGIQuery): ArrayResult<T>;
+	findAll(query: TGIArray): ArrayResult<T>;
 	findAll(predicate: TGIPredicate<T>, thisArg?: any): ArrayResult<T>;
-	findAll(query: FindArg<T>, group?: number | any, instance?: number): ArrayResult<T> {
+	findAll(query: FindParameters<T>[0], group?: number | any, instance?: number): ArrayResult<T> {
 
 		// If the query is specified as a function, use it as such.
 		if (typeof query === 'function') {
@@ -118,8 +120,9 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// in which case it's acceptable that it's a little slower.
 	remove(fn: TGIPredicate<T>): number;
 	remove(query: TGIQuery): number;
+	remove(query: TGIArray): number;
 	remove(type: number, group: number, instance: number) : number;
-	remove(query: FindArg<T>, g?: number, i?: number): number {
+	remove(query: FindParameters<T>[0], g?: number, i?: number): number {
 		let removed;
 		if (typeof query === 'function') {
 			removed = filterInPlace<T>(this, query);
@@ -208,7 +211,7 @@ export class Index<T extends TGILiteral> {
 	}
 
 	// ## toJSON()
-	toJSON() {
+	toJSON(): TGIIndexJSON {
 		return {
 			tgi: [...this.tgi.entries()],
 			ti: [...this.ti.entries()],

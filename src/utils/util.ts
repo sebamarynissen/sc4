@@ -86,15 +86,15 @@ export const inspect = {
 			},
 		};
 	},
-	tgi(object: TGILiteral, label?: string) {
+	tgi(object: Partial<TGILiteral>, label?: string) {
 		return {
 			[kInspect](_depth: number, opts: InspectOptionsStylized, nodeInspect: Function) {
 				if (!object) return object;
 				let prefix = label ? `${label} ` : '';
 				return `${prefix}${nodeInspect({
-					type: inspect.hex(object.type),
-					group: inspect.hex(object.group),
-					instance: inspect.hex(object.instance),
+					type: object.type && inspect.hex(object.type),
+					group: object.group && inspect.hex(object.group),
+					instance: object.instance && inspect.hex(object.instance),
 				}, opts)}`;
 			},
 		};

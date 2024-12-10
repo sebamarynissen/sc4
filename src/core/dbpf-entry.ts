@@ -51,7 +51,7 @@ interface EntryOfPossibleArrayType<T extends File> extends Entry {
 
 // The interface where the magic happens of narrowing down the return type of 
 // the read() function.
-interface EntryWithReadResult<T extends File | File[]> extends Entry {
+export interface EntryWithReadResult<T extends File | File[]> extends Entry {
 	read(): T;
 	readAsync(): Promise<T>;
 	file: T | null;
@@ -61,6 +61,16 @@ interface EntryWithReadResult<T extends File | File[]> extends Entry {
 // automatically infer the return type of an entry.
 export type TypeIdToEntry<T extends DecodedFileTypeId> =
 	EntryWithReadResult<TypeIdToReadResult<T>>;
+
+export type EntryJSON = {
+	type: uint32;
+	group: uint32;
+	instance: uint32;
+	fileSize: number;
+	compressedSize: number;
+	offset: number;
+	compressed: boolean;
+};
 
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
@@ -305,7 +315,7 @@ export default class Entry {
 	// ## toJSON()
 	// Serializes the dbpf entry to json so that we can pass it around between 
 	// threads.
-	toJSON() {
+	toJSON(): EntryJSON {
 		let {
 			type,
 			group,

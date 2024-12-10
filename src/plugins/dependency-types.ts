@@ -2,19 +2,42 @@
 import chalk from 'chalk';
 import path from 'node:path';
 import { util, inspect, hex } from 'sc4/utils';
-import { LotObjectType, FileType } from 'sc4/core';
+import { LotObjectType } from 'sc4/core';
+import { getTypeLabel } from 'src/core/helpers.js';
+import type { InspectOptions } from 'node:util';
+import type Entry from 'src/core/dbpf-entry.js';
 
 const DEFAULT_WIDTH = 150;
 
+type EntryLike = Entry | {
+	type?: number;
+	group?: number;
+	instance: number;
+	id?: string;
+	dbpf?: {
+		file?: string;
+	};
+};
+type DependencyOptions = {
+	entry: EntryLike;
+};
+type ToLinesOptions = {
+	width?: number;
+	level?: number;
+	root?: boolean;
+};
+
 // # Dependency
-class Dependency {
-	entry = null;
-	constructor({ entry }) {
+export abstract class Dependency {
+	entry: EntryLike;
+	abstract kind: string;
+	constructor({ entry }: DependencyOptions) {
 		this.entry = entry;
 	}
 	toString(opts = {}) {
 		return this.toLines(opts).join('\n');
 	}
+	abstract toLines(...args: any[]): string[];
 
 	// ## get id()
 	// The default dependency id is just the entry id. This is overridden though 
@@ -27,7 +50,7 @@ class Dependency {
 	// ## get children()
 	// By default a dependency has no children. If a dependency has cildren, it 
 	// needs to implement it itself.
-	get children() {
+	get children(): Dependency[] {
 		return [];
 	}
 
@@ -38,15 +61,15 @@ class Dependency {
 export class Lot extends Dependency {
 	kind = 'lot';
 	name = '';
-	foundation = null;
-	building = null;
-	textures = [];
-	props = [];
-	flora = [];
-	parent = null;
+	foundation: Dependency | null = null;
+	building: Dependency | null = null;
+	textures: Dependency[] = [];
+	props: Dependency[] = [];
+	flora: Dependency[] = [];
+	parent: Dependency | null = null;
 
 	// ## constructor(opts)
-	constructor(opts) {
+	constructor(opts: DependencyOptions & { name: string }) {
 		super(opts);
 		Object.assign(this, opts);
 	}
@@ -63,11 +86,11 @@ export class Lot extends Dependency {
 			...this.props,
 			...this.flora,
 			this.parent,
-		].flat(1).filter(Boolean);
+		].flat(1).filter(dep => !!dep);
 	}
 
 	// ## toLines()
-	toLines(opts = {}) {
+	toLines(opts: ToLinesOptions = {}) {
 		let { width = DEFAULT_WIDTH, level = 0, root = true } = opts;
 		let lines = [];
 		let { name, entry } = this;
@@ -78,7 +101,7 @@ export class Lot extends Dependency {
 			$(
 				width,
 				`${' '.repeat(2*level)}${name} ${entryToString(entry)}`,
-				entry.dbpf.file,
+				entry.dbpf?.file,
 			),
 		);
 		let { foundation, building, textures, props, flora, parent } = this;
@@ -90,10 +113,12 @@ export class Lot extends Dependency {
 				...foundation.toLines({ width, level, root: false }),
 			);
 		}
-		lines.push(
-			`${s}${chalk.green('Building')}`,
-			...building.toLines({ width, level, root: false }),
-		);
+		if (building) {
+			lines.push(
+				`${s}${chalk.green('Building')}`,
+				...building.toLines({ width, level, root: false }),
+			);
+		}
 		if (textures.length > 0) {
 			lines.push(`${s}${chalk.green('Textures')}`);
 			for (let texture of textures) {
@@ -122,7 +147,11 @@ export class Lot extends Dependency {
 		return lines;
 	}
 
-	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](
+		_level: number,
+		opts: InspectOptions,
+		nodeInspect: Function
+	) {
 		let { entry, ...rest } = this;
 		return `Lot ${nodeInspect({
 			entry: inspect.tgi(entry, 'Entry'),
@@ -134,22 +163,24 @@ export class Lot extends Dependency {
 // # getLotSetter(lot, type)
 // Returns a setter that allows us to set a specific lot object in a deferred 
 // way - i.e. further up the event loop.
-export const getLotSetter = (lot, type) => {
+export const getLotSetter = (lot: Lot, type: number) => {
 	switch (type) {
 		case LotObjectType.Building:
-			return object => lot.building = object;
+			return (object: Dependency) => lot.building = object;
 		case LotObjectType.Texture:
 			return getArraySetter(lot.textures);
 		case LotObjectType.Prop:
 			return getArraySetter(lot.props);
 		case LotObjectType.Flora:
 			return getArraySetter(lot.flora);
+		default:
+			return () => void null;
 	}
 };
 
 // # getArraySetter(array)
-const getArraySetter = array => {
-	return dep => {
+const getArraySetter = (array: Dependency[]) => {
+	return (dep: Dependency) => {
 		let ids = new Set(array.map(dep => dep.id));
 		if (!ids.has(dep.id)) {
 			array.push(dep);
@@ -163,20 +194,28 @@ const getArraySetter = array => {
 // Represents a family in the dependency tree. Note that this could be a 
 // building, prop or flora family, but we don't make an explicit distinction 
 // here.
-export class Family extends Array {
-
+export class Family extends Dependency {
 	kind = 'family';
-	familyId;
+	familyId: number | undefined;
+	elements: Dependency[];
+
+	// ## constructor(id, children)
+	constructor(children: Dependency[], id?: number) {
+		let entry = { instance: id ?? 0 };
+		super({ entry });
+		this.elements = children;
+		this.familyId = id;
+	}
 
 	// ## toLines()
-	toLines({ width, level }) {
+	toLines({ width, level = 0 }: ToLinesOptions) {
 		let line = `${' '.repeat(2*level)}${chalk.green('Family')}`;
 		if (this.familyId !== undefined) {
 			line += ` ${chalk.yellow(hex(this.familyId))}`;
 		}
 		let lines = [line];
 		level += 1;
-		for (let dep of this) {
+		for (let dep of this.elements) {
 			lines.push(...dep.toLines({ width, level, root: false }));
 		}
 		return lines;
@@ -184,13 +223,15 @@ export class Family extends Array {
 
 	// ## get id()
 	get id() {
-		let id = this.familyId ?? [...this].map(dep => dep.id).join('/');
+		let id = this.familyId ?? [...this.elements]
+			.map(dep => dep.id)
+			.join('/');
 		return `family/${id}`;
 	}
 
 	// ## get children()
 	get children() {
-		return [...this];
+		return this.elements;
 	}
 
 }
@@ -199,16 +240,16 @@ export class Family extends Array {
 // Represents a texture in the dependency tree.
 export class Texture extends Dependency {
 	kind = 'texture';
-	toLines({ width = DEFAULT_WIDTH, level = 0, root = true }) {
+	toLines({ width = DEFAULT_WIDTH, level = 0, root = true }: ToLinesOptions) {
 		let s = ' '.repeat(2*level);
 		let l = root ? chalk.magenta('Texture ') : '';
 		return [$(
 			width,
 			`${s}${l}${chalk.yellow(hex(this.entry.instance))}`,
-			this.entry.dbpf.file,
+			this.entry.dbpf?.file,
 		)];
 	}
-	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return inspect.tgi(this.entry, 'Texture');
 	}
 }
@@ -225,12 +266,12 @@ export class Model extends Dependency {
 		lines.push($(
 			width,
 			`${' '.repeat(2*level)}Model ${entryToString(entry)}`,
-			entry.dbpf.file,
+			entry.dbpf?.file,
 		));
 		return lines;
 	}
 
-	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return inspect.tgi(this.entry, 'Model');
 	}
 }
@@ -278,15 +319,17 @@ const exemplarTypes = {
 // # Exemplar
 // Represents a generic exemplar in the dependency tree. This could be a 
 // building exemplar, prop exemplar, whatever.
+export type ExemplarProp = [name: string, dep: Dependency];
 export class Exemplar extends Dependency {
-	kind = 0x00;
+	kind = 'exemplar';
+	exemplarType: keyof typeof exemplarTypes = 0x00;
 	name = '';
-	parent = null;
-	models = [];
-	props = [];
+	parent: Dependency | null = null;
+	models: Dependency[] = [];
+	props: ExemplarProp[] = [];
 
 	// ## constructor(opts)
-	constructor(opts) {
+	constructor(opts: DependencyOptions & { exemplarType: number; name: string }) {
 		super(opts);
 		Object.assign(this, opts);
 	}
@@ -294,10 +337,10 @@ export class Exemplar extends Dependency {
 	// ## get children()
 	get children() {
 		return [
-			this.model,
+			...this.models,
 			this.parent,
-			...this.props.map(row => row[0]),
-		].filter(Boolean);
+			...this.props.map(row => (row as ExemplarProp)[1]),
+		].filter(dep => !!dep);
 	}
 
 	// ## toLines(opts)
@@ -305,13 +348,13 @@ export class Exemplar extends Dependency {
 		let lines = [];
 		let { name, entry } = this;
 		if (root) {
-			let type = exemplarTypes[this.kind];
+			let type = exemplarTypes[this.exemplarType];
 			lines.push(`${chalk.magenta('Exemplar')} ${chalk.gray(`(${type})`)}`);
 		}
 		lines.push($(
 			width,
 			`${' '.repeat(2*level)}${name} ${entryToString(entry)}`,
-			entry.dbpf.file,
+			entry.dbpf?.file,
 		));
 		if (this.models.length > 0) {
 			for (let model of this.models) {
@@ -333,7 +376,11 @@ export class Exemplar extends Dependency {
 		return lines;
 	}
 
-	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')](
+		_level: number,
+		opts: InspectOptions,
+		nodeInspect: any,
+	) {
 		let { entry, ...rest } = this;
 		return `Exemplar ${nodeInspect({
 			entry: inspect.tgi(entry, 'Entry'),
@@ -349,19 +396,18 @@ export class Exemplar extends Dependency {
 export class Raw extends Dependency {
 	kind = 'raw';
 	get label() {
-		return FileType[this.entry.type];
+		return getTypeLabel(this.entry.type!);
 	}
 
-	toLines({ level, width = DEFAULT_WIDTH, root = true } = {}) {
-		let { type } = this.entry;
-		let line = chalk.yellow(FileType[type] ?? hex(this.entry.type));
+	toLines({ width = DEFAULT_WIDTH, root = true }: ToLinesOptions = {}) {
+		let line = chalk.yellow(this.label ?? hex(this.entry.type!));
 		if (root) {
 			line = `${chalk.magenta('Raw')} ${line}`;
 		}
-		return [$(width, line, this.entry.dbpf.file)];
+		return [$(width, line, this.entry.dbpf?.file)];
 	}
 
-	[Symbol.for('nodejs.util.inspect.custom')](level, opts, nodeInspect) {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return inspect.tgi(this.entry, this.label);
 	}
 }
@@ -370,7 +416,7 @@ export class Raw extends Dependency {
 // Represents a mising dependency
 export class Missing extends Dependency {
 	kind = 'missing';
-	constructor(entry) {
+	constructor(entry: EntryLike) {
 		super({ entry });
 	}
 	toLines({ level = 0 } = {}) {
@@ -378,9 +424,11 @@ export class Missing extends Dependency {
 		let prefix = `${' '.repeat(2*level)} ${chalk.red('MISSING')}`;
 		if (!type) {
 			return [`${prefix}${chalk.yellow(prefix)}`];
-		} else {
+		} else if (instance && group) {
 			let tgi = [type, group, instance].map(x => chalk.yellow(hex(x)));
 			return [`${prefix} ${tgi}`];
+		} else {
+			return [];
 		}
 	}
 	get id() {
@@ -388,21 +436,25 @@ export class Missing extends Dependency {
 		return `missing/${type}-${group}-${instance}`;
 	}
 	[Symbol.for('nodejs.util.inspect.custom')]() {
-		return inspect.tgi(this.entry, util.styleText('red', 'MISSING'));
+		return inspect.tgi(this.entry, util!.styleText('red', 'MISSING'));
 	}
 }
 
 // # entryToString(entry)
-function entryToString({ type, group, instance }) {
+function entryToString({ type, group, instance }: EntryLike) {
 	if (!group) {
 		return chalk.yellow(hex(instance));
 	}
-	return [type, group, instance].map(nr => {
-		return chalk.yellow(hex(nr));
-	}).join('-');
+	if (type === undefined) {
+		return chalk.yellow(hex(instance));
+	} else {
+		return [type, group, instance].map(nr => {
+			return chalk.yellow(hex(nr));
+		}).join('-');
+	}
 }
 
-function $(width, line, file) {
+function $(width: number, line: string, file: string | null | undefined) {
 	// eslint-disable-next-line no-control-regex
 	let filtered = line.replaceAll(/\x1B\[\d+m/g, '');
 	let basename = file ? path.basename(file) : 'Not found';

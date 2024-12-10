@@ -1,17 +1,52 @@
 // # file-index.js
 import { os } from 'sc4/utils';
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { DBPF, FileType } from 'sc4/core';
+import { DBPF, Exemplar, FileType } from 'sc4/core';
 import { TGIIndex, hex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
 import WorkerPool from './worker-pool.js';
+import Entry from 'src/core/dbpf-entry.js';
+import type { DecodedFileTypeId } from 'src/core/types.js';
+import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
+import type { EntryJSON, TypeIdToEntry } from 'src/core/dbpf-entry.js';
+import type { FindParameters, TGIIndexJSON } from 'src/utils/tgi-index.js';
+import type { DBPFJSON } from 'src/core/dbpf.js';
 const Family = 0x27812870;
 
 // The hash function we use for type, group and instances. It's fastest to just 
 // use the identity function here, but for debugging purposes it can often be 
 // useful to see the hex values.
 const h = hex;
+
+type folder = string;
+type PluginIndexOptions = {
+	scan?: string | string[];
+	core?: boolean;
+	installation?: folder;
+	plugins?: folder;
+	mem?: number;
+};
+
+type GeneralBuildOptions = {
+	concurrency?: number;
+};
+
+type BuildOptions = GeneralBuildOptions & {
+	plugins?: string;
+};
+
+type CacheJSON = {
+	files: string[];
+	dbpfs: number[][];
+	entries: EntryJSON[];
+	index: TGIIndexJSON;
+	families: { [id: string]: number[] };
+};
+
+type FamilyIndex = {
+	[id: string]: Entry[];
+};
 
 // # PluginIndex
 // The plugin index is a data structure that scans a list of dbpf files and 
@@ -21,13 +56,19 @@ const h = hex;
 // **on the disk**. Note: we should make use of node's async nature here so 
 // that we can read in as much files as possible in parallel!
 export default class PluginIndex {
-
-	scan = [];
-	entries = [];
-	families = Object.create(null);
+	scan: string[] = [];
+	entries: TGIIndex<Entry> = new TGIIndex();
+	families: FamilyIndex = Object.create(null);
+	cache: LRUCache<string, Entry>;
+	options: {
+		scan: string[];
+		core: boolean;
+		installation: folder | undefined;
+		plugins: folder | undefined;
+	};
 
 	// ## constructor(opts)
-	constructor(opts = {}) {
+	constructor(opts: PluginIndexOptions | string | string[] = {}) {
 
 		// Normalize our options first.
 		if (typeof opts === 'string') {
@@ -44,7 +85,7 @@ export default class PluginIndex {
 			core = true,
 			installation = process.env.SC4_INSTALLATION,
 			plugins = process.env.SC4_PLUGINS,
-			mem = +os.totalmem,
+			mem = +os!.totalmem,
 		} = opts;
 		this.options = {
 			scan: [scan].flat(),
@@ -56,12 +97,12 @@ export default class PluginIndex {
 		// Set up the cache that we'll use to free up memory of DBPF files 
 		// that are not read often.
 		this.cache = new LRUCache({
-			max: 0.5*mem,
-			length(n, entry) {
+			maxSize: 0.5*mem,
+			sizeCalculation(entry) {
 				if (!entry.buffer) return 0;
 				return entry.buffer.byteLength;
 			},
-			dispose(entry, n) {
+			dispose(entry) {
 				entry.free();
 			},
 		});
@@ -69,20 +110,20 @@ export default class PluginIndex {
 	}
 
 	// ## get length()
-	get length() {
-		return this.entries.length;
+	get length(): number {
+		return this.entries?.length ?? 0;
 	}
 
 	// ## async getFilesToScan()
 	// Returns the array of files to scan, properly sorted in the order that we 
 	// will read them in.
-	async getFilesToScan(opts = {}) {
+	async getFilesToScan(opts: BuildOptions = {}) {
 
 		// Get all files to scan. Note that we do this separately for the core 
 		// files and the plugins because plugins *always* need to override core 
 		// files.
-		let coreFiles = [];
-		let sourceFiles = [];
+		let coreFiles: string[] = [];
+		let sourceFiles: string[] = [];
 		let tasks = [];
 		if (this.options.core && this.options.installation) {
 			let task = new FileScanner(this.options.installation)
@@ -119,7 +160,7 @@ export default class PluginIndex {
 	// does. This means that the *load order* of the files is important! We also 
 	// need to do some gymnastics to ensure the order is kept when parsing all 
 	// the DBPF files in parallel because
-	async build(opts = {}) {
+	async build(opts: BuildOptions = {}) {
 
 		// Open a new worker pool because we'll be parsing all dbpf files in 
 		// separate threads that report to the main thread.
@@ -131,15 +172,14 @@ export default class PluginIndex {
 		// here to maintain the sort order, so when a file is read in, we don't 
 		// just put it in the queue, but we put it in the queue *at the right 
 		// position*!
-		const queue = new Array(files.length).fill();
-		let tasks = [];
+		const queue: DBPF[] = new Array(files.length).fill(undefined);
+		let tasks: Promise<DBPF>[] = [];
 		for (let i = 0; i < files.length; i++) {
 			let file = files[i];
-			let task = pool.run({ name: 'index', file }).then(json => {
-				const { dbpf: file, ...rest } = json;
-				let dbpf = new DBPF({ file, parse: false, ...rest });
+			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
+				let dbpf = new DBPF({ ...json, parse: false });
 				queue[i] = dbpf;
-			});
+			}) as Promise<DBPF>;
 			tasks.push(task);
 		}
 		await Promise.all(tasks);
@@ -148,7 +188,7 @@ export default class PluginIndex {
 		// Reverse the array so that files that were seen last are the ones that 
 		// are kept. This is faster than using "unshift" apparently.
 		queue.reverse();
-		let unique = [];
+		let unique: Entry[] = [];
 		let seen = new Set();
 		for (let dbpf of queue) {
 			for (let entry of dbpf) {
@@ -178,7 +218,7 @@ export default class PluginIndex {
 	// ## buildFamilies()
 	// Builds up the index of all building & prop families by reading in all 
 	// exemplars.
-	async buildFamilies(opts = {}) {
+	async buildFamilies(opts: GeneralBuildOptions = {}) {
 		let { concurrency = 512 } = opts;
 		let exemplars = this.findAll({ type: FileType.Exemplar });
 		let queue = new PQueue({ concurrency });
@@ -187,10 +227,10 @@ export default class PluginIndex {
 				try {
 					let exemplar = await entry.readAsync();
 					let families = this.getPropertyValue(exemplar, Family);
-					if (!Array.isArray(families)) families = [families];
-					for (let family of families) {
+					if (!families) return;
+					for (let family of [families].flat()) {
 						if (family) {
-							let key = h(family);
+							let key = h(family as number);
 							this.families[key] ??= [];
 							this.families[key].push(entry);
 						}
@@ -212,7 +252,7 @@ export default class PluginIndex {
 	// That's useful if we're often running a script on a large plugins folder 
 	// where we're sure the folder doesn't change. We can gain a lot of precious 
 	// time by reading in a cached version in this case!
-	async load(cache) {
+	async load(cache: CacheJSON) {
 
 		// Create the new tgi collection.
 		const { dbpfs, files, families, entries: json } = cache;
@@ -252,29 +292,37 @@ export default class PluginIndex {
 	// This method puts the given entry on top of the LRU cache, which means 
 	// that they will be registered as "last used" and hence are less likely to 
 	// get kicked out of memory (once loaded of course).
-	touch(entry) {
+	touch(entry: Entry) {
 		if (entry) {
-			this.cache.set(entry);
+			this.cache.set(entry.id, entry);
 		}
 		return entry;
 	}
 
 	// ## find(type, group, instance)
 	// Finds the record identified by the given tgi.
-	find(type, group, instance) {
-		return this.entries.find(type, group, instance);
+	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T> | undefined;
+	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T> | undefined;
+	find(...params: FindParameters<Entry>): Entry | undefined;
+	find(...args: FindParameters<Entry>) {
+		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
 	}
 
 	// ## findAll(query)
 	// Finds all records that satisfy the given query.
-	findAll(query) {
-		return this.entries.findAll(query);
+	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T>[];
+	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T>[];
+	findAll(...params: FindParameters<Entry>): Entry[]
+	findAll(...args: FindParameters<Entry>): Entry[] {
+		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
 	}
 
 	// ## family(id)
 	// Checks if the a prop or building family exists with the given IID and 
 	// if so returns the family array.
-	family(id) {
+	family(id: uint32) {
 		let arr = this.families[h(id)];
 		return arr || null;
 	}
@@ -283,11 +331,14 @@ export default class PluginIndex {
 	// This function accepts a parsed exemplar file and looks up the property 
 	// with the given key. If the property doesn't exist, then tries to look 
 	// it up in the parent cohort and so on all the way up.
-	getProperty(exemplar, key) {
+	getProperty(exemplar: Exemplar, key: number) {
 		let prop = exemplar.prop(key);
 		while (!prop && exemplar.parent[0]) {
 			let { parent } = exemplar;
-			let entry = this.find(parent);
+			type ExemplarLike =
+				| typeof FileType.Exemplar
+				| typeof FileType.Cohort;
+			let entry = this.find(parent as TGIArray<ExemplarLike>);
 			if (!entry) {
 				break;
 			};
@@ -314,7 +365,7 @@ export default class PluginIndex {
 	// ## getPropertyValue(exemplar, key)
 	// Directly returns the value for the given property in the exemplar. If 
 	// it doesn't exist, looks it up in the parent cohort.
-	getPropertyValue(exemplar, key) {
+	getPropertyValue(exemplar: Exemplar, key: number) {
 		let prop = this.getProperty(exemplar, key);
 		return prop ? prop.value : undefined;
 	}
@@ -322,19 +373,19 @@ export default class PluginIndex {
 	// ## getScalarPropertyValue(exemplar, key)
 	// Same as getPropertyValue, but unwraps the value if it is an array of a 
 	// single value.
-	getScalarPropertyValue(exemplar, key) {
+	getScalarPropertyValue(exemplar: Exemplar, key: number) {
 		let value = this.getPropertyValue(exemplar, key);
 		return Array.isArray(value) ? value[0] : value;
 	}
 
 	// ## toJSON()
-	toJSON() {
+	toJSON(): CacheJSON {
 
 		// First thing we'll do is getting all our entries and getting the dbpf 
 		// files from it.
-		let dbpfSet = new Set();
-		let entryToKey = new Map();
-		let entries = [];
+		let dbpfSet: Set<DBPF> = new Set();
+		let entryToKey: Map<Entry, number> = new Map();
+		let entries: EntryJSON[] = [];
 		let i = 0;
 		for (let entry of this.entries) {
 			let id = i++;
@@ -346,11 +397,11 @@ export default class PluginIndex {
 		// Fill up the files array containing all file paths, along with the 
 		// dbpfs array, that contains sub-arrays with pointers to the entries. 
 		// That way our json gzips nicely.
-		let files = [];
-		let dbpfs = [];
+		let files: string[] = [];
+		let dbpfs: number[][] = [];
 		for (let dbpf of dbpfSet) {
-			files.push(dbpf.file);
-			let pointers = [];
+			files.push(dbpf.file!);
+			let pointers: number[] = [];
 			for (let entry of dbpf.entries) {
 				let ptr = entryToKey.get(entry);
 				if (ptr === undefined) continue;
@@ -365,7 +416,7 @@ export default class PluginIndex {
 
 		// Serialize our built up families as well, as this one also takes a lot 
 		// of time to read.
-		let families = {};
+		let families: { [id: string]: number[] } = {};
 		for (let id of Object.keys(this.families)) {
 			let family = this.families[id];
 			let pointers = [];
@@ -399,12 +450,12 @@ export default class PluginIndex {
 // # hash(entry)
 // Calculates a unique hash for the given entry. This function should be 
 // optimized for maximum speed.
-function hash(entry) {
+function hash(entry: Entry) {
 	return `${entry.type},${entry.group},${entry.instance}`;
 }
 
 // # compare(a, b)
 // The comparator function that determines the load order of the files.
-function compare(a, b) {
+function compare(a: string, b: string) {
 	return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
 }

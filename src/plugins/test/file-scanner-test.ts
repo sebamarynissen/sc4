@@ -19,8 +19,8 @@ describe('The FileScanner', function() {
 			'SimCity 4/Plugins/200-residential/aaron-graham.wellington.dark.1.sc4pac/NYBT/lot.SC4Lot': '',
 			'SimCity 4/Plugins/200-residential/aaron-graham.wellington.dark.1.sc4pac/NYBT/model.SC4Model': '',
 		}, '/');
-		const fs = this.test.ctx.fs = createFsFromVolume(vol);
-		this.test.ctx.scan = function(patterns = this.test.title, opts) {
+		const fs = (this as any).test.ctx.fs = createFsFromVolume(vol);
+		(this as any).test.ctx.scan = function(patterns = this.test.title, opts) {
 			return new FileScanner(patterns, {
 				fs,
 				cwd: '/SimCity 4/Plugins',

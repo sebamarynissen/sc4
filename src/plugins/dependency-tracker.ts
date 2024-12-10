@@ -3,12 +3,16 @@ import chalk from 'chalk';
 import { Glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
-import { DBPF, FileType, LotObjectType, ExemplarProperty } from 'sc4/core';
+import { DBPF, FileType, LotObjectType, ExemplarProperty, Exemplar, LotObject, Cohort } from 'sc4/core';
 import { hex } from 'sc4/utils';
 import PluginIndex from './plugin-index.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
+import type Entry from 'src/core/dbpf-entry.js';
+import type { EntryWithReadResult } from 'src/core/dbpf-entry.js';
+import type { DecodedFileTypeId, FileTypeId } from 'src/core/types.js';
+import type { TGIQuery } from 'sc4/types';
 
 // Constants
 const LotConfigurations = 0x00000010;
@@ -29,19 +33,35 @@ const RKT = [
 const kIndex = Symbol('index');
 const kPackageIndex = Symbol('packageIndex');
 
+type folder = string;
+type Logger = any;
+type DependencyTrackerOptions = {
+	plugins?: folder;
+	installation?: folder;
+	logger?: Logger;
+	cache?: string;
+};
+type PackageIndex = {
+	[pkg: string]: folder;
+};
+type ExemplarLike = Exemplar | Cohort;
+type ExemplarEntry = EntryWithReadResult<ExemplarLike>;
+
 // # DependencyTracker
 // Small helper class that allows us to easily pass context around without 
 // having to inject it constantly in the functions.
 export default class DependencyTracker {
-
-	plugins = '';
-	installation = '';
-	index = null;
-	packages = null;
-	options = {};
+	plugins: folder | undefined = '';
+	installation: folder | undefined = '';
+	logger: Logger | undefined;
+	index: PluginIndex | null = null;
+	packages: PackageIndex | null = null;
+	options: DependencyTrackerOptions = {};
+	private [kIndex]?: Promise<any>;
+	private [kPackageIndex]?: Promise<any>;
 
 	// ## constructor(opts)
-	constructor(opts = {}) {
+	constructor(opts: DependencyTrackerOptions = {}) {
 		this.options = { ...opts };
 		const {
 			plugins = process.env.SC4_PLUGINS,
@@ -56,7 +76,7 @@ export default class DependencyTracker {
 	// ## buildIndex()
 	// Builds up the index of all available files by TGI, just like SimCity 4 
 	// does it upon loading, taking into account any overrides.
-	async buildIndex(opts = {}) {
+	async buildIndex(opts: { logger?: Logger } = {}) {
 
 		// If a dependency cache was specified, check if it exists.
 		const { logger = this.logger } = opts;
@@ -120,7 +140,7 @@ export default class DependencyTracker {
 	// Builds up the index of all installed sc4pac packages. We do this based on 
 	// the folder structure of the plugins folder.
 	async buildPackageIndex() {
-		let map = this.packages = {};
+		let map: PackageIndex = this.packages = {};
 		let glob = new Glob('*/*/', {
 			cwd: this.plugins,
 			absolute: true,
@@ -128,7 +148,9 @@ export default class DependencyTracker {
 		for await (let folder of glob) {
 			if (!folder.endsWith('.sc4pac')) continue;
 			let pkg = folderToPackageId(folder);
-			map[pkg] = folder;
+			if (pkg) {
+				map[pkg] = folder;
+			}
 		}
 	}
 
@@ -181,16 +203,19 @@ export default class DependencyTracker {
 // This class is used to represent a single dependency tracking operation. It's 
 // here that we keep track of what files we have already scanned while doing the 
 // recursive walk.
+type MaybePromise<T> = T | Promise<T>;
 class DependencyTrackingContext {
-
-	entries = new Map();
-	touched = new Set();
-	missing = [];
+	tracker: DependencyTracker;
+	index: PluginIndex;
+	files: string[];
+	entries: Map<string, MaybePromise<Dep.Dependency>> = new Map();
+	touched: Set<string> = new Set();
+	missing: object[] = [];
 
 	// ## constructor(tracker, files)
-	constructor(tracker, files) {
+	constructor(tracker: DependencyTracker, files: string[]) {
 		this.tracker = tracker;
-		this.index = tracker.index;
+		this.index = tracker.index!;
 		this.files = files;
 	}
 
@@ -206,13 +231,16 @@ class DependencyTrackingContext {
 	// ## touch(entry)
 	// Stores that the given DBPF entry is "touched" by this tracking operation, 
 	// meaning it is indeed considered a dependency.
-	touch(entry) {
-		this.touched.add(entry.dbpf.file);
+	touch(entry: Entry) {
+		let { file } = entry.dbpf;
+		if (file) {
+			this.touched.add(file);
+		}
 	}
 
 	// ## read(file)
 	// Parses the given file as a dbpf file and tracks down all dependencies.
-	async read(file) {
+	async read(file: string) {
 		let dbpf = new DBPF({ file, parse: false });
 		await dbpf.parseAsync();
 		let tasks = [...dbpf].map(async entry => {
@@ -229,13 +257,13 @@ class DependencyTrackingContext {
 	// is stored in as touched. Then, if the resource hasn't been read yet, 
 	// we'll also process it further and check what kind of resource we're 
 	// dealing with.
-	async readResource(entry) {
+	async readResource(entry: Entry): Promise<Dep.Dependency> {
 		this.touch(entry);
 		return await this.once(entry, async () => {
 			switch (entry.type) {
 				case FileType.Exemplar:
 				case FileType.Cohort:
-					return await this.readExemplar(entry);
+					return await this.readExemplar(entry as ExemplarEntry);
 				case FileType.FSH:
 					return await this.readTexture(entry);
 				default:
@@ -248,10 +276,10 @@ class DependencyTrackingContext {
 	// ## readExemplar(entry)
 	// Reads & processes the exemplar file identified by the given entry. Note 
 	// that the exemplar.
-	async readExemplar(entry) {
+	async readExemplar(entry: ExemplarEntry) {
 		let exemplar = await entry.readAsync();
 		this.touch(entry);
-		let [type] = [exemplar.value(0x10)].flat();
+		let [type] = [exemplar.singleValue(0x10) as number].flat();
 		let tasks = [];
 		if (type === LotConfigurations) {
 			tasks.push(this.readLotExemplar(exemplar, entry));
@@ -264,11 +292,19 @@ class DependencyTrackingContext {
 		let [t, g, i] = exemplar.parent;
 		if (t+g+i !== 0) {
 			let entry = this.index.find(t, g, i);
-			tasks.push(this.readResource(entry));
+			if (entry) {
+				tasks.push(this.readResource(entry));
+			} else {
+				tasks.push(new Dep.Missing({
+					type: t,
+					group: g,
+					instance: i,
+				}));
+			}
 		}
 		let [dep, parent] = await Promise.all(tasks);
 		if (parent) {
-			dep.parent = parent;
+			(dep as Dep.Exemplar).parent = parent;
 		}
 		return dep;
 
@@ -276,20 +312,21 @@ class DependencyTrackingContext {
 
 	// ## readLotExemplar(exemplar, entry)
 	// Traverses all objects on the given lot exemplar and starts tracking them.
-	async readLotExemplar(exemplar, entry) {
+	async readLotExemplar<T extends ExemplarLike>(exemplar: T, entry: EntryWithReadResult<T>) {
 		const lot = new Dep.Lot({
 			entry,
-			name: exemplar.singleValue(ExemplarProperty.ExemplarName),
+			name: exemplar.singleValue(ExemplarProperty.ExemplarName) as string,
 		});
-		const tasks = exemplar.lotObjects.map(async lotObject => {
+		const tasks: Promise<any>[] = exemplar.lotObjects.map(async lotObject => {
 			const { type } = lotObject;
 			const setter = Dep.getLotSetter(lot, type);
 			if (!setter) return;
-			setter(await this.readLotObject(lotObject, entry));
+			let dep = await this.readLotObject(lotObject, entry);
+			if (dep) setter(dep);
 		});
 
 		// Lots can also have a foundation exemplar. Read this as well.
-		const fid = exemplar.singleValue(ExemplarProperty.BuildingFoundation);
+		const fid = exemplar.singleValue(ExemplarProperty.BuildingFoundation) as number;
 		if (fid) {
 			let entry = this.index.find({ instance: fid });
 			if (entry) {
@@ -307,13 +344,16 @@ class DependencyTrackingContext {
 	// ## readLotObject(lotObject, entry)
 	// Reads in a single lotObject. It's here that we look at what type of lot 
 	// object we're actually dealing with.
-	async readLotObject(lotObject, entry) {
+	async readLotObject(lotObject: LotObject, entry: Entry) {
 		switch (lotObject.type) {
 			case LotObjectType.Building:
 			case LotObjectType.Prop:
 			case LotObjectType.Texture:
 			case LotObjectType.Flora:
-				return await this.readLotObjectIIDs(lotObject, entry);
+				return await this.readLotObjectIIDs(
+					lotObject,
+					entry as ExemplarEntry
+				);
 			case LotObjectType.Network:
 				return await this.readLotObjectNetwork(lotObject, entry);
 		}
@@ -322,7 +362,7 @@ class DependencyTrackingContext {
 	// ## readLotObjectIIDs(lotObject, entry)
 	// Tracks fown all lot objects that are of the type where we simply have to 
 	// query an iid, such as props or buildings.
-	async readLotObjectIIDs(lotObject, entry) {
+	async readLotObjectIIDs(lotObject: LotObject, entry: ExemplarEntry) {
 		let tasks = [];
 		for (let iid of lotObject.IIDs) {
 			tasks.push(this.readLotObjectIID(iid, lotObject, entry));
@@ -332,7 +372,7 @@ class DependencyTrackingContext {
 		// randomized. Hence we'll return just the 1 item if there's indeed only 
 		// 1.
 		let result = await Promise.all(tasks);
-		return result.length <= 1 ? result[0] : new Dep.Family(...result);
+		return result.length <= 1 ? result[0] : new Dep.Family(result, 0);
 
 	}
 
@@ -340,7 +380,11 @@ class DependencyTrackingContext {
 	// Looks up all dependencies based on the lot object. Note that this differs 
 	// per type! For network nodes, this is quite different than for props or 
 	// buildings!
-	async readLotObjectIID(iid, lotObject, lotEntry) {
+	async readLotObjectIID(
+		iid: number,
+		lotObject: LotObject,
+		lotEntry: ExemplarEntry,
+	) {
 
 		// If we're dealing with a building, prop or flora, then it's possible 
 		// that the idd actually refers to a family id.
@@ -376,7 +420,7 @@ class DependencyTrackingContext {
 		// somehow.
 		if (family) {
 			let core = entries.filter(entry => {
-				return entry.dbpf.file.match(/SimCity_\d\.dat$/i);
+				return entry.dbpf.file?.match(/SimCity_\d\.dat$/i);
 			});
 			if (core.length > 0) entries = core;
 		}
@@ -404,8 +448,7 @@ class DependencyTrackingContext {
 		// be a family as well by the way.
 		let result = await Promise.all(tasks);
 		if (family) {
-			let dep = new Dep.Family(...result);
-			dep.familyId = family;
+			let dep = new Dep.Family(result, family);
 			return dep;
 		} else {
 			return result[0];
@@ -415,10 +458,10 @@ class DependencyTrackingContext {
 
 	// ## readLotObjectNetwork(lotObject, entry)
 	// Tracks down a lot object that is a network node.
-	async readLotObjectNetwork(lotObject, entry) {
+	async readLotObjectNetwork(lotObject: LotObject, _entry: Entry) {
 		let tasks = [];
-		if (lotObject.values.length > 15) {
-			let instance = lotObject.values[15];
+		if (lotObject.type === LotObject.Network) {
+			let instance = lotObject.IID;
 			if (instance === 0x00) return;
 			let entries = this.index.findAll({ instance });
 			for (let entry of entries) {
@@ -431,15 +474,15 @@ class DependencyTrackingContext {
 	// ## readRktExemplar(exemplar, entry)
 	// Reads in an exemplar and looks for ResourceKeyTypes. If found, we have to 
 	// mark the resource as a dependency.
-	async readRktExemplar(exemplar, entry) {
+	async readRktExemplar(exemplar: ExemplarLike, entry: ExemplarEntry) {
 		let dep = new Dep.Exemplar({
 			entry,
-			name: exemplar.singleValue(ExemplarProperty.ExemplarName) ?? '',
-			kind: exemplar.singleValue(ExemplarProperty.ExemplarType) ?? 0,
+			name: exemplar.singleValue(ExemplarProperty.ExemplarName) as string ?? '',
+			exemplarType: exemplar.singleValue(ExemplarProperty.ExemplarType) as number ?? 0,
 		});
 		let models = [];
 		for (let key of RKT) {
-			let value = exemplar.value(key);
+			let value = exemplar.value(key) as number[];
 			if (!value) continue;
 			if (value.length === 3) {
 				models.push([...value]);
@@ -494,10 +537,10 @@ class DependencyTrackingContext {
 			SFXActivateSound: { type: 0x4A4C132E },
 		};
 		for (let prop of Object.keys(props)) {
-			let key = ExemplarProperty[prop];
-			let hint = props[prop];
-			let value = exemplar.value(key);
-			let query;
+			let key = ExemplarProperty[prop as keyof typeof ExemplarProperty];
+			let hint = props[prop as keyof typeof props];
+			let value = exemplar.value(key) as number[];
+			let query: TGIQuery & { instance: number };
 			if (Array.isArray(value)) {
 				if (value.length === 1) {
 					let [instance] = value;
@@ -505,6 +548,8 @@ class DependencyTrackingContext {
 				} else if (value.length === 3) {
 					let [type, group, instance] = value;
 					query = { ...hint, type, group, instance };
+				} else {
+					continue;
 				}
 			} else if (typeof value === 'number') {
 				query = { ...hint, instance: value };
@@ -523,16 +568,20 @@ class DependencyTrackingContext {
 			if (query.instance === 0x00) continue;
 
 			// If nothing was found, we have a missing dependency.
-			entry = this.index.find(query);
+			entry = this.index.find(query) as ExemplarEntry;
 			if (!entry) {
 				dep.props.push([prop, new Dep.Missing(query)]);
 			} else {
 				let index = dep.props.length;
-				dep.props.push(null);
+
+				// TypeScript complains that we can't add null, but that's only 
+				// temporary, so make it work.
+				dep.props.push(null as unknown as Dep.ExemplarProp);
 				let task = this.readResource(entry).then(obj => {
 					dep.props[index] = [prop, obj];
 				});
 				tasks.push(task);
+
 			}
 
 		}
@@ -546,7 +595,7 @@ class DependencyTrackingContext {
 	}
 
 	// ## readTexture(entry)
-	async readTexture(entry) {
+	async readTexture(entry: Entry) {
 		return new Dep.Texture({ entry });
 	}
 
@@ -555,10 +604,10 @@ class DependencyTrackingContext {
 	// This is needed because we might read a prop exemplar from a bare .sc4desc 
 	// file, or from an .sc4lot file which then refers to the prop in the 
 	// .sc4desc file.
-	async once(entry, fn) {
+	async once<T extends Dep.Dependency>(entry: Entry, fn: () => MaybePromise<T>): Promise<T> {
 		let { id } = entry;
 		if (this.entries.has(id)) {
-			return await this.entries.get(id);
+			return this.entries.get(id) as T;
 		};
 		let promise = fn();
 		this.entries.set(id, promise);
@@ -573,20 +622,28 @@ class DependencyTrackingContext {
 // # DependencyTrackingResult
 // Small class for representing a dependency tracking result.
 class DependencyTrackingResult {
+	installation: folder;
+	plugins: folder;
+	scanned: string[];
+	dependencies: Dep.Dependency[];
+	tree: Dep.Dependency[];
+	files: string[];
+	packages: string[];
+	missing: object[];
 
 	// ## constructor(ctx)
-	constructor(ctx) {
+	constructor(ctx: DependencyTrackingContext) {
 
 		// Report the installation & plugins folder that we scanned.
-		const { installation, plugins } = ctx.tracker.index.options;
-		this.installation = installation;
-		this.plugins = plugins;
+		const { installation, plugins } = ctx.tracker.index!.options;
+		this.installation = installation as string;
+		this.plugins = plugins as string;
 
 		// Report all files that were scanned, relative to the plugins folder.
 		this.scanned = ctx.files.sort();
 
 		// Store all dependencies that were touched as a dependency class.
-		this.dependencies = [...ctx.entries.values()];
+		this.dependencies = [...ctx.entries.values()] as Dep.Dependency[];
 
 		// Build up the tree class from it.
 		let children = new Set();
@@ -610,8 +667,8 @@ class DependencyTrackingResult {
 		// Convert the folders to the packages as well.
 		let packages = this.files
 			.map(folder => folderToPackageId(folder))
-			.filter(Boolean);
-		this.packages = [...new Set(packages)].sort();
+			.filter(pkg => !!pkg);
+		this.packages = [...new Set(packages)].sort() as string[];
 
 		// Storate the information about the missing dependencies.
 		this.missing = ctx.missing;
@@ -658,7 +715,7 @@ class DependencyTrackingResult {
 		// Always report any missing dependencies.
 		if (format === 'sc4pac' && this.missing.length > 0) {
 			console.log(red('The following dependencies were not found:'));
-			let mapped = this.missing.map(row => {
+			let mapped = this.missing.map((row: any) => {
 				let clone = { ...row };
 				let u = void 0;
 				row.type !== u && (clone.type = new Hex(row.type));
@@ -684,7 +741,7 @@ class DependencyTrackingResult {
 
 // # getFileTypeByLotObject(lotObject)
 // Helper function that returns what filetypes we can look for
-function getFileTypeByLotObject(lotObject) {
+function getFileTypeByLotObject(lotObject: LotObject) {
 	switch (lotObject.type) {
 		case LotObjectType.Building:
 		case LotObjectType.Prop:
@@ -698,12 +755,12 @@ function getFileTypeByLotObject(lotObject) {
 // # Hex
 // Small helper class for formatting numbers as hexadecimal in the console table.
 class Hex extends Number {
-	[Symbol.for('nodejs.util.inspect.custom')](depth, opts) {
+	[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: any) {
 		return opts.stylize(hex(+this), 'number');
 	}
 }
 class File extends String {
-	[Symbol.for('nodejs.util.inspect.custom')](depth, opts) {
+	[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: any) {
 		let max = 100;
 		let value = String(this);
 		if (value.length > max) {

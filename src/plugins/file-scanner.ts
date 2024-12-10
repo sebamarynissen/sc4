@@ -1,15 +1,20 @@
 // # file-scanner.js
 import path from 'node:path';
-import { Glob } from 'glob';
+import { Glob, type GlobOptions } from 'glob';
+
+type FileScannerOptions = GlobOptions & {
+	recursive?: boolean;
+	extensions?: string[];
+};
 
 // # FileScanner
 // Helper class that extends a Glob class. It automatically constructs globbing 
 // patterns based on some extended syntax, where we support absolute paths as 
 // well.
-export default class FileScanner extends Glob {
+export default class FileScanner extends Glob<GlobOptions & { withFileTypes: false }> {
 
 	// ## constructor(patterns, opts)
-	constructor(patterns, opts = {}) {
+	constructor(patterns: string | string[], opts: FileScannerOptions = {}) {
 		const {
 			recursive = true,
 			extensions = ['dat', 'sc4lot', 'sc4desc', 'sc4model'],
@@ -72,11 +77,12 @@ export default class FileScanner extends Glob {
 			return pattern;
 
 		}).filter(Boolean);
-		super(parsed, {
+		super(parsed as string[], {
 			absolute: true,
 			nodir: true,
 			nocase: true,
 			...rest,
+			withFileTypes: false,
 		});
 	}
 
