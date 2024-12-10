@@ -120,9 +120,9 @@ function findPosition(city: Savegame, exemplar: Exemplar, bbox: number[] = []) {
 	const [width, depth] = exemplar.value(LotConfigPropertySize) as [number, number];
 	const { zoneDeveloper: zones, width: cityWidth, depth: cityDepth } = city;
 	const [minX = 0, minZ = 0, maxX = cityWidth, maxZ = cityDepth] = bbox;
-	for (let z = minZ; z < maxZ-depth; z++) {
+	for (let z = minZ; z <= maxZ-depth; z++) {
 		outer:
-		for (let x = minX; x < maxX-width; x++) {
+		for (let x = minX; x <= maxX-width; x++) {
 			for (let i = 0; i < width; i++) {
 				for (let j = 0; j < depth; j++) {
 					if (zones.isOccupied(x+i, z+j)) continue outer;

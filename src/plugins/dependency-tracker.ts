@@ -9,8 +9,7 @@ import PluginIndex from './plugin-index.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
-import type Entry from 'src/core/dbpf-entry.js';
-import type { EntryWithReadResult } from 'src/core/dbpf-entry.js';
+import type { Entry, EntryWithReadResult } from 'sc4/core';
 import type { Logger, TGIQuery } from 'sc4/types';
 
 // Constants

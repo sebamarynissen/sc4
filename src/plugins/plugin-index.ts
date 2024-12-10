@@ -6,12 +6,15 @@ import { DBPF, Exemplar, FileType } from 'sc4/core';
 import { TGIIndex, hex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
 import WorkerPool from './worker-pool.js';
-import Entry from 'src/core/dbpf-entry.js';
-import type { DecodedFileTypeId } from 'src/core/types.js';
+import type {
+	DBPFJSON,
+	Entry,
+	EntryJSON,
+	DecodedFileTypeId,
+	TypeIdToEntry,
+} from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
-import type { EntryJSON, TypeIdToEntry } from 'src/core/dbpf-entry.js';
-import type { FindParameters, TGIIndexJSON } from 'src/utils/tgi-index.js';
-import type { DBPFJSON } from 'src/core/dbpf.js';
+import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
 const Family = 0x27812870;
 
 // The hash function we use for type, group and instances. It's fastest to just 
@@ -304,8 +307,8 @@ export default class PluginIndex {
 	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T> | undefined;
 	find<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T> | undefined;
 	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T> | undefined;
-	find(...params: FindParameters<Entry>): Entry | undefined;
-	find(...args: FindParameters<Entry>) {
+	find(...params: TGIFindParameters<Entry>): Entry | undefined;
+	find(...args: TGIFindParameters<Entry>) {
 		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
 	}
 
@@ -314,8 +317,8 @@ export default class PluginIndex {
 	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T>[];
 	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T>[];
 	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T>[];
-	findAll(...params: FindParameters<Entry>): Entry[]
-	findAll(...args: FindParameters<Entry>): Entry[] {
+	findAll(...params: TGIFindParameters<Entry>): Entry[]
+	findAll(...args: TGIFindParameters<Entry>): Entry[] {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
 	}
 

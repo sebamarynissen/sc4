@@ -2,10 +2,8 @@
 import chalk from 'chalk';
 import path from 'node:path';
 import { util, inspect, hex } from 'sc4/utils';
-import { LotObjectType } from 'sc4/core';
-import { getTypeLabel } from 'src/core/helpers.js';
+import { LotObjectType, getTypeLabel, type Entry } from 'sc4/core';
 import type { InspectOptions } from 'node:util';
-import type Entry from 'src/core/dbpf-entry.js';
 
 const DEFAULT_WIDTH = 150;
 
