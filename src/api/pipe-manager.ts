@@ -1,6 +1,14 @@
 // # pipe-manager.js
 import Context from './city-context.js';
-import { Pipe, Vertex, Color, Pointer, FileType } from 'sc4/core';
+import {
+	Pipe,
+	Vertex,
+	Color,
+	Pointer,
+	FileType,
+	type Savegame,
+	type TerrainMap,
+} from 'sc4/core';
 
 // Bit flags of what connections are enabled. Based on those sides we'll also 
 // create a map of *lines* corresponding to those sides.
@@ -18,10 +26,13 @@ const SIDE_MAP = new Map([
 // # PipeManager
 // The class we use for generating pipe layouts, more specifically generating 
 // the *optimal* pipe layout for a city.
+type PipeTile = [number, number, number];
 export default class PipeManager {
+	dbpf: Savegame;
+	ctx: Context;
 
 	// ## constructor(dbpf)
-	constructor(dbpf, ctx = new Context(dbpf)) {
+	constructor(dbpf: Savegame, ctx = new Context(dbpf)) {
 		this.dbpf = dbpf;
 		this.ctx = ctx;
 	}
@@ -29,7 +40,7 @@ export default class PipeManager {
 	// Shortcuts.
 	get sim() { return this.dbpf.plumbingSimulator; }
 	get pipes() { return this.dbpf.pipes; }
-	get terrain() { return this.dbpf.terrain; }
+	get terrain() { return this.dbpf.terrain!; }
 	get index() { return this.dbpf.itemIndex; }
 	get serializer() { return this.dbpf.COMSerializer; }
 
@@ -71,7 +82,7 @@ export default class PipeManager {
 	// ## generateOptimalLayout()
 	// Generates the coordinates of all pipe tiles along with their connection 
 	// identifier. Note that we return a sparse array, not a full map!
-	generateOptimalLayout() {
+	generateOptimalLayout(): PipeTile[] {
 
 		// 1. Determine the rows where we have to draw the pipes. If the last 
 		// row is too far from the edge, we'll insert a new one manually where 
@@ -80,7 +91,7 @@ export default class PipeManager {
 		const size = this.sim.xSize;
 		const range = 6;
 		let rows = [];
-		let last;
+		let last = range;
 		for (let j = range, dj = 2*range+1; j < size; j += dj) {
 			rows.push(last = j);
 		}
@@ -89,7 +100,7 @@ export default class PipeManager {
 		// 2. Insert the horizontal tiles. This has id 0x15, but we'll need to 
 		// take into account the end pieces as well of course.
 		const vertical = size/2-1;
-		let out = [];
+		let out: PipeTile[] = [];
 		for (let j of rows) {
 			const a = Math.floor(range/2);
 			const b = size-a-1;
@@ -125,7 +136,7 @@ export default class PipeManager {
 	// This returns a *cloned* of the terrain map where we egalized the parts 
 	// that need it. For example, T and + pieces need to be completely flat, 
 	// straight pieces need to be a tile.
-	egalizeTerrain(terrain, layout) {
+	egalizeTerrain(terrain: TerrainMap, layout: PipeTile[]) {
 
 		// Filter out all pipe tiles that require a flat terrain tile and then 
 		// egalize the terrain for that tile.
@@ -175,7 +186,7 @@ export default class PipeManager {
 
 	// ## createTile(i, j, id, map)
 	// Actually creates a new pipe occupant tile and properly positions it.
-	createTile(i, j, id, map) {
+	createTile(i: number, j: number, id: number, map: TerrainMap) {
 
 			// Calculate the metric x and z positions of the ne corner of the 
 			// tile.
@@ -202,13 +213,14 @@ export default class PipeManager {
 			// Set the heights at the corner of the terrain. Obviously we we 
 			// need the actual *terrain* coordinates here, not the egalized 
 			// underground terrain!
+			type Key = 'yNW' | 'yNE' | 'ySW' | 'ySE';
 			let corners = [['NW', 'NE'], ['SW', 'SE']];
 			let cornerValues = [];
 			for (let j = 0; j < 2; j++) {
 				for (let i = 0; i < 2; i++) {
 					let xx = x+16*i;
 					let zz = z+16*i;
-					let h = pipe['y'+corners[j][i]] = terrain.query(xx, zz);
+					let h = pipe['y'+corners[j][i] as Key] = terrain.query(xx, zz);
 					cornerValues.push(h);
 				}
 			}
@@ -221,7 +233,7 @@ export default class PipeManager {
 					let index = 2*i+j;
 					let v = pipe.vertices[index];
 					v.x = x+16*i;
-					v.z = z+16*(i !== j);
+					v.z = z+16*(+(i !== j));
 					v.u = i;
 					v.v = +(i !== j);
 					v.y = map.query(v.x, v.z)-10.2;
@@ -266,7 +278,7 @@ export default class PipeManager {
 						vertex.color = new Color(0xff, 0xff, 0xff, 0x80);
 						let src = i !== j ? map : terrain;
 						let h = src.query(vertex.x, vertex.z);
-						vertex.y = h - (i !== j)*10.2;
+						vertex.y = h - Number(i !== j)*10.2;
 						pipe.sideTextures[0].push(vertex);
 					}
 				}
@@ -275,7 +287,7 @@ export default class PipeManager {
 
 			// Count how many connections we have now. This determines what 
 			// model we have to insert as well as how to orient it.
-			let sum = west + north + east + south;
+			let sum = +west + +north + +east + +south;
 			if (sum === 1) {
 				pipe.textureId = 0x00000300;
 				pipe.orientation = [south, west, north, east].indexOf(true);

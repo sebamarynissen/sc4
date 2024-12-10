@@ -62,6 +62,7 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
     "@types/chai": "^5.0.1",
+    "@types/knuth-shuffle-seeded": "^1.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.1",
     "@whisthub/eslint-config": "^3.1.0",

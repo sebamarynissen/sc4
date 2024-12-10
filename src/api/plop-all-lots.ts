@@ -1,6 +1,6 @@
 // # plop-all-lots.js
 import shuffle from 'knuth-shuffle-seeded';
-import { DBPF } from 'sc4/core';
+import { DBPF, Exemplar, Savegame } from 'sc4/core';
 import { PluginIndex, FileScanner } from 'sc4/plugins';
 import CityManager from './city-manager.js';
 
@@ -8,8 +8,23 @@ const LotConfigPropertySize = 0x88edc790;
 
 // # plopAllLots(files)
 // This function accepts an array of file patterns and will plop all lots that 
-// it finds in those files.
-export default async function plopAllLots(opts = {}) {
+// it finds in those files
+type folder = string;
+type PlopAllLotsOptions = {
+	lots?: string;
+	directory?: folder;
+	installation?: folder;
+	plugins?: folder;
+	logger?: any;
+	random?: number | boolean;
+	city: string;
+	clear?: boolean;
+	bbox?: [number, number, number, number];
+	save?: boolean;
+	backup?: Function;
+	output?: string;
+};
+export default async function plopAllLots(opts: PlopAllLotsOptions) {
 
 	// First thing we'll do is looking up all lot files with a file scanner.
 	let {
@@ -99,8 +114,8 @@ export default async function plopAllLots(opts = {}) {
 
 // # findPosition(city, exemplar, bbox)
 // Finds a suitable position for the given lot exemplar to plop.
-function findPosition(city, exemplar, bbox = []) {
-	const [width, depth] = exemplar.value(LotConfigPropertySize);
+function findPosition(city: Savegame, exemplar: Exemplar, bbox: number[] = []) {
+	const [width, depth] = exemplar.value(LotConfigPropertySize) as [number, number];
 	const { zoneDeveloper: zones, width: cityWidth, depth: cityDepth } = city;
 	const [minX = 0, minZ = 0, maxX = cityWidth, maxZ = cityDepth] = bbox;
 	for (let z = minZ; z < maxZ-depth; z++) {
