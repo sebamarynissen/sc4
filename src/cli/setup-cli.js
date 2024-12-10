@@ -402,9 +402,9 @@ export function factory(program) {
 			}
 
 			let dbpf = new DBPF(buff);
-			let lotFile = dbpf.entries.find(x => x.type === FileType.LotFile).read();
+			let lots = dbpf.find({ type: FileType.Lot }).read();
 			let all = [];
-			for (let lot of lotFile) {
+			for (let lot of lots) {
 				let str = JSON.stringify(lot, replacer, 2);
 				all.push(str);
 			}
@@ -442,10 +442,10 @@ export function factory(program) {
 
 				// Build up the queries.
 				let queries = opts.queries = {};
-				if (this.lots || this.all) queries.Lot = FileType.LotFile;
-				if (this.buildings || this.all) queries.Building = FileType.BuildingFile;
-				if (this.textures || this.all) queries.Texture = FileType.BaseTextureFile;
-				if (this.props || this.all) queries.Prop = FileType.PropFile;
+				if (this.lots || this.all) queries.Lot = FileType.Lot;
+				if (this.buildings || this.all) queries.Building = FileType.Building;
+				if (this.textures || this.all) queries.Texture = FileType.BaseT$;
+				if (this.props || this.all) queries.Prop = FileType.Prop;
 
 				// Handle more types.
 				if (this.types) {

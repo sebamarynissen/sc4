@@ -357,8 +357,8 @@ export default class CityManager {
 		}
 
 		// At last update the com serializer.
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.LotFile, lots.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.Lot, lots.length);
 
 		// Return the created zone.
 		return lot;
@@ -371,7 +371,7 @@ export default class CityManager {
 
 		// Read in the size of the lot because we'll still need it.
 		let { dbpf } = this;
-		let lots = dbpf.lotFile;
+		let { lots } = dbpf;
 		let { exemplar, x, z, building, orientation = 0 } = opts;
 		let file = exemplar.read();
 		let [width, depth] = this.getPropertyValue(
@@ -428,7 +428,7 @@ export default class CityManager {
 
 		// Now put the lot in the zone developer file as well. TODO: We should 
 		// actually check first and ensure that no building exists yet here!
-		let zones = dbpf.zoneDeveloperFile;
+		let zones = dbpf.zoneDeveloper;
 		let grid = dbpf.getSimGrid(SimGrid.ZoneData);
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
@@ -439,8 +439,8 @@ export default class CityManager {
 
 		// Don't forget to update the COMSerializer to include the updated 
 		// length! Otherwise the lot won't show up!
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.LotFile, lots.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.Lot, lots.length);
 
 		// Return the lot that we've just created.
 		return lot;
@@ -483,19 +483,19 @@ export default class CityManager {
 
 		// Put the building in the index at the correct spot.
 		let { dbpf } = this;
-		this.addToItemIndex(building, FileType.BuildingFile);
+		this.addToItemIndex(building, FileType.Building);
 
 		// Push in the file with all buildings.
-		let buildings = dbpf.buildingFile;
+		let { buildings } = dbpf;
 		buildings.push(building);
 
 		// Add to the lot developer file as well.
-		let dev = dbpf.lotDeveloperFile;
+		let dev = dbpf.lotDeveloper;
 		dev.buildings.push(new Pointer(building));
 
 		// At last update the COMSerializer file.
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.BuildingFile, buildings.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.Building, buildings.length);
 		return building;
 
 	}
@@ -555,11 +555,11 @@ export default class CityManager {
 		props.push(prop);
 
 		// Put the prop in the index.
-		this.addToItemIndex(prop, FileType.PropFile, lotObject);
+		this.addToItemIndex(prop, FileType.Prop, lotObject);
 
 		// Update the COM serializer and we're done.
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.PropFile, props.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.Prop, props.length);
 		return props;
 
 	}
@@ -618,11 +618,11 @@ export default class CityManager {
 		// COMSerializer as well.
 		let { dbpf } = this;
 		dbpf.textures.push(texture);
-		let com = dbpf.COMSerializerFile;
-		com.set(FileType.BaseTextureFile, dbpf.textures.length);
+		let com = dbpf.COMSerializer;
+		com.set(FileType.BaseTexture, dbpf.textures.length);
 
 		// Update the item index as well.
-		this.addToItemIndex(texture, FileType.BaseTextureFile);
+		this.addToItemIndex(texture, FileType.BaseTexture);
 
 		// Return the base texture that we've created.
 		return texture;
@@ -667,7 +667,7 @@ export default class CityManager {
 	clear() {
 		const { city } = this;
 		const index = city.itemIndex;
-		const com = city.COMSerializerFile;
+		const com = city.COMSerializer;
 		const clear = type => {
 			let file = city.readByType(type);
 			if (file) {
@@ -676,15 +676,15 @@ export default class CityManager {
 				com.set(type, 0);
 			}
 		};
-		clear(FileType.LotFile);
-		clear(FileType.BuildingFile);
-		clear(FileType.PropFile);
-		clear(FileType.FloraFile);
-		clear(FileType.BaseTextureFile);
+		clear(FileType.Lot);
+		clear(FileType.Building);
+		clear(FileType.Prop);
+		clear(FileType.Flora);
+		clear(FileType.BaseTexture);
 
 		// Clear both the lot and zone developer files as well.
-		city.lotDeveloperFile.clear();
-		city.zoneDeveloperFile.clear();
+		city.lotDeveloper.clear();
+		city.zoneDeveloper.clear();
 
 		// Clear some simgrids.
 		city.getSimGrid(SimGrid.ZoneData).clear();
@@ -739,8 +739,8 @@ function orient([x, y], lot, opts = {}) {
 		return [x, y];
 	} else {
 		return [
-			16*(lot.minX + x),
-			16*(lot.minZ + y),
+			16*lot.minX + x,
+			16*lot.minZ + y,
 		];
 	}
 

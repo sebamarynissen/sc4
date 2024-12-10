@@ -4,12 +4,14 @@
 		"outDir": "lib",
 		"baseUrl": "./",
 		"paths": {
-			"sc4/core": ["src/core/index.js"],
-			"sc4/utils": ["src/utils/index.js"],
+			"sc4/core": ["src/core/index.ts"],
+			"sc4/utils": ["src/utils/index.ts"],
+			"sc4/utils/register": ["src/utils/register-debug-utils.ts"],
 			"sc4/plugins": ["src/plugins/index.js"],
-			"sc4/threading": ["src/threading/index.js"],
+			"sc4/threading": ["src/threading/index.ts"],
 			"sc4/api": ["src/api/api.js"],
 			"sc4/api/*": ["src/api/*"],
+			"sc4/types": ["src/types/types.ts"],
 		},
 		"lib": ["es2022"],
 		"target": "es2022",
@@ -17,6 +19,11 @@
 		"moduleResolution": "nodenext",
 		"verbatimModuleSyntax": true,
 		"declaration": true,
+		"noImplicitAny": true,
+
+		// Prevent TypeScript from checking d.ts files.
+		"skipLibCheck": true,
+		"strictNullChecks": true,
 
 		// AllowJs has to be true as long as we haven't migrated everything yet.
 		"allowJs": true,
