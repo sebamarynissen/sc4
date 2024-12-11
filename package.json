@@ -73,6 +73,7 @@
     "esbuild": "^0.24.0",
     "eslint": "^9.14.0",
     "hilbert-curve": "^2.0.5",
+    "jsdom": "^25.0.1",
     "memfs": "^4.14.0",
     "mocha": "^10.8.2",
     "postject": "^1.0.0-alpha.6",
@@ -80,8 +81,7 @@
     "string-argv": "^0.3.1",
     "tsx": "^4.19.2",
     "type-fest": "^4.30.0",
-    "typescript": "^5.7.2",
-    "xml2js": "^0.6.2"
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "@inquirer/checkbox": "^4.0.1",
