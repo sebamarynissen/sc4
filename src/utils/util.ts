@@ -67,28 +67,28 @@ export const inspect = {
 	type(value: any) {
 		if (!value) return value;
 		return {
-			[kInspect]() {
+			[Symbol.for('nodejs.util.inspect.custom')]() {
 				return util!.styleText('cyan', value);
 			},
 		};
 	},
 	constructor(value: Constructor<any>) {
 		return {
-			[kInspect]() {
+			[Symbol.for('nodejs.util.inspect.custom')]() {
 				return util!.styleText('cyan', value.name);
 			},
 		};
 	},
 	hex(value: number, pad?: number) {
 		return {
-			[kInspect](_depth: number, opts: InspectOptionsStylized) {
+			[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: InspectOptionsStylized) {
 				return opts.stylize(hex(value, pad), 'number');
 			},
 		};
 	},
 	tgi(object: Partial<TGILiteral>, label?: string) {
 		return {
-			[kInspect](_depth: number, opts: InspectOptionsStylized, nodeInspect: Function) {
+			[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: InspectOptionsStylized, nodeInspect: Function) {
 				if (!object) return object;
 				let prefix = label ? `${label} ` : '';
 				return `${prefix}${nodeInspect({
