@@ -16,6 +16,7 @@ import type {
     ExemplarPropertyIdLikeToValue,
     ExemplarPropertyPrimitive,
     ExemplarPropertyValue,
+    ExemplarPropertyIdLikeToType,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
@@ -36,12 +37,24 @@ export type ExemplarOptions = {
 	parent?: TGIArray;
 	props?: Property[] | PropertyOptions[];
 };
-export type PropertyOptions = {
+export type PropertyOptions<T extends number = number> = {
 	id: number;
 	type?: PropertyValueType;
-	value: ExemplarPropertyValue;
+	value: ExemplarPropertyIdLikeToType<T>;
 	comment?: string;
 };
+
+// Small helper generic type for easily converting a string | number property 
+// accessor into a property of known type.
+type PropertyByAccessor<T extends ExemplarPropertyIdLike> = Property<
+	ExemplarPropertyIdLikeToId<T>
+>;
+
+/**
+ * Either a string, a number or an object that can be converted to a number 
+ * which identifies a certain property.
+ */
+export type PropertyAccessor = string | NumberLike;
 
 const LotObjectRange = [
 	+ExemplarProperty.LotConfigPropertyLotObject,
@@ -189,26 +202,36 @@ abstract class BaseExemplar {
 
 	// ## prop(key)
 	// Helper function for accessing a property.
-	prop<T extends number>(key: NumberLike<T>): Property<T> | undefined {
-		return this.#table.get(+key);
+	// prop(key: number | string): Property | undefined {
+	prop<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T> | undefined;
+	prop(key: PropertyAccessor): Property | undefined;
+	prop(key: PropertyAccessor): Property | undefined {
+		let id = normalizeId(key);
+		return this.#table.get(id);
 	}
 
 	// ## value(key)
 	// Helper function for directly accessing the value of a property.
-	value<T extends number>(key: NumberLike<T>) {
+	value<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T>['value'] | undefined;
+	value(key: PropertyAccessor): ExemplarPropertyValue | undefined;
+	value(key: PropertyAccessor): ExemplarPropertyValue | undefined {
 		let prop = this.prop(key);
 		return prop ? prop.value : undefined;
 	}
 
 	// ## get(key)
 	// Alias for `value(key)`
-	get<T extends number>(key: NumberLike<T>) {
+	// get<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T>['value'] | undefined;
+	// get(key: PropertyAccessor): ExemplarPropertyValue | undefined;
+	get(key: PropertyAccessor): ExemplarPropertyValue | undefined {
 		return this.value(key);
 	}
 
 	// ## set(key, value)
 	// Updates the value of a rop by key.
-	set(key: number, value: ExemplarPropertyValue) {
+	// set<T extends ExemplarPropertyIdLike>(key: T, value: PropertyByAccessor<T>['value']): this;
+	// set(key: PropertyAccessor, value: ExemplarPropertyValue): this;
+	set(key: PropertyAccessor, value: ExemplarPropertyValue): this {
 		let prop = this.prop(key);
 		if (prop) {
 			prop.value = value;
@@ -232,7 +255,7 @@ abstract class BaseExemplar {
 	addProperty<T extends ExemplarPropertyIdLike>(
 		idOrName: T,
 		value: ExemplarPropertyIdLikeToValue<T>,
-	): Property<ExemplarPropertyIdLikeToId<T>>;
+	): PropertyByAccessor<T>;
 	addProperty(
 		idOrName: number | string,
 		value: ExemplarPropertyValue,
@@ -363,7 +386,7 @@ abstract class BaseExemplar {
 
 // # normalaizeId(idOrName)
 // Looks up the *numeric* property id, but also allows looking up by name.
-function normalizeId(idOrName: number | string): number {
+function normalizeId(idOrName: NumberLike | string): number {
 	if (typeof idOrName === 'string') {
 		if (idOrName in ExemplarProperty) {
 			return +ExemplarProperty[idOrName as keyof typeof ExemplarProperty];
@@ -371,7 +394,7 @@ function normalizeId(idOrName: number | string): number {
 			throw new Error(`Unknown exemplar property name ${idOrName}!`);
 		}
 	} else {
-		return idOrName;
+		return +idOrName;
 	}
 }
 
@@ -419,14 +442,14 @@ export class Cohort extends BaseExemplar {
 
 // # Property()
 // Wrapper class around an Exemplar property.
-class Property<T = number> {
+class Property<T extends number = number> {
 	id = 0x00000000;
 	type: PropertyValueType = Uint32Array;
-	value: ExemplarPropertyValue | undefined;
+	value: ExemplarPropertyIdLikeToType<T> | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data?: PropertyOptions | Property<T>) {
+	constructor(data?: PropertyOptions<T> | Property<T>) {
 		let isClone = data instanceof Property;
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;

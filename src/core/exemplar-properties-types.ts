@@ -3,7 +3,7 @@
 // when reading exemplar properties. The exemplar-properties object is what does 
 // the magic for us.
 import type { ValueOf } from 'type-fest';
-import type { uint32, uint16, uint8, sint32, float, sint64 } from 'sc4/types';
+import type { uint32, uint16, uint8, sint32, sint64, float } from 'sc4/types';
 import type {
 	ExemplarProperty,
 	kPropertyId,
@@ -15,6 +15,7 @@ export type ExemplarPropertyPrimitive =
 	| uint16
 	| uint32
 	| sint32
+	| sint64
 	| float
 	| boolean;
 export type ExemplarPropertyValue =
@@ -90,5 +91,9 @@ type ExtractType<T extends number | HasTypeKey> =
 			: ExtractPrimitiveType<ExtractTypeSymbol<T>>
 		) : ExemplarPropertyValue;
 
-export type ExemplarPropertyIdLikeToType<T extends ExemplarPropertyIdLike> =
-	ExtractType<ExemplarPropertyIdLikeToValue<T>>;
+export type ExemplarPropertyIdLikeToType<T extends string | number> =
+	T extends ExemplarPropertyIdLike
+		? ExtractType<ExemplarPropertyIdLikeToValue<T>>
+		: ExemplarPropertyValue;
+
+let foo: ExemplarPropertyIdLikeToType<'Euhm wat'> = {};
