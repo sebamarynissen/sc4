@@ -3824,11 +3824,11 @@ HardFailureType:
   type: Uint32
   description: Explosion type at end of life.
   options:
-    0DoesntExplode: 0x0
-    1LowEnergyExplosion: 0x1
-    2MediumEnergyExplosion: 0x2
-    3HighEnergyExplosion: 0x3
-    4SuperHighEnergyExplosion: 0x4
+    DoesntExplode: 0x0
+    LowEnergyExplosion: 0x1
+    MediumEnergyExplosion: 0x2
+    HighEnergyExplosion: 0x3
+    SuperHighEnergyExplosion: 0x4
 TrainMinMaxKPH:
   id: 0x6a440d40
   type: Uint32

@@ -101,10 +101,12 @@ fs.writeFileSync(
 
 function normalizeName(str) {
 	let normalized = str
+		.replaceAll(/^\d - /g, '')
 		.replaceAll(/(\d)-(\d)/g, '$1_$2')
 		.replaceAll(/:/g, ' ')
 		.replaceAll(/§/g, '$')
-		.replaceAll(/[^\w$ ]/g, '');
+		.trim()
+		.replaceAll(/[^\w$ ]/g, '')
 	return toPascalCase(normalized);
 }
 
