@@ -10,8 +10,20 @@ import type {
 	kPropertyType,
 } from './exemplar-properties.js';
 
+export type ExemplarPropertyPrimitive = 
+	| uint8
+	| uint16
+	| uint32
+	| sint32
+	| float
+	| boolean;
+export type ExemplarPropertyValue =
+	| string
+	| ExemplarPropertyPrimitive
+	| ExemplarPropertyPrimitive[];
+
 type P = typeof ExemplarProperty;
-export type NumberLike<T extends number> =
+export type NumberLike<T extends number = number> =
 	| T
 	| { [kPropertyId]: T; }
 	| { [Symbol.toPrimitive](...args: any[]): T; };
@@ -25,7 +37,7 @@ export type ExemplarPropertyIdLike = ExemplarPropertyName | ExemplarPropertyId;
 
 // This generic type accepts both a numeric id or a string and ensures we return 
 // a proper *numeric id*.
-export type ExemplarPropertyLikeToId<T extends ExemplarPropertyIdLike> =
+export type ExemplarPropertyIdLikeToId<T extends ExemplarPropertyIdLike> =
 	T extends ExemplarPropertyId
 		? T
 		: T extends ExemplarPropertyName
@@ -61,7 +73,7 @@ type ExtractPrimitiveType<T> = T extends typeof Uint32Array
 	? sint64
 	: T extends Boolean
 	? boolean
-	: never;
+	: ExemplarPropertyValue;
 
 type HasTypeKey = { [kPropertyType]: any };
 type ExtractTypeSymbol<T extends HasTypeKey> = T[typeof kPropertyType];
@@ -76,7 +88,7 @@ type ExtractType<T extends number | HasTypeKey> =
 			: ExtractTypeSymbol<T> extends readonly any[]
 			? ExtractPrimitiveType<Unwrap<ExtractTypeSymbol<T>>>[]
 			: ExtractPrimitiveType<ExtractTypeSymbol<T>>
-		) : never;
+		) : ExemplarPropertyValue;
 
 export type ExemplarPropertyIdLikeToType<T extends ExemplarPropertyIdLike> =
 	ExtractType<ExemplarPropertyIdLikeToValue<T>>;

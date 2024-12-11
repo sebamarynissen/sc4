@@ -1,5 +1,6 @@
-import type { TGIArray } from "sc4/types";
-import type { PropertyOptions, PropertyValue } from "./exemplar.js";
+import type { TGIArray } from 'sc4/types';
+import type { PropertyOptions } from './exemplar.js';
+import type { ExemplarPropertyValue } from './exemplar-properties-types.js';
 
 type TypeIndicator =
 	| 'String'
@@ -103,7 +104,7 @@ function readProp() {
 	let reps = Number(val.slice(0, index));
 	advance(index+1);
 
-	let value = readValue(typeHint, reps) as PropertyValue;
+	let value = readValue(typeHint, reps) as ExemplarPropertyValue;
 
 	// Restore.
 	val = temp;

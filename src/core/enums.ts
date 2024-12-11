@@ -92,4 +92,4 @@ export const LotObjectType = makeEnum({
 	Network: 0x07,
 } as const);
 
-export { ExemplarProperty } from './data/exemplar-properties.js';
+export { ExemplarProperty } from './exemplar-properties.js';

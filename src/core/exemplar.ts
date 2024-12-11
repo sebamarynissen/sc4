@@ -2,13 +2,21 @@
 import { isUint8Array } from 'uint8array-extras';
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
-import NAMES from './exemplar-props.js';
 import FileType from './file-types.js';
 import LotObject, { type LotObjectArray } from './lot-object.js';
-import { ExemplarProperty } from './enums.js';
+import { ExemplarProperty, kPropertyType } from './exemplar-properties.js';
 import { invertMap, hex, inspect } from 'sc4/utils';
 import { kFileType } from './symbols.js';
-import type { byte, float, sint32, sint64, TGIArray, uint16, uint32, uint8 } from 'sc4/types';
+import type { byte, float, sint32, sint64, TGIArray, uint16, uint32 } from 'sc4/types';
+import type {
+	NumberLike,
+	ExemplarPropertyId,
+	ExemplarPropertyIdLike,
+	ExemplarPropertyIdLikeToId,
+    ExemplarPropertyIdLikeToValue,
+    ExemplarPropertyPrimitive,
+    ExemplarPropertyValue,
+} from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
 
@@ -23,9 +31,6 @@ type PropertyValueType =
  	| typeof Boolean
  	| typeof String;
 
-type PropertyPrimitive = uint8 | uint16 | uint32 | sint32 | float | boolean;
-export type PropertyValue = string | PropertyPrimitive | PropertyPrimitive[];
-
 export type ExemplarOptions = {
 	id?: ExemplarId;
 	parent?: TGIArray;
@@ -34,14 +39,21 @@ export type ExemplarOptions = {
 export type PropertyOptions = {
 	id: number;
 	type?: PropertyValueType;
-	value: PropertyValue;
+	value: ExemplarPropertyValue;
 	comment?: string;
 };
 
 const LotObjectRange = [
-	ExemplarProperty.LotConfigPropertyLotObject,
-	ExemplarProperty.LotConfigPropertyLotObject+1279,
+	+ExemplarProperty.LotConfigPropertyLotObject,
+	+ExemplarProperty.LotConfigPropertyLotObject+1279,
 ];
+
+// Invert the exemplar properties so that we can find the name by id easily.
+const idToName: Map<number, string> = new Map(
+	Object.entries(ExemplarProperty).map(([name, object]) => {
+		return [+(object as NumberLike<ExemplarPropertyId>), name as string];
+	}),
+);
 
 // We no longer use an enum for indicating the type of an exemplar property. 
 // Instead we use the native built-in JavaScript typed arrays to indicate the 
@@ -158,7 +170,7 @@ abstract class BaseExemplar {
 	get lotObjects() {
 		if (this.#lotObjects) return this.#lotObjects;
 		const table = this.#table;
-		let i = ExemplarProperty.LotConfigPropertyLotObject;
+		let i = +ExemplarProperty.LotConfigPropertyLotObject;
 		let out = [];
 		let entry = table.get(i);
 		while (entry) {
@@ -177,26 +189,26 @@ abstract class BaseExemplar {
 
 	// ## prop(key)
 	// Helper function for accessing a property.
-	prop(key: number): Property | undefined {
-		return this.#table.get(key);
+	prop<T extends number>(key: NumberLike<T>): Property<T> | undefined {
+		return this.#table.get(+key);
 	}
 
 	// ## value(key)
 	// Helper function for directly accessing the value of a property.
-	value(key: number) {
+	value<T extends number>(key: NumberLike<T>) {
 		let prop = this.prop(key);
 		return prop ? prop.value : undefined;
 	}
 
 	// ## get(key)
 	// Alias for `value(key)`
-	get(key: number) {
+	get<T extends number>(key: NumberLike<T>) {
 		return this.value(key);
 	}
 
 	// ## set(key, value)
 	// Updates the value of a rop by key.
-	set(key: number, value: PropertyValue) {
+	set(key: number, value: ExemplarPropertyValue) {
 		let prop = this.prop(key);
 		if (prop) {
 			prop.value = value;
@@ -208,7 +220,7 @@ abstract class BaseExemplar {
 	// Ensures that the value return is never an array. This is to handle cases 
 	// where properties that normally shouldn't be arrays, are still stored as 
 	// 1-element arrays in an examplar,
-	singleValue(key: number): string | PropertyPrimitive | undefined {
+	singleValue(key: number): string | ExemplarPropertyPrimitive | undefined {
 		let value = this.value(key);
 		return Array.isArray(value) ? value[0] : value;
 	}
@@ -217,21 +229,22 @@ abstract class BaseExemplar {
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 
 	// something specific.
+	addProperty<T extends ExemplarPropertyIdLike>(
+		idOrName: T,
+		value: ExemplarPropertyIdLikeToValue<T>,
+	): Property<ExemplarPropertyIdLikeToId<T>>;
 	addProperty(
-		id: number,
-		value: PropertyValue,
+		idOrName: number | string,
+		value: ExemplarPropertyValue,
+		typeHint?: PropertyValueType,
+	): Property;
+	addProperty(
+		idOrName: number | string,
+		value: ExemplarPropertyValue,
 		typeHint: PropertyValueType = Uint32,
 	) {
-		let type;
-		if (typeof value === 'string') {
-			type = String;
-		} else if (typeof value === 'bigint') {
-			type = BigInt64Array;
-		} else if (typeof value === 'boolean') {
-			type = Boolean;
-		} else {
-			type = typeHint;
-		}
+		let id = normalizeId(idOrName);
+		let type = normalizeType(id, value, typeHint);
 		let prop = new Property({
 			id,
 			type,
@@ -239,6 +252,7 @@ abstract class BaseExemplar {
 		});
 		this.props.push(prop);
 		this.#table.set(prop.id, prop);
+		return prop;
 	}
 
 	// ## parse(bufferOrStream)
@@ -328,7 +342,7 @@ abstract class BaseExemplar {
 			props = props.filter(prop => {
 				return !(min <= prop.id && prop.id <= max);
 			});
-			let i = ExemplarProperty.LotConfigPropertyLotObject;
+			let i = +ExemplarProperty.LotConfigPropertyLotObject;
 			for (let lotObject of this.#lotObjects) {
 				let prop = new Property({
 					id: i++,
@@ -344,6 +358,48 @@ abstract class BaseExemplar {
 		return buffer.toUint8Array();
 
 	}
+
+}
+
+// # normalaizeId(idOrName)
+// Looks up the *numeric* property id, but also allows looking up by name.
+function normalizeId(idOrName: number | string): number {
+	if (typeof idOrName === 'string') {
+		if (idOrName in ExemplarProperty) {
+			return +ExemplarProperty[idOrName as keyof typeof ExemplarProperty];
+		} else {
+			throw new Error(`Unknown exemplar property name ${idOrName}!`);
+		}
+	} else {
+		return idOrName;
+	}
+}
+
+// # normalizeType(id, value, typeHint)
+// Tries to figure out the type of this property in an intelligent way. We first 
+// check whether the id is a known id. If that's the case, then we know the type 
+// right away. Otherwise we try to derive it from the value, and as a last 
+// resort we rely on the type hint, which defaults to uint32.
+function normalizeType(
+	id: number,
+	value: ExemplarPropertyValue,
+	typeHint: PropertyValueType = Uint32Array,
+): PropertyValueType {
+	let name = idToName.get(id);
+	if (name && name in ExemplarProperty) {
+		let object = ExemplarProperty[name as keyof typeof ExemplarProperty];
+		if (typeof object === 'number') return Uint32Array;
+		let [type] = [object[kPropertyType]].flat();
+		return type;
+	}
+
+	// The property is not a known property, so we're in uncharted territory. 
+	// Now check if we can figure out the type from the value itself.
+	if (typeof value === 'string') return String;
+	let [first] = [value].flat();
+	if (typeof first === 'boolean') return Boolean;
+	else if (typeof first === 'bigint') return BigInt64Array;
+	else return typeHint;
 
 }
 
@@ -363,14 +419,14 @@ export class Cohort extends BaseExemplar {
 
 // # Property()
 // Wrapper class around an Exemplar property.
-class Property {
+class Property<T = number> {
 	id = 0x00000000;
 	type: PropertyValueType = Uint32Array;
-	value: PropertyValue | undefined;
+	value: ExemplarPropertyValue | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data?: PropertyOptions | Property) {
+	constructor(data?: PropertyOptions | Property<T>) {
 		let isClone = data instanceof Property;
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
@@ -380,7 +436,7 @@ class Property {
 
 	// ## get name()
 	get name() {
-		return NAMES[this.id] ?? '';
+		return idToName.get(this.id) ?? '';
 	}
 
 	// ## [Symbol.toPrimitive]()
@@ -421,7 +477,7 @@ class Property {
 	get byteLength() {
 		let { type, value } = this;
 		let bytes = getByteLengthFromType(type);
-		return this.multiple ? (4 + (value as PropertyValue[]).length * bytes) : bytes;
+		return this.multiple ? (4 + (value as ExemplarPropertyValue[]).length * bytes) : bytes;
 	}
 
 	// ## parse(rs)
@@ -453,7 +509,7 @@ class Property {
 			} else {
 				let values = this.value = new Array(reps);
 				for (let i = 0; i < reps; i++) {
-					values[i] = reader!(rs) as PropertyPrimitive;
+					values[i] = reader!(rs) as ExemplarPropertyPrimitive;
 				}
 			}
 		}
