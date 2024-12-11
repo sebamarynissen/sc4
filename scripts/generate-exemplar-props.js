@@ -82,11 +82,14 @@ obj.ExemplarPatchTargets = {
 	description: 'A list of Exemplar files this patch applies to (format: Group ID 1, Instance ID 1, Group ID 2, Instance ID 2, ...). The list must contain an even number of IDs',
 };
 
-// Serialize to yaml.
-let doc = new Document(obj);
+// Serialize to yaml, but make sure to transform to an *array*.
+let array = Object.entries(obj).map(([name, obj]) => {
+	return { name, ...obj };
+});
+let doc = new Document(array);
 for (let item of doc.contents.items) {
-	item.value.get('id', true).format = 'HEX';
-	let options = item.value.get('options', true);
+	item.get('id', true).format = 'HEX';
+	let options = item.get('options', true);
 	if (options) {
 		for (let option of options.items) {
 			option.value.format = 'HEX';
