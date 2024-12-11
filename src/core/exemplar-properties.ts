@@ -26,7 +26,7 @@ const kToPrimitive = Symbol.toPrimitive;
 export const kPropertyId = Symbol.for('sc4.ExemplarPropertyId');
 export const kPropertyType = Symbol.for('sc4.ExemplarPropertyType');
 
-export default {
+export const ExemplarProperty = {
 	/**
 	 * Used by property editors to group exemplars and filter properties
 	 */
@@ -12425,3 +12425,4 @@ export default {
 		[kInspect]: inspector,
 	},
 } as const;
+export default ExemplarProperty;
