@@ -92,27 +92,4 @@ export const LotObjectType = makeEnum({
 	Network: 0x07,
 } as const);
 
-export const ExemplarProperty = makeEnum({
-	ExemplarType: 0x10,
-	ExemplarName: 0x20,
-	Family: 0x27812870,
-	BuildingFoundation: 0x88FCD877,
-	UserVisibleNameKey: 0x8A416A99,
-	ItemIcon: 0x8A2602B8,
-	ItemOrder: 0x8A2602B9,
-	QueryExemplarGUID: 0x2A499F85,
-	SFXQuerySound: 0xAA1DD397,
-	SFXDefaultPlopSound: 0xC9B93A56,
-	SFXAmbientGoodSound: 0xCA19D7CA,
-	SFXActivateSound: 0x4A4C132E,
-	ResourceKeyType0: 0x27812820,
-	ResourceKeyType1: 0x27812821,
-	ResourceKeyType2: 0x27812822,
-	ResourceKeyType3: 0x27812823,
-	ResourceKeyType4: 0x27812824,
-	ResourceKeyType5: 0x27812825,
-	SimulatorDateStart: 0xca7515cc,
-	SimulatorDateInterval: 0x0a751675,
-	SimulatorDateDuration: 0x4a764564,
-	LotConfigPropertyLotObject: 0x88edc900,
-} as const);
+export { ExemplarProperty } from './data/exemplar-properties.js';

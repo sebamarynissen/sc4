@@ -34,7 +34,7 @@ const kToPrimitive = Symbol.toPrimitive;
 export const kPropertyId = Symbol.for('sc4.ExemplarPropertyId');
 export const kPropertyType = Symbol.for('sc4.ExemplarPropertyType');
 
-export default {
+export const ExemplarProperty = {
 `;
 for (let key of Object.keys(props)) {
 	let obj = props[key];
@@ -64,6 +64,7 @@ for (let key of Object.keys(props)) {
 	code += `\t${key}: ${value},\n`;
 }
 code += `} as const;
+export default ExemplarProperty;
 `;
 
 function hex(nr) {
