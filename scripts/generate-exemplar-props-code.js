@@ -16,22 +16,33 @@ const Sint64 = BigInt64Array;
 const Float32 = Float32Array;
 
 const kToPrimitive = Symbol.toPrimitive;
-export const kType = Symbol('type');
+export const kPropertyId = Symbol.for('sc4.ExemplarPropertyId');
+export const kPropertyType = Symbol.for('sc4.ExemplarPropertyType');
 export default {
 `;
 for (let key of Object.keys(props)) {
 	let obj = props[key];
 	if (key.match(/^\d/)) key = `'${key}'`;
 	let value = hex(obj.id);
-	if (obj.options || obj.type !== 'Uint32') {
+	if (obj.options || obj.type !== 'Uint32' || Math.abs(obj.count) > 1) {
+		let { type, count } = obj;
+		if (Math.abs(count) > 1) {
+			type = `[${type}]`;
+		}
 		let id = value;
 		value = `{\n`;
 		value += `\t\t[kToPrimitive]: () => ${id},\n`;
-		value += `\t\t[kType]: ${obj.type},\n`;
+		value += `\t\t[kPropertyId]: ${id},\n`;
+		value += `\t\t[kPropertyType]: ${type},\n`;
 		for (let [key, option] of Object.entries(obj.options || [])) {
 			value += `\t\t${key}: ${hex(option)},\n`;
 		}
 		value += '\t}';
+	}
+	if (obj.description) {
+		code += `\t/**\n`;
+		code += `${wrap(obj.description)}\n`;
+		code += `\t */\n`;
 	}
 	code += `\t${key}: ${value},\n`;
 }
@@ -46,3 +57,17 @@ fs.writeFileSync(
 	new URL('../src/core/data/exemplar-properties.ts', import.meta.url),
 	code,
 );
+
+function wrap(description, prefix = '\t') {
+	let lines = [''];
+	let split = description.split(' ');
+	while (split.length > 0) {
+		let word = split.shift();
+		if (lines.at(-1).length + word.length > 80-7) {
+			lines.push(word);
+		} else {
+			lines[lines.length-1] += ` ${word}`;
+		}
+	}
+	return lines.map(x => `${prefix} * ${x.trim()}`).join('\n');
+}

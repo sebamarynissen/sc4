@@ -8,11 +8,16 @@ const Sint64 = BigInt64Array;
 const Float32 = Float32Array;
 
 const kToPrimitive = Symbol.toPrimitive;
-export const kType = Symbol('type');
+export const kPropertyId = Symbol.for('sc4.ExemplarPropertyId');
+export const kPropertyType = Symbol.for('sc4.ExemplarPropertyType');
 export default {
+	/**
+	 * Used by property editors to group exemplars and filter properties
+	 */
 	ExemplarType: {
 		[kToPrimitive]: () => 0x00000010,
-		[kType]: Uint32,
+		[kPropertyId]: 0x00000010,
+		[kPropertyType]: Uint32,
 		OtherUnknown: 0x00000000,
 		Tuning: 0x00000001,
 		Buildings: 0x00000002,
@@ -51,303 +56,660 @@ export default {
 		TerrainBrush: 0x00000027,
 		MiscCatalog: 0x00000028,
 	},
+	/**
+	 * A GZGUID that identifies a class interface
+	 */
 	ExemplarInterfaceID: 0x00000011,
+	/**
+	 * A GZCLSID that identifies a class implementation
+	 */
 	ExemplarClassID: 0x00000012,
+	/**
+	 * If true, LotEditor identifies the lot as a custom lot.
+	 */
 	CustomLot: 0xcbe243f7,
+	/**
+	 * Identifies this exemplar in property editors.
+	 */
 	ExemplarName: {
 		[kToPrimitive]: () => 0x00000020,
-		[kType]: String,
+		[kPropertyId]: 0x00000020,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Identifies this exemplar so that C++ code and other exemplars can refer
+	 * to it
+	 */
 	ExemplarID: 0x00000021,
+	/**
+	 * Specifies a group id registered with the resource manager
+	 */
 	ResManRegisteredGroups: {
 		[kToPrimitive]: () => 0x07af514b,
-		[kType]: Uint32,
+		[kPropertyId]: 0x07af514b,
+		[kPropertyType]: Uint32,
 		AutoTracks: 0x67cd5fa1,
 	},
+	/**
+	 * Range: [0.0 - 90.0]
+	 */
 	MaxNetworkSlopeChange: {
 		[kToPrimitive]: () => 0x07b36c71,
-		[kType]: Float32,
+		[kPropertyId]: 0x07b36c71,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * kSC4FloraParametersProperty
+	 */
 	KSC4FloraParametersProperty: {
 		[kToPrimitive]: () => 0x083dc35b,
-		[kType]: Float32,
+		[kPropertyId]: 0x083dc35b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * kSC4FloraPreferencesProperty
+	 */
 	KSC4FloraPreferencesProperty: {
 		[kToPrimitive]: () => 0x083dc487,
-		[kType]: Float32,
+		[kPropertyId]: 0x083dc487,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * kSC4FloraCursorProperty
+	 */
 	KSC4FloraCursorProperty: 0x083de16f,
+	/**
+	 * mnRandomSeedingCellsPerMonth
+	 */
 	MnRandomSeedingCellsPerMonth: 0x085489c7,
+	/**
+	 * ID of FSH texture to use for flora's shadow
+	 */
 	ShadowTextureID: 0x085489c8,
+	/**
+	 * Offset of shadow from object center
+	 */
 	ShadowOffset: {
 		[kToPrimitive]: () => 0x085489c9,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489c9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Size of shadow
+	 */
 	ShadowSize: {
 		[kToPrimitive]: () => 0x085489ca,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489ca,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Color of shadow
+	 */
 	ShadowColor: {
 		[kToPrimitive]: () => 0x085489cb,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489cb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Strength of flora shadows
+	 */
 	ShadowStrength: {
 		[kToPrimitive]: () => 0x085489cc,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489cc,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Mask threshold of flora shadows
+	 */
 	ShadowThreshold: {
 		[kToPrimitive]: () => 0x085489cd,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489cd,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Sun direction in degrees, clockwise from Z axis
+	 */
 	SunDirection: {
 		[kToPrimitive]: () => 0x085489ce,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489ce,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Sun pitch in degrees, up from XZ plane
+	 */
 	SunPitch: {
 		[kToPrimitive]: () => 0x085489cf,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489cf,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Strength of hill shadows
+	 */
 	HillShadowStrength: {
 		[kToPrimitive]: () => 0x085489d0,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489d0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Can be used to bend shadows downwards (below 1) or upwards (above 1)
+	 */
 	HillShadowWarp: {
 		[kToPrimitive]: () => 0x085489d1,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489d1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Depth below the hill shadow at which object shadows fade to nothingness
+	 */
 	HillShadowFadeDistance: {
 		[kToPrimitive]: () => 0x085489d2,
-		[kType]: Float32,
+		[kPropertyId]: 0x085489d2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Protection effect of station at its center (in protection units: 0-255).
+	 */
 	FireStationCenterStrength: {
 		[kToPrimitive]: () => 0x08f55dc0,
-		[kType]: Sint32,
+		[kPropertyId]: 0x08f55dc0,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Protection effect of station at its limit (in protection units: 0-255).
+	 */
 	FireStationExteriorStrength: {
 		[kToPrimitive]: () => 0x08f55dc1,
-		[kType]: Sint32,
+		[kPropertyId]: 0x08f55dc1,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Effect radius of station (in meters).
+	 */
 	FireStationRadius: {
 		[kToPrimitive]: () => 0x08f55dc2,
-		[kType]: Float32,
+		[kPropertyId]: 0x08f55dc2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of trucks that can be dispatched from this station.
+	 */
 	FireStationTotalDispatches: {
 		[kToPrimitive]: () => 0x08f55dc5,
-		[kType]: Sint32,
+		[kPropertyId]: 0x08f55dc5,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on air pollution
+	 */
 	AirEffect: {
 		[kToPrimitive]: () => 0x08f79b8e,
-		[kType]: Float32,
+		[kPropertyId]: 0x08f79b8e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The minimum before you are bankrupt. Usually something like -100,000
+	 */
 	BudgetMinAllowableFunds: {
 		[kToPrimitive]: () => 0x090e0a9f,
-		[kType]: Sint64,
+		[kPropertyId]: 0x090e0a9f,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * The maximum number of outstanding bonds that is allowed
+	 */
 	BudgetMaxBonds: {
 		[kToPrimitive]: () => 0x090e0aac,
-		[kType]: Uint8,
+		[kPropertyId]: 0x090e0aac,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Factor by which this ordinance reduces power consumption
+	 */
 	PowerReductionEffect: {
 		[kToPrimitive]: () => 0x0911e117,
-		[kType]: Float32,
+		[kPropertyId]: 0x0911e117,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % chance
+	 * of a utility strike
+	 */
 	UtilityStrikeResponseCurve: {
 		[kToPrimitive]: () => 0x0911e2e6,
-		[kType]: Float32,
+		[kPropertyId]: 0x0911e2e6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Converts the current radation of the plant to a multiplier for
+	 * maintenance cost
+	 */
 	AgeToMaintenanceCostMultiplierResponseCurve: {
 		[kToPrimitive]: () => 0x0911e2e7,
-		[kType]: Float32,
+		[kPropertyId]: 0x0911e2e7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiples the rate of aging based on funding level
+	 */
 	FundingPercentageToDecayRateMultiplierResponseCurve: {
 		[kToPrimitive]: () => 0x0911e2e8,
-		[kType]: Float32,
+		[kPropertyId]: 0x0911e2e8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiples the rate of aging based on usage level
+	 */
 	UsagePercentageToDecayRateMultiplierResponseCurve: {
 		[kToPrimitive]: () => 0x0911e2e9,
-		[kType]: Float32,
+		[kPropertyId]: 0x0911e2e9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Efficiency of utility buildings will drop to this % during a strike
+	 */
 	UtilityStrikeEfficiency: {
 		[kToPrimitive]: () => 0x09122027,
-		[kType]: Float32,
+		[kPropertyId]: 0x09122027,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost of maintaining this power pole
+	 */
 	PowerPoleMonthlyUpkeep: {
 		[kToPrimitive]: () => 0x09132de8,
-		[kType]: Sint64,
+		[kPropertyId]: 0x09132de8,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Maximum water pollution value reported to the UI, must be less than 32767
+	 */
 	MaxWaterPollutionValueForUI: 0x09134be2,
+	/**
+	 * When a cell has this much garbage, it's considered polluted
+	 */
 	GarbagePollutionThreshold: 0x0913519b,
+	/**
+	 * When a cell has this much water pollution, it's considered polluted
+	 */
 	WaterPollutionThreshold: 0x091351ae,
+	/**
+	 * Number of garbage units that decompose (i.e., disappear) each month
+	 */
 	GarbageDecompostionAmount: 0x09135479,
+	/**
+	 * Scaling factor to convert simulator garbage units to whatever units the
+	 * UI displays (tons, Kgs)
+	 */
 	GarbageUIScalingFactor: {
 		[kToPrimitive]: () => 0x09135482,
-		[kType]: Float32,
+		[kPropertyId]: 0x09135482,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Radius of this hospital's coverage, in meters.  Current settings are 384
+	 * for clinic; 800 for hospital; 5800 for disease lab.
+	 */
 	HospitalCoverageRadius: {
 		[kToPrimitive]: () => 0x091b42a2,
-		[kType]: Float32,
+		[kPropertyId]: 0x091b42a2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Amount by which HQ decays each month
+	 */
 	HQDecay: {
 		[kToPrimitive]: () => 0x0929c439,
-		[kType]: Float32,
+		[kPropertyId]: 0x0929c439,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Average age assigned to new Medium Wealth residents
+	 */
 	MediumWealthAverageAge: {
 		[kToPrimitive]: () => 0x0929cc30,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0929cc30,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Average age assigned to new High Wealth residents
+	 */
 	HighWealthAverageAge: {
 		[kToPrimitive]: () => 0x0929cc36,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0929cc36,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * EQ assigned to new Medium Wealth residents
+	 */
 	MediumWealthEQ: {
 		[kToPrimitive]: () => 0x0929cc65,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0929cc65,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects the capacity
+	 * of hospitals
+	 */
 	HealthCapacityEffect: {
 		[kToPrimitive]: () => 0x092d909b,
-		[kType]: Float32,
+		[kPropertyId]: 0x092d909b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Default height above trench floor to place intersectons
+	 */
 	UndergroundIntersectionHeight: {
 		[kToPrimitive]: () => 0x096e5653,
-		[kType]: Float32,
+		[kPropertyId]: 0x096e5653,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * RGBA color for unwatered terrain cells in pipe view
+	 */
 	UnwateredTerrainColor: {
 		[kToPrimitive]: () => 0x097f4c4e,
-		[kType]: Uint8,
+		[kPropertyId]: 0x097f4c4e,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * The maximum number of cells allowed between power poles
+	 */
 	MaxCellsBetweenPowerPoles: 0x098b25c8,
+	/**
+	 * The minimum distance allowed between a power line and the terrain
+	 */
 	MinimumPowerLineHeight: {
 		[kToPrimitive]: () => 0x098b27d0,
-		[kType]: Float32,
+		[kPropertyId]: 0x098b27d0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Bulldoze cost to delete the building, in Simoleans(tm)
+	 */
 	BulldozeCost: {
 		[kToPrimitive]: () => 0x099afacd,
-		[kType]: Sint64,
+		[kPropertyId]: 0x099afacd,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Total lifetime of fog particle (ms)
+	 */
 	ParticleLife: {
 		[kToPrimitive]: () => 0x09b00b2b,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b2b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Wind power coefficient (v = wind * c)
+	 */
 	WindFactor: {
 		[kToPrimitive]: () => 0x09b00b2c,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b2c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terrain gradient coefficient (effect of hills)
+	 */
 	TerrainFactor: {
 		[kToPrimitive]: () => 0x09b00b2d,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b2d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max fog creation rate (particles/sec)
+	 */
 	MaxParticleRate: {
 		[kToPrimitive]: () => 0x09b00b2e,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b2e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Angular window centered around anti-wind direction in which fog appears
+	 * (degrees)
+	 */
 	ParticleFOV: {
 		[kToPrimitive]: () => 0x09b00b2f,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b2f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Floating distance of fog above terrain
+	 */
 	FloatAltitude: {
 		[kToPrimitive]: () => 0x09b00b30,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b30,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum alpha value for particles (0-255)
+	 */
 	MaxOpacity: {
 		[kToPrimitive]: () => 0x09b00b31,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b31,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Initial portion of particle life for fade-in (ms)
+	 */
 	FadeinTime: {
 		[kToPrimitive]: () => 0x09b00b32,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b32,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terminal portion of particle life for fade-out (ms)
+	 */
 	FadeoutTime: {
 		[kToPrimitive]: () => 0x09b00b33,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b33,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of fog particles
+	 */
 	ParticleCount: 0x09b00b34,
+	/**
+	 * Fraction (0-1) of maximum particle rate by hour of the clock
+	 */
 	FogRateByHour: {
 		[kToPrimitive]: () => 0x09b00b35,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b00b35,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Global lighting value for night time -- everything gets multiplied by
+	 * this.
+	 */
 	NighttimeGlobalColor: {
 		[kToPrimitive]: () => 0x09b6d6ae,
-		[kType]: Float32,
+		[kPropertyId]: 0x09b6d6ae,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifies the time (0-23) that night time graphically begins.
+	 */
 	K24HourClockNightBeginProperty: 0x09b73421,
+	/**
+	 * Specifies the time (0-23) that night time graphically ends.
+	 */
 	K24HourClockNightEndProperty: 0x09b73422,
+	/**
+	 * Higher this value, the more weightage this texture gets while blending
+	 * with others
+	 */
 	TextureBlendStrength: {
 		[kToPrimitive]: () => 0x09c2aef0,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Specifiess how does the texture strength fall off with distance
+	 */
 	Z0_TextureSpreadCurve: {
 		[kToPrimitive]: () => 0x09c2aef3,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifiess how does the texture strength fall off with distance
+	 */
 	Z1_TextureSpreadCurve: {
 		[kToPrimitive]: () => 0x09c2aef4,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifiess how does the texture strength fall off with distance
+	 */
 	Z2_TextureSpreadCurve: {
 		[kToPrimitive]: () => 0x09c2aef5,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifiess how does the texture strength fall off with distance
+	 */
 	Z3_TextureSpreadCurve: {
 		[kToPrimitive]: () => 0x09c2aef6,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifiess how does the texture strength fall off with distance
+	 */
 	Z4_TextureSpreadCurve: {
 		[kToPrimitive]: () => 0x09c2aef7,
-		[kType]: Float32,
+		[kPropertyId]: 0x09c2aef7,
+		[kPropertyType]: [Float32],
 	},
-	ModelResourceKey: 0x09c80416,
-	AuxiliaryModel1KeyHeadlights: 0x09c80417,
+	/**
+	 * Model type, group, and instance ID
+	 */
+	ModelResourceKey: {
+		[kToPrimitive]: () => 0x09c80416,
+		[kPropertyId]: 0x09c80416,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Type/Group/Instance ID for headlight/taillight model
+	 */
+	AuxiliaryModel1KeyHeadlights: {
+		[kToPrimitive]: () => 0x09c80417,
+		[kPropertyId]: 0x09c80417,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * If set to true, specifies that the prop should ignore lot state effects
+	 * (distressed, abandoned, etc.).
+	 */
 	IgnoreLotStateEffects: {
 		[kToPrimitive]: () => 0x09f00e59,
-		[kType]: Bool,
+		[kPropertyId]: 0x09f00e59,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Water Pollution Average Level to Water Pollution Decal Alpha curve
+	 */
 	WaterPollutionEffectStrengthCurve: {
 		[kToPrimitive]: () => 0x0a10c772,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a10c772,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Air Pollution Average Level to Air Pollution Particle Emission Rage curve
+	 */
 	AirPollutionEffectStrengthCurve: {
 		[kToPrimitive]: () => 0x0a10c773,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a10c773,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Radiation Pollution Average Level to Radiation Effect Strength curve
+	 */
 	RadiationPollutionEffectStrengthCurve: {
 		[kToPrimitive]: () => 0x0a10c774,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a10c774,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Radiation Pollution Average Level to Radiation Effect Strength curve
+	 */
 	GarbagePollutionEffectStrengthCurve: {
 		[kToPrimitive]: () => 0x0a10c775,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a10c775,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Bitfield describing which zoom levels score is active for
+	 */
 	AudioZoomScoreEnable: {
 		[kToPrimitive]: () => 0x0a25896b,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0a25896b,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Cost to demolish a power pole. Lines are ignored
+	 */
 	PowerPoleDemolitionCost: {
 		[kToPrimitive]: () => 0x0a2eced8,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a2eced8,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * GUID of sound played when alarm goes off
+	 */
 	SFXAlarmSoundId: 0x0a36afa2,
+	/**
+	 * Radii for attention per zoom
+	 */
 	AudioAmbienceAttentionSpanRadii: {
 		[kToPrimitive]: () => 0x0a36f410,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a36f410,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of months to payback a bond
+	 */
 	BudgetBondPaybackMonths: 0x0a3fb9a8,
+	/**
+	 * Filter GUIDs any of which must be satisfied
+	 */
 	AudioORFilters: 0x0a410ba0,
+	/**
+	 * Size of glob for grouping single layer, or occupant
+	 */
 	AudioOccupantGroupRadius: {
 		[kToPrimitive]: () => 0x0a4168e1,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a4168e1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps supply-over-demand to profit factor
+	 */
 	NDe_ProfitResponseCurve: {
 		[kToPrimitive]: () => 0x0a469353,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a469353,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Time In Seconds until lava flowing and solidification continues
+	 */
 	VolcanoLavaTotalLavaTimeInSecs: {
 		[kToPrimitive]: () => 0x0a4bc742,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a4bc742,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Orifice Size of Lava Flow in Metres
+	 */
 	VolcanoLavaOrificeRadius: 0x0a4bc752,
+	/**
+	 * GUID of sound played when building is around and damaged or decayed.
+	 */
 	SFXAmbienceDecayedSound: {
 		[kToPrimitive]: () => 0x0a4c13cb,
-		[kType]: Uint32,
+		[kPropertyId]: 0x0a4c13cb,
+		[kPropertyType]: Uint32,
 		CoalPowerPlant: 0x4a4c43e5,
 		HydrogenPowerPlant: 0x8a890d15,
 		NaturalGasPowerPlant: 0x6a890d99,
@@ -359,34 +721,75 @@ export default {
 		WaterPump: 0x2a55aaca,
 		WaterPurificationPlant: 0x2a55b192,
 	},
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for freight train density
+	 */
 	FreightTrainDensityCurve: {
 		[kToPrimitive]: () => 0x0a51188a,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a51188a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to %
+	 * coverage
+	 */
 	HealthFundingToCoverageCurve: {
 		[kToPrimitive]: () => 0x0a53b2f9,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a53b2f9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How many trips are satisfied by each train car.  Determines train length.
+	 */
 	SimsPerTrainCar: 0x0a53fd32,
+	/**
+	 * Size of glob for grouping cells
+	 */
 	AudioCellGroupRadius: {
 		[kToPrimitive]: () => 0x0a56212a,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a56212a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost of placing each cell of wire
+	 */
 	PowerLinePlacementCost: {
 		[kToPrimitive]: () => 0x0a5f596b,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a5f596b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How often this prop becomes active, in days.
+	 */
 	SimulatorDateInterval: 0x0a751675,
+	/**
+	 * GUID of the sound to play when the occupant is clicked on with query tool
+	 * and is abandoned.
+	 */
 	SFXQuerySoundAbandoned: 0x0a902434,
+	/**
+	 * GUID of the sound to play when an occupant is demolished
+	 */
 	SFXDemolitionSound: 0x0a93036f,
+	/**
+	 * Max playing one-shots
+	 */
 	AudioMaxPlayingOneShots: 0x0a946a57,
+	/**
+	 * Max amount of full volume to change down per second
+	 */
 	AudioVolumeDecayLimit: {
 		[kToPrimitive]: () => 0x0a9599bf,
-		[kType]: Float32,
+		[kPropertyId]: 0x0a9599bf,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Flag specifying the zooms in which the model should appear.
+	 */
 	AppearanceZoomsFlag: {
 		[kToPrimitive]: () => 0x0abfc024,
-		[kType]: Uint32,
+		[kPropertyId]: 0x0abfc024,
+		[kPropertyType]: Uint32,
 		None: 0x00000000,
 		Zoom1: 0x00000001,
 		Zoom2: 0x00000002,
@@ -420,90 +823,201 @@ export default {
 		Zoom2345: 0x0000001e,
 		Zoom12345: 0x0000001f,
 	},
+	/**
+	 * uSecs of active time for background thread
+	 */
 	MicroSecsPerTimeSlice: 0x0b579c21,
+	/**
+	 * uSecs of sleep time for background thread
+	 */
 	SleepMicroSecsAfterTimeSlice: 0x0b579c22,
+	/**
+	 * uSec budget for processing cells in main thread
+	 */
 	ProcessCellsMaxTimeSliceMicroSecs: 0x0b579c23,
 	MOperationQuantaForOccupiedCell: {
 		[kToPrimitive]: () => 0x0b579c24,
-		[kType]: Float32,
+		[kPropertyId]: 0x0b579c24,
+		[kPropertyType]: Float32,
 	},
 	MOperationQuantaForEmptyCell: {
 		[kToPrimitive]: () => 0x0b579c25,
-		[kType]: Float32,
+		[kPropertyId]: 0x0b579c25,
+		[kPropertyType]: Float32,
 	},
 	MOperationQuantaBeforeTimerCall: {
 		[kToPrimitive]: () => 0x0b579c26,
-		[kType]: Float32,
+		[kPropertyId]: 0x0b579c26,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * if true, background loader is disabled
+	 */
 	DisableBackgroundLoader: {
 		[kToPrimitive]: () => 0x0b579c27,
-		[kType]: Bool,
+		[kPropertyId]: 0x0b579c27,
+		[kPropertyType]: Bool,
 	},
-	MinLoadRadius: 0x0b579c28,
+	/**
+	 * Mininum extra radius to load (by zoom level)
+	 */
+	MinLoadRadius: {
+		[kToPrimitive]: () => 0x0b579c28,
+		[kPropertyId]: 0x0b579c28,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * extra radius to load per free meg (by zoom level)
+	 */
 	ExtraLoadRadiusPerMeg: {
 		[kToPrimitive]: () => 0x0b579c29,
-		[kType]: Float32,
+		[kPropertyId]: 0x0b579c29,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Type of ferry terminal
+	 */
 	FerryTerminalType: {
 		[kToPrimitive]: () => 0x0bd86fd3,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0bd86fd3,
+		[kPropertyType]: Uint8,
 		Passenger: 0x00000000,
 		CarAndPassenger: 0x00000001,
 	},
+	/**
+	 * Maps funding (as percentage) to road/rail damage acceleration
+	 */
 	FundingToDamageAccelerationCurve: {
 		[kToPrimitive]: () => 0x0bd86fd4,
-		[kType]: Float32,
+		[kPropertyId]: 0x0bd86fd4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Probability (0 to 1.0) that a train going over a rail pothole will cause
+	 * derailment
+	 */
 	RailDamageAccidentFactor: {
 		[kToPrimitive]: () => 0x0bd86fd5,
-		[kType]: Float32,
+		[kPropertyId]: 0x0bd86fd5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Indicate what kind of airplane should appear at this point
+	 */
 	AirplaneHangerType: {
 		[kToPrimitive]: () => 0x0bfa15a5,
-		[kType]: Uint8,
+		[kPropertyId]: 0x0bfa15a5,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		CropDuster: 0x00000001,
 		Fire: 0x00000002,
 		Stunt: 0x00000003,
 		Military: 0x00000004,
 	},
+	/**
+	 * Simoleon charge per traveller to enter the switch
+	 */
 	TransitSwitchFare: {
 		[kToPrimitive]: () => 0x0bfc0a4c,
-		[kType]: Float32,
+		[kPropertyId]: 0x0bfc0a4c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Starting tax rate for all developer types, indexed by difficulty type
+	 */
 	BudgetInitialTaxRate: {
 		[kToPrimitive]: () => 0x0c032488,
-		[kType]: Float32,
+		[kPropertyId]: 0x0c032488,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of planes that can be dispatched from this station.
+	 */
 	FireStationTotalPlaneDispatches: {
 		[kToPrimitive]: () => 0x0c0afdd7,
-		[kType]: Sint32,
+		[kPropertyId]: 0x0c0afdd7,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * In meters: Width Height Depth
+	 */
 	OccupantSize: {
 		[kToPrimitive]: () => 0x27812810,
-		[kType]: Float32,
+		[kPropertyId]: 0x27812810,
+		[kPropertyType]: [Float32],
 	},
 	FillingDegree: {
 		[kToPrimitive]: () => 0x27812811,
-		[kType]: Float32,
+		[kPropertyId]: 0x27812811,
+		[kPropertyType]: Float32,
 	},
-	ResourceKeyType0: 0x27812820,
-	ResourceKeyType1: 0x27812821,
-	ResourceKeyType2: 0x27812822,
-	ResourceKeyType3: 0x27812823,
-	ResourceKeyType4: 0x27812824,
-	ResourceKeyType5: 0x27812825,
+	/**
+	 * Specifies 1 model key for all Z/R
+	 */
+	ResourceKeyType0: {
+		[kToPrimitive]: () => 0x27812820,
+		[kPropertyId]: 0x27812820,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Specifies 1 model key for each Z/R
+	 */
+	ResourceKeyType1: {
+		[kToPrimitive]: () => 0x27812821,
+		[kPropertyId]: 0x27812821,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * A unique instance ID for each zoom and rotation.
+	 */
+	ResourceKeyType2: {
+		[kToPrimitive]: () => 0x27812822,
+		[kPropertyId]: 0x27812822,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * A unique instance ID for each zoom
+	 */
+	ResourceKeyType3: {
+		[kToPrimitive]: () => 0x27812823,
+		[kPropertyId]: 0x27812823,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Multi-model, multi state (see tuning docs)
+	 */
+	ResourceKeyType4: {
+		[kToPrimitive]: () => 0x27812824,
+		[kPropertyId]: 0x27812824,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Specifies 1 model key for each Z/R/state
+	 */
+	ResourceKeyType5: {
+		[kToPrimitive]: () => 0x27812825,
+		[kPropertyId]: 0x27812825,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Wealth represented by the building.
+	 */
 	Wealth: {
 		[kToPrimitive]: () => 0x27812832,
-		[kType]: Uint8,
+		[kPropertyId]: 0x27812832,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		LowWealth: 0x00000001,
 		MediumWealth: 0x00000002,
 		HighWealth: 0x00000003,
 	},
+	/**
+	 * Function of building
+	 */
 	Purpose: {
 		[kToPrimitive]: () => 0x27812833,
-		[kType]: Uint8,
+		[kPropertyId]: 0x27812833,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		Residence: 0x00000001,
 		Services: 0x00000002,
@@ -515,9 +1029,16 @@ export default {
 		HighTech: 0x00000008,
 		Other: 0x00000009,
 	},
+	/**
+	 * A list of pairs. The first number is a demand ID, and the second number
+	 * indicates how much plopping this building supplies the resource. Put the
+	 * primary one first (i.e., for residential buildings, start with residential
+	 * demand). Recommended range: [0, 100]
+	 */
 	CapacitySatisfied: {
 		[kToPrimitive]: () => 0x27812834,
-		[kType]: Uint32,
+		[kPropertyId]: 0x27812834,
+		[kPropertyType]: [Uint32],
 		R$: 0x00001010,
 		R$$: 0x00001020,
 		R$$$: 0x00001030,
@@ -531,21 +1052,39 @@ export default {
 		IM: 0x00004300,
 		IHT: 0x00004400,
 	},
+	/**
+	 * if true, different types can occupy the building simultaneously
+	 */
 	AllowJointOccupancy: {
 		[kToPrimitive]: () => 0x27812836,
-		[kType]: Bool,
+		[kPropertyId]: 0x27812836,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Similar to density, but with more granularity. The smallest (1) is the
+	 * first to appear
+	 */
 	GrowthStage: {
 		[kToPrimitive]: () => 0x27812837,
-		[kType]: Uint8,
+		[kPropertyId]: 0x27812837,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If true, this building is for debug and tuning use only
+	 */
 	MonopolyPiece: {
 		[kToPrimitive]: () => 0x2781283f,
-		[kType]: Bool,
+		[kPropertyId]: 0x2781283f,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Paired values, demand ID, and how much plopping this building supplies
+	 * the resource.
+	 */
 	DemandSatisfied: {
 		[kToPrimitive]: () => 0x27812840,
-		[kType]: Uint32,
+		[kPropertyId]: 0x27812840,
+		[kPropertyType]: [Uint32],
 		R$CAP: 0x00001810,
 		R$$CAP: 0x00001820,
 		R$$$CAP: 0x00001830,
@@ -556,9 +1095,15 @@ export default {
 		IMCAP: 0x00004b00,
 		IHCAP: 0x00004c00,
 	},
+	/**
+	 * A list of pairs. The first number is a demand ID, and the second number
+	 * indicates how much plopping this building increases the demand for the
+	 * resource. Recommended increase range: [0, 100]
+	 */
 	DemandCreated: {
 		[kToPrimitive]: () => 0x27812841,
-		[kType]: Uint32,
+		[kPropertyId]: 0x27812841,
+		[kPropertyType]: [Uint32],
 		Jobs$: 0x00002010,
 		Jobs$$: 0x00002020,
 		Jobs$$$: 0x00002030,
@@ -575,34 +1120,74 @@ export default {
 		IM: 0x00004300,
 		IHT: 0x00004400,
 	},
+	/**
+	 * IDs from Demand Satisfied are associated to these values instead of the
+	 * Uint32 values
+	 */
 	DemandSatisfiedFloat: {
 		[kToPrimitive]: () => 0x27812842,
-		[kType]: Float32,
+		[kPropertyId]: 0x27812842,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * IDs from Demand Created are associated to these values instead of the
+	 * Uint32 values
+	 */
 	DemandCreatedFloat: {
 		[kToPrimitive]: () => 0x27812843,
-		[kType]: Float32,
+		[kPropertyId]: 0x27812843,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * if true, the demand simulator ignores demand created and demand satisfied
+	 * until instructed
+	 */
 	DemandIsVariable: {
 		[kToPrimitive]: () => 0x27812844,
-		[kType]: Bool,
+		[kPropertyId]: 0x27812844,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * This determines the landmark building's impact on desirability. Magnitude
+	 * (-100 to +100), radius (in cells).
+	 */
 	LandmarkEffect: {
 		[kToPrimitive]: () => 0x87cd6399,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6399,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Affects desirability of residential buildings.   The first number in this
+	 * array is the amount of the effect (-100 to 100) and the second number is
+	 * the radius in cells.
+	 */
 	ParkEffect: {
 		[kToPrimitive]: () => 0x87cd6341,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6341,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Amount of pollution generated by the occupant, for each type (air, water,
+	 * garbage, and radiation). This value represents the amount of pollution at
+	 * the center of the circular area of effect. This can be negative for
+	 * occupants that decrease pollution.
+	 */
 	PollutionAtCenter: {
 		[kToPrimitive]: () => 0x27812851,
-		[kType]: Sint32,
+		[kPropertyId]: 0x27812851,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * Amount of power generated by this building.
+	 */
 	PowerGenerated: 0x27812852,
+	/**
+	 * Type of power plant.
+	 */
 	PowerPlantType: {
 		[kToPrimitive]: () => 0x27812853,
-		[kType]: Uint32,
+		[kPropertyId]: 0x27812853,
+		[kPropertyType]: Uint32,
 		Coal: 0x00000001,
 		Hydrogen: 0x00000002,
 		NaturalGas: 0x00000003,
@@ -613,240 +1198,540 @@ export default {
 		Wind: 0x00000009,
 		Auxiliary: 0x0000000a,
 	},
+	/**
+	 * Amount of power consumed by this building.
+	 */
 	PowerConsumed: 0x27812854,
+	/**
+	 * The family that this building or prop is a member of.
+	 */
 	BuildingpropFamily: 0x27812870,
-	ResourceKeyType1xm: 0x27812921,
-	ResourceKeyType2xm: 0x27812922,
-	ResourceKeyType3xm: 0x27812923,
-	ResourceKeyType4xm: 0x27812924,
-	ResourceKeyType5xm: 0x27812925,
+	/**
+	 * Specifies 1 model key for each Z/R
+	 */
+	ResourceKeyType1xm: {
+		[kToPrimitive]: () => 0x27812921,
+		[kPropertyId]: 0x27812921,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * A unique instance ID for each zoom and rotation.
+	 */
+	ResourceKeyType2xm: {
+		[kToPrimitive]: () => 0x27812922,
+		[kPropertyId]: 0x27812922,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * A unique instance ID for each zoom
+	 */
+	ResourceKeyType3xm: {
+		[kToPrimitive]: () => 0x27812923,
+		[kPropertyId]: 0x27812923,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Multi-model, multi state (see tuning docs)
+	 */
+	ResourceKeyType4xm: {
+		[kToPrimitive]: () => 0x27812924,
+		[kPropertyId]: 0x27812924,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Specifies 1 model key for each Z/R/state
+	 */
+	ResourceKeyType5xm: {
+		[kToPrimitive]: () => 0x27812925,
+		[kPropertyId]: 0x27812925,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Range: [0.0 - 90.0]
+	 */
 	MaxSlopeOnNetworkSide: {
 		[kToPrimitive]: () => 0x279d1707,
-		[kType]: Float32,
+		[kPropertyId]: 0x279d1707,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * ID of this ordinance
+	 */
 	ID: 0x28ebbc30,
+	/**
+	 * Ordinance name
+	 */
 	NameStringNonlocalizable: {
 		[kToPrimitive]: () => 0x28ebbc32,
-		[kType]: String,
+		[kPropertyId]: 0x28ebbc32,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Ordinance description string
+	 */
 	DescriptionStringNonlocalizable: {
 		[kToPrimitive]: () => 0x28ebbc34,
-		[kType]: String,
+		[kPropertyId]: 0x28ebbc34,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Year this ordinance becomes available
+	 */
 	YearAvailable: 0x28ebbc35,
+	/**
+	 * Monthly chance of this ordinance bemoming available
+	 */
 	MonthlyChance: {
 		[kToPrimitive]: () => 0x28ebbc36,
-		[kType]: Float32,
+		[kPropertyId]: 0x28ebbc36,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Revenue generated by enacting this ordinance
+	 */
 	EnactmentIncome: {
 		[kToPrimitive]: () => 0x28ebbc37,
-		[kType]: Sint32,
+		[kPropertyId]: 0x28ebbc37,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Cost of retracting this ordinance
+	 */
 	RetractmentIncome: {
 		[kToPrimitive]: () => 0x28ebbc38,
-		[kType]: Sint32,
+		[kPropertyId]: 0x28ebbc38,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Constant part of monthly income generated by this ordinance
+	 */
 	MonthlyConstantIncome: {
 		[kToPrimitive]: () => 0x28ebbc39,
-		[kType]: Sint32,
+		[kPropertyId]: 0x28ebbc39,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Factor applied to ordinance cost basis
+	 */
 	MonthlyIncomeFactor: {
 		[kToPrimitive]: () => 0x28ebbc3a,
-		[kType]: Float32,
+		[kPropertyId]: 0x28ebbc3a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Advisor ID for this ordinance
+	 */
 	AdvisorID: 0x28ebbc3b,
+	/**
+	 * True for ordinances that should appear on income part of budget
+	 */
 	IncomeOrdinance: {
 		[kToPrimitive]: () => 0x28ebbc3c,
-		[kType]: Bool,
+		[kPropertyId]: 0x28ebbc3c,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Crime effect: magnitude, radius. Doesn't increase overall crime, but can
+	 * negate effects of police stations
+	 */
 	CrimeEffect: {
 		[kToPrimitive]: () => 0xca5b9306,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca5b9306,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on flammability
+	 */
 	FlammabilityEffect: {
 		[kToPrimitive]: () => 0x28f42aa0,
-		[kType]: Float32,
+		[kPropertyId]: 0x28f42aa0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum acceptable percentage for Utility department funding
+	 */
 	PowerMinAcceptableFunding: {
 		[kToPrimitive]: () => 0x29121e8b,
-		[kType]: Float32,
+		[kPropertyId]: 0x29121e8b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum duration of a Utility strike, in months
+	 */
 	UtilityStrikeDuration: 0x2912202e,
+	/**
+	 * When a cell has this much radiation, it's considered polluted
+	 */
 	RadiationPollutionThreshold: 0x291351b5,
+	/**
+	 * Traffic density multiplied by this each month
+	 */
 	MonthlyTrafficDensityReduction: {
 		[kToPrimitive]: () => 0x29136788,
-		[kType]: Float32,
+		[kPropertyId]: 0x29136788,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % of
+	 * Health output
+	 */
 	HealthFundingToEfficiencyCurve: {
 		[kToPrimitive]: () => 0x2918949e,
-		[kType]: Float32,
+		[kPropertyId]: 0x2918949e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Brightness floor for terrain textures
+	 */
 	TextureFloor: {
 		[kToPrimitive]: () => 0x29189beb,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189beb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Whether to use art-supplied environment map for lighting
+	 */
 	UseEnvironmentMap: {
 		[kToPrimitive]: () => 0x29189bec,
-		[kType]: Bool,
+		[kPropertyId]: 0x29189bec,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Use test environment map to determine orientation
+	 */
 	TestEnvironmentMap: {
 		[kToPrimitive]: () => 0x29189bed,
-		[kType]: Bool,
+		[kPropertyId]: 0x29189bed,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * How much models are shadowed by the terrain
+	 */
 	TerrainShadowAmount: {
 		[kToPrimitive]: () => 0x29189bee,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bee,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Test model shadowing by terrain
+	 */
 	TestTerrainShadowing: {
 		[kToPrimitive]: () => 0x29189bef,
-		[kType]: Bool,
+		[kPropertyId]: 0x29189bef,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Global lighting value for day time -- everything gets multiplied by this.
+	 */
 	DaytimeGlobalColor: {
 		[kToPrimitive]: () => 0x29189bf0,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much flora are shadowed by the terrain
+	 */
 	FloraTerrainShadowAmount: {
 		[kToPrimitive]: () => 0x29189bf1,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How much models (buildings) are shadowed by the terrain
+	 */
 	ModelTerrainShadowAmount: {
 		[kToPrimitive]: () => 0x29189bf2,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How much automata are shadowed by the terrain
+	 */
 	AutomataTerrainShadowAmount: {
 		[kToPrimitive]: () => 0x29189bf3,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The colour the terrain gets tinted by in the distance
+	 */
 	AtmosphericScatteringColour: {
 		[kToPrimitive]: () => 0x29189bf4,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much the terrain gets tinted
+	 */
 	AtmosphericScattering: {
 		[kToPrimitive]: () => 0x29189bf5,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The required change in brightness before the terrain gets updated
+	 */
 	LightingUpdateDelta: {
 		[kToPrimitive]: () => 0x29189bf6,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The brightness below which night falls
+	 */
 	NightThreshold: {
 		[kToPrimitive]: () => 0x29189bf7,
-		[kType]: Float32,
+		[kPropertyId]: 0x29189bf7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps distance from hospital to a % of population covered
+	 */
 	HospitalPopulationVsDistance: {
 		[kToPrimitive]: () => 0x2921a9cc,
-		[kType]: Float32,
+		[kPropertyId]: 0x2921a9cc,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * See ISC4FireProtectionSimulator.h
+	 */
 	FireProtectionSimFundingEfficiencyCurve: {
 		[kToPrimitive]: () => 0x29233e8d,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e8d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * 100.0+ Maximum percentage you can fund a fire station
+	 */
 	FireProtectionSimMaxAllowedFunding: {
 		[kToPrimitive]: () => 0x29233e8f,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e8f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * 0.0-1.0 efficiency multiplier when stations are on strike
+	 */
 	FireProtectionSimStrikeEfficiencyMultiplier: {
 		[kToPrimitive]: () => 0x29233e94,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e94,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of days a strike can last
+	 */
 	FireProtectionSimMaxStrikeDuration: {
 		[kToPrimitive]: () => 0x29233e95,
-		[kType]: Sint32,
+		[kPropertyId]: 0x29233e95,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * 0.0-100.0, See ISC4FireProtectionSimulator.h
+	 */
 	FireProtectionSimMinFundingToEndStrikes: {
 		[kToPrimitive]: () => 0x29233e96,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e96,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * See ISC4FireProtectionSimulator.h"
+	 */
 	FireProtectionSimStrikeResponseCurve: {
 		[kToPrimitive]: () => 0x29233e98,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e98,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Protection effect of vehicle at its center (in protection units: 0-255).
+	 */
 	FireStationDispatchCenterStrength: {
 		[kToPrimitive]: () => 0x29233e9a,
-		[kType]: Sint32,
+		[kPropertyId]: 0x29233e9a,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Protection effect of vehicle at its limit (in protection units: 0-255).
+	 */
 	FireStationDispatchExteriorStrength: {
 		[kToPrimitive]: () => 0x29233e9b,
-		[kType]: Sint32,
+		[kPropertyId]: 0x29233e9b,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Effect radius of active vehicle (in meters).
+	 */
 	FireStationDispatchRadius: {
 		[kToPrimitive]: () => 0x29233e9c,
-		[kType]: Float32,
+		[kPropertyId]: 0x29233e9c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Base flammability (0-255) of occupant.
+	 */
 	Flammability: {
 		[kToPrimitive]: () => 0x29244db5,
-		[kType]: Uint8,
+		[kPropertyId]: 0x29244db5,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * EQ assigned to new High Wealth residents
+	 */
 	HighWealthEQ: {
 		[kToPrimitive]: () => 0x2929cc6b,
-		[kType]: Uint8,
+		[kPropertyId]: 0x2929cc6b,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Variable length list of type IDs for this hospital
+	 */
 	HospitalTypeIDList: 0x292d8f9b,
-	KSC4RetainingWallPropertyWallTextures: 0x295961f2,
+	/**
+	 * Texture IDs for each zoom level.
+	 */
+	KSC4RetainingWallPropertyWallTextures: {
+		[kToPrimitive]: () => 0x295961f2,
+		[kPropertyId]: 0x295961f2,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Size of a texture in meters. Defaults to standard city cell size.
+	 */
 	KSC4RetainingWallPropertyWallTextureSize: {
 		[kToPrimitive]: () => 0x295961f3,
-		[kType]: Float32,
+		[kPropertyId]: 0x295961f3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Zone wealth values compatible with crime (none == can appear around any
+	 * wealth)
+	 */
 	WealthFilter: {
 		[kToPrimitive]: () => 0xaa12fcb3,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb3,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Determines whether unwatered terrain cells are colored in pipe view
+	 */
 	DrawUnwateredTerrainCellColor: {
 		[kToPrimitive]: () => 0x297f42b7,
-		[kType]: Bool,
+		[kPropertyId]: 0x297f42b7,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * At this depth (meters), water becomes opaque
+	 */
 	WaterDepthForMaxAlpha: {
 		[kToPrimitive]: () => 0x29ab15c0,
-		[kType]: Float32,
+		[kPropertyId]: 0x29ab15c0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min alpha of water
+	 */
 	WaterMinAlpha: {
 		[kToPrimitive]: () => 0x29ab15c1,
-		[kType]: Uint8,
+		[kPropertyId]: 0x29ab15c1,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Number of pixels in the gradient corresponding to each meter of water
+	 * depth
+	 */
 	WaterDepthToColorGradientFactor: {
 		[kToPrimitive]: () => 0x29ab15c2,
-		[kType]: Float32,
+		[kPropertyId]: 0x29ab15c2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Enable/Disable the display of water surface
+	 */
 	DisplayWaterSurface: {
 		[kToPrimitive]: () => 0x29ab15c3,
-		[kType]: Bool,
+		[kPropertyId]: 0x29ab15c3,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Enable/Disable the display of terrain surface
+	 */
 	DisplayTerrainSurface: {
 		[kToPrimitive]: () => 0x29ab15c4,
-		[kType]: Bool,
+		[kPropertyId]: 0x29ab15c4,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Modifications to the r,g,b of water at night
+	 */
 	WaterNightColorAdjustment: {
 		[kToPrimitive]: () => 0x29ab15c5,
-		[kType]: Float32,
+		[kPropertyId]: 0x29ab15c5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Heights (meters) of all but the bottom-most layers on city edge
+	 */
 	CityEdgeLayerHeights: {
 		[kToPrimitive]: () => 0x29ab15c6,
-		[kType]: Float32,
+		[kPropertyId]: 0x29ab15c6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiplication factor to tune the brightness of cliffs on city edges
+	 */
 	CityEdgeBrightnessKludgeFactor: {
 		[kToPrimitive]: () => 0x29ab15c7,
-		[kType]: Float32,
+		[kPropertyId]: 0x29ab15c7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * flammability multiplier if building if abandoned
+	 */
 	FlammabilityMultiplierAbandonment: {
 		[kToPrimitive]: () => 0x29b40134,
-		[kType]: Float32,
+		[kPropertyId]: 0x29b40134,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * flammability multiplier if building is not watered
+	 */
 	FlammabilityMultiplierNoWater: {
 		[kToPrimitive]: () => 0x29b4013b,
-		[kType]: Float32,
+		[kPropertyId]: 0x29b4013b,
+		[kPropertyType]: Float32,
 	},
-	FlammabilityHotspotSettings: 0x29b4013c,
+	/**
+	 * hotspot settings: threshold value (0-255), radius (in tracts), minimum
+	 * weight
+	 */
+	FlammabilityHotspotSettings: {
+		[kToPrimitive]: () => 0x29b4013c,
+		[kPropertyId]: 0x29b4013c,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * maps hotspot weight (# of cells above threshold) to monthly fire
+	 * probability (in percent 0-100)
+	 */
 	FlammabilityHotspotFireProbability: {
 		[kToPrimitive]: () => 0x29b4013d,
-		[kType]: Float32,
+		[kPropertyId]: 0x29b4013d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * monthly fire probability (in percent 0-100) of random lot fire
+	 */
 	FlammabilityRandomFireProbability: {
 		[kToPrimitive]: () => 0x29b4013e,
-		[kType]: Float32,
+		[kPropertyId]: 0x29b4013e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * A list of IDs of 1x1 lots that describe a field tile associated with this
+	 * building (will choose 1 randomly)
+	 */
 	FieldLots: {
 		[kToPrimitive]: () => 0x29b55f73,
-		[kType]: Uint32,
+		[kPropertyId]: 0x29b55f73,
+		[kPropertyType]: Uint32,
 		FurrowsWithSprinkler: 0x2a6e4309,
 		DirtWithSprinkler: 0x2a6e431d,
 		OrangeTreeOrchards: 0xaa6e4328,
@@ -854,52 +1739,116 @@ export default {
 		DirtPatch: 0xea6e4721,
 		GreenPatch: 0xea6e4722,
 	},
+	/**
+	 * Minimum (left side) and maximum (right side) range of offset from paths
+	 * for pedestrians
+	 */
 	PathOffsetRangeForPeds: {
 		[kToPrimitive]: () => 0x29dd40c1,
-		[kType]: Float32,
+		[kPropertyId]: 0x29dd40c1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Minimum (left side) and maximum (right side) range of offset from paths
+	 * for vehicles
+	 */
 	PathOffsetRangeForVehicles: {
 		[kToPrimitive]: () => 0x29dd40c2,
-		[kType]: Float32,
+		[kPropertyId]: 0x29dd40c2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Flora type that results when combining this type and one of equal or
+	 * lesser value.
+	 */
 	FloraClusterType: 0x2a0348ba,
+	/**
+	 * Maximum plane distance for this flora to cluster with others.
+	 */
 	FloraClusterMaxRadius: {
 		[kToPrimitive]: () => 0x2a0348bb,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a0348bb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum altitude differential for this flora to cluster with others.
+	 */
 	FloraClusterMaxHeight: {
 		[kToPrimitive]: () => 0x2a0348bc,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a0348bc,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to plop a lot is building + area x this response curve
+	 */
 	LotDeveloperCostMultiplierVsLotSlope: {
 		[kToPrimitive]: () => 0x2a2d7824,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a2d7824,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Brush belongs to mayor mode, miscellaneous category
+	 */
 	CategoryMayorMisc: 0x2a3143d7,
+	/**
+	 * Scale factor for all zoom levels
+	 */
 	AudioZoomScaleFactor: {
 		[kToPrimitive]: () => 0x2a35a25f,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a35a25f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How fast sounds rolloff with distance
+	 */
 	AudioListenerRolloffFactor: {
 		[kToPrimitive]: () => 0x2a36e3cb,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a36e3cb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Filter GUIDs that MUST be satisfied
+	 */
 	AudioANDFilters: 0x2a3fbde1,
+	/**
+	 * Filter GUIDs that must NOT be satisfied
+	 */
 	AudioNOTFilters: 0x2a3fbde5,
+	/**
+	 * Array of exemplars to load
+	 */
 	AudioAmbienceExemplarIds: 0x2a3ff8cd,
+	/**
+	 * GUID for this building's Query exemplar
+	 */
 	QueryExemplarGUID: 0x2a499f85,
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for commute train density
+	 */
 	CommuteTrainDensityCurve: {
 		[kToPrimitive]: () => 0x2a511893,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a511893,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiplied by a vehicle's default speed when it goes around a curve
+	 */
 	CurveSpeedMultiplier: {
 		[kToPrimitive]: () => 0x2a511cbc,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a511cbc,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * GUID of sound. Plays between alarm times.
+	 */
 	SFXAlarmAmbienceSound: 0x2a53be13,
+	/**
+	 * Crime sims only - which crime type this model represents
+	 */
 	CrimeType: {
 		[kToPrimitive]: () => 0x2a62d9f3,
-		[kType]: Uint32,
+		[kPropertyId]: 0x2a62d9f3,
+		[kPropertyType]: Uint32,
 		NONE: 0x00000000,
 		GenericCrime: 0x00000001,
 		Fighting: 0x00000003,
@@ -916,661 +1865,1497 @@ export default {
 		PieThrowing: 0x00000012,
 		TPing: 0x00000013,
 	},
+	/**
+	 * Factor applied to commercial demand
+	 */
 	CommercialDemandEffect: {
 		[kToPrimitive]: () => 0x2a633000,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a633000,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Factor applied to industrial demand
+	 */
 	IndustrialDemandEffect: {
 		[kToPrimitive]: () => 0x2a634000,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a634000,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on Cs$ when active
+	 */
 	DemandEffectCs$: {
 		[kToPrimitive]: () => 0x2a653110,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a653110,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on Cs$$ when active
+	 */
 	DemandEffectCs$$: {
 		[kToPrimitive]: () => 0x2a653120,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a653120,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on Cs$$$ when active
+	 */
 	DemandEffectCs$$$: {
 		[kToPrimitive]: () => 0x2a653130,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a653130,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on Co$$ when active
+	 */
 	DemandEffectCo$$: {
 		[kToPrimitive]: () => 0x2a653320,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a653320,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on Co$$$ when active
+	 */
 	DemandEffectCo$$$: {
 		[kToPrimitive]: () => 0x2a653330,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a653330,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on IR when active
+	 */
 	DemandEffectIR: {
 		[kToPrimitive]: () => 0x2a654100,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a654100,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on ID when active
+	 */
 	DemandEffectID: {
 		[kToPrimitive]: () => 0x2a654200,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a654200,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on IM when active
+	 */
 	DemandEffectIM: {
 		[kToPrimitive]: () => 0x2a654300,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a654300,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the % Effect the Ordinance will have on IHT when active
+	 */
 	DemandEffectIHT: {
 		[kToPrimitive]: () => 0x2a654400,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a654400,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Whether or not prop destroys entire lot when it burns down.  Default is
+	 * true for flammable props.
+	 */
 	PropDestroysLot: {
 		[kToPrimitive]: () => 0x2a89b677,
-		[kType]: Bool,
+		[kPropertyId]: 0x2a89b677,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Max amount of full volume to change up per second
+	 */
 	AudioVolumeAttackLimit: {
 		[kToPrimitive]: () => 0x2a9590de,
-		[kType]: Float32,
+		[kPropertyId]: 0x2a9590de,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When zoning, the additional cost per cell for each meter of altitude
+	 * changed
+	 */
 	LandfillCostForAltitudeChange: {
 		[kToPrimitive]: () => 0x2aa00fe7,
-		[kType]: Sint64,
+		[kPropertyId]: 0x2aa00fe7,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Values per zoom controlling update garnularity in meters
+	 */
 	AudioListenerGranularity: {
 		[kToPrimitive]: () => 0x2aa40ccc,
-		[kType]: Float32,
+		[kPropertyId]: 0x2aa40ccc,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max HQ boost achievable without reward buildings.  Used to scale values
+	 * for Sims opinion polls.
+	 */
 	MaximumHQBoost: {
 		[kToPrimitive]: () => 0x2aa84164,
-		[kType]: Float32,
+		[kPropertyId]: 0x2aa84164,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to demolish a tile on a lot that has been destroyed
+	 */
 	LotDeveloperCostToDemolishDestroyedTile: 0x2ab845e7,
+	/**
+	 * Maximum number of riot leaders created per instance
+	 */
 	RiotMaxLeaders: 0x2adb6b6d,
+	/**
+	 * Male=0, Female=1, used by MySim ped chooser
+	 */
 	MySimWalkGender: 0x2c0c922e,
+	/**
+	 * Automata group ID which controls the creation and driving properties for
+	 * this automaton
+	 */
 	FinalGroupId: 0x2c23a3a1,
+	/**
+	 * Categorizes this exemplar; for debug and exemplar editors use only
+	 */
 	ExemplarCategory: 0x2c8f8746,
+	/**
+	 * Minimum active demand, use 0x80000000 for none
+	 */
 	MinimumValue: {
 		[kToPrimitive]: () => 0x47bb3f10,
-		[kType]: Sint32,
+		[kPropertyId]: 0x47bb3f10,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Maximum active demand, use 0x7fffffff for none
+	 */
 	MaximumValue: {
 		[kToPrimitive]: () => 0x47bb3f11,
-		[kType]: Sint32,
+		[kPropertyId]: 0x47bb3f11,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Initial supply of this resource, [min, max]
+	 */
 	InitialSupply: {
 		[kToPrimitive]: () => 0x47bb3f20,
-		[kType]: Sint32,
+		[kPropertyId]: 0x47bb3f20,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Initial demand for this resource, [min, max]
+	 */
 	InitialDemand: {
 		[kToPrimitive]: () => 0x47bb3f21,
-		[kType]: Sint32,
+		[kPropertyId]: 0x47bb3f21,
+		[kPropertyType]: Sint32,
 	},
-	Drives: 0x47bb3f30,
-	Satisfies: 0x47bb3f31,
-	Contributes: 0x47bb3f32,
+	/**
+	 * Demands increased by this resource (demandID, percentage)
+	 */
+	Drives: {
+		[kToPrimitive]: () => 0x47bb3f30,
+		[kPropertyId]: 0x47bb3f30,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Resources created by this resource (demandID, percentage)
+	 */
+	Satisfies: {
+		[kToPrimitive]: () => 0x47bb3f31,
+		[kPropertyId]: 0x47bb3f31,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Demands increased by this demand (demandID, percentage)
+	 */
+	Contributes: {
+		[kToPrimitive]: () => 0x47bb3f32,
+		[kPropertyId]: 0x47bb3f32,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Demand IDs capped by this resource, based on % depleted
+	 */
 	CapsDemand: 0x47bb3f41,
+	/**
+	 * List of demand IDs summed by this one
+	 */
 	Sums: 0x47bb3f50,
+	/**
+	 * Which part of the regional index is added to the local index
+	 */
 	RegionUse: {
 		[kToPrimitive]: () => 0x47bb3f60,
-		[kType]: Uint8,
+		[kPropertyId]: 0x47bb3f60,
+		[kPropertyType]: Uint8,
 		UseNone: 0x00000000,
 		UseSupply: 0x00000001,
 		UseDemand: 0x00000002,
 	},
+	/**
+	 * Power of 2; determines the size of the demand grid
+	 */
 	TractSize: {
 		[kToPrimitive]: () => 0x87cd6310,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6310,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Minimum > 0, Maximum
+	 */
 	LandValueIntrinsicMinMax: {
 		[kToPrimitive]: () => 0x47e2c300,
-		[kType]: Uint8,
+		[kPropertyId]: 0x47e2c300,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Low/Medium boundary, Medium/High boundary
+	 */
 	LandValueWealthBoundaries: {
 		[kToPrimitive]: () => 0x47e2c301,
-		[kType]: Uint8,
+		[kPropertyId]: 0x47e2c301,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Effect of water on land value: size, radius
+	 */
 	LandValueWaterEffect: {
 		[kToPrimitive]: () => 0x47e2c310,
-		[kType]: Uint8,
+		[kPropertyId]: 0x47e2c310,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Maps altitude to land value
+	 */
 	LandValueAltitudeEffect: {
 		[kToPrimitive]: () => 0x47e2c320,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c320,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Growth Developer IDs (see Effects)
+	 */
 	LandValueDesirabilityIDs: 0x47e2c330,
+	/**
+	 * Size of effects (see IDs)
+	 */
 	LandValueDesirabilityFactors: {
 		[kToPrimitive]: () => 0x47e2c331,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c331,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps desirability to land value
+	 */
 	LandValueDesirabilityCurve: {
 		[kToPrimitive]: () => 0x47e2c332,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c332,
+		[kPropertyType]: [Float32],
 	},
-	ConstructionResourcesMinMax: 0x47e2c380,
+	/**
+	 * Amount of capacity that can be under construction at any one time
+	 */
+	ConstructionResourcesMinMax: {
+		[kToPrimitive]: () => 0x47e2c380,
+		[kPropertyId]: 0x47e2c380,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Factor applied to population to calculate construction resources
+	 */
 	ConstructionResourcesPerResident: {
 		[kToPrimitive]: () => 0x47e2c381,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c381,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Improves that chance that low-demand types will have opportunity to build
+	 */
 	ConstructionTypeSelectionBias: 0x47e2c382,
+	/**
+	 * Values >1 allow big stage buildings sooner. Indexed by difficulty level
+	 */
 	StagePopluationMultiplier: {
 		[kToPrimitive]: () => 0x47e2c383,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c383,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of days before a building can distress
+	 */
 	LotDeveloperStayNewTime: 0x47e2c400,
+	/**
+	 * When to abandon, distress, and renew. Values 0-1
+	 */
 	LotDeveloperOccupancyThresholds: {
 		[kToPrimitive]: () => 0x47e2c401,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c401,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Factor applied to desired capacity when growing buildings in a tract
+	 */
 	TractDeveloperOverbuild: {
 		[kToPrimitive]: () => 0x47e2c500,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c500,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Start and Stop percentage of desired capacity that can be fulfilled by
+	 * abandoned buildings
+	 */
 	TractDeveloperReoccupyThresholds: {
 		[kToPrimitive]: () => 0x47e2c501,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c501,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * What percentage of the existing capacity must be demanded before we
+	 * redevelop
+	 */
 	TractDeveloperRedevelopSizeThreshold: {
 		[kToPrimitive]: () => 0x47e2c502,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c502,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * for occupied/abandoned buildings"
+	 */
 	TractDeveloperDemolitionCosts: {
 		[kToPrimitive]: () => 0x47e2c510,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c510,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Fictional cost to aggregate a lot/subdivide a lot
+	 */
 	TractDeveloperNewLotCosts: {
 		[kToPrimitive]: () => 0x47e2c511,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c511,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Building occupancy rate +/- variation from tract rate
+	 */
 	TractDeveloperOccupancyVariation: {
 		[kToPrimitive]: () => 0x47e2c530,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c530,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When 100% full, subtract a little from the occupancy rate
+	 */
 	TractDeveloperMinVacancyRange: {
 		[kToPrimitive]: () => 0x47e2c531,
-		[kType]: Float32,
+		[kPropertyId]: 0x47e2c531,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If true, higher wealth buildings can replace non-empty lower wealth
+	 * buildings
+	 */
 	TractDeveloperKickOutLowerWealth: {
 		[kToPrimitive]: () => 0x47e2c540,
-		[kType]: Bool,
+		[kPropertyId]: 0x47e2c540,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * List of available (R and C) building styles
+	 */
 	TractDeveloperAvailableStyles: 0x47e2c550,
+	/**
+	 * How often to change (R and C) building styles
+	 */
 	TractDeveloperYearsBetweenStyles: {
 		[kToPrimitive]: () => 0x47e2c551,
-		[kType]: Sint32,
+		[kPropertyId]: 0x47e2c551,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Min clearance below bridge (meters)
+	 */
 	MinClearance: {
 		[kToPrimitive]: () => 0x482cb441,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb441,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of end pieces
+	 */
 	NumEndPieces: 0x482cb442,
+	/**
+	 * Exemplar ids for end pieces(in order)
+	 */
 	EndPieceExemplars: 0x482cb443,
+	/**
+	 * Model rotations for end pieces
+	 */
 	EndPieceRotations: {
 		[kToPrimitive]: () => 0x482cb444,
-		[kType]: Uint8,
+		[kPropertyId]: 0x482cb444,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Exemplar id for the repeat pieces
+	 */
 	RepeatPieceExemplar: 0x482cb445,
+	/**
+	 * Model rotation for repeat piece
+	 */
 	RepeatPieceRotation: {
 		[kToPrimitive]: () => 0x482cb446,
-		[kType]: Uint8,
+		[kPropertyId]: 0x482cb446,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Number of cells between supports
+	 */
 	SupportInterval: 0x482cb447,
+	/**
+	 * Number of support pieces(count one side only)
+	 */
 	NumSupportPieces: 0x482cb448,
+	/**
+	 * Exemplar ids for support pieces(start at pillar)
+	 */
 	SupportPieceExemplars: 0x482cb449,
+	/**
+	 * Model rotations for support pieces
+	 */
 	SupportPieceRotations: {
 		[kToPrimitive]: () => 0x482cb44a,
-		[kType]: Uint8,
+		[kPropertyId]: 0x482cb44a,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Dist from top the two spans of each end piece are
+	 */
 	EndPieceSpanLocations: {
 		[kToPrimitive]: () => 0x482cb44b,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb44b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Dist from pivot point to the top of concrete column (-ve for no column)
+	 */
 	ColumnTopPosForSupportPieces: {
 		[kToPrimitive]: () => 0x482cb44c,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb44c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Dist from pivot point to the top of concrete column (-ve for no column)
+	 */
 	ColumnTopPosForEndPieces: {
 		[kToPrimitive]: () => 0x482cb44d,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb44d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * (x,z) corresponding to the 4 corners of the support column w.r.t column
+	 * center
+	 */
 	SupportColumnCorners: {
 		[kToPrimitive]: () => 0x482cb44e,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb44e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Set to true if this bridge can work as land bridge
+	 */
 	CanWorkAsLandBridge: {
 		[kToPrimitive]: () => 0x482cb44f,
-		[kType]: Bool,
+		[kPropertyId]: 0x482cb44f,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Set to true if this bridge can work as water bridge
+	 */
 	CanWorkAsWaterBridge: {
 		[kToPrimitive]: () => 0x482cb450,
-		[kType]: Bool,
+		[kPropertyId]: 0x482cb450,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * The lowest suspend wire can get in the middle
+	 */
 	MinHold: {
 		[kToPrimitive]: () => 0x482cb455,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb455,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The lowest suspend wire can get at the ends (leave it at 0 please)
+	 */
 	MinEndHold: {
 		[kToPrimitive]: () => 0x482cb456,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb456,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Pylons height (meters)
+	 */
 	PylonsHeight: {
 		[kToPrimitive]: () => 0x482cb457,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb457,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The shortest possible bridge of this type (tiles)
+	 */
 	MinSpan: 0x482cb458,
+	/**
+	 * Number of cells between supports at the ends of the bridge
+	 */
 	EndSupportInterval: 0x482cb459,
+	/**
+	 * Minimal number of pylons
+	 */
 	MinPylons: 0x482cb45a,
+	/**
+	 * Maximal number of pylons
+	 */
 	MaxPylons: 0x482cb45b,
+	/**
+	 * Texture ID for suspension wire
+	 */
 	WireMainTexId: 0x482cb45c,
+	/**
+	 * Texture ID for vertical suspension wires
+	 */
 	WireTileTexId: 0x482cb45d,
+	/**
+	 * (x,z) corresponding to the 4 corners of the pylon w.r.t pylon center
+	 */
 	MainPylonCorners: {
 		[kToPrimitive]: () => 0x482cb45e,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb45e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Bridge width in tiles (defaults to 1)
+	 */
 	BridgeWidth: 0x482cb45f,
+	/**
+	 * The longest possible bridge of this type (tiles)
+	 */
 	MaxSpan: 0x482cb467,
+	/**
+	 * Distance from road top to ceiling of water passage below bridge tiles.
+	 */
 	CeilingHeight: {
 		[kToPrimitive]: () => 0x482cb468,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb468,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * 3D start and end (x,y,z) of cable attachments on front side of pylon.
+	 */
 	CableStayedFrontAnchors: {
 		[kToPrimitive]: () => 0x482cb469,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb469,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * 3D start and end (x,y,z) of cable attachments on rear side of pylon.
+	 */
 	CableStayedRearAnchors: {
 		[kToPrimitive]: () => 0x482cb46a,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb46a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Instance ID of texture to use for cable-stayed bridge wires.
+	 */
 	CableStayedWireTexture: 0x482cb46b,
+	/**
+	 * Thickness of cable-stayed wires in meters.
+	 */
 	CableStayedWireThickness: {
 		[kToPrimitive]: () => 0x482cb46c,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb46c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Start and end positions for cable-stayed bridge wires on the span,
+	 * relative to the pylon.
+	 */
 	CableStayedSpanAnchors: {
 		[kToPrimitive]: () => 0x482cb46d,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb46d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The number of wires on one side of a pylon on a cable-stayed bridge.
+	 */
 	CableStayedWireCount: 0x482cb46e,
-	BridgeImageKey: 0x482cb46f,
-	BridgeCosts: 0x482cb470,
+	/**
+	 * Group and instance ID for preview image of bridge.
+	 */
+	BridgeImageKey: {
+		[kToPrimitive]: () => 0x482cb46f,
+		[kPropertyId]: 0x482cb46f,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * One-time and per-tile costs for bridge, in simoleons.
+	 */
+	BridgeCosts: {
+		[kToPrimitive]: () => 0x482cb470,
+		[kPropertyId]: 0x482cb470,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Height of a repeating wire tile for suspension bridges.
+	 */
 	WireTilingUnit: {
 		[kToPrimitive]: () => 0x482cb471,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb471,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Vertical displacement for all models in a bridge.
+	 */
 	BridgeHeightBias: {
 		[kToPrimitive]: () => 0x482cb472,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cb472,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Offset of suspension wire base
+	 */
 	SuspensionWireBase: {
 		[kToPrimitive]: () => 0x482cd460,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd460,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Offset of suspension wire inside the bridge tile
+	 */
 	SuspensionWireInside: {
 		[kToPrimitive]: () => 0x482cd461,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd461,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Offset of pylon base
+	 */
 	SupportColumnBase: {
 		[kToPrimitive]: () => 0x482cd462,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd462,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum estimated elevation above water
+	 */
 	MinAltitudeAboveWater: {
 		[kToPrimitive]: () => 0x482cd463,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd463,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum estimated elevation above water
+	 */
 	MaxAltitudeAboveWater: {
 		[kToPrimitive]: () => 0x482cd464,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd464,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Force pylon-to-end distance to be at least some% of pylon-to-pylon
+	 * distance.
+	 */
 	MinEndIntervalFraction: {
 		[kToPrimitive]: () => 0x482cd465,
-		[kType]: Float32,
+		[kPropertyId]: 0x482cd465,
+		[kPropertyType]: Float32,
 	},
-	BridgeNameKey: 0x482cd466,
+	/**
+	 * Group and instance ID for string name of bridge.
+	 */
+	BridgeNameKey: {
+		[kToPrimitive]: () => 0x482cd466,
+		[kPropertyId]: 0x482cd466,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Relative to left, bottom, far corner of bounding box (x,y,z meters)
+	 */
 	PivotPointPosition: {
 		[kToPrimitive]: () => 0x4835c6a4,
-		[kType]: Float32,
+		[kPropertyId]: 0x4835c6a4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Dist (meters) from the pivot pt to left, right, back, front, bottom, top
+	 * side of model
+	 */
 	BoundingBox: {
 		[kToPrimitive]: () => 0x4835c6a5,
-		[kType]: Float32,
+		[kPropertyId]: 0x4835c6a5,
+		[kPropertyType]: [Float32],
 	},
-	TestResKeyTable: 0x489b6974,
+	/**
+	 * Test for Resource key table editor
+	 */
+	TestResKeyTable: {
+		[kToPrimitive]: () => 0x489b6974,
+		[kPropertyId]: 0x489b6974,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Max normal height in fractally generated terrains, for different city
+	 * size choices
+	 */
 	MaxNormalTerrainHeight: {
 		[kToPrimitive]: () => 0x48cd7b20,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b20,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Sea level (meters)
+	 */
 	SeaLevel: {
 		[kToPrimitive]: () => 0x48cd7b21,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b21,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Factor governing the min ht for regular terrain
+	 */
 	MinRegularHtFactor: {
 		[kToPrimitive]: () => 0x48cd7b22,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b22,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Factor governing the max ht for regular terrain
+	 */
 	MaxRegularHtFactor: {
 		[kToPrimitive]: () => 0x48cd7b23,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b23,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Factor governing the min ht for mountain terrain
+	 */
 	MinMountainHtFactor: {
 		[kToPrimitive]: () => 0x48cd7b24,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b24,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Factor governing the max ht for mountain terrain
+	 */
 	MaxMountainHtFactor: {
 		[kToPrimitive]: () => 0x48cd7b25,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b25,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum altitude of a terrain vertex
+	 */
 	MaxTerrainHeight: {
 		[kToPrimitive]: () => 0x48cd7b26,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b26,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum altitude of a terrain vertex
+	 */
 	MinTerrainHeight: {
 		[kToPrimitive]: () => 0x48cd7b27,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b27,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How many meters correspond to one unit of gray scale value in image
+	 */
 	ImageImportScaleFactor: {
 		[kToPrimitive]: () => 0x48cd7b28,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b28,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Default terrain height for new city (meters)
+	 */
 	DefaultTerrainHeight: {
 		[kToPrimitive]: () => 0x48cd7b2a,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b2a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Factor governing the max temperature range for texture assignment
+	 */
 	TemperatureRangeFactor: {
 		[kToPrimitive]: () => 0x48cd7b30,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b30,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Factor governing the max water proxmity range for texture assignment
+	 */
 	WaterProximityRangeFactor: {
 		[kToPrimitive]: () => 0x48cd7b31,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b31,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of erosion passes at initial terrain creation time
+	 */
 	NumInitialErosionPasses: 0x48cd7b40,
+	/**
+	 * Number of hydraulic erosion iterations in each initial erosion pass
+	 */
 	NumHydraulicIterationsPerInitialErosionPass: 0x48cd7b41,
+	/**
+	 * Number of wind erosion iterations in each initial erosion pass
+	 */
 	NumWindIterationsPerInitialErosionPass: 0x48cd7b42,
+	/**
+	 * The sea level change range (meters) corresponding to the water slider,
+	 * for diff city sizes
+	 */
 	SeaLevelChangeDueToWaterSlider: {
 		[kToPrimitive]: () => 0x48cd7b43,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b43,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * do not auto flatten it"
+	 */
 	MinCellsInUsefulFlatArea: 0x48cd7b50,
+	/**
+	 * Controls the extent of height change allowed in auto-flattening
+	 */
 	MaxHtChangeToFlattenFactor: {
 		[kToPrimitive]: () => 0x48cd7b51,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b51,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls the maximum altitude upto which auto-flattening gets done
+	 */
 	MaxTerraceAltitudeFactor: {
 		[kToPrimitive]: () => 0x48cd7b52,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b52,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls the lowest altitude at which terraces get created
+	 */
 	MinTerraceAltitudeFactor: {
 		[kToPrimitive]: () => 0x48cd7b53,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b53,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * To what distance (in cells) around an auto-flattened area we do smoothing
+	 */
 	AutoFlatAreaEdgeSmootheningRadius: 0x48cd7b54,
+	/**
+	 * Minimum number of shore vertices in a shore cliff
+	 */
 	MinShoreCliffSize: 0x48cd7b60,
+	/**
+	 * Minimum pre-existing ht difference at shore for it to be considered for
+	 * turning into a cliff
+	 */
 	MinShoreCliffCandidateHt: {
 		[kToPrimitive]: () => 0x48cd7b61,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b61,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum ht above sea level at a shore cliff (after cliff creation)
+	 */
 	MinShoreCliffHt: {
 		[kToPrimitive]: () => 0x48cd7b62,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b62,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum ht above sea level at a shore cliff (after cliff creation)
+	 */
 	MaxShoreCliffHt: {
 		[kToPrimitive]: () => 0x48cd7b63,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b63,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of shore vertices in a shore cliff
+	 */
 	MaxShoreCliffSize: 0x48cd7b64,
+	/**
+	 * A face is considered cliff if the y-component of its normal is less than
+	 * this
+	 */
 	MaxNormalYForCliff: {
 		[kToPrimitive]: () => 0x48cd7b65,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b65,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum sea altitude
+	 */
 	MinSeaLevel: {
 		[kToPrimitive]: () => 0x48cd7b70,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b70,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum sea altitude
+	 */
 	MaxSeaLevel: {
 		[kToPrimitive]: () => 0x48cd7b71,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b71,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Extent by which the sea level is raised/lowered for each player click
+	 */
 	SeaRaiseLowerAmount: {
 		[kToPrimitive]: () => 0x48cd7b72,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b72,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Extent by which the terrain level is raised/lowered each time raise/lower
+	 * menu is selected
+	 */
 	TerrainRaiseLowerAmount: {
 		[kToPrimitive]: () => 0x48cd7b73,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7b73,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Run auto-flatten tool upon initial terrain creation
+	 */
 	AutoFlattenUponCreation: {
 		[kToPrimitive]: () => 0x48cd7b80,
-		[kType]: Uint8,
+		[kPropertyId]: 0x48cd7b80,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Run cliff creation tool upon initial terrain creation
+	 */
 	ShoreCliffsUponCreation: {
 		[kToPrimitive]: () => 0x48cd7b81,
-		[kType]: Uint8,
+		[kPropertyId]: 0x48cd7b81,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Angle (in degrees) by which the brush rotates between successive
+	 * applications
+	 */
 	TypicalBrushAngleIncrement: {
 		[kToPrimitive]: () => 0x48cd7ba0,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7ba0,
+		[kPropertyType]: [Float32],
 	},
-	NumFlowStepsPerWaterErosionBrushApplication: 0x48cd7bf1,
+	/**
+	 * Number of water flow steps in each application of water erosion brush
+	 */
+	NumFlowStepsPerWaterErosionBrushApplication: {
+		[kToPrimitive]: () => 0x48cd7bf1,
+		[kPropertyId]: 0x48cd7bf1,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Number of water erosion steps in each application of water erosion tool
+	 */
 	NumWaterErosionIterationsPerInvocation: 0x48cd7bf2,
+	/**
+	 * Number of smoothing iterations after each application of water erosion
+	 * tool
+	 */
 	NumSmoothingIterationsAfterWaterErosion: 0x48cd7bf3,
+	/**
+	 * Specifiess the smoothing radius as a function of height adjustment needed
+	 */
 	EdgeReconcilliationSmoothingRadiusVsHeightDiff: {
 		[kToPrimitive]: () => 0x48cd7c00,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7c00,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Smoothing iterations for edge reconcilliation
+	 */
 	EdgeReconcilliationSmoothingIterations: 0x48cd7c01,
+	/**
+	 * If the height difference is less than this, don't reconcile
+	 */
 	EdgeReconcilliationHtDifferenceThreshold: {
 		[kToPrimitive]: () => 0x48cd7c02,
-		[kType]: Float32,
+		[kPropertyId]: 0x48cd7c02,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Protection effect of station at its center (in protection units: 0-255).
+	 */
 	PoliceStationCenterStrength: {
 		[kToPrimitive]: () => 0x48d71ed0,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ed0,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Protection effect of station at its limit (in protection units: 0-255).
+	 */
 	PoliceStationExteriorStrength: {
 		[kToPrimitive]: () => 0x48d71ed1,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ed1,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Effect radius of station (in meters).
+	 */
 	PoliceStationRadius: {
 		[kToPrimitive]: () => 0x48d71ed2,
-		[kType]: Float32,
+		[kPropertyId]: 0x48d71ed2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of police cars that can be dispatched from this station.
+	 */
 	PoliceStationTotalDispatches: {
 		[kToPrimitive]: () => 0x48d71ed5,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ed5,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Protection effect of vehicle at its center (in protection units: 0-255).
+	 */
 	PoliceStationDispatchCenterStrength: {
 		[kToPrimitive]: () => 0x48d71ed9,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ed9,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Protection effect of vehicle at its limit (in protection units: 0-255).
+	 */
 	PoliceStationDispatchExteriorStrength: {
 		[kToPrimitive]: () => 0x48d71eda,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71eda,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Effect radius of active vehicle (in meters).
+	 */
 	PoliceStationDispatchRadius: {
 		[kToPrimitive]: () => 0x48d71edb,
-		[kType]: Float32,
+		[kPropertyId]: 0x48d71edb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Jail Inmate Capacity.  Note: The value you see in game and the number you
+	 * enter here may not match. The value entered here is the ideal number of
+	 * inmates you can pack into a jail. The number in the game is the practical
+	 * number you can pack into a jail.
+	 */
 	JailInmateCapacity: {
 		[kToPrimitive]: () => 0x48d71ee0,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ee0,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Monthly cost, per convict, for every prisoner over regular (100%)
+	 * capacity
+	 */
 	JailOvercapacityCostPerPerson: {
 		[kToPrimitive]: () => 0x48d71ee4,
-		[kType]: Sint32,
+		[kPropertyId]: 0x48d71ee4,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Amount of trash converted to energy per month.
+	 */
 	WasteToEnergyMonthlyCapacity: 0x48ebd0b1,
+	/**
+	 * Amount of garbage the building can store in a month
+	 */
 	GarbageCapacity: 0x48ee7a44,
+	/**
+	 * Where this water producer gets its water
+	 */
 	WaterSource: {
 		[kToPrimitive]: () => 0x48f23a7e,
-		[kType]: Uint8,
+		[kPropertyId]: 0x48f23a7e,
+		[kPropertyType]: Uint8,
 		FreshWater: 0x00000000,
 		SaltWater: 0x00000001,
 		Aquifer: 0x00000002,
 	},
+	/**
+	 * Bonds are issued in values that are of this increment
+	 */
 	BudgetBondIncrement: {
 		[kToPrimitive]: () => 0x490e0aa6,
-		[kType]: Sint64,
+		[kPropertyId]: 0x490e0aa6,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Minimum funding percentage that must be restored to end a utility strike
+	 */
 	UtilityMinFundingToEndStrike: {
 		[kToPrimitive]: () => 0x49122036,
-		[kType]: Float32,
+		[kPropertyId]: 0x49122036,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Traffic volume generated per point of population in a building
+	 */
 	TrafficVolumePerPopulation: {
 		[kToPrimitive]: () => 0x491332e6,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332e6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Speed to walk through rd, rl, hwy, st, x, x, ave, sub, lr, mo, ow, dr, gh
+	 */
 	MaxSpeedByNetworkForWalking: {
 		[kToPrimitive]: () => 0x491332e7,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332e7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to drive through rd, rl, hwy, st, x, x, ave, sub, lr, mo, ow, dr,
+	 * gh
+	 */
 	MaxSpeedByNetworkForDriving: {
 		[kToPrimitive]: () => 0x491332e8,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332e8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to bus travel through rd, rl, hwy, st, x, x, ave, sub, lr, mo, ow,
+	 * dr, gh
+	 */
 	MaxSpeedByNetworkForABus: {
 		[kToPrimitive]: () => 0x491332e9,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332e9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to train travel through rd, rl, hwy, st, x, x, ave, sub, lr, mo,
+	 * ow, dr, gh
+	 */
 	MaxSpeedByNetworkForATrain: {
 		[kToPrimitive]: () => 0x491332ea,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332ea,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to truck travel through rd, rl, hwy, st, x, x, ave, sub, lr, mo,
+	 * ow, dr, gh
+	 */
 	MaxSpeedByNetworkForATruck: {
 		[kToPrimitive]: () => 0x491332eb,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332eb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to train travel through rd, rl, hwy, st, x, x, ave, sub, lr, mo,
+	 * ow, dr, gh
+	 */
 	MaxSpeedByNetworkForAFrtTrain: {
 		[kToPrimitive]: () => 0x491332ec,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332ec,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to subway travel. Set the eighth value.
+	 */
 	MaxSpeedByNetworkForSubways: {
 		[kToPrimitive]: () => 0x491332ed,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332ed,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to ride el train.  Set the eighth value.
+	 */
 	MaxSpeedByNetworkForElTrain: {
 		[kToPrimitive]: () => 0x491332ee,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332ee,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed to ride monorail.  Set the ninth value.
+	 */
 	MaxSpeedByNetworkForMonorail: {
 		[kToPrimitive]: () => 0x491332ef,
-		[kType]: Float32,
+		[kPropertyId]: 0x491332ef,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum number of garbage units reported to the UI, must be less than
+	 * 32767
+	 */
 	MaxGarbageValueForUI: 0x49134bd4,
+	/**
+	 * Maximum air pollution value reported to the UI, must be less than 32767
+	 */
 	MaxAirPollutionValueForUI: 0x49134bdd,
+	/**
+	 * Multiplier to tweak the relative weighting of the R$$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_R$$$: {
 		[kToPrimitive]: () => 0x4918c925,
-		[kType]: Float32,
+		[kPropertyId]: 0x4918c925,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the CS$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_Cs$$: {
 		[kToPrimitive]: () => 0x4918c92c,
-		[kType]: Float32,
+		[kPropertyId]: 0x4918c92c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the CS$$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_Cs$$$: {
 		[kToPrimitive]: () => 0x4918c930,
-		[kType]: Float32,
+		[kPropertyId]: 0x4918c930,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the CO$$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_Co$$$: {
 		[kToPrimitive]: () => 0x4918c93a,
-		[kType]: Float32,
+		[kPropertyId]: 0x4918c93a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percentage (from 0 to 200) by which this ordinance affects coverage
+	 * radius of health buildings
+	 */
 	HealthCoverageRadiusEffect: {
 		[kToPrimitive]: () => 0x491b3ad5,
-		[kType]: Float32,
+		[kPropertyId]: 0x491b3ad5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Enable/disable ripples
+	 */
 	RipplesEnabled: {
 		[kToPrimitive]: () => 0x491c9c00,
-		[kType]: Bool,
+		[kPropertyId]: 0x491c9c00,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Place ripples only if the shore is these many cells long
+	 */
 	RippleMinShoreSizeForPlacement: 0x491c9c01,
+	/**
+	 * Approximate width of the quads along the ribbon axis (meters)
+	 */
 	RippleQuadWidth: {
 		[kToPrimitive]: () => 0x491c9c02,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c02,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Land side of the ribbon is keptabove sea level to get ripple washing the
+	 * beach effect
+	 */
 	RippleLandVertexHtAboveSeaLevel: {
 		[kToPrimitive]: () => 0x491c9c03,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c03,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * What portion of the texture corresponds to each quad
+	 */
 	RippleTextureUIncrementPerQuad: {
 		[kToPrimitive]: () => 0x491c9c04,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c04,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Dist (meters) from ribbon center to the quad edge on water side
+	 */
 	RippleWaterSideRibbonWidth: {
 		[kToPrimitive]: () => 0x491c9c05,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c05,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Dist (meters) from ribbon center to the quad edge on land side
+	 */
 	RippleLandSideRibbonWidth: {
 		[kToPrimitive]: () => 0x491c9c06,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c06,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Microseconds spent in each frame of animation
+	 */
 	RippleMicroSecsPerFrame: 0x491c9c07,
+	/**
+	 * Alpha values for the ribbon vertices on the land side
+	 */
 	RippleLandVertexAlpha: {
 		[kToPrimitive]: () => 0x491c9c08,
-		[kType]: Uint8,
+		[kPropertyId]: 0x491c9c08,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Alpha values for the ribbon vertices on the water side
+	 */
 	RippleWaterVertexAlpha: {
 		[kToPrimitive]: () => 0x491c9c09,
-		[kType]: Uint8,
+		[kPropertyId]: 0x491c9c09,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Factor governing the variation of the ribbon width [0-1]
+	 */
 	RippleWaterSideRibbonWidthVariation: {
 		[kToPrimitive]: () => 0x491c9c0a,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c0a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If the variation in ripple tangent direction is more than this, we break
+	 * the ripple there
+	 */
 	RippleConcavityThresholdAngle: {
 		[kToPrimitive]: () => 0x491c9c0b,
-		[kType]: Float32,
+		[kPropertyId]: 0x491c9c0b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If the area (square cells) of terrain edits exceeds this, ripples get
+	 * reevaluated
+	 */
 	RippleTerrainUpdateAreaThreshold: 0x491c9c0c,
+	/**
+	 * On the edges of the ripples, alpha increments over these many steps to
+	 * reach its max
+	 */
 	RippleAlphaIncrementSteps: 0x491c9c0d,
+	/**
+	 * HQ assigned to new High Wealth residents
+	 */
 	HighWealthHQ: {
 		[kToPrimitive]: () => 0x4929cc97,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4929cc97,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Maps Life Expectancy of a tract to the % of that tract that is in the
+	 * workforce
+	 */
 	LifeExpectancyToWorkforceCurve: {
 		[kToPrimitive]: () => 0x4941a92b,
-		[kType]: Float32,
+		[kPropertyId]: 0x4941a92b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Odds of selecting each travel strategy
+	 */
 	TravelStrategyPercentWealthNone: {
 		[kToPrimitive]: () => 0x4953e8a3,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4953e8a3,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Odds of selecting each travel strategy
+	 */
 	TravelStrategyPercentWealth$: {
 		[kToPrimitive]: () => 0x4953e8a4,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4953e8a4,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Odds of selecting each travel strategy
+	 */
 	TravelStrategyPercentWealth$$: {
 		[kToPrimitive]: () => 0x4953e8a5,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4953e8a5,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Odds of selecting each travel strategy
+	 */
 	TravelStrategyPercentWealth$$$: {
 		[kToPrimitive]: () => 0x4953e8a6,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4953e8a6,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Default depth of underground network piece below terrain
+	 */
 	UndergroundPieceDepth: {
 		[kToPrimitive]: () => 0x496e564c,
-		[kType]: Float32,
+		[kPropertyId]: 0x496e564c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If false, normal pipe pieces are placed as per intersections
+	 */
 	UsePipeDepth: {
 		[kToPrimitive]: () => 0x496e5a36,
-		[kType]: Bool,
+		[kPropertyId]: 0x496e5a36,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Zone purpose types compatible with crime (none == can appear around any
+	 * purpose)
+	 */
 	ZonePurposeFilter: {
 		[kToPrimitive]: () => 0xaa12fcb4,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb4,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Percent amount to decelerate scrolling speed per GZPaint tick.
+	 */
 	ScrollingDeceleration: {
 		[kToPrimitive]: () => 0xca383ca2,
-		[kType]: Float32,
+		[kPropertyId]: 0xca383ca2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * True if ScrollingDeceleration should be the percentage (0.0-1.0) to
+	 * decelerate per GZPaint tick.  False if that amount should be the absolute
+	 * amount to decrement the speed per tick.
+	 */
 	ScrollingDecelerationIsPercentage: {
 		[kToPrimitive]: () => 0x4975dd25,
-		[kType]: Bool,
+		[kPropertyId]: 0x4975dd25,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * RGBA color for unwatered buildings in pipe view
+	 */
 	UnwateredBuildingColor: {
 		[kToPrimitive]: () => 0x497f42a4,
-		[kType]: Uint8,
+		[kPropertyId]: 0x497f42a4,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for vehicle density
+	 */
 	VehicleDensityCurve: {
 		[kToPrimitive]: () => 0x4998c89c,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c89c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Which travel types are currently visible and simulated by the automata
+	 * system
+	 */
 	ActiveTravelTypes: {
 		[kToPrimitive]: () => 0x4998c89d,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c89d,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		Commute: 0x00000001,
 		Bus: 0x00000002,
@@ -1583,374 +3368,842 @@ export default {
 		ElTrain: 0x00000009,
 		Monorail: 0x0000000a,
 	},
+	/**
+	 * Max number of vehicles to cross a tile per second
+	 */
 	MaxVehiclesPerSecond: {
 		[kToPrimitive]: () => 0x4998c89e,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c89e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of vehicles at one time
+	 */
 	MaxVehicles: 0x4998c89f,
-	VehicleMinMaxKPH: 0x4998c900,
+	/**
+	 * Minimum and maximum DEFAULT speed for vehicles, in kilometers per hour
+	 */
+	VehicleMinMaxKPH: {
+		[kToPrimitive]: () => 0x4998c900,
+		[kPropertyId]: 0x4998c900,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for ped (sim) density
+	 */
 	PedDensityCurve: {
 		[kToPrimitive]: () => 0x4998c901,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c901,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of cells that occupant-trip vehicles should travel before
+	 * disappearing
+	 */
 	VehicleLifespanRange: {
 		[kToPrimitive]: () => 0x4998c902,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c902,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Max number of peds to cross a tile per second
+	 */
 	MaxPedsPerSecond: {
 		[kToPrimitive]: () => 0x4998c903,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c903,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of pedestrianss at one time
+	 */
 	MaxPeds: 0x4998c904,
-	PedMinMaxKPH: 0x4998c905,
+	/**
+	 * Minimum and maximum DEFAULT speed for pedestrians, in kilometers per hour
+	 */
+	PedMinMaxKPH: {
+		[kToPrimitive]: () => 0x4998c905,
+		[kPropertyId]: 0x4998c905,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maximum number of aircraft at one time
+	 */
 	MaxAircraft: 0x4998c908,
+	/**
+	 * Number of cells that occupant-trip pedestrians should travel before
+	 * disappearing
+	 */
 	PedLifespanRange: {
 		[kToPrimitive]: () => 0x4998c909,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c909,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Range for random value used to dampen occupancy values when generating
+	 * occupant trips
+	 */
 	OccupantTripNoiseRange: {
 		[kToPrimitive]: () => 0x4998c90a,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c90a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum number of watercraft at one time
+	 */
 	MaxWatercraft: 0x4998c90b,
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of commute automata
+	 * generated (0.0 - 1.0)
+	 */
 	CommuteClock: {
 		[kToPrimitive]: () => 0x4998c90c,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c90c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of bus automata
+	 * generated (0.0 - 1.0)
+	 */
 	BusClock: {
 		[kToPrimitive]: () => 0x4998c90d,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c90d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of freight train
+	 * automata generated (0.0 - 1.0)
+	 */
 	FreightTrainClock: {
 		[kToPrimitive]: () => 0x4998c90e,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c90e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of commute train
+	 * automata generated (0.0 - 1.0)
+	 */
 	CommuteTrainClock: {
 		[kToPrimitive]: () => 0x4998c90f,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c90f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of occupant trip
+	 * automata generated (0.0 - 1.0)
+	 */
 	OccupantTripClock: {
 		[kToPrimitive]: () => 0x4998c910,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c910,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of freight truck
+	 * automata generated (0.0 - 1.0)
+	 */
 	FreightTruckClock: {
 		[kToPrimitive]: () => 0x4998c911,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c911,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How long in seconds an automaton will pause at a stop sign
+	 */
 	StopSignDelay: {
 		[kToPrimitive]: () => 0x4998c912,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c912,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How long in seconds traffic coming from secondary streets gets the green
+	 * light
+	 */
 	StreetGoTime: {
 		[kToPrimitive]: () => 0x4998c913,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c913,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How long in seconds traffic coming from main roads gets the green light
+	 */
 	RoadGoTime: {
 		[kToPrimitive]: () => 0x4998c914,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c914,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How long in seconds traffic coming from avenues/boulevards gets the green
+	 * light
+	 */
 	AvenueGoTime: {
 		[kToPrimitive]: () => 0x4998c915,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c915,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How long in seconds it takes automata to fade in or out
+	 */
 	FadeTime: {
 		[kToPrimitive]: () => 0x4998c916,
-		[kType]: Float32,
+		[kPropertyId]: 0x4998c916,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Lowest zoom level at which vehicles are visible
+	 */
 	VehicleMinZoomVisibility: {
 		[kToPrimitive]: () => 0x4998c918,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c918,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Lowest zoom level at which pedestrians are visible
+	 */
 	PedestrianMinZoomVisibility: {
 		[kToPrimitive]: () => 0x4998c919,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c919,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Lowest zoom level at which aircraft are visible
+	 */
 	AircraftMinZoomVisibility: {
 		[kToPrimitive]: () => 0x4998c91a,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c91a,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Lowest zoom level at which watercraft are visible
+	 */
 	WatercraftMinZoomVisibility: {
 		[kToPrimitive]: () => 0x4998c91b,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c91b,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Automata should base traffic levels on 24-hour clock
+	 */
 	Use24hourClock: {
 		[kToPrimitive]: () => 0x4998c91c,
-		[kType]: Bool,
+		[kPropertyId]: 0x4998c91c,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * How many cells around a road tile the system will check population for
+	 * occupant trips
+	 */
 	OccupantTripPopulationRadius: {
 		[kToPrimitive]: () => 0x4998c91d,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4998c91d,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Time in days to complete construction. Recommended range: [15, 255]
+	 */
 	ConstructionTime: {
 		[kToPrimitive]: () => 0x499afa38,
-		[kType]: Uint8,
+		[kPropertyId]: 0x499afa38,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Distance between the points generated for power line curves
+	 */
 	PowerLineCurveDistanceBetweenPoints: {
 		[kToPrimitive]: () => 0x49a195c0,
-		[kType]: Float32,
+		[kPropertyId]: 0x49a195c0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Which prop requester this prop satisfies. Most props satisfy the Wealth
+	 * Requester, meaning they express the wealth level of the lot or street they
+	 * are placed on. Choices are Wealth, Crime and Garbage.
+	 */
 	RequesterSatisfaction: {
 		[kToPrimitive]: () => 0x49a1e05a,
-		[kType]: Uint32,
+		[kPropertyId]: 0x49a1e05a,
+		[kPropertyType]: Uint32,
 		Wealth: 0x49a1e995,
 		Crime: 0x49a1e996,
 		Garbage: 0xe9a4300b,
 	},
+	/**
+	 * Percent of line length at which to place control points, horizontally
+	 */
 	PowerLineControlHoriz: {
 		[kToPrimitive]: () => 0x49a1e8c4,
-		[kType]: Float32,
+		[kPropertyId]: 0x49a1e8c4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percentage of industrial bldg. population that will generate freight
+	 * trips
+	 */
 	FreightTrafficScalingFactor: {
 		[kToPrimitive]: () => 0x49a2e8be,
-		[kType]: Float32,
+		[kPropertyId]: 0x49a2e8be,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Crime level (0-1) vs. Prop Share
+	 */
 	CrimePropRequestCurve: {
 		[kToPrimitive]: () => 0x49a34301,
-		[kType]: Float32,
+		[kPropertyId]: 0x49a34301,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * DEBUG ONLY - Sims drive on the right side of the road, like proper
+	 * Americans
+	 */
 	DriveOnRight: {
 		[kToPrimitive]: () => 0x49be9565,
-		[kType]: Bool,
+		[kPropertyId]: 0x49be9565,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Highest fire stage that this occupant reaches before burning down. Range
+	 * = 1 to 5.
+	 */
 	MaxFireStage: {
 		[kToPrimitive]: () => 0x49beda31,
-		[kType]: Uint8,
+		[kPropertyId]: 0x49beda31,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * How this prop reacts to night
+	 */
 	NighttimeStateChange: {
 		[kToPrimitive]: () => 0x49c9c93c,
-		[kType]: Uint8,
+		[kPropertyId]: 0x49c9c93c,
+		[kPropertyType]: Uint8,
 		NoChange: 0x00000000,
 		ChangeToState1: 0x00000001,
 	},
+	/**
+	 * Cost to plop this building, in Simoleans(tm)
+	 */
 	PlopCost: {
 		[kToPrimitive]: () => 0x49cac341,
-		[kType]: Sint64,
+		[kPropertyId]: 0x49cac341,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * kPropertyID_NetworkPlacementPattern
+	 */
 	KPropertyID_NetworkPlacementPattern: {
 		[kToPrimitive]: () => 0x49d55951,
-		[kType]: Uint8,
+		[kPropertyId]: 0x49d55951,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Speed of scrolling when cursor hits screen edge.
+	 */
 	AutoScrollSpeed: {
 		[kToPrimitive]: () => 0x49e5522f,
-		[kType]: Float32,
+		[kPropertyId]: 0x49e5522f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Brush strength multiplier at epicenter vs. quake intensity
+	 */
 	QuakeBrushStrengthAtEpicenterVsQuakeIntensity: {
 		[kToPrimitive]: () => 0x4a08c500,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c500,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Brush width multiplier at epicenter vs. quake intensity
+	 */
 	QuakeBrushWidthAtEpicenterVsQuakeIntensity: {
 		[kToPrimitive]: () => 0x4a08c501,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c501,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Variation of brush strength with distance from epicenter
+	 */
 	QuakeBrushStrengthVsDistance: {
 		[kToPrimitive]: () => 0x4a08c502,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c502,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Variation of brush width with distance from epicenter
+	 */
 	QuakeBrushWidthVsDistance: {
 		[kToPrimitive]: () => 0x4a08c503,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c503,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Distance in meters, specifying how far apart we place effects
+	 */
 	QuakeDistBetweenEffects: {
 		[kToPrimitive]: () => 0x4a08c504,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c504,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max deviation from a straight fault line
+	 */
 	QuakeFaultLineCurviness: {
 		[kToPrimitive]: () => 0x4a08c505,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c505,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max variation (degrees) in the slope of fault line
+	 */
 	QuakeMaxFaultLineSlopeVariation: {
 		[kToPrimitive]: () => 0x4a08c506,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c506,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Speed (meters/sec) with which earthquake brush moves
+	 */
 	QuakeBrushTravelSpeed: {
 		[kToPrimitive]: () => 0x4a08c507,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c507,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Microsecs between shake effects
+	 */
 	QuakeMicroSecsBetweenShakeEffects: 0x4a08c508,
+	/**
+	 * Distance in meters, specifying how far apart we place automata repulsors
+	 */
 	QuakeDistBetweenAutomataRepulsors: {
 		[kToPrimitive]: () => 0x4a08c509,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c509,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min time (secs) from onset of leak until burst happens
+	 */
 	PipeBurstMinLeakTimeBeforeBurst: {
 		[kToPrimitive]: () => 0x4a08c600,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c600,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max time (secs) from onset of leak until burst happens
+	 */
 	PipeBurstMaxLeakTimeBeforeBurst: {
 		[kToPrimitive]: () => 0x4a08c601,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a08c601,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Specifies base name of disaster effect
+	 */
 	EffectName: {
 		[kToPrimitive]: () => 0x4a08c700,
-		[kType]: String,
+		[kPropertyId]: 0x4a08c700,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Specifies the id of the disaster manager to use
+	 */
 	ManagerID: 0x4a08c701,
+	/**
+	 * Mouse pick for disaster trigger should choose water surface instead of
+	 * terrain bed underneath
+	 */
 	StopPickAtWaterSurface: {
 		[kToPrimitive]: () => 0x4a08c702,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a08c702,
+		[kPropertyType]: Bool,
 	},
-	DataViewTypeFilter: 0x4a0b47e0,
+	/**
+	 * Occupant types to include or exclude (0=unused).
+	 */
+	DataViewTypeFilter: {
+		[kToPrimitive]: () => 0x4a0b47e0,
+		[kPropertyId]: 0x4a0b47e0,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * If true, the occupant filter is exclusive rather than inclusive.
+	 */
 	DataViewInvertFilter: {
 		[kToPrimitive]: () => 0x4a0b47e1,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a0b47e1,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * If true, zoning decals are hidden.
+	 */
 	DataViewHideZones: {
 		[kToPrimitive]: () => 0x4a0b47e2,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a0b47e2,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Specifies a surface or underground view to use.
+	 */
 	DataViewViewLevel: 0x4a0b47e3,
-	DataViewColorRamp: 0x4a0b47e4,
+	/**
+	 * Color progression to use for data.
+	 */
+	DataViewColorRamp: {
+		[kToPrimitive]: () => 0x4a0b47e4,
+		[kPropertyId]: 0x4a0b47e4,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Data overlay to display.
+	 */
 	DataViewDataSource: 0x4a0b47e5,
+	/**
+	 * Override value for undeveloped zone opacity (0-255).
+	 */
 	DataViewZoneOpacity: {
 		[kToPrimitive]: () => 0x4a0b47e6,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4a0b47e6,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If true, data map is interpolated to city cell resolution.
+	 */
 	DataViewInterpolateData: {
 		[kToPrimitive]: () => 0x4a0b47e7,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a0b47e7,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Force data to be uniform over lots, possibly of a specific type.
+	 */
 	DataViewQuantizeLots: 0x4a0b47e8,
+	/**
+	 * Selects building types for coverage rings and highlights.
+	 */
 	DataViewHighlightMode: 0x4a0b47e9,
+	/**
+	 * Specifies visual effect for coverage rings.
+	 */
 	DataViewCoverageEffect: {
 		[kToPrimitive]: () => 0x4a0b47ea,
-		[kType]: String,
+		[kPropertyId]: 0x4a0b47ea,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Specifies a CLSID of special code to create a custom view.
+	 */
 	DataViewCustomView: 0x4a0b47eb,
+	/**
+	 * Specifies a scaling factor for 16-bit maps.
+	 */
 	DataViewMaximumScale: 0x4a0b47ec,
+	/**
+	 * Specifies a layer subtype for development layers (R$, CO$$, etc.)
+	 */
 	DataViewDemandType: 0x4a0b47ed,
+	/**
+	 * Enables coverage circles for current highlight type with given color
+	 * (0xRRGGBB, HTML-style).
+	 */
 	DataViewCoverageCircleColor: 0x4a0b47ee,
+	/**
+	 * Shows highlighted buildings on 2D map with given color (0xAARRGGBB).
+	 */
 	DataViewHighlightColor: 0x4a0b47ef,
+	/**
+	 * If true, developed lots will show up as plain zone coloring.
+	 */
 	DataViewForceZones: {
 		[kToPrimitive]: () => 0x4a0b47f0,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a0b47f0,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Sets which networks are visible.
+	 */
 	DataViewNetworkVislevel: {
 		[kToPrimitive]: () => 0x4a0b47f1,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4a0b47f1,
+		[kPropertyType]: Uint8,
 	},
-	DataViewLegendsColor: 0x4a0b47f2,
-	DataViewLegendsGUIDS: 0x4a0b47f3,
+	/**
+	 * Set Color for legend on Data view
+	 */
+	DataViewLegendsColor: {
+		[kToPrimitive]: () => 0x4a0b47f2,
+		[kPropertyId]: 0x4a0b47f2,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * GUID for ledgend Text GroupID, GUID
+	 */
+	DataViewLegendsGUIDS: {
+		[kToPrimitive]: () => 0x4a0b47f3,
+		[kPropertyId]: 0x4a0b47f3,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Selects building types for coverage rings and highlights.
+	 */
 	DataViewLegendsHeader: 0x4a0b47f4,
+	/**
+	 * Displays zone coloring in the 2D map.
+	 */
 	DataViewShowZoneMap: {
 		[kToPrimitive]: () => 0x4a0b47f5,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a0b47f5,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Range of hours on 24-hour clock (0-23) when prop will be at state 0
+	 * (visible).  If start and end times are both 0, always visible.
+	 */
 	PropTimeOfDay: {
 		[kToPrimitive]: () => 0x4a149631,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a149631,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * What is the highest tax rate you can set before demand suffers?
+	 */
 	DemandNeutralTaxRateVsPopulation: {
 		[kToPrimitive]: () => 0x4a1f38b5,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38b5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much is demand impacted by tax rates above or below neutral?
+	 */
 	DemandTaxModifierVsRateVariance: {
 		[kToPrimitive]: () => 0x4a1f38b6,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38b6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How long a high tax rate depresses demand (even after it is lowered)
+	 */
 	DemandDaysOfTaxPenalty: 0x4a1f38b7,
+	/**
+	 * Relief for first connection (more have diminishing returns)
+	 */
 	DemandCommercicalCapReliefForConnections: {
 		[kToPrimitive]: () => 0x4a1f38c5,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38c5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Relief per connected Co population
+	 */
 	DemandCommercicalCapReliefForAirports: {
 		[kToPrimitive]: () => 0x4a1f38c6,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38c6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Relief per industrial trip
+	 */
 	DemandCommercicalCapReliefForSeaports: {
 		[kToPrimitive]: () => 0x4a1f38c7,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38c7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Relief per neighbor trip
+	 */
 	DemandIndustrialCapReliefForTrips: {
 		[kToPrimitive]: () => 0x4a1f38c8,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38c8,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Relief per connected Co population
+	 */
 	DemandIndustrialCapReliefForAirports: {
 		[kToPrimitive]: () => 0x4a1f38c9,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38c9,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Relief per industrial trip
+	 */
 	DemandIndustrialCapReliefForSeaports: {
 		[kToPrimitive]: () => 0x4a1f38ca,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f38ca,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * List of IDs corresponding to Demand Modifiers
+	 */
 	NationDemandIDList: 0x4a1f629f,
+	/**
+	 * Demand boost over time
+	 */
 	NationDefaultDemandModifierVsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a0,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier1VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a1,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier2VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a2,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier3VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a3,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier4VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a4,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier5VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a5,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier6VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a6,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier7VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a7,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier8VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a8,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier9VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62a9,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62a9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier10VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62b0,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62b0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier11VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62b1,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62b1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost over time
+	 */
 	NationDemandModifier12VsMonth: {
 		[kToPrimitive]: () => 0x4a1f62b2,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f62b2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Demand boost, indexed by difficulty
+	 */
 	NationDifficultyDemandModifier: {
 		[kToPrimitive]: () => 0x4a1f6300,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a1f6300,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of seconds the construction crew will spend per tile while
+	 * building network
+	 */
 	ConstructionCrewTime: {
 		[kToPrimitive]: () => 0x4a270db0,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a270db0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Speed of construction crew vehicles in meters/second
+	 */
 	ConstructionCrewVehicleSpeed: {
 		[kToPrimitive]: () => 0x4a270e94,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a270e94,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Instance ID of construction crew lead vehicle
+	 */
 	ConstructionCrewLeadVehicleInstance: 0x4a271248,
+	/**
+	 * Instance ID of construction crew follow vehicle
+	 */
 	ConstructionCrewFollowVehicleInstance: 0x4a27124f,
+	/**
+	 * Type of path used by construction crew vehicles (0=None, 1=Auto, 2=Ped,
+	 * 3=Train, 4=Subway
+	 */
 	ConstructionCrewVehiclePathType: 0x4a275748,
+	/**
+	 * The rate at which garbage decays in units per month
+	 */
 	LandfillGarbageDecayRate: {
 		[kToPrimitive]: () => 0x4a280510,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a280510,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The altitude variance of the landfill zone before levelling will take
+	 * place
+	 */
 	LandfillLevelToleranceThreshold: {
 		[kToPrimitive]: () => 0x4a280513,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a280513,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to create a tile of network using this tool
+	 */
 	SimoleanCostPerTile: 0x4a2d49b9,
+	/**
+	 * Bits 0 - 3 indicate which sides of the lot require a road (before
+	 * rotation).Side ordering is SC4 standard (0 = left side, 1 = top side, etc.
+	 */
 	LotConfigRequiredRoads: {
 		[kToPrimitive]: () => 0x4a4a88f0,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4a4a88f0,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		Left: 0x00000001,
 		Behind: 0x00000002,
@@ -1959,13 +4212,22 @@ export default {
 		LeftCorner: 0x00000009,
 		RightCorner: 0x0000000c,
 	},
+	/**
+	 * Solidification Rate for the Flow of VolcanoLava (Input Time in Fraction
+	 * from [0, 1])
+	 */
 	VolcanoLavaCurveSolidifcationRate: {
 		[kToPrimitive]: () => 0x4a4bc714,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a4bc714,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * GUID of sound played when building goes online.
+	 */
 	SFXActivateSound: {
 		[kToPrimitive]: () => 0x4a4c132e,
-		[kType]: Uint32,
+		[kPropertyId]: 0x4a4c132e,
+		[kPropertyType]: Uint32,
 		CoalPowerUp: 0xaa4c4718,
 		HydrogenPowerUp: 0x2a4c42b3,
 		NaturalGasPowerUp: 0xca4c4395,
@@ -1977,618 +4239,1410 @@ export default {
 		WaterPump: 0x0a55aaec,
 		WaterPurificationPlant: 0x2a55b1b1,
 	},
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for bus density
+	 */
 	BusDensityCurve: {
 		[kToPrimitive]: () => 0x4a511873,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a511873,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Cost to place a power pole using the power line tool
+	 */
 	PowerPolePlacementCost: 0x4a5f5953,
+	/**
+	 * Radius in cells, Max effect, and min effect for each developer
+	 */
 	DesirabilityEffectValues: {
 		[kToPrimitive]: () => 0x4a5f7315,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a5f7315,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Growth Developer IDs to go with next property
+	 */
 	DesirabilityEffectIDs: 0x4a5f7c4b,
+	/**
+	 * Maximum amount of garbage units the valve can hold
+	 */
 	MaxGarbageOnValve: 0x4a652679,
+	/**
+	 * Amount of garbage units each landfill tile can hold
+	 */
 	LandfillTileCapacity: 0x4a65267a,
+	/**
+	 * Input: park efficiency (0-100)  Output: Chance of zoo escape each month
+	 * (0-100)
+	 */
 	ZooEscapeChanceCurve: {
 		[kToPrimitive]: () => 0x4a6676ad,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a6676ad,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * The max total amount of garbage units taken in by landfills monthly
+	 */
 	LandfillTotalMaxGarbageMonthly: 0x4a677e5b,
+	/**
+	 * The max amount of garbage units taken in by each landfill monthly
+	 */
 	LandfillMonthlyMaxGarbagePerLandfill: 0x4a677e5c,
+	/**
+	 * Flag indicating whether or not to move landfill tiles with terrain
+	 */
 	LandfillMoveLandfillTilesWithTerrain: {
 		[kToPrimitive]: () => 0x4a677e5d,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a677e5d,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * The max amount of garbage units to decay in each landfill monthly
+	 */
 	LandfillMonthlyMaxGarbageDecayedPerLandfill: 0x4a677e5e,
+	/**
+	 * Monthly maintenance cost of a landfill cell (can be overridden by the
+	 * model budghet cost property)
+	 */
 	LandfillDefaultLandfillCellMaintenanceCost: {
 		[kToPrimitive]: () => 0x4a677e5f,
-		[kType]: Sint64,
+		[kPropertyId]: 0x4a677e5f,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Lower scores means more side explorations but also more CPU time
+	 */
 	NearestDestinationAttractiveness: {
 		[kToPrimitive]: () => 0x4a678060,
-		[kType]: Float32,
+		[kPropertyId]: 0x4a678060,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Add this property only if prop states are visually depicted by different
+	 * frames in an animated model instance
+	 */
 	StatesAsFrames: {
 		[kToPrimitive]: () => 0x4a70d491,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a70d491,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Random chance (0-100) of this prop appearing according to time-of-day and
+	 * simulator date
+	 */
 	PropRandomChance: {
 		[kToPrimitive]: () => 0x4a751ad5,
-		[kType]: Uint8,
+		[kPropertyId]: 0x4a751ad5,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * How long in simulator days the prop will stay active once triggered
+	 */
 	SimulatorDateDuration: 0x4a764564,
+	/**
+	 * Minimum music volume level setting for slider in audio prefs (0-1024)
+	 */
 	AudioMinMusicVolumeLevel: 0x4a7cb3ba,
+	/**
+	 * Minimum sound volume level setting for slider in audio prefs (0-1024)
+	 */
 	AudioMinSoundVolumeLevel: 0x4a7cb3bb,
+	/**
+	 * Max music volume level setting for slider in audio prefs (0-1024)
+	 */
 	AudioMaxMusicVolumeLevel: 0x4a7cb3bc,
+	/**
+	 * Max sound volume level setting for slider in audio prefs (0-1024)
+	 */
 	AudioMaxSoundVolumeLevel: 0x4a7cb3bd,
+	/**
+	 * Amount by which to adjust music volume such that at 80 percent it matches
+	 * the sfx volume at full
+	 */
 	AudioMusicVolAdjustment: 0x4a7cb3be,
+	/**
+	 * Time (in ms) within which music fades out when switching radio stations
+	 */
 	AudioMusicFadeoutTimeMs: 0x4a7cb3bf,
+	/**
+	 * If set to true, the prop will appear in the building plop preview
+	 */
 	Previewable: {
 		[kToPrimitive]: () => 0x4a89fcf3,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a89fcf3,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Max playing sounds
+	 */
 	AudioMaxPlayingSounds: 0x4a946a5d,
+	/**
+	 * Set if prop has a light mask and should light up at night with the lot
+	 * building.
+	 */
 	Light: {
 		[kToPrimitive]: () => 0x4a9f188b,
-		[kType]: Bool,
+		[kPropertyId]: 0x4a9f188b,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Layer volume smoothing delta limit
+	 */
 	AudioLayerVolumeSmoothDelta: 0x4aa03db1,
+	/**
+	 * Value for displaying capacity in the catalog - not simulated
+	 */
 	CatalogCapacity: 0x4aa60ebc,
+	/**
+	 * Value for displaying maximum capacity (last stage) in the catalog - not
+	 * simulated
+	 */
 	MaximumCatalogCapacity: 0x4aa60ebd,
+	/**
+	 * Value for displaying maximum monthly cost (last stage) in the catalog -
+	 * not simulated
+	 */
 	MaximumCatalogCost: {
 		[kToPrimitive]: () => 0x4aa60ebe,
-		[kType]: Sint32,
+		[kPropertyId]: 0x4aa60ebe,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Value for displaying maximum plop cost (last stage) in the catalog - not
+	 * simulated
+	 */
 	MaximumPlopCost: 0x4aa60ebf,
+	/**
+	 * Value for displaying alternative capacity (other than port) in the
+	 * catalog - not simulated
+	 */
 	AltCatalogCapacity: 0x4aa60ec0,
+	/**
+	 * Value for displaying maximum alternative capacity (other than port) in
+	 * the catalog - not simulated
+	 */
 	MaximumAltCatalogCapacity: 0x4aa60ec1,
+	/**
+	 * Value for displaying maximum alternate monthly cost (other than port) in
+	 * the catalog - not simulated
+	 */
 	MaximumAltCatalogCost: {
 		[kToPrimitive]: () => 0x4aa60ec2,
-		[kType]: Sint32,
+		[kPropertyId]: 0x4aa60ec2,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Max EQ boost achievable without reward buildings.  Used to scale values
+	 * for Sims opinion polls.
+	 */
 	MaximumEQBoost: {
 		[kToPrimitive]: () => 0x4aa84161,
-		[kType]: Float32,
+		[kPropertyId]: 0x4aa84161,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percent chance (0-100.0) that the effect will play for a tract that's at
+	 * death's door.
+	 */
 	DeathsDoorEffectChance: {
 		[kToPrimitive]: () => 0x4ab70dac,
-		[kType]: Float32,
+		[kPropertyId]: 0x4ab70dac,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Random height variance for effect for a tract that's at death's door.
+	 */
 	DeathsDoorEffectHeightDelta: {
 		[kToPrimitive]: () => 0x4ab71659,
-		[kType]: Float32,
+		[kPropertyId]: 0x4ab71659,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * For each taxable square of the given land value, the number of Simoleans
+	 * produced
+	 */
 	BudgetLandValueToSimoleans: {
 		[kToPrimitive]: () => 0x4ac519b8,
-		[kType]: Float32,
+		[kPropertyId]: 0x4ac519b8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps true simulation cost to synthetic cost value used by garbage deals.
+	 */
 	NDe_MaxUnitCostForGarbageDealsRCurve: {
 		[kToPrimitive]: () => 0x4b61ffc9,
-		[kType]: Float32,
+		[kPropertyId]: 0x4b61ffc9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Player-visible name of this automaton during query
+	 */
 	AutomatonDisplayName: {
 		[kToPrimitive]: () => 0x4b733e12,
-		[kType]: String,
+		[kPropertyId]: 0x4b733e12,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Multiply by default speed on road, rail, highway, street, pipe,
+	 * powerline, avenue, subway, light rail, monorail, 1-way road, dirt road,
+	 * ground highway
+	 */
 	SpeedMultiplierByNetwork: {
 		[kToPrimitive]: () => 0x4bae8fe0,
-		[kType]: Float32,
+		[kPropertyId]: 0x4bae8fe0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Cost to add per vehicle when deciding whether to switch lanes to pass
+	 * slower-moving vehicles
+	 */
 	LaneSwitchCost: {
 		[kToPrimitive]: () => 0x4bae8fe1,
-		[kType]: Float32,
+		[kPropertyId]: 0x4bae8fe1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max distance in meters that a vehicle will switch lanes on a multi-lane
+	 * network
+	 */
 	LaneSwitchMaxDistance: {
 		[kToPrimitive]: () => 0x4bae8fe2,
-		[kType]: Float32,
+		[kPropertyId]: 0x4bae8fe2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps congestion to accident probablity
+	 */
 	CongestionToAccidentProbability: {
 		[kToPrimitive]: () => 0x4be09ec9,
-		[kType]: Float32,
+		[kPropertyId]: 0x4be09ec9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps capacity to accident probablity
+	 */
 	CapacityToAccidentProbability: {
 		[kToPrimitive]: () => 0x4be09eca,
-		[kType]: Float32,
+		[kPropertyId]: 0x4be09eca,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Time (in seconds) that a traffic accident lasts
+	 */
 	AccidentDuration: {
 		[kToPrimitive]: () => 0x4be09ecb,
-		[kType]: Float32,
+		[kPropertyId]: 0x4be09ecb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Period (in seconds) that the traffic sim tests for accidents
+	 */
 	AccidentCheckPeriod: {
 		[kToPrimitive]: () => 0x4be09ecc,
-		[kType]: Float32,
+		[kPropertyId]: 0x4be09ecc,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If true, this building radiates capacity reduction like intersections
+	 */
 	TransitSwitchCapacityEffect: {
 		[kToPrimitive]: () => 0x4bfc47b0,
-		[kType]: Bool,
+		[kPropertyId]: 0x4bfc47b0,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * AEMS Volume curve
+	 */
 	AudioAEMSVolumeCurve: {
 		[kToPrimitive]: () => 0x4bfdd955,
-		[kType]: Float32,
+		[kPropertyId]: 0x4bfdd955,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Height that clouds float at
+	 */
 	MtnCloudsHeight: {
 		[kToPrimitive]: () => 0x66fbf7a9,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7a9,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Lowest terrain height that clouds form over
+	 */
 	MtnCloudsFormHeight: {
 		[kToPrimitive]: () => 0x66fbf7aa,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7aa,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Lowest terrain height that clouds have max opacity
+	 */
 	MtnCloudsFadeInHeight: {
 		[kToPrimitive]: () => 0x66fbf7ab,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7ab,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terrain height above which clouds begin to fade
+	 */
 	MtnCloudsFadeOutHeight: {
 		[kToPrimitive]: () => 0x66fbf7ac,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7ac,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terrain height above which clouds fade completely
+	 */
 	MtnCloudsDisperseHeight: {
 		[kToPrimitive]: () => 0x66fbf7ad,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7ad,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terrain height above which clouds begin to slow
+	 */
 	MtnCloudsSlowDownHeight: {
 		[kToPrimitive]: () => 0x66fbf7ae,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7ae,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Terrain height above which clouds stop completely
+	 */
 	MtnCloudsStopHeight: {
 		[kToPrimitive]: () => 0x66fbf7af,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7af,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min and Max of cloud size variation (meters)
+	 */
 	MtnCloudsSizeRange: {
 		[kToPrimitive]: () => 0x66fbf7b0,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max of cloud aspect ratio variation (0-1)
+	 */
 	MtnCloudsAspectRange: {
 		[kToPrimitive]: () => 0x66fbf7b1,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max of cloud opacity variation (0-1)
+	 */
 	MtnCloudsOpacityRange: {
 		[kToPrimitive]: () => 0x66fbf7b2,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max of cloud intensity variation (0-1)
+	 */
 	MtnCloudsIntensityRange: {
 		[kToPrimitive]: () => 0x66fbf7b3,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max of cloud speed variation (meters/msec)
+	 */
 	MtnCloudsSpeedRange: {
 		[kToPrimitive]: () => 0x66fbf7b4,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max scale factors for ShadeOffsetDir
+	 */
 	MtnCloudsShadeOffsetRange: {
 		[kToPrimitive]: () => 0x66fbf7b5,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min and Max radii in world units where clouds are hidden by cursor.
+	 */
 	MtnCloudsCursorHideRange: {
 		[kToPrimitive]: () => 0x66fbf7b6,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * brightness of shadow quad as % of highlight (0-1)
+	 */
 	MtnCloudsShadeIntensity: {
 		[kToPrimitive]: () => 0x66fbf7b8,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7b8,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier for cloud speed based on sim speed. Slow Med Fast Paused
+	 */
 	MtnCloudsSimSpeedFactor: {
 		[kToPrimitive]: () => 0x66fbf7ba,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7ba,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * X and Y(Z) offset of shade quad as a ratio of particle size (0-1)
+	 */
 	MtnCloudsShadeOffsetDir: {
 		[kToPrimitive]: () => 0x66fbf7bb,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7bb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max # of cloud particles that can exist at once
+	 */
 	MtnCloudsMaxParticles: 0x66fbf7bc,
+	/**
+	 * Min time for particles to fade in when they spawn visible, or to fade out
+	 * when they die due to age. (Milliseconds)
+	 */
 	MtnCloudsMinFadeInTime: {
 		[kToPrimitive]: () => 0x66fbf7bd,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7bd,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max particle lifetime (Milliseconds)
+	 */
 	MtnCloudsParticleMaxAge: {
 		[kToPrimitive]: () => 0x66fbf7be,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7be,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Particle spawning rate (Particles per second)
+	 */
 	MtnCloudsParticleGenRate: {
 		[kToPrimitive]: () => 0x66fbf7bf,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7bf,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * if true, particles are still simulated outside of regions where clouds
+	 * are visible
+	 */
 	MtnCloudsAllowHiddenParticles: {
 		[kToPrimitive]: () => 0x66fbf7c0,
-		[kType]: Bool,
+		[kPropertyId]: 0x66fbf7c0,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Percent of normal opacity by zoom level. Set to 0 to disable a particular
+	 * zoom. Top is zoom 1 bottom is zoom 5
+	 */
 	MtnCloudsZoomFade: {
 		[kToPrimitive]: () => 0x66fbf7c1,
-		[kType]: Float32,
+		[kPropertyId]: 0x66fbf7c1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * 0.0-100.0, See ISC4PoliceSimulator.h
+	 */
 	PoliceMaxJailOvercrowdingPercentage: {
 		[kToPrimitive]: () => 0x68ddae92,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae92,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * See ISC4PoliceSimulator.h
+	 */
 	PoliceFundingToEfficiencyResponseCurve: {
 		[kToPrimitive]: () => 0x68ddae93,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae93,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * 0.0-100.0, See ISC4PoliceSimulator.h
+	 */
 	PoliceMaxAllowedFundingPercentage: {
 		[kToPrimitive]: () => 0x68ddae95,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae95,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * 0.0-100.0, See ISC4PoliceSimulator.h
+	 */
 	PoliceMonthlyCriminalRehabilitationPercent: {
 		[kToPrimitive]: () => 0x68ddae97,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae97,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * 0.0-100.0, See ISC4PoliceSimulator.h
+	 */
 	PoliceStrikeEfficiency: {
 		[kToPrimitive]: () => 0x68ddae9a,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae9a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * In days. See ISC4PoliceSimulator.h
+	 */
 	PoliceMaxStrikeDuration: 0x68ddae9b,
+	/**
+	 * 0.0-100.0, See ISC4PoliceSimulator.h
+	 */
 	PoliceMinFundingToEndStrikes: {
 		[kToPrimitive]: () => 0x68ddae9c,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae9c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * See ISC4PoliceSimulator.h
+	 */
 	PoliceStrikeResponseCurve: {
 		[kToPrimitive]: () => 0x68ddae9e,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddae9e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If crime is committed in a cell whose police protection value is above
+	 * this, they'll get arrested
+	 */
 	PoliceArrestThreshold: 0x68ddae9f,
+	/**
+	 * See ISC4PoliceSimulator.h
+	 */
 	JailFundingToEfficiencyResponseCurve: {
 		[kToPrimitive]: () => 0x68ddaea0,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ddaea0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of people that can be served by this recycling center
+	 */
 	RecyclingCenterPopulationServed: 0x68ed1736,
+	/**
+	 * Radii of pollution (in cells) generated by the building, for each type
+	 * (air, water, garbage, radiation).
+	 */
 	PollutionRadii: {
 		[kToPrimitive]: () => 0x68ee9764,
-		[kType]: Float32,
+		[kPropertyId]: 0x68ee9764,
+		[kPropertyType]: [Float32],
 	},
-	MapViewUnsignedColors: 0x68f26014,
-	MapViewSignedColors: 0x68f26015,
+	/**
+	 * RGBA color of 3D overlay of 2-color map view
+	 */
+	MapViewUnsignedColors: {
+		[kToPrimitive]: () => 0x68f26014,
+		[kPropertyId]: 0x68f26014,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * RGBA color of 3D overlay of 3-color map view
+	 */
+	MapViewSignedColors: {
+		[kToPrimitive]: () => 0x68f26015,
+		[kPropertyId]: 0x68f26015,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Number of cells surrounding water pipes that will also be watered
+	 */
 	WaterPipeEffectRadius: 0x68f5436a,
+	/**
+	 * Number of cells away from fresh water a water pump can be placed
+	 */
 	FreshWaterPumpReach: 0x68f5436b,
+	/**
+	 * Number of cells away from salt water a water pump can be placed
+	 */
 	SaltWaterPumpReach: 0x68f5436c,
+	/**
+	 * Percentace by which water production is reduced when not within range of
+	 * fresh water source
+	 */
 	FreshWaterDistanceLoss: 0x68f5436d,
-	KSC4FoundationPropertySideTextures: 0x68fcff37,
-	KSC4FoundationPropertyTopTextures: 0x68fcff38,
+	/**
+	 * Texture IDs for each zoom level. Mutally exclusive with building model
+	 * properties.
+	 */
+	KSC4FoundationPropertySideTextures: {
+		[kToPrimitive]: () => 0x68fcff37,
+		[kPropertyId]: 0x68fcff37,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Texture IDs for each zoom level. Mutally exclusive with building model
+	 * properties.
+	 */
+	KSC4FoundationPropertyTopTextures: {
+		[kToPrimitive]: () => 0x68fcff38,
+		[kPropertyId]: 0x68fcff38,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % of a
+	 * utility output
+	 */
 	PowerFundingToEfficiencyCurve: {
 		[kToPrimitive]: () => 0x6911e2df,
-		[kType]: Float32,
+		[kPropertyId]: 0x6911e2df,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % chance
+	 * of a Health strike
+	 */
 	HealthStrikeResponseCurve: {
 		[kToPrimitive]: () => 0x691894a4,
-		[kType]: Float32,
+		[kPropertyId]: 0x691894a4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Minimum grade that all schools must have to end a School strike
+	 */
 	SchoolMinGradeToEndStrike: {
 		[kToPrimitive]: () => 0x691894c0,
-		[kType]: Float32,
+		[kPropertyId]: 0x691894c0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % of
+	 * Education output
+	 */
 	SchoolFundingToEfficiencyCurve: {
 		[kToPrimitive]: () => 0x691894c6,
-		[kType]: Float32,
+		[kPropertyId]: 0x691894c6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Radius of a school's coverage, in meters.
+	 */
 	SchoolCoverageRadius: {
 		[kToPrimitive]: () => 0x691b42b3,
-		[kType]: Float32,
+		[kPropertyId]: 0x691b42b3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of patients served by this hospital.
+	 */
 	HospitalPatientCapacity: 0x69220415,
+	/**
+	 * HQ assigned to new Medium Wealth residents
+	 */
 	MediumWealthHQ: {
 		[kToPrimitive]: () => 0x6929cc92,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6929cc92,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects the rate at
+	 * which EQ decays
+	 */
 	SchoolEQDecayEffect: {
 		[kToPrimitive]: () => 0x692ef65a,
-		[kType]: Float32,
+		[kPropertyId]: 0x692ef65a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Distance (meters) from the shore to the starting location of waves
+	 */
 	DistFromShoreToWaveStartLocation: {
 		[kToPrimitive]: () => 0x6932dc00,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc00,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min time (sec) between the production of successive waves
+	 */
 	WaveMinProductionInterval: {
 		[kToPrimitive]: () => 0x6932dc01,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc01,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max time (sec) between the production of successive waves
+	 */
 	WaveMaxProductionInterval: {
 		[kToPrimitive]: () => 0x6932dc02,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc02,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Inner radius (meter) of the wave arc
+	 */
 	WaveInnerRadius: {
 		[kToPrimitive]: () => 0x6932dc03,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc03,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Outer radius (meter) of the wave arc
+	 */
 	WaveOuterRadius: {
 		[kToPrimitive]: () => 0x6932dc04,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc04,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Arc angle (degrees) for the wave
+	 */
 	WaveArcAngle: {
 		[kToPrimitive]: () => 0x6932dc05,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc05,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min time (sec) the wave spends in each of the states
+	 */
 	WaveMinTimeInState: {
 		[kToPrimitive]: () => 0x6932dc06,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc06,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max time (sec) the wave spends in each of the states
+	 */
 	WaveMaxTimeInState: {
 		[kToPrimitive]: () => 0x6932dc07,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc07,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Initial movement speed (meter/sec) of  the wave
+	 */
 	WaveInitialMoveSpeed: {
 		[kToPrimitive]: () => 0x6932dc08,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc08,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Initial expansion speed (meter/sec) of  the wave
+	 */
 	WaveInitialExpandSpeed: {
 		[kToPrimitive]: () => 0x6932dc09,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc09,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min movement speed (meter/sec) of  the wave
+	 */
 	WaveMinMoveSpeed: {
 		[kToPrimitive]: () => 0x6932dc0a,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min expansion speed (meter/sec) of  the wave
+	 */
 	WaveMinExpandSpeed: {
 		[kToPrimitive]: () => 0x6932dc0b,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max movement speed (meter/sec) of  the wave
+	 */
 	WaveMaxMoveSpeed: {
 		[kToPrimitive]: () => 0x6932dc0c,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max expansion speed (meter/sec) of  the wave
+	 */
 	WaveMaxExpandSpeed: {
 		[kToPrimitive]: () => 0x6932dc0d,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min acceleration of expansion in each of the states
+	 */
 	WaveMinExpandAcceleration: {
 		[kToPrimitive]: () => 0x6932dc0e,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max acceleration of expansion in each of the states
+	 */
 	WaveMaxExpandAcceleration: {
 		[kToPrimitive]: () => 0x6932dc0f,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc0f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min acceleration of movement in each of the states
+	 */
 	WaveMinMoveAcceleration: {
 		[kToPrimitive]: () => 0x6932dc10,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc10,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max acceleration of movement in each of the states
+	 */
 	WaveMaxMoveAcceleration: {
 		[kToPrimitive]: () => 0x6932dc11,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc11,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum number of waves in the city
+	 */
 	MaxWaves: 0x6932dc12,
+	/**
+	 * Gap (meters) between two waves
+	 */
 	InterWaveGap: {
 		[kToPrimitive]: () => 0x6932dc13,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc13,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum difference in the orientation of different waves
+	 */
 	WaveMaxOrientationDifference: {
 		[kToPrimitive]: () => 0x6932dc14,
-		[kType]: Float32,
+		[kPropertyId]: 0x6932dc14,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps HQ of a tract to the Life Expectancy of that tract
+	 */
 	HealthQuotientToLifeExpectancyCurve: {
 		[kToPrimitive]: () => 0x6941a67f,
-		[kType]: Float32,
+		[kPropertyId]: 0x6941a67f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps amount of air pollution in a tract to the rate at which the HQ in
+	 * that tract decays
+	 */
 	AirPollutionToHQDecayCurve: {
 		[kToPrimitive]: () => 0x6941b022,
-		[kType]: Float32,
+		[kPropertyId]: 0x6941b022,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Affects how traffic density equates to air pollution
+	 */
 	TrafficAirPollutionFactor: {
 		[kToPrimitive]: () => 0x69501944,
-		[kType]: Float32,
+		[kPropertyId]: 0x69501944,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Zone types compatible with crime (none == can appear in any zone)
+	 */
 	ZoneFilter: {
 		[kToPrimitive]: () => 0xaa12fcb2,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb2,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Number of pixels in color gradient corresponding to every meter of lava
+	 * depth
+	 */
 	LavaColorGradientMapFactor: {
 		[kToPrimitive]: () => 0x69987e60,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e60,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Higher the viscosity, lower should this number be.
+	 */
 	LavaMaxFlowRate: {
 		[kToPrimitive]: () => 0x69987e61,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e61,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Lava height differential at which the max flow rate is reached
+	 */
 	LavaHtDiffForMaxFlowRate: {
 		[kToPrimitive]: () => 0x69987e62,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e62,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When unit amount of lava solidifies, it increases the terrain height by
+	 * this much
+	 */
 	LavaLiquidToSolidConversionFactor: {
 		[kToPrimitive]: () => 0x69987e63,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e63,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min alpha for lava
+	 */
 	LavaMinAlpha: {
 		[kToPrimitive]: () => 0x69987e64,
-		[kType]: Uint8,
+		[kPropertyId]: 0x69987e64,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * When the lava depth is less than this, we set alpha to be LavaMinAlpha
+	 */
 	LavaMinAlphaDepth: {
 		[kToPrimitive]: () => 0x69987e65,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e65,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If lava depth is more than this, it becomes opaque (i.e., max alpha)
+	 */
 	LavaMaxAlphaDepth: {
 		[kToPrimitive]: () => 0x69987e66,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e66,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Width of scorched terrain decal (meters)
+	 */
 	LavaScorchedTerrainDecalSize: {
 		[kToPrimitive]: () => 0x69987e67,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e67,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Solidification rate under water this many times that over land
+	 */
 	LavaUnderWaterSolidificationMultiple: {
 		[kToPrimitive]: () => 0x69987e68,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e68,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The lava depth at which occupants will catch on fire
+	 */
 	LavaDepthBurnThreshold: {
 		[kToPrimitive]: () => 0x69987e69,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e69,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The lava depth at which occupants will instantly burn down
+	 */
 	LavaDepthDeepFryThreshold: {
 		[kToPrimitive]: () => 0x69987e6a,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e6a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Duration of each lava texture animation frame (microsecs)
+	 */
 	LavaAnimationFrameDuration: 0x69987e6b,
+	/**
+	 * If lava amount is less than this, we don't deposit it (We simply dry it
+	 * up!)
+	 */
 	LavaMinAmountForDepositToHappen: {
 		[kToPrimitive]: () => 0x69987e6c,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e6c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Life time of scorch decal(microsecs)
+	 */
 	LavaScorchDecalLifeTime: 0x69987e6d,
+	/**
+	 * Fade in time (Secs) of scorch decal
+	 */
 	LavaScorchDecalFadeInTime: {
 		[kToPrimitive]: () => 0x69987e6e,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e6e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Fade out time (Secs) of scorch decal
+	 */
 	LavaScorchDecalFadeOutTime: {
 		[kToPrimitive]: () => 0x69987e6f,
-		[kType]: Float32,
+		[kPropertyId]: 0x69987e6f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The Min slope this lot will develop on
+	 */
 	LotConfigPropertyMinSlopeAllowed: {
 		[kToPrimitive]: () => 0x699b08a4,
-		[kType]: Float32,
+		[kPropertyId]: 0x699b08a4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the IResource occupant
+	 * type's taxes
+	 */
 	BudgetTaxRateOccWeight_IResource: {
 		[kToPrimitive]: () => 0x69a36e40,
-		[kType]: Float32,
+		[kPropertyId]: 0x69a36e40,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Shares of garbage props requested vs. garbage percentage of max
+	 */
 	GarbagePropRequestCurve: {
 		[kToPrimitive]: () => 0x69a437f6,
-		[kType]: Float32,
+		[kPropertyId]: 0x69a437f6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If the water depth exceeds this, we apply deep seabed texture
+	 */
 	MinWaterDepthForDeepSeaBedTexture: {
 		[kToPrimitive]: () => 0x69ac5640,
-		[kType]: Float32,
+		[kPropertyId]: 0x69ac5640,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Upto this water depth we use deep seabed texture for terrain (No
+	 * texturing beyond that depth)
+	 */
 	MaxWaterDepthForDeepSeaBedTexture: {
 		[kToPrimitive]: () => 0x69ac5641,
-		[kType]: Float32,
+		[kPropertyId]: 0x69ac5641,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * (0.0 - 1.0)
+	 */
 	FireProtectionSimStationNoRoadMultiplier: {
 		[kToPrimitive]: () => 0x69b425db,
-		[kType]: Float32,
+		[kPropertyId]: 0x69b425db,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls how often terrain texture updates happen while applying terrain
+	 * brushes
+	 */
 	TextureUpdateIntervalForTerrainBrushes: 0x69db8d00,
+	/**
+	 * Controls how the brush strength is modified by the control key
+	 */
 	ModKey1StrengthMultiplier: {
 		[kToPrimitive]: () => 0x69db8d01,
-		[kType]: Float32,
+		[kPropertyId]: 0x69db8d01,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls how the brush strength is modified by the control key
+	 */
 	ModKey1WidthMultiplier: {
 		[kToPrimitive]: () => 0x69db8d02,
-		[kType]: Float32,
+		[kPropertyId]: 0x69db8d02,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls how the brush strength is modified by the shift key
+	 */
 	ModKey2StrengthMultiplier: {
 		[kToPrimitive]: () => 0x69db8d03,
-		[kType]: Float32,
+		[kPropertyId]: 0x69db8d03,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Controls how the brush strength is modified by the shift key
+	 */
 	ModKey2WidthMultiplier: {
 		[kToPrimitive]: () => 0x69db8d04,
-		[kType]: Float32,
+		[kPropertyId]: 0x69db8d04,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Time interval (secs) between applications to get full brush strength
+	 */
 	ApplicationTimeIntervalForFullBrushStrength: {
 		[kToPrimitive]: () => 0x69db8d05,
-		[kType]: Float32,
+		[kPropertyId]: 0x69db8d05,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Prop rotates x/z to match slope.
+	 */
 	OrientToSlope: {
 		[kToPrimitive]: () => 0x69f14d33,
-		[kType]: Bool,
+		[kPropertyId]: 0x69f14d33,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Percentage (0.0-1.0) of actual crimes in a cell that will generate a
+	 * corresponding crime sim
+	 */
 	CrimeSimMultiplier: {
 		[kToPrimitive]: () => 0x6a09f62f,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a09f62f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min and Max number of times a one-shot sim will loop through its
+	 * animation before fading out
+	 */
 	SimPropAnimRange: {
 		[kToPrimitive]: () => 0x6a09f630,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a09f630,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Maps time of day on 24-hour clock to a percentage of crime props
+	 * generated (0.0 - 1.0)
+	 */
 	CrimeLayerClock: {
 		[kToPrimitive]: () => 0x6a09f631,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a09f631,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * This is an optional property. It is used in conjunction with the "Health
+	 * Effect Strength". Radius is in cells.
+	 */
 	HealthEffectRadius: {
 		[kToPrimitive]: () => 0x6a19f6b5,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a19f6b5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to raise/lower one vertex one meter when using this tool
+	 */
 	SimoleanCostPerMeterDisplaced: {
 		[kToPrimitive]: () => 0x6a2d49f4,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a2d49f4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Brush belongs to god mode, mountain category
+	 */
 	CategoryGodMountain: 0x6a33d682,
+	/**
+	 * Tweak values to nudge each delta
+	 */
 	AudioZoomDistanceTweaks: {
 		[kToPrimitive]: () => 0x6a359f22,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a359f22,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * 24hour times i.e. 15.5
+	 */
 	SFXAlarmTime: {
 		[kToPrimitive]: () => 0x6a36afab,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a36afab,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * GUID of sound played for the occupant. There will be one instance per
+	 * occupant.
+	 */
 	SFXOccupantInstanceSound: 0x6a36afac,
+	/**
+	 * Controls whether the flora appears in landscape mode (wild) or mayor mode
+	 * (domestic).
+	 */
 	FloraWild: {
 		[kToPrimitive]: () => 0x6a37ebb6,
-		[kType]: Bool,
+		[kPropertyId]: 0x6a37ebb6,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Ambient loop id
+	 */
 	AudioLoopId: 0x6a3fbdda,
+	/**
+	 * Sound Pressure Level
+	 */
 	AudioFreshSPL: 0x6a3fc4c7,
+	/**
+	 * Trigger ID for script-defined global effect that turns this prop on
+	 * (state 0) and off (state 1).
+	 */
 	GlobalEffectTrigger: 0x6a3fcc37,
+	/**
+	 * Maximum amount of air pollution that can be added to/subtracted from each
+	 * cell per month.
+	 */
 	AirPollutionDelta: 0x6a406201,
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % of a
+	 * utility output
+	 */
 	WaterFundingToEfficiencyCurve: {
 		[kToPrimitive]: () => 0x6a410bf2,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a410bf2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Density to freshness volume curve
+	 */
 	AudioDensity2FreshVolumeCurve: {
 		[kToPrimitive]: () => 0x6a4132f3,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a4132f3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Density to loop volume curve
+	 */
 	AudioDensity2LoopVolumeCurve: {
 		[kToPrimitive]: () => 0x6a4132f6,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a4132f6,
+		[kPropertyType]: [Float32],
 	},
-	NameKey: 0x6a416b21,
+	/**
+	 * Resource key of ordinance name resource
+	 */
+	NameKey: {
+		[kToPrimitive]: () => 0x6a416b21,
+		[kPropertyId]: 0x6a416b21,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Explosion type at end of life.
+	 */
 	HardFailureType: {
 		[kToPrimitive]: () => 0x6a43150f,
-		[kType]: Uint32,
+		[kPropertyId]: 0x6a43150f,
+		[kPropertyType]: Uint32,
 		DoesntExplode: 0x00000000,
 		LowEnergyExplosion: 0x00000001,
 		MediumEnergyExplosion: 0x00000002,
 		HighEnergyExplosion: 0x00000003,
 		SuperHighEnergyExplosion: 0x00000004,
 	},
-	TrainMinMaxKPH: 0x6a440d40,
+	/**
+	 * Min/max speed of trains in kilometers per hour
+	 */
+	TrainMinMaxKPH: {
+		[kToPrimitive]: () => 0x6a440d40,
+		[kPropertyId]: 0x6a440d40,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Min deal amount for water deal
+	 */
 	NDb_MinDealAmountWater: {
 		[kToPrimitive]: () => 0x6a469337,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a469337,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min deal profit factor (1 + NDc_MinDealProfitFactor)
+	 */
 	NDc_MinDealProfitFactor: {
 		[kToPrimitive]: () => 0x6a469342,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a469342,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Overrides the automatic maximum Y value.
+	 */
 	GraphMaximumYValue: {
 		[kToPrimitive]: () => 0x6a4aeded,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a4aeded,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Overrides the automatic Y tick spacing.
+	 */
 	GraphYTickSpacing: {
 		[kToPrimitive]: () => 0x6a4aedef,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a4aedef,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Array of GUIDs, one per plot, each representing a data source.
+	 */
 	GraphPlotDataSource1: 0x6a4aee40,
+	/**
+	 * (Line only) Array of GUIDs, one per plot, each representing a data
+	 * source.
+	 */
 	GraphPlotDataSource2: 0x6a4aee5f,
+	/**
+	 * (Line only) Array of ints, one per plot, each representing how data
+	 * sources 1 and 2 are combined (none, +, -, *, /).
+	 */
 	GraphPlotCombineOp: 0x6a4aee68,
+	/**
+	 * Array of ints, one per plot, each representing a localized string key for
+	 * the label.
+	 */
 	GraphPlotLabelKey: 0x6a4aeedc,
+	/**
+	 * Array of RGB triplets, 3 integers per plot, each representing a line
+	 * color.
+	 */
 	GraphPlotColor: {
 		[kToPrimitive]: () => 0x6a4aeedf,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a4aeedf,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Array of floats, one per plot, which scales the plot by that amount.
+	 */
 	GraphPlotScale: {
 		[kToPrimitive]: () => 0x6a4aeee2,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a4aeee2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * (Bar only) Array of ints, one per plot, each representing which series
+	 * that plot should be in.
+	 */
 	GraphPlotSeries: 0x6a4aeee3,
+	/**
+	 * (Bar only) Array of RGB triplets, 3 integers per series, each
+	 * representing a fill color for a whole series.
+	 */
 	GraphPlotSeriesFillColor: {
 		[kToPrimitive]: () => 0x6a4aeee4,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a4aeee4,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * (Bar only) Array of RGB triplets, 3 integers per series, each
+	 * representing a outline color a whole series.
+	 */
 	GraphPlotSeriesLineColor: {
 		[kToPrimitive]: () => 0x6a4aeee5,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a4aeee5,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * To Allow the flow of lava flow
+	 */
 	VolcanoLavaShouldLavaFlow: {
 		[kToPrimitive]: () => 0x6a4bc8ed,
-		[kType]: Bool,
+		[kPropertyId]: 0x6a4bc8ed,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Width in cells of each demolition cluster window
+	 */
 	Obliterate_ClusterWindowWidth: 0x6a5a6700,
+	/**
+	 * Cumulative number of clusters to demolish as a function of time (secs)
+	 */
 	Obliterate_NumClustersVsTime: {
 		[kToPrimitive]: () => 0x6a5a6701,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a5a6701,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Time (secs) between the creation of Finale effect and our last big
+	 * wipe-out sweep of the ciry
+	 */
 	Obliterate_SmokeScreenFormationTime: {
 		[kToPrimitive]: () => 0x6a5a6702,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a5a6702,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * What lot state this prop is active in.  Don't add the property if the
+	 * prop is active in all lot states.
+	 */
 	ActiveLotState: {
 		[kToPrimitive]: () => 0x6a5e0727,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a5e0727,
+		[kPropertyType]: Uint8,
 		Created: 0x00000000,
 		Ready: 0x00000001,
 		Constructing: 0x00000002,
@@ -2597,284 +5651,617 @@ export default {
 		Destructing: 0x00000005,
 		Destroyed: 0x00000006,
 	},
+	/**
+	 * History data source for this trend bar
+	 */
 	TrendBarDataSource: 0x6a6564f4,
+	/**
+	 * Converts from input data source range to {0,1}
+	 */
 	TrendBarResponseCurve: {
 		[kToPrimitive]: () => 0x6a6564f6,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a6564f6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Upkeep cost per tile of each network type (rd, rl, hwy, st, x, x, ave,
+	 * sub, lr)
+	 */
 	MonthlyCostForNetworkTile: {
 		[kToPrimitive]: () => 0x6a84493e,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a84493e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If this property is present the game will not apply deform and lighting
+	 * to the model
+	 */
 	ModelIsPrelit: 0x6a845768,
+	/**
+	 * ID of the plugin pack to which the data belongs
+	 */
 	PluginPackID: 0x6a871b82,
+	/**
+	 * Volume limiting curve
+	 */
 	AudioVolumeLimitingCurve: {
 		[kToPrimitive]: () => 0x6a946a50,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a946a50,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Prop only appears if lot is powered
+	 */
 	RequiresPowerToAppear: {
 		[kToPrimitive]: () => 0x6a959e71,
-		[kType]: Bool,
+		[kPropertyId]: 0x6a959e71,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * If set to true, when the prop is hover-queried, it will highlight both
+	 * itself and the main building (and give the same hover data). Setting to
+	 * True creates the effect of a main building that is composed of multiple
+	 * pieces (such as the University).
+	 */
 	QueryAsMainBuilding: {
 		[kToPrimitive]: () => 0x6a95e503,
-		[kType]: Bool,
+		[kPropertyId]: 0x6a95e503,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Starting funds for a new city, by difficult level
+	 */
 	BudgetInitialFunds: {
 		[kToPrimitive]: () => 0x6a9c7718,
-		[kType]: Sint64,
+		[kPropertyId]: 0x6a9c7718,
+		[kPropertyType]: [Sint64],
 	},
+	/**
+	 * Whether animated props should be looped, ping-pong, or one-shot. If not
+	 * present, the default is Loop.
+	 */
 	AnimatedPropPlayMode: {
 		[kToPrimitive]: () => 0x6a9edd07,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6a9edd07,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Coverage radii are multiplied by this value when computing tract coverage
+	 */
 	CoverageRadiusSlopMultiplier: {
 		[kToPrimitive]: () => 0x6a9f6edd,
-		[kType]: Float32,
+		[kPropertyId]: 0x6a9f6edd,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If a tract's HQ falls below this number, they're at death's door.
+	 */
 	DeathsDoorHQ: {
 		[kToPrimitive]: () => 0x6ab70da7,
-		[kType]: Float32,
+		[kPropertyId]: 0x6ab70da7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Base height above terrain at which the effect will play for a tract
+	 * that's at death's door.
+	 */
 	DeathsDoorEffectHeight: {
 		[kToPrimitive]: () => 0x6ab71654,
-		[kType]: Float32,
+		[kPropertyId]: 0x6ab71654,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Value for displaying monthly cost in the catalog - not simulated
+	 */
 	CatalogMonthlyCost: {
 		[kToPrimitive]: () => 0x6ad54804,
-		[kType]: Sint32,
+		[kPropertyId]: 0x6ad54804,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Multiplier for automata speed when sim is in slow, medium, fast, and
+	 * player-drive mode.  1.0 = default speed
+	 */
 	SimulationSpeedMultiplier: {
 		[kToPrimitive]: () => 0x6b42922c,
-		[kType]: Float32,
+		[kPropertyId]: 0x6b42922c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Defaulted deals get suspended for this number of days.
+	 */
 	NDd_SuspensionPeriod: {
 		[kToPrimitive]: () => 0x6b588fad,
-		[kType]: Float32,
+		[kPropertyId]: 0x6b588fad,
+		[kPropertyType]: Float32,
 	},
-	MiniMapWaterRamp: 0x6b733233,
+	/**
+	 * Color progression to use for water.
+	 */
+	MiniMapWaterRamp: {
+		[kToPrimitive]: () => 0x6b733233,
+		[kPropertyId]: 0x6b733233,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * List of travel types
+	 */
 	DataViewTravelTypes: 0x6b7c5cdd,
+	/**
+	 * How many tiles traffic autos should look ahead when determining paths
+	 */
 	PathLookaheadTiles: {
 		[kToPrimitive]: () => 0x6bac0b3e,
-		[kType]: Uint8,
+		[kPropertyId]: 0x6bac0b3e,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * GUID array of sounds to play (per zoom) when occupant is 'active'
+	 */
 	SFXActiveSound: 0x6c044bb5,
+	/**
+	 * Desired maximum # of vehicles in the world during player-drive
+	 */
 	PlayerdriveVehicleMaxCount: 0x6c200139,
+	/**
+	 * mnMonthsBetweenCellCoverage
+	 */
 	MnMonthsBetweenCellCoverage: 0x8761abd0,
+	/**
+	 * Range: [0.0 - 90.0]
+	 */
 	MaxSlopeAlongNetwork: {
 		[kToPrimitive]: () => 0x879d12e7,
-		[kType]: Float32,
+		[kPropertyId]: 0x879d12e7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The type of zone that is developed
+	 */
 	TargetZone: {
 		[kToPrimitive]: () => 0x87cd6300,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6300,
+		[kPropertyType]: Uint8,
 		Residential: 0x00000001,
 		Commercial: 0x00000002,
 		Industrial: 0x00000003,
 	},
+	/**
+	 * Demand comes from this index OR source zone
+	 */
 	DemandSourceIndex: 0x87cd6301,
+	/**
+	 * Specifies (source and target) wealth type
+	 */
 	WealthType: {
 		[kToPrimitive]: () => 0x87cd6330,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6330,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Specifies type of building created by this developer
+	 */
 	PurposeType: {
 		[kToPrimitive]: () => 0x87cd6332,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6332,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Specifies acceptable land values (0, 0 disables)
+	 */
 	LandValueRange: {
 		[kToPrimitive]: () => 0x87cd6333,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6333,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * True means use total land value
+	 */
 	LandValueUseIntrinsic: {
 		[kToPrimitive]: () => 0x87cd633f,
-		[kType]: Bool,
+		[kPropertyId]: 0x87cd633f,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * How much land value is a factor in desirability
+	 */
 	LandValueEffect: {
 		[kToPrimitive]: () => 0x87cd6340,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6340,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much proximity to R$ is a factor in desirability
+	 */
 	R$ProximityEffect: {
 		[kToPrimitive]: () => 0x87cd6343,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6343,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much proximity to R$$ is a factor in desirability
+	 */
 	R$$ProximityEffect: {
 		[kToPrimitive]: () => 0x87cd6344,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6344,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much proximity to R$$$ is a factor in desirability
+	 */
 	R$$$ProximityEffect: {
 		[kToPrimitive]: () => 0x87cd6345,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6345,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much traffic volume is a factor in desirability
+	 */
 	TrafficEffect: {
 		[kToPrimitive]: () => 0x87cd6346,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6346,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much travel time is a factor in desirability
+	 */
 	TripLengthEffect: {
 		[kToPrimitive]: () => 0x87cd6347,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6347,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much school grade is a factor in desirability
+	 */
 	SchoolEffect: {
 		[kToPrimitive]: () => 0x87cd6348,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6348,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much hospital grade is a factor in desirability
+	 */
 	HospitalEffect: {
 		[kToPrimitive]: () => 0x87cd6349,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6349,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much air pollution proximity affects desirability
+	 */
 	PollutionEffectAir: {
 		[kToPrimitive]: () => 0x87cd634b,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd634b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much water pollution proximity affects desirability
+	 */
 	PollutionEffectWater: {
 		[kToPrimitive]: () => 0x87cd634c,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd634c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much garbage pollution proximity affects desirability
+	 */
 	PollutionEffectGarbage: {
 		[kToPrimitive]: () => 0x87cd634d,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd634d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much radiation pollution proximity affects desirability
+	 */
 	PollutionEffectRadiation: {
 		[kToPrimitive]: () => 0x87cd634e,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd634e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Tracts with desirability greater than this value never abandon.
+	 */
 	DesirabilityThresholdDecline: {
 		[kToPrimitive]: () => 0x87cd6354,
-		[kType]: Sint32,
+		[kPropertyId]: 0x87cd6354,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Tracts with desirability less than this value never develop. Tested
+	 * before pruning.
+	 */
 	DesirabilityThresholdGrowth: {
 		[kToPrimitive]: () => 0x87cd6355,
-		[kType]: Sint32,
+		[kPropertyId]: 0x87cd6355,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * If true, unhappy sims will create a demand for new growth, which results
+	 * in migration
+	 */
 	PhantomDemand: {
 		[kToPrimitive]: () => 0x87cd6356,
-		[kType]: Bool,
+		[kPropertyId]: 0x87cd6356,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Value for desirability, if no other effects are applicable
+	 */
 	BaselineDesirability: {
 		[kToPrimitive]: () => 0x87cd6357,
-		[kType]: Sint32,
+		[kPropertyId]: 0x87cd6357,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Number of growth stages
+	 */
 	StageCount: {
 		[kToPrimitive]: () => 0x87cd6360,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6360,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Percentage of growth which should be of type 1, as a function of the
+	 * population of the city
+	 */
 	Stage1VsSize: {
 		[kToPrimitive]: () => 0x87cd6361,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6361,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 2, as a function of the
+	 * population of the city
+	 */
 	Stage2VsSize: {
 		[kToPrimitive]: () => 0x87cd6362,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6362,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 3, as a function of the
+	 * population of the city
+	 */
 	Stage3VsSize: {
 		[kToPrimitive]: () => 0x87cd6363,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6363,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 4, as a function of the
+	 * population of the city
+	 */
 	Stage4VsSize: {
 		[kToPrimitive]: () => 0x87cd6364,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6364,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 5, as a function of the
+	 * population of the city
+	 */
 	Stage5VsSize: {
 		[kToPrimitive]: () => 0x87cd6365,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6365,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 6, as a function of the
+	 * population of the city
+	 */
 	Stage6VsSize: {
 		[kToPrimitive]: () => 0x87cd6366,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6366,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 7, as a function of the
+	 * population of the city
+	 */
 	Stage7VsSize: {
 		[kToPrimitive]: () => 0x87cd6367,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6367,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 8, as a function of the
+	 * population of the city
+	 */
 	Stage8VsSize: {
 		[kToPrimitive]: () => 0x87cd6368,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6368,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 9, as a function of the
+	 * population of the city
+	 */
 	Stage9VsSize: {
 		[kToPrimitive]: () => 0x87cd6369,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6369,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 10, as a function of the
+	 * population of the city
+	 */
 	Stage10VsSize: {
 		[kToPrimitive]: () => 0x87cd636a,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 11, as a function of the
+	 * population of the city
+	 */
 	Stage11VsSize: {
 		[kToPrimitive]: () => 0x87cd636b,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 12, as a function of the
+	 * population of the city
+	 */
 	Stage12VsSize: {
 		[kToPrimitive]: () => 0x87cd636c,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 13, as a function of the
+	 * population of the city
+	 */
 	Stage13VsSize: {
 		[kToPrimitive]: () => 0x87cd636d,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 14, as a function of the
+	 * population of the city
+	 */
 	Stage14VsSize: {
 		[kToPrimitive]: () => 0x87cd636e,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage of growth which should be of type 15, as a function of the
+	 * population of the city
+	 */
 	Stage15VsSize: {
 		[kToPrimitive]: () => 0x87cd636f,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd636f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum density allowed without water service
+	 */
 	WaterSupplyCap: {
 		[kToPrimitive]: () => 0x87cd6370,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6370,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Maximum density allowed without fire protection
+	 */
 	FireCoverageCap: {
 		[kToPrimitive]: () => 0x87cd6371,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6371,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Maximum density allowed without a nearby park
+	 */
 	ParkCap: {
 		[kToPrimitive]: () => 0x87cd6372,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6372,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Maximum density allowed without power service
+	 */
 	PowerSupplyCap: {
 		[kToPrimitive]: () => 0x87cd6373,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6373,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Specifies building selection mode
+	 */
 	UseMonopolyPieces: {
 		[kToPrimitive]: () => 0x87cd6381,
-		[kType]: Uint8,
+		[kPropertyId]: 0x87cd6381,
+		[kPropertyType]: Uint8,
 		UseRealBuildingsOnly: 0x00000000,
 		UseRealIfAvailable: 0x00000001,
 		UseMonopolyBuildingsOnly: 0x00000002,
 	},
+	/**
+	 * How much proximity to Co$$ is a factor in desirability
+	 */
 	Co$$ProximityEffect: {
 		[kToPrimitive]: () => 0x87cd6391,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6391,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much proximity to Co$$$ is a factor in desirability
+	 */
 	Co$$$ProximityEffect: {
 		[kToPrimitive]: () => 0x87cd6392,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6392,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much transient aura effects (-128, 127) affect desirability
+	 */
 	TransientAuraEffect: {
 		[kToPrimitive]: () => 0x87cd6397,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6397,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How much slope is a factor in desirability
+	 */
 	SlopeEffect: {
 		[kToPrimitive]: () => 0x87cd6398,
-		[kType]: Float32,
+		[kPropertyId]: 0x87cd6398,
+		[kPropertyType]: [Float32],
 	},
-	StylePercentages: 0x87cd63a0,
+	/**
+	 * Pairs of occupant group IDs and percentages showing how often they should
+	 * be used
+	 */
+	StylePercentages: {
+		[kToPrimitive]: () => 0x87cd63a0,
+		[kPropertyId]: 0x87cd63a0,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Percentage by which recycling center reduces trash
+	 */
 	RecyclingCenterPercentReduction: 0x88ed1059,
+	/**
+	 * Amount of water produced by this building per month.
+	 */
 	WaterProduced: 0x88ed3303,
+	/**
+	 * Lot Config Property Version
+	 */
 	LotConfigPropertyVersion: {
 		[kToPrimitive]: () => 0x88edc789,
-		[kType]: Uint8,
+		[kPropertyId]: 0x88edc789,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * LotConfigPropertySize
+	 */
 	LotConfigPropertySize: {
 		[kToPrimitive]: () => 0x88edc790,
-		[kType]: Uint8,
+		[kPropertyId]: 0x88edc790,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * LotConfigPropertyFamily
+	 */
 	LotConfigPropertyFamily: 0x88edc791,
+	/**
+	 * The slope at which it switches to using a Lot foundation
+	 */
 	LotConfigPropertyMaxSlopeBeforeLotFoundation: {
 		[kToPrimitive]: () => 0x88edc792,
-		[kType]: Float32,
+		[kPropertyId]: 0x88edc792,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * LotConfigPropertyZoneTypes
+	 */
 	LotConfigPropertyZoneTypes: {
 		[kToPrimitive]: () => 0x88edc793,
-		[kType]: Uint8,
+		[kPropertyId]: 0x88edc793,
+		[kPropertyType]: [Uint8],
 		None: 0x00000000,
 		RLowDensity: 0x00000001,
 		RMediumDensity: 0x00000002,
@@ -2892,17 +6279,25 @@ export default {
 		Landfill: 0x0000000e,
 		PloppedBuilding: 0x0000000f,
 	},
+	/**
+	 * LotConfigPropertyWealthTypes
+	 */
 	LotConfigPropertyWealthTypes: {
 		[kToPrimitive]: () => 0x88edc795,
-		[kType]: Uint8,
+		[kPropertyId]: 0x88edc795,
+		[kPropertyType]: [Uint8],
 		None: 0x00000000,
 		$: 0x00000001,
 		$$: 0x00000002,
 		$$$: 0x00000003,
 	},
+	/**
+	 * LotConfigPropertyPurposeTypes
+	 */
 	LotConfigPropertyPurposeTypes: {
 		[kToPrimitive]: () => 0x88edc796,
-		[kType]: Uint8,
+		[kPropertyId]: 0x88edc796,
+		[kPropertyType]: [Uint8],
 		None: 0x00000000,
 		R: 0x00000001,
 		CS: 0x00000002,
@@ -2913,16 +6308,37 @@ export default {
 		IM: 0x00000007,
 		IH: 0x00000008,
 	},
+	/**
+	 * LotConfigPropertyFenceDefinition
+	 */
 	LotConfigPropertyFenceDefinition: 0x88edc797,
+	/**
+	 * LotConfigPropertyRetainingWallTypes
+	 */
 	LotConfigPropertyRetainingWallTypes: 0x88edc798,
-	LotConfigPropertyLotObject: 0x88edc900,
+	/**
+	 * LotConfigPropertyLotObject
+	 */
+	LotConfigPropertyLotObject: {
+		[kToPrimitive]: () => 0x88edc900,
+		[kPropertyId]: 0x88edc900,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * The height a foundation can lift an occupant (usually a building or lot).
+	 */
 	KSC4FoundationPropertyMaxHeight: {
 		[kToPrimitive]: () => 0x88fcc3e3,
-		[kType]: Float32,
+		[kPropertyId]: 0x88fcc3e3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Foundation type ID for this building or lot.
+	 */
 	BuildingFoundation: {
 		[kToPrimitive]: () => 0x88fcd877,
-		[kType]: Uint32,
+		[kPropertyId]: 0x88fcd877,
+		[kPropertyType]: Uint32,
 		$$16x16: 0x1a421000,
 		$$16x20: 0x1a431000,
 		$10x24: 0x1a3a1000,
@@ -2955,436 +6371,1141 @@ export default {
 		Ut96x96_Seaport: 0x194a1000,
 		UtMarina16x64: 0x194c0000,
 	},
+	/**
+	 * Maximum Tax Rate - something like maybe 25%
+	 */
 	BudgetMaxTaxRate: {
 		[kToPrimitive]: () => 0x890e0a99,
-		[kType]: Float32,
+		[kPropertyId]: 0x890e0a99,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The maximum amount of outstanding bond debt that is allowed
+	 */
 	BudgetMaxBondAmount: {
 		[kToPrimitive]: () => 0x890e0ab4,
-		[kType]: Sint64,
+		[kPropertyId]: 0x890e0ab4,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Maximum radiaiton pollution value reported to the UI, must be less than
+	 * 32767
+	 */
 	MaxRadiationPollutionValueForUI: 0x89135044,
+	/**
+	 * LotConfigPropertyWaterCompatibility
+	 */
 	LotConfigPropertyWaterCompatibility: {
 		[kToPrimitive]: () => 0x89136440,
-		[kType]: Uint8,
+		[kPropertyId]: 0x89136440,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Efficiency of Health buildings will drop to this % during a strike
+	 */
 	HealthStrikeEfficiency: {
 		[kToPrimitive]: () => 0x89189482,
-		[kType]: Float32,
+		[kPropertyId]: 0x89189482,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum duration of a Health strike, in months
+	 */
 	HealthStrikeDuration: 0x8918948b,
+	/**
+	 * Minimum grade that all health buildings must have to end a Health strike
+	 */
 	HealthMinGradeToEndStrike: {
 		[kToPrimitive]: () => 0x89189495,
-		[kType]: Float32,
+		[kPropertyId]: 0x89189495,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Initial and Maximum allowed funding percentage for schools
+	 */
 	SchoolInitMaxAllowedFunding: {
 		[kToPrimitive]: () => 0x891894ad,
-		[kType]: Float32,
+		[kPropertyId]: 0x891894ad,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the CO$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_Co$$: {
 		[kToPrimitive]: () => 0x8918c937,
-		[kType]: Float32,
+		[kPropertyId]: 0x8918c937,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the IManufacturing occupant
+	 * type's taxes
+	 */
 	BudgetTaxRateOccWeight_IManufacturing: {
 		[kToPrimitive]: () => 0x8918c93e,
-		[kType]: Float32,
+		[kPropertyId]: 0x8918c93e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps % of coverage distance from a hospital to HQ boost %
+	 */
 	HealthEffectivenessVsDistanceEffect: {
 		[kToPrimitive]: () => 0x891b3ae6,
-		[kType]: Float32,
+		[kPropertyId]: 0x891b3ae6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum number of students served by this school.
+	 */
 	SchoolStudentCapacity: 0x8922041b,
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects the capacity
+	 * of schools
+	 */
 	SchoolCapacityEffect: {
 		[kToPrimitive]: () => 0x892d9d02,
-		[kType]: Float32,
+		[kPropertyId]: 0x892d9d02,
+		[kPropertyType]: Float32,
 	},
-	SimulatorSpeeds: 0x89590e6d,
+	/**
+	 * Milliseconds per day for slow, medium, fast
+	 */
+	SimulatorSpeeds: {
+		[kToPrimitive]: () => 0x89590e6d,
+		[kPropertyId]: 0x89590e6d,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Time dilation factor to apply to animations based on sim speed
+	 * (paused,slow,med,fast,emergency/drive)
+	 */
 	KAnimationTimeDilationProperty: {
 		[kToPrimitive]: () => 0x89590e6e,
-		[kType]: Float32,
+		[kPropertyId]: 0x89590e6e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Specifies a multiplier from real time to the 24 hour clock's time.
+	 */
 	'24HourClockSpeedTimeMagnification': {
 		[kToPrimitive]: () => 0x897e709f,
-		[kType]: Float32,
+		[kPropertyId]: 0x897e709f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How long (microsecs) is the volcanic ash visible on screen
+	 */
 	VolcanicAshLifeTime: 0x89861864,
+	/**
+	 * Height of one growth level
+	 */
 	SegmentHeight: {
 		[kToPrimitive]: () => 0x8989ec22,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec22,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Width of corner posts
+	 */
 	PostWidth: {
 		[kToPrimitive]: () => 0x8989ec23,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec23,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Gap between scaffold and building
+	 */
 	ScaffoldGap: {
 		[kToPrimitive]: () => 0x8989ec24,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec24,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Width of the planks that run around the top of the scaffold
+	 */
 	PlankWidth: {
 		[kToPrimitive]: () => 0x8989ec25,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec25,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How large the plank texture is, in meters
+	 */
 	PlankTextureScale: {
 		[kToPrimitive]: () => 0x8989ec26,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec26,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How large the scaffold texture is, in meters
+	 */
 	ScaffoldTextureScale: {
 		[kToPrimitive]: () => 0x8989ec27,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec27,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How large the top girders texture is, in meters
+	 */
 	GirdersTextureScale: {
 		[kToPrimitive]: () => 0x8989ec28,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec28,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How fast scaffolding goes up in meters per day
+	 */
 	ScaffoldGrowthRate: {
 		[kToPrimitive]: () => 0x8989ec29,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec29,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How fast scaffolding is removed in meters per day
+	 */
 	ScaffoldRemovalRate: {
 		[kToPrimitive]: () => 0x8989ec2a,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec2a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Width of the post that holds up the crane model
+	 */
 	CranePostWidth: {
 		[kToPrimitive]: () => 0x8989ec2b,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec2b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Size of gap between the crane post and the scaffold
+	 */
 	CranePostGap: {
 		[kToPrimitive]: () => 0x8989ec2c,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec2c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How far above the scaffold to place the bottom of the crane
+	 */
 	CraneHeightAboveScaffold: {
 		[kToPrimitive]: () => 0x8989ec2d,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec2d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Milliseconds to complete one full rotation
+	 */
 	CraneRotationTime: {
 		[kToPrimitive]: () => 0x8989ec2e,
-		[kType]: Float32,
+		[kPropertyId]: 0x8989ec2e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The item name that will be visible to the player in game.
+	 */
 	ItemName: {
 		[kToPrimitive]: () => 0x899afbad,
-		[kType]: String,
+		[kPropertyId]: 0x899afbad,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Max vertical distance from the center of the line at which the control
+	 * points are placed
+	 */
 	PowerLineControlMaxVerticalDistance: {
 		[kToPrimitive]: () => 0x89a18fc4,
-		[kType]: Float32,
+		[kPropertyId]: 0x89a18fc4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum number of points to generate on power line Bezier curve
+	 */
 	MinimumNumberOfCurvePoints: 0x89a1e8fb,
+	/**
+	 * 100 meters of terrain corresponds to this fraction of texture in farthest
+	 * zoom
+	 */
 	TerrainTexTilingFactor: {
 		[kToPrimitive]: () => 0x89a312c0,
-		[kType]: Float32,
+		[kPropertyId]: 0x89a312c0,
+		[kPropertyType]: Float32,
 	},
-	TextureRandomizationGridSize: 0x89a312c2,
+	/**
+	 * Width of the coarse grid (in terrain cells) where we assign the same
+	 * texture family member
+	 */
+	TextureRandomizationGridSize: {
+		[kToPrimitive]: () => 0x89a312c2,
+		[kPropertyId]: 0x89a312c2,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * How long in seconds an emergency vehicle will remain idle when repathing
+	 * or handling event
+	 */
 	EmergencyVehicleIdleTime: {
 		[kToPrimitive]: () => 0x89aec88b,
-		[kType]: Float32,
+		[kPropertyId]: 0x89aec88b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max distance in cells an emergency vehicle can stop from its dispatch
+	 * destination
+	 */
 	EmergencyVehicleMaxCellDistance: {
 		[kToPrimitive]: () => 0x89aec88c,
-		[kType]: Uint8,
+		[kPropertyId]: 0x89aec88c,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * How many times an emergency vehicle will try to repath to its destination
+	 */
 	EmergencyVehicleRepathAttempts: {
 		[kToPrimitive]: () => 0x89aec88d,
-		[kType]: Uint8,
+		[kPropertyId]: 0x89aec88d,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Default speed for emergency vehicles, in kilometers per hour
+	 */
 	EmergencyVehicleKPH: 0x89aec88e,
+	/**
+	 * Cost/application at different zoom levels
+	 */
 	BrushCost: {
 		[kToPrimitive]: () => 0x8a020101,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020101,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Cost/application at different zoom levels
+	 */
 	BrushWiggleAmount: {
 		[kToPrimitive]: () => 0x8a020102,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020102,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Sound Id
+	 */
 	BrushActiveSound: 0x8a020103,
+	/**
+	 * Sound Id
+	 */
 	BrushReleaseOneShot: 0x8a020104,
+	/**
+	 * Component1: Texture id
+	 */
 	Comp1TextureId: 0x8a020200,
+	/**
+	 * Component1: should be aligned with the mouse movement direction
+	 */
 	Comp1AlignedWithMouseMoveDirection: {
 		[kToPrimitive]: () => 0x8a020201,
-		[kType]: Bool,
+		[kPropertyId]: 0x8a020201,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Component1: zoom specific widths
+	 */
 	Comp1Width: {
 		[kToPrimitive]: () => 0x8a020202,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020202,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component1: zoom specific brush strengths
+	 */
 	Comp1Strength: {
 		[kToPrimitive]: () => 0x8a020203,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020203,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component1: Base texture value (Raise/lower if value is more/less than
+	 * this)
+	 */
 	Comp1BaseTextureVal: {
 		[kToPrimitive]: () => 0x8a020204,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8a020204,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Component1: Operation id
+	 */
 	Comp1OperationId: 0x8a020205,
+	/**
+	 * Component1: Decal texture id for paint brush
+	 */
 	Comp1DecalTextureId: 0x8a020206,
+	/**
+	 * Component1: Max rotation of decal texture (degrees)
+	 */
 	Comp1MaxDecalRotation: {
 		[kToPrimitive]: () => 0x8a020207,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020207,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Component1: Max # of effects/decals placed in a cell during a scrubbing
+	 * session
+	 */
 	Comp1MaxPlacementsPerCell: 0x8a020208,
-	Comp1IDOfEffectToPlace: 0x8a020209,
+	/**
+	 * Component1: (group id, instance id) of the effect to place
+	 */
+	Comp1IDOfEffectToPlace: {
+		[kToPrimitive]: () => 0x8a020209,
+		[kPropertyId]: 0x8a020209,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Component2: Texture id
+	 */
 	Comp2TextureId: 0x8a020300,
+	/**
+	 * Component2: should be aligned with the mouse movement direction
+	 */
 	Comp2AlignedWithMouseMoveDirection: {
 		[kToPrimitive]: () => 0x8a020301,
-		[kType]: Bool,
+		[kPropertyId]: 0x8a020301,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Component2: zoom specific widths
+	 */
 	Comp2Width: {
 		[kToPrimitive]: () => 0x8a020302,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020302,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component2: zoom specific brush strengths
+	 */
 	Comp2Strength: {
 		[kToPrimitive]: () => 0x8a020303,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020303,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component2: Base texture value (Raise/lower if value is more/less than
+	 * this)
+	 */
 	Comp2BaseTextureVal: {
 		[kToPrimitive]: () => 0x8a020304,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8a020304,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Component2: Operation id
+	 */
 	Comp2OperationId: 0x8a020305,
+	/**
+	 * Component2: Decal texture id for paint brush
+	 */
 	Comp2DecalTextureId: 0x8a020306,
+	/**
+	 * Component2: Max rotation of decal texture (degrees)
+	 */
 	Comp2MaxDecalRotation: {
 		[kToPrimitive]: () => 0x8a020307,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020307,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Component2: Max # of effects/decals placed in a cell during a scrubbing
+	 * session
+	 */
 	Comp2MaxPlacementsPerCell: 0x8a020308,
-	Comp2IDOfEffectToPlace: 0x8a020309,
+	/**
+	 * Component2: (group id, instance id) of the effect to place
+	 */
+	Comp2IDOfEffectToPlace: {
+		[kToPrimitive]: () => 0x8a020309,
+		[kPropertyId]: 0x8a020309,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Component3: Texture id
+	 */
 	Comp3TextureId: 0x8a020400,
+	/**
+	 * Component3: should be aligned with the mouse movement direction
+	 */
 	Comp3AlignedWithMouseMoveDirection: {
 		[kToPrimitive]: () => 0x8a020401,
-		[kType]: Bool,
+		[kPropertyId]: 0x8a020401,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Component3: zoom specific widths
+	 */
 	Comp3Width: {
 		[kToPrimitive]: () => 0x8a020402,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020402,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component3: zoom specific brush strengths
+	 */
 	Comp3Strength: {
 		[kToPrimitive]: () => 0x8a020403,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020403,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component3: Base texture value (Raise/lower if value is more/less than
+	 * this)
+	 */
 	Comp3BaseTextureVal: {
 		[kToPrimitive]: () => 0x8a020404,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8a020404,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Component3: Operation id
+	 */
 	Comp3OperationId: 0x8a020405,
+	/**
+	 * Component3: Decal texture id for paint brush
+	 */
 	Comp3DecalTextureId: 0x8a020406,
+	/**
+	 * Component3: Max rotation of decal texture (degrees)
+	 */
 	Comp3MaxDecalRotation: {
 		[kToPrimitive]: () => 0x8a020407,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020407,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Component3: Max # of effects/decals placed in a cell during a scrubbing
+	 * session
+	 */
 	Comp3MaxPlacementsPerCell: 0x8a020408,
-	Comp3IDOfEffectToPlace: 0x8a020409,
+	/**
+	 * Component3: (group id, instance id) of the effect to place
+	 */
+	Comp3IDOfEffectToPlace: {
+		[kToPrimitive]: () => 0x8a020409,
+		[kPropertyId]: 0x8a020409,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Component4: Texture id
+	 */
 	Comp4TextureId: 0x8a020500,
+	/**
+	 * Component4: should be aligned with the mouse movement direction
+	 */
 	Comp4AlignedWithMouseMoveDirection: {
 		[kToPrimitive]: () => 0x8a020501,
-		[kType]: Bool,
+		[kPropertyId]: 0x8a020501,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Component4: zoom specific widths
+	 */
 	Comp4Width: {
 		[kToPrimitive]: () => 0x8a020502,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020502,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component4: zoom specific brush strengths
+	 */
 	Comp4Strength: {
 		[kToPrimitive]: () => 0x8a020503,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020503,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Component4: Base texture value (Raise/lower if value is more/less than
+	 * this)
+	 */
 	Comp4BaseTextureVal: {
 		[kToPrimitive]: () => 0x8a020504,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8a020504,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Component4: Operation id
+	 */
 	Comp4OperationId: 0x8a020505,
+	/**
+	 * Component4: Decal texture id for paint brush
+	 */
 	Comp4DecalTextureId: 0x8a020506,
+	/**
+	 * Component4: Max rotation of decal texture (degrees)
+	 */
 	Comp4MaxDecalRotation: {
 		[kToPrimitive]: () => 0x8a020507,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a020507,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Component4: Max # of effects/decals placed in a cell during a scrubbing
+	 * session
+	 */
 	Comp4MaxPlacementsPerCell: 0x8a020508,
-	Comp4IDOfEffectToPlace: 0x8a020509,
+	/**
+	 * Component4: (group id, instance id) of the effect to place
+	 */
+	Comp4IDOfEffectToPlace: {
+		[kToPrimitive]: () => 0x8a020509,
+		[kPropertyId]: 0x8a020509,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Freight traffic that can arrive at this building.
+	 */
 	FreightReceivingCapacity: 0x8a0b4103,
 	CrimeJoblessIndicatorSmoothingFactor: {
 		[kToPrimitive]: () => 0x8a0cbaa3,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa3,
+		[kPropertyType]: Float32,
 	},
 	CrimeR$EQBaseCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa4,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa4,
+		[kPropertyType]: [Float32],
 	},
 	CrimeR$$EQBaseCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa5,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa5,
+		[kPropertyType]: [Float32],
 	},
 	CrimeR$$$EQBaseCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa6,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa6,
+		[kPropertyType]: [Float32],
 	},
 	CrimeR$JoblessRatioCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa7,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa7,
+		[kPropertyType]: [Float32],
 	},
 	CrimeR$$JoblessRatioCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa8,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa8,
+		[kPropertyType]: [Float32],
 	},
 	CrimeR$$$JoblessRatioCriminalityCurve: {
 		[kToPrimitive]: () => 0x8a0cbaa9,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaa9,
+		[kPropertyType]: [Float32],
 	},
 	CrimeCriminalityCrimesCurve: {
 		[kToPrimitive]: () => 0x8a0cbaaa,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaaa,
+		[kPropertyType]: [Float32],
 	},
 	CrimePoliceProtectionCrimeAttenuation: {
 		[kToPrimitive]: () => 0x8a0cbaab,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaab,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Example: 0.5 means values get halved every month
+	 */
 	CrimeCrimeGridDecayFactor: {
 		[kToPrimitive]: () => 0x8a0cbaac,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaac,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Fraction (0 to 1.0) of unjailed criminals that will commit crimes next
+	 * month
+	 */
 	CrimeCriminalGridDecayFactor: {
 		[kToPrimitive]: () => 0x8a0cbaad,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a0cbaad,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The reported damage amount (in simoleons) if the occupant gets destroyed
+	 * by a disaster.
+	 */
 	Worth: {
 		[kToPrimitive]: () => 0x8a1c3e72,
-		[kType]: Sint64,
+		[kPropertyId]: 0x8a1c3e72,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Converts the current age degradation of the plant to a multiplier for
+	 * production level
+	 */
 	AgeToOutputLevelResponseCurve: {
 		[kToPrimitive]: () => 0x8a1e07ee,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a1e07ee,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Likelihood per month that a distressed pipe will burst
+	 */
 	PipeBurstProbability: {
 		[kToPrimitive]: () => 0x8a235c56,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a235c56,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * This is the in game readable description for this item.
+	 */
 	ItemDescription: {
 		[kToPrimitive]: () => 0x8a2602a9,
-		[kType]: String,
+		[kPropertyId]: 0x8a2602a9,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Resource instance ID of Menu Icon for this item
+	 */
 	ItemIcon: 0x8a2602b8,
+	/**
+	 * Controls position in menu.  Items with lower numbers appear on or near
+	 * the top of the menu, items with higher numbers are placed lower on the
+	 * menu.
+	 */
 	ItemOrder: 0x8a2602b9,
+	/**
+	 * If needed: which sub menu this item belongs to
+	 */
 	ItemSubmenu: 0x8a2602ba,
+	/**
+	 * If needed: the button id this item corresponds to
+	 */
 	ItemButtonID: 0x8a2602bb,
+	/**
+	 * List of instance IDs for exemplars containing the properties for each
+	 * distinct airport/seaport type
+	 */
 	PortTypeExemplarIDs: 0x8a270fc3,
+	/**
+	 * Cost to create a bridge tile of network using this tool
+	 */
 	SimoleanCostPerBridgeTile: 0x8a2d49ea,
+	/**
+	 * Cost to create a tunnel tile of network using this tool
+	 */
 	SimoleanCostPerTunnelTile: 0x8a2d49f0,
+	/**
+	 * Brush belongs to god mode, miscellaneous category
+	 */
 	CategoryGodMisc: 0x8a3143b7,
+	/**
+	 * Interest applied to principal once and added to total
+	 */
 	BudgetBondInterestRate: {
 		[kToPrimitive]: () => 0x8a3fb98d,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a3fb98d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Priority scalar
+	 */
 	AudioLayerWeight: {
 		[kToPrimitive]: () => 0x8a3fc5dd,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a3fc5dd,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum amount of water pollution that can be added to/subtracted from
+	 * each cell per month.
+	 */
 	WaterPollutionDelta: 0x8a40620b,
-	UserVisibleNameKey: 0x8a416a99,
+	/**
+	 * Resource key of the name of what this exemplar represents
+	 */
+	UserVisibleNameKey: {
+		[kToPrimitive]: () => 0x8a416a99,
+		[kPropertyId]: 0x8a416a99,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Min/max length in cars, including engine, of commuter trains
+	 */
 	CommuteTrainLength: {
 		[kToPrimitive]: () => 0x8a441c9c,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8a441c9c,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Min deal amount for garbage deal
+	 */
 	NDb_MinDealAmountGarbage: {
 		[kToPrimitive]: () => 0x8a46933d,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a46933d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier applied to a building tax value for each level of difference
+	 * in wealth level
+	 */
 	BudgetWaningWealthPropertyTaxMultiplier: {
 		[kToPrimitive]: () => 0x8a480df7,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a480df7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage (0.0 - 1.0) of skid that will be applied to vehicle turns.  0
+	 * = clamp to paths
+	 */
 	VehicleSkid: {
 		[kToPrimitive]: () => 0x8a4efa75,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a4efa75,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max number of buses to cross a tile per second
+	 */
 	MaxBusesPerSecond: {
 		[kToPrimitive]: () => 0x8a511dd1,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a511dd1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Layer Position Mode
+	 */
 	AudioLayerPositionMode: 0x8a552758,
+	/**
+	 * Present if this prop is a ground-based model suitable for demolish fx,
+	 * shadows, and collision avoidance.
+	 */
 	IsGroundModel: {
 		[kToPrimitive]: () => 0x8a5e5db8,
-		[kType]: Bool,
+		[kPropertyId]: 0x8a5e5db8,
+		[kPropertyType]: Bool,
 	},
-	AudioMusicPlaylistEntry1: 0x8a5e7b50,
-	AudioMusicPlaylistEntry2: 0x8a5e7b51,
-	AudioMusicPlaylistEntry3: 0x8a5e7b52,
-	AudioMusicPlaylistEntry4: 0x8a5e7b53,
-	AudioMusicPlaylistEntry5: 0x8a5e7b54,
-	AudioMusicPlaylistEntry6: 0x8a5e7b55,
-	AudioMusicPlaylistEntry7: 0x8a5e7b56,
-	AudioMusicPlaylistEntry8: 0x8a5e7b57,
-	AudioMusicPlaylistEntry9: 0x8a5e7b58,
-	AudioMusicPlaylistEntry10: 0x8a5e7b59,
-	AudioMusicPlaylistEntry11: 0x8a5e7b5a,
-	AudioMusicPlaylistEntry12: 0x8a5e7b5b,
-	AudioMusicPlaylistEntry13: 0x8a5e7b5c,
-	AudioMusicPlaylistEntry14: 0x8a5e7b5d,
-	AudioMusicPlaylistEntry15: 0x8a5e7b5e,
-	AudioMusicPlaylistEntry16: 0x8a5e7b5f,
-	AudioMusicPlaylistEntry17: 0x8a5e7b60,
-	AudioMusicPlaylistEntry18: 0x8a5e7b61,
-	AudioMusicPlaylistEntry19: 0x8a5e7b62,
-	AudioMusicPlaylistEntry20: 0x8a5e7b63,
-	AudioMusicPlaylistEntry21: 0x8a5e7b64,
-	MinForPurposeFundingPercentageToAnimate: 0x8a5f88e3,
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry1: {
+		[kToPrimitive]: () => 0x8a5e7b50,
+		[kPropertyId]: 0x8a5e7b50,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry2: {
+		[kToPrimitive]: () => 0x8a5e7b51,
+		[kPropertyId]: 0x8a5e7b51,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry3: {
+		[kToPrimitive]: () => 0x8a5e7b52,
+		[kPropertyId]: 0x8a5e7b52,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry4: {
+		[kToPrimitive]: () => 0x8a5e7b53,
+		[kPropertyId]: 0x8a5e7b53,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry5: {
+		[kToPrimitive]: () => 0x8a5e7b54,
+		[kPropertyId]: 0x8a5e7b54,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry6: {
+		[kToPrimitive]: () => 0x8a5e7b55,
+		[kPropertyId]: 0x8a5e7b55,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry7: {
+		[kToPrimitive]: () => 0x8a5e7b56,
+		[kPropertyId]: 0x8a5e7b56,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry8: {
+		[kToPrimitive]: () => 0x8a5e7b57,
+		[kPropertyId]: 0x8a5e7b57,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry9: {
+		[kToPrimitive]: () => 0x8a5e7b58,
+		[kPropertyId]: 0x8a5e7b58,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry10: {
+		[kToPrimitive]: () => 0x8a5e7b59,
+		[kPropertyId]: 0x8a5e7b59,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry11: {
+		[kToPrimitive]: () => 0x8a5e7b5a,
+		[kPropertyId]: 0x8a5e7b5a,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry12: {
+		[kToPrimitive]: () => 0x8a5e7b5b,
+		[kPropertyId]: 0x8a5e7b5b,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry13: {
+		[kToPrimitive]: () => 0x8a5e7b5c,
+		[kPropertyId]: 0x8a5e7b5c,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry14: {
+		[kToPrimitive]: () => 0x8a5e7b5d,
+		[kPropertyId]: 0x8a5e7b5d,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry15: {
+		[kToPrimitive]: () => 0x8a5e7b5e,
+		[kPropertyId]: 0x8a5e7b5e,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry16: {
+		[kToPrimitive]: () => 0x8a5e7b5f,
+		[kPropertyId]: 0x8a5e7b5f,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry17: {
+		[kToPrimitive]: () => 0x8a5e7b60,
+		[kPropertyId]: 0x8a5e7b60,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry18: {
+		[kToPrimitive]: () => 0x8a5e7b61,
+		[kPropertyId]: 0x8a5e7b61,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry19: {
+		[kToPrimitive]: () => 0x8a5e7b62,
+		[kPropertyId]: 0x8a5e7b62,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry20: {
+		[kToPrimitive]: () => 0x8a5e7b63,
+		[kPropertyId]: 0x8a5e7b63,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Music playlist entry values (Title, Filename, on/off)
+	 */
+	AudioMusicPlaylistEntry21: {
+		[kToPrimitive]: () => 0x8a5e7b64,
+		[kPropertyId]: 0x8a5e7b64,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * (PurposeId, funding)The occupant needs to be funded by at least this much
+	 * for the specified purpose, for it to animate
+	 */
+	MinForPurposeFundingPercentageToAnimate: {
+		[kToPrimitive]: () => 0x8a5f88e3,
+		[kPropertyId]: 0x8a5f88e3,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * For each wealth type ($-$$$), modifies percentage of travelers using each
+	 * of the three travel strategies
+	 */
 	TravelStrategyModifier: {
 		[kToPrimitive]: () => 0x8a612fee,
-		[kType]: Sint32,
+		[kPropertyId]: 0x8a612fee,
+		[kPropertyType]: [Sint32],
 	},
-	AverageSalaryForDemographic: 0x8a63f2a1,
+	/**
+	 * The average salary for each of the three wealth levels and four education
+	 * levels (12 total)
+	 */
+	AverageSalaryForDemographic: {
+		[kToPrimitive]: () => 0x8a63f2a1,
+		[kPropertyId]: 0x8a63f2a1,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Effect (multiplier) this ordinance has on air pollution for each zone
+	 * type
+	 */
 	AirEffectByZoneType: {
 		[kToPrimitive]: () => 0x8a67e373,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a67e373,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on water pollution for each zone
+	 * type
+	 */
 	WaterEffectByZoneType: {
 		[kToPrimitive]: () => 0x8a67e374,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a67e374,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on garbage for each zone type
+	 */
 	GarbageEffectByZoneType: {
 		[kToPrimitive]: () => 0x8a67e376,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a67e376,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on air pollution generated by
+	 * traffic
+	 */
 	TrafficAirPollutionEffect: {
 		[kToPrimitive]: () => 0x8a67e378,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a67e378,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Layer Density Mode
+	 */
 	AudioLayerDensityMode: 0x8a70b1a2,
+	/**
+	 * Maintenance cost for each pipe occupant
+	 */
 	MonthlyCostPerPipe: {
 		[kToPrimitive]: () => 0x8a84778f,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a84778f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The school's capacity is divided by this number to determine the number
+	 * of teachers on staff
+	 */
 	SchoolCapacityToStaffDivisor: 0x8a891421,
+	/**
+	 * The hospital's capacity is divided by this number to determine the number
+	 * of doctors on staff
+	 */
 	HospitalCapacityToStaffDivisor: 0x8a89142a,
+	/**
+	 * Float value for displaying monthly cost in the catalog - not simulated
+	 */
 	CatalogMonthlyCostFloat: {
 		[kToPrimitive]: () => 0x8a94eee0,
-		[kType]: Float32,
+		[kPropertyId]: 0x8a94eee0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Layer position smoothing delta limit
+	 */
 	AudioLayerPositionSmoothDelta: 0x8aa039b7,
+	/**
+	 * Which crime simulator incident this prop represents, or 0 if it's a
+	 * generic crime prop.
+	 */
 	CrimeIncidentID: 0x8aa864d5,
+	/**
+	 * If after suspension period the deal's at default during this number of
+	 * days it will get killed without being re-suspended.
+	 */
 	NDd_UnsuspensionPeriod: {
 		[kToPrimitive]: () => 0x8b58c59e,
-		[kType]: Float32,
+		[kPropertyId]: 0x8b58c59e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If true, automaton will be ghosted in the earned vehicle catalog view
+	 * until an advisor condition is satisfied
+	 */
 	ConditionalAutomaton: {
 		[kToPrimitive]: () => 0x8bbd735e,
-		[kType]: Bool,
+		[kPropertyId]: 0x8bbd735e,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Indicate the location of the end of a runway. Must come in pairs.
+	 */
 	RunwayEndNumber: {
 		[kToPrimitive]: () => 0x8bfb1072,
-		[kType]: Uint8,
+		[kPropertyId]: 0x8bfb1072,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * How much garbage can be delivered to the landfill each month
+	 */
 	GarbageTransportVersusLandfillTiles: {
 		[kToPrimitive]: () => 0x8c19c3e9,
-		[kType]: Float32,
+		[kPropertyId]: 0x8c19c3e9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Volume for AEMS system at each zoom level
+	 */
 	AudioAEMSZoomVolumes: {
 		[kToPrimitive]: () => 0x8c376d4f,
-		[kType]: Float32,
+		[kPropertyId]: 0x8c376d4f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Income per traveller from a ferry trip
+	 */
 	FerryFare: {
 		[kToPrimitive]: () => 0x8c3caef5,
-		[kType]: Float32,
+		[kPropertyId]: 0x8c3caef5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How many travellers it takes to yield a bus automata
+	 */
 	TravellersPerBus: 0x8c3e8185,
+	/**
+	 * Types of occupants
+	 */
 	OccupantTypes: {
 		[kToPrimitive]: () => 0x8cb3511f,
-		[kType]: Uint32,
+		[kPropertyId]: 0x8cb3511f,
+		[kPropertyType]: Uint32,
 		R$: 0x00001010,
 		R$$: 0x00001020,
 		R$$$: 0x00001030,
@@ -3398,318 +7519,709 @@ export default {
 		IM: 0x00004300,
 		IH: 0x00004400,
 	},
+	/**
+	 * mnWeeksForCompleteTemperatureSimulation
+	 */
 	MnWeeksForCompleteTemperatureSimulation: {
 		[kToPrimitive]: () => 0xa7607d70,
-		[kType]: Sint32,
+		[kPropertyId]: 0xa7607d70,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * mnWeeksForCompleteMoistureSimulation
+	 */
 	MnWeeksForCompleteMoistureSimulation: {
 		[kToPrimitive]: () => 0xa7607d71,
-		[kType]: Sint32,
+		[kPropertyId]: 0xa7607d71,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * mnSimulationSpreadWritingRadius
+	 */
 	MnSimulationSpreadWritingRadius: {
 		[kToPrimitive]: () => 0xa7607d72,
-		[kType]: Sint32,
+		[kPropertyId]: 0xa7607d72,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * mfYearlyAmbientTemperature
+	 */
 	MfYearlyAmbientTemperature: {
 		[kToPrimitive]: () => 0xa7607d73,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d73,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientTemperatureVariation
+	 */
 	MfYearlyAmbientTemperatureVariation: {
 		[kToPrimitive]: () => 0xa7607d74,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d74,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientTemperatureVariationFactor
+	 */
 	MfYearlyAmbientTemperatureVariationFactor: {
 		[kToPrimitive]: () => 0xa7607d75,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d75,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mnSeaModerationRadius
+	 */
 	MnSeaModerationRadius: {
 		[kToPrimitive]: () => 0xa7607d76,
-		[kType]: Sint32,
+		[kPropertyId]: 0xa7607d76,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * mfSeaModerationFactor
+	 */
 	MfSeaModerationFactor: {
 		[kToPrimitive]: () => 0xa7607d77,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d77,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfAltitudeTemperatureFactor
+	 */
 	MfAltitudeTemperatureFactor: {
 		[kToPrimitive]: () => 0xa7607d78,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d78,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfWindChillTemperatureFactor
+	 */
 	MfWindChillTemperatureFactor: {
 		[kToPrimitive]: () => 0xa7607d79,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d79,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientMoisture
+	 */
 	MfYearlyAmbientMoisture: {
 		[kToPrimitive]: () => 0xa7607d7a,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientMoistureVariation
+	 */
 	MfYearlyAmbientMoistureVariation: {
 		[kToPrimitive]: () => 0xa7607d7b,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientMoistureVariationFactor
+	 */
 	MfYearlyAmbientMoistureVariationFactor: {
 		[kToPrimitive]: () => 0xa7607d7c,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Wind effect on hill moisture (H20 fractional units per m/s of
+	 * perpendicular wind penetration)
+	 */
 	MfMoistureHillFactor: {
 		[kToPrimitive]: () => 0xa7607d7d,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7d,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Moisture boost for areas detected as valleys (0-1)
+	 */
 	MfValleyMoistureBoost: {
 		[kToPrimitive]: () => 0xa7607d7e,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7e,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum concavity required to detect area as valley (linear height
+	 * deviation in meters)
+	 */
 	MfMoistureValleySlopeThreshold: {
 		[kToPrimitive]: () => 0xa7607d7f,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d7f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Amplitude of plasma-based noise in moisture map (map creation only)
+	 */
 	MMoistureVariationScale: 0xa7607d80,
+	/**
+	 * Amplitude of high-freq. dithering noise in moisture map (map creation
+	 * only)
+	 */
 	MMoistureDitherScale: 0xa7607d81,
+	/**
+	 * mfYearlyAmbientWindSpeed
+	 */
 	MfYearlyAmbientWindSpeed: {
 		[kToPrimitive]: () => 0xa7607d86,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d86,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientWindDirection[0]
+	 */
 	MfYearlyAmbientWindDirection0: {
 		[kToPrimitive]: () => 0xa7607d87,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d87,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * mfYearlyAmbientWindDirection[1]
+	 */
 	MfYearlyAmbientWindDirection1: {
 		[kToPrimitive]: () => 0xa7607d88,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d88,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Angular window for periodic variation of ambient wind direction (0-90
+	 * degrees)
+	 */
 	MfWindPerturbationRange: {
 		[kToPrimitive]: () => 0xa7607d89,
-		[kType]: Float32,
+		[kPropertyId]: 0xa7607d89,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Amount of trash burned per month
+	 */
 	IncineratorMonthlyCapacity: 0xa8ebcf0c,
-	KSC4FloraFamilyProperty: 0xa8f149c5,
+	/**
+	 * kSC4FloraFamilyProperty
+	 */
+	KSC4FloraFamilyProperty: {
+		[kToPrimitive]: () => 0xa8f149c5,
+		[kPropertyId]: 0xa8f149c5,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Effect (multiplier) this ordinace has on water use
+	 */
 	WaterUseReduction: {
 		[kToPrimitive]: () => 0xa8f4eb0c,
-		[kType]: Float32,
+		[kPropertyId]: 0xa8f4eb0c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When right-click scrolling, this is the number of pixels away from the
+	 * anchor at which the scrolling speed maxes out.
+	 */
 	IntelliScrollOuterRadiusPixels: 0xca383ca3,
+	/**
+	 * Number of cells surrounding buildings and zones that will also be powered
+	 */
 	PowerRadiationRadius: 0xa911e2f1,
+	/**
+	 * Cost of maintaining each cell of wire connected to this power pole
+	 */
 	PowerLineMonthlyUpkeep: {
 		[kToPrimitive]: () => 0xa9132ef9,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9132ef9,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When a cell has this much air pollution, it's considered polluted
+	 */
 	AirPollutionThreshold: 0xa91351a6,
+	/**
+	 * Multiplier to tweak the relative weighting of the R$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_R$: {
 		[kToPrimitive]: () => 0xa9188ef5,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9188ef5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Initial and Maximum allowed funding percentage for health department
+	 */
 	HealthInitMaxAllowedFunding: {
 		[kToPrimitive]: () => 0xa9189479,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9189479,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum duration of a School strike, in months
+	 */
 	SchoolStrikeDuration: 0xa91894bc,
+	/**
+	 * Multiplier to tweak the relative weighting of the CS$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_Cs$: {
 		[kToPrimitive]: () => 0xa918c929,
-		[kType]: Float32,
+		[kPropertyId]: 0xa918c929,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the IDirty occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_IDirty: {
 		[kToPrimitive]: () => 0xa918c942,
-		[kType]: Float32,
+		[kPropertyId]: 0xa918c942,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percentage (from 0 to 200) by which this ordinance affects coverage
+	 * radius of schools
+	 */
 	SchoolCoverageRadiusEffect: {
 		[kToPrimitive]: () => 0xa91b3af4,
-		[kType]: Float32,
+		[kPropertyId]: 0xa91b3af4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps % of coverage distance from a school to EQ boost %
+	 */
 	SchoolEffectivenessVsDistanceEffect: {
 		[kToPrimitive]: () => 0xa91b3afa,
-		[kType]: Float32,
+		[kPropertyId]: 0xa91b3afa,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min quad widths (meters) in different zooms
+	 */
 	ShimmerMinQuadWidth: {
 		[kToPrimitive]: () => 0xa91cbe00,
-		[kType]: Float32,
+		[kPropertyId]: 0xa91cbe00,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max quad widths (meters) in different zooms
+	 */
 	ShimmerMaxQuadWidth: {
 		[kToPrimitive]: () => 0xa91cbe01,
-		[kType]: Float32,
+		[kPropertyId]: 0xa91cbe01,
+		[kPropertyType]: [Float32],
 	},
-	ShimmerQuadDensity: 0xa91cbe02,
+	/**
+	 * Number of shimmer quads to have if all of a 256x256 happenned to be water
+	 */
+	ShimmerQuadDensity: {
+		[kToPrimitive]: () => 0xa91cbe02,
+		[kPropertyId]: 0xa91cbe02,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maximum allowed funding percentage for roads
+	 */
 	MaxRoadsFundingPercent: {
 		[kToPrimitive]: () => 0xa92356ae,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356ae,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum allowed funding percentage for mass transit
+	 */
 	MaxMassTransitFundingPercent: {
 		[kToPrimitive]: () => 0xa92356af,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356af,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Additional cost to travel on a damaged road tile
+	 */
 	DamagedRoadExtraStepCost: {
 		[kToPrimitive]: () => 0xa92356b0,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356b0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Income gained for each tile: walk, car, bus, rail, freight truck, freight
+	 * train, subway, lt rl
+	 */
 	IncomePerTileByTravelType: {
 		[kToPrimitive]: () => 0xa92356b1,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356b1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percent chance an RCI trip will allow use of mass transit
+	 */
 	MassTransitUsageChance: {
 		[kToPrimitive]: () => 0xa92356b2,
-		[kType]: Uint8,
+		[kPropertyId]: 0xa92356b2,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Level at which traffic volume becomes uncomfortable to sims (rd, rl, hwy,
+	 * st, x, x, ave, sub, lr)
+	 */
 	NetworkTrafficCapacity: {
 		[kToPrimitive]: () => 0xa92356b3,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356b3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Order: walk, car, bus, train, subway, lt rl
+	 */
 	TravelTypeGeneratesTraffic: {
 		[kToPrimitive]: () => 0xa92356b4,
-		[kType]: Bool,
+		[kPropertyId]: 0xa92356b4,
+		[kPropertyType]: [Bool],
 	},
+	/**
+	 * Order: walk, car, bus, train, subway, lt rl
+	 */
 	TravelTypeCanReachDestination: {
 		[kToPrimitive]: () => 0xa92356b5,
-		[kType]: Bool,
+		[kPropertyId]: 0xa92356b5,
+		[kPropertyType]: [Bool],
 	},
+	/**
+	 * How far a trip can jump from its starting zone to a road/rail/etc
+	 */
 	MaximumDistanceFromOriginToNetwork: 0xa92356b8,
+	/**
+	 * Maps speed multiplier as a function of congestion
+	 */
 	CongestionVsSpeed: {
 		[kToPrimitive]: () => 0xa92356b9,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356b9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum time for a commute trip in minutes
+	 */
 	CommuteTripMaxTime: {
 		[kToPrimitive]: () => 0xa92356ba,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356ba,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Diminishing effect of an intersection or turn on capacity
+	 */
 	IntersectionAndTurnCapacityEffect: {
 		[kToPrimitive]: () => 0xa92356bb,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356bb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Starting overhead cost in time for each travel type
+	 */
 	TripStartingCostByTravelType: {
 		[kToPrimitive]: () => 0xa92356bc,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356bc,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Multiplies building capacity to determine number of jobs there
+	 */
 	JobScalingConstant: {
 		[kToPrimitive]: () => 0xa92356bd,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356bd,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Amount of background (non-trip) traffic volume generated per population
+	 * point for R, C, and I zones
+	 */
 	PopulationBackgroundTraffic: {
 		[kToPrimitive]: () => 0xa92356be,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92356be,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Order: walk, car, bus, train, freight truck, freight train, subway, lt rl
+	 */
 	TravelTypeAffectedByTraffic: {
 		[kToPrimitive]: () => 0xa92356bf,
-		[kType]: Bool,
+		[kPropertyId]: 0xa92356bf,
+		[kPropertyType]: [Bool],
 	},
+	/**
+	 * Maps Average age of a tract to the % HQ boost the hospital gives the
+	 * tract
+	 */
 	HospitalEffectivenessVsAverageAge: {
 		[kToPrimitive]: () => 0xa92ae3bd,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92ae3bd,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * The EQ boost the school gives at it's origin.
+	 */
 	SchoolEQBoost: {
 		[kToPrimitive]: () => 0xa92ae446,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92ae446,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Variable length list of type IDs for this school
+	 */
 	SchoolTypeIDList: 0xa92d8e40,
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects all EQ values
+	 */
 	SchoolEQBoostEffect: {
 		[kToPrimitive]: () => 0xa92d9d7a,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92d9d7a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps wealth level to HQ boost %
+	 */
 	HospitalEffectivenessVsWealth: {
 		[kToPrimitive]: () => 0xa92d9fcd,
-		[kType]: Float32,
+		[kPropertyId]: 0xa92d9fcd,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps amount of water pollution in a tract to the rate at which the HQ in
+	 * that tract decays
+	 */
 	WaterPollutionToHQDecayCurve: {
 		[kToPrimitive]: () => 0xa941b028,
-		[kType]: Float32,
+		[kPropertyId]: 0xa941b028,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Default depth of underground network trench floor below terrain
+	 */
 	UndergroundTrenchFloorDepth: {
 		[kToPrimitive]: () => 0xa96e5641,
-		[kType]: Float32,
+		[kPropertyId]: 0xa96e5641,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Uint32: The class ID of the prop occupant to create. If not present, then
+	 * 'kGZCLSID_cSC4PropOccupant' is used.
+	 */
 	PropOccupantClassID: 0xa977a86b,
+	/**
+	 * RGBA color for watered terrain cells in pipe view
+	 */
 	WateredTerrainColor: {
 		[kToPrimitive]: () => 0xa97f42ce,
-		[kType]: Uint8,
+		[kPropertyId]: 0xa97f42ce,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the IHighTech occupant
+	 * type's taxes
+	 */
 	BudgetTaxRateOccWeight_IHighTech: {
 		[kToPrimitive]: () => 0xa9a36e47,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9a36e47,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Which zone types will generate occupant trips
+	 */
 	OccupantTripZoneFilter: {
 		[kToPrimitive]: () => 0xa9af1e54,
-		[kType]: Uint8,
+		[kPropertyId]: 0xa9af1e54,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Which zone purpose types will generate occupant trips
+	 */
 	OccupantTripPurposeFilter: {
 		[kToPrimitive]: () => 0xa9af1e55,
-		[kType]: Uint8,
+		[kPropertyId]: 0xa9af1e55,
+		[kPropertyType]: Uint8,
 	},
-	StageTime: 0xa9b6ecd3,
-	SpreadTime: 0xa9b6ecd4,
-	SpreadRadius: 0xa9b6ecd5,
+	/**
+	 * Ticks to next fire stage by stage
+	 */
+	StageTime: {
+		[kToPrimitive]: () => 0xa9b6ecd3,
+		[kPropertyId]: 0xa9b6ecd3,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Ticks between spread attempts per stage
+	 */
+	SpreadTime: {
+		[kToPrimitive]: () => 0xa9b6ecd4,
+		[kPropertyId]: 0xa9b6ecd4,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * In meters beyond occupant/lot boundaries
+	 */
+	SpreadRadius: {
+		[kToPrimitive]: () => 0xa9b6ecd5,
+		[kPropertyId]: 0xa9b6ecd5,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Wind effect on spread direction is directly scaled by this
+	 */
 	WindScalar: {
 		[kToPrimitive]: () => 0xa9b6ecd6,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9b6ecd6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of top fires per unit area
+	 */
 	FiresAreaTop: {
 		[kToPrimitive]: () => 0xa9b6ecd7,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9b6ecd7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Number of side fires per unit area
+	 */
 	FiresAreaSide: {
 		[kToPrimitive]: () => 0xa9b6ecd8,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9b6ecd8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * The rate at which a fire declines as a function of protection
+	 */
 	ExtinguishRateVsProtection: {
 		[kToPrimitive]: () => 0xa9b6ecd9,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9b6ecd9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps Flammability(0-255) to percent chance(0-100) of fire starting when
+	 * ignited
+	 */
 	PercentFireStartVsFlammability: {
 		[kToPrimitive]: () => 0xa9b6ecda,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9b6ecda,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How far from water (in cells) does the beach extend
+	 */
 	MaxBeachWidth: {
 		[kToPrimitive]: () => 0xa9c283d0,
-		[kType]: Uint8,
+		[kPropertyId]: 0xa9c283d0,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * How high above the sea level(meters), does the beach extend
+	 */
 	MaxBeachAltitude: {
 		[kToPrimitive]: () => 0xa9c283d1,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9c283d1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Offsets (in meters) of fire team from center of engine and director from
+	 * front of engine
+	 */
 	FireCrewOffsets: {
 		[kToPrimitive]: () => 0xa9d6cc17,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9d6cc17,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min Percentage (0.0-1.0) of fire team efficiency that will give the
+	 * super, normal, and incompetent animations
+	 */
 	FireCrewCompetencePct: {
 		[kToPrimitive]: () => 0xa9d6cc18,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9d6cc18,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Speed of scrolling when arrow key is held down.
+	 */
 	KeyboardScrollSpeed: {
 		[kToPrimitive]: () => 0xa9e581fb,
-		[kType]: Float32,
+		[kPropertyId]: 0xa9e581fb,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The Max slope this lot will develop on
+	 */
 	NetworkLotConfigPropertyMaxSlopeAllowed: {
 		[kToPrimitive]: () => 0xaa120972,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa120972,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * The Min slope this lot will develop on
+	 */
 	NetworkLotConfigPropertyMinSlopeAllowed: {
 		[kToPrimitive]: () => 0xaa120973,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa120973,
+		[kPropertyType]: Float32,
 	},
 	CrimeName: {
 		[kToPrimitive]: () => 0xaa12fcb0,
-		[kType]: String,
+		[kPropertyId]: 0xaa12fcb0,
+		[kPropertyType]: String,
 	},
-	IconResourceKey: 0xaa12fcb1,
+	/**
+	 * type, group, and instance ID
+	 */
+	IconResourceKey: {
+		[kToPrimitive]: () => 0xaa12fcb1,
+		[kPropertyId]: 0xaa12fcb1,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * The crime grid tract value will be increased by this amount
+	 */
 	CrimeGridValue: {
 		[kToPrimitive]: () => 0xaa12fcb5,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb5,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If set to non-zero value, this will trigger a fire
+	 */
 	TriggerFire: {
 		[kToPrimitive]: () => 0xaa12fcb6,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb6,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Lot conditions compatible with crime
+	 */
 	LotConditionFilter: {
 		[kToPrimitive]: () => 0xaa12fcb7,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa12fcb7,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Relative occurance weight of this crime, only has meaning relative to
+	 * values for other crimes.
+	 */
 	RelativeOccurrance: {
 		[kToPrimitive]: () => 0xaa12fcb8,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa12fcb8,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Water pumps will not function if water pollution higher than this level
+	 */
 	MaxAcceptablePumpedWaterPollutionLevel: 0xaa161f81,
+	/**
+	 * This is an optional property. If defined and less than 0, the building is
+	 * a "health hazard" (in a way other than the standard pollution types) and
+	 * will depress HQ in an area defined by the radius and strength. If the
+	 * number is  greater than 0 then it will benefit health in the area.
+	 */
 	HealthEffectStrength: {
 		[kToPrimitive]: () => 0xaa19f6ea,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa19f6ea,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * List of groups this occupant belongs to.
+	 */
 	OccupantGroups: {
 		[kToPrimitive]: () => 0xaa1dd396,
-		[kType]: Uint32,
+		[kPropertyId]: 0xaa1dd396,
+		[kPropertyType]: Uint32,
 		BuildingResidential: 0x00001000,
 		BuildingCommercial: 0x00001001,
 		BuildingIndustrial: 0x00001002,
@@ -4367,79 +8879,211 @@ export default {
 		SFBTHamburgW2W: 0xb5c00f0a,
 		BTESFBTBuilding: 0xb5c00f5f,
 	},
+	/**
+	 * GUID of the sound to play when the occupant is clicked on with query tool
+	 */
 	SFXQuerySound: 0xaa1dd397,
+	/**
+	 * Cost per unit of garbage sent to landfill, incinerator or w2e
+	 */
 	GarbageServiceCostPerUnitOfGarbage: {
 		[kToPrimitive]: () => 0xaa1f8ab7,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa1f8ab7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Which type of Industrial (Anchor/Out/Mech)
+	 */
 	IndustrialBuildingType: {
 		[kToPrimitive]: () => 0xaa230baf,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa230baf,
+		[kPropertyType]: Uint8,
 	},
-	UIActiveEffectID: 0xaa2ed800,
-	UIIdleEffectID: 0xaa2ed801,
-	UIActiveIconID: 0xaa2ed802,
-	UIIdleIconID: 0xaa2ed803,
+	/**
+	 * UI effect in active state
+	 */
+	UIActiveEffectID: {
+		[kToPrimitive]: () => 0xaa2ed800,
+		[kPropertyId]: 0xaa2ed800,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * UI effect in idle state
+	 */
+	UIIdleEffectID: {
+		[kToPrimitive]: () => 0xaa2ed801,
+		[kPropertyId]: 0xaa2ed801,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Icon effect in active state
+	 */
+	UIActiveIconID: {
+		[kToPrimitive]: () => 0xaa2ed802,
+		[kPropertyId]: 0xaa2ed802,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Icon effect in idle state
+	 */
+	UIIdleIconID: {
+		[kToPrimitive]: () => 0xaa2ed803,
+		[kPropertyId]: 0xaa2ed803,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Hardware cursor ID for active state
+	 */
 	UIActiveCursorId: 0xaa2ed804,
+	/**
+	 * Hardware cursor ID for idle state
+	 */
 	UIIdleCursorId: 0xaa2ed805,
+	/**
+	 * Bitfield describing which zoom levels loop is active for
+	 */
 	AudioZoomLoopEnable: {
 		[kToPrimitive]: () => 0xaa3fbdde,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa3fbdde,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Freshness Volume
+	 */
 	AudioFreshVolume: 0xaa3fc48e,
+	/**
+	 * Min term a deal can be had before renewal.
+	 */
 	NDd_MinDealTermYears: {
 		[kToPrimitive]: () => 0xaa46934b,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa46934b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplying Factor to the Response curve so response curve shape
+	 * preserves
+	 */
 	VolcanoLavaScaleIntensityOfProduction: {
 		[kToPrimitive]: () => 0xaa4bc72a,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa4bc72a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Type of the graph to be shown (line, bar, etc.)
+	 */
 	GraphType: 0xaa4c0d1b,
+	/**
+	 * Amount of pollution generated by the building, for each type (air, water,
+	 * garbage, and radiation). This value represents the amount of pollution at
+	 * the outer edge of the circular area of effect. The default value is zero.
+	 * This can be negative for buildings that decrease pollution.
+	 */
 	PollutionAtOuterEdgeOfCircle: {
 		[kToPrimitive]: () => 0xaa5832f3,
-		[kType]: Sint32,
+		[kPropertyId]: 0xaa5832f3,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * Automaton should not be lit by the lighting manager
+	 */
 	IgnoreLighting: {
 		[kToPrimitive]: () => 0xaa5a9633,
-		[kType]: Bool,
+		[kPropertyId]: 0xaa5a9633,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * This value get added globally to mayor rating
+	 */
 	MayorRating: {
 		[kToPrimitive]: () => 0xaa5b8407,
-		[kType]: Sint32,
+		[kPropertyId]: 0xaa5b8407,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Intensity of spewed radiation (at center of area) when nuclear power
+	 * plant explodes.
+	 */
 	RadiationSpewIntensity: {
 		[kToPrimitive]: () => 0xaa5c04c5,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa5c04c5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Radius of the area in which radiation is spread when nuclear power plant
+	 * explodes (in cells).
+	 */
 	RadiationSpewRadius: {
 		[kToPrimitive]: () => 0xaa5c04c8,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa5c04c8,
+		[kPropertyType]: Float32,
 	},
-	LandmarkHomageKey: 0xaa5c23fa,
+	/**
+	 * Resource key of string to be displayed in the landmark's query dialog
+	 */
+	LandmarkHomageKey: {
+		[kToPrimitive]: () => 0xaa5c23fa,
+		[kPropertyId]: 0xaa5c23fa,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Response curve for the Goofy Stat field in query dialogs
+	 */
 	GoofyStatResponseCurve: {
 		[kToPrimitive]: () => 0xaa60e745,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa60e745,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Converts a funding level (percentage) into a decay rate (negative
+	 * numbers) or repair rate (positive numbers)
+	 */
 	FundingPercentageToPowerPoleDecayrepair: {
 		[kToPrimitive]: () => 0xaa713782,
-		[kType]: Float32,
+		[kPropertyId]: 0xaa713782,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * What kind of crane to use
+	 */
 	CraneHints: {
 		[kToPrimitive]: () => 0xaa83558f,
-		[kType]: Uint8,
+		[kPropertyId]: 0xaa83558f,
+		[kPropertyType]: Uint8,
 		NoCrane: 0x00000000,
 		OuterCrane: 0x00000001,
 		InnerCrane: 0x00000002,
 		OuterThenInnerCrane: 0x00000003,
 	},
+	/**
+	 * GUID of the sound to play when the occupant approaches an intersection
+	 */
 	SFXIntersectionSound: 0xaa87817a,
+	/**
+	 * GUID of the sound to play when the occupant is clicked on with query tool
+	 * and is decayed.
+	 */
 	SFXQuerySoundDecayed: 0xaa905ab9,
+	/**
+	 * Max concurrent playing one-shots
+	 */
 	AudioMaxConcurrentOneShots: 0xaabaa0d3,
-	DVRegionalTransportColorTable: 0xab9ec143,
+	/**
+	 * Color table for regional transport map: street, rail, road, 1way road,
+	 * avenue, monorail, elrail, highway, elhighway, airport, seaport, park, rail
+	 * station, default zone.
+	 */
+	DVRegionalTransportColorTable: {
+		[kToPrimitive]: () => 0xab9ec143,
+		[kPropertyId]: 0xab9ec143,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Indicate what kind of helicopter should appear on this helipad
+	 */
 	HelipadType: {
 		[kToPrimitive]: () => 0xabb90e58,
-		[kType]: Uint8,
+		[kPropertyId]: 0xabb90e58,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		Police: 0x00000001,
 		Hospital: 0x00000002,
@@ -4447,94 +9091,222 @@ export default {
 		Military: 0x00000004,
 		UFO: 0x00000005,
 	},
+	/**
+	 * This property prevents water automata from crossing under the bridge
+	 * tile.
+	 */
 	BridgeObstruction: {
 		[kToPrimitive]: () => 0xabe1b5a3,
-		[kType]: Bool,
+		[kPropertyId]: 0xabe1b5a3,
+		[kPropertyType]: Bool,
 	},
-	ShadowModelKey: 0xac2bc81c,
-	HospitalCapacityChunkSize: 0xac43826d,
+	/**
+	 * Model type, group, and instance for shadow model
+	 */
+	ShadowModelKey: {
+		[kToPrimitive]: () => 0xac2bc81c,
+		[kPropertyId]: 0xac2bc81c,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * How many people are represented by one unit in the coverage map
+	 */
+	HospitalCapacityChunkSize: {
+		[kToPrimitive]: () => 0xac43826d,
+		[kPropertyId]: 0xac43826d,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * How much can terrain be raised during network placement [0.0 - 100000.0]
+	 */
 	MaxTerrainHtIncrease: {
 		[kToPrimitive]: () => 0xc7b36ca4,
-		[kType]: Float32,
+		[kPropertyId]: 0xc7b36ca4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * How much can terrain be lowered during network placement [0.0 - 100000.0]
+	 */
 	MaxTerrainHtDecrease: {
 		[kToPrimitive]: () => 0xc7b36ca5,
-		[kType]: Float32,
+		[kPropertyId]: 0xc7b36ca5,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Range: [0.0 - 100000.0]
+	 */
 	MaxNetworkHtAdjustment: {
 		[kToPrimitive]: () => 0xc804dd86,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd86,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min terrain slope to trigger tunnel placement
+	 */
 	MinTerrainSlopeForTunnelStart: {
 		[kToPrimitive]: () => 0xc804dd87,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd87,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum slope of tunnel (in degrees)
+	 */
 	MaxTunnelSlope: {
 		[kToPrimitive]: () => 0xc804dd88,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd88,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum amount (in meters) by which a network vertex is allowed to move
+	 * beyond reference plane
+	 */
 	MaxDisplacementBeyondRefPlane: {
 		[kToPrimitive]: () => 0xc804dd89,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd89,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Use freehand mode of placement (i.e., anchor points freeze)
+	 */
 	UseFreehandMode: {
 		[kToPrimitive]: () => 0xc804dd90,
-		[kType]: Bool,
+		[kPropertyId]: 0xc804dd90,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * [deprecated] Number of frame updates between the freezing of successive
+	 * anchor points
+	 */
 	NumFramesBetweenAnchorPtFreeze: 0xc804dd91,
-	NumCellsBetweenAnchorPtFreeze: 0xc804dd92,
+	/**
+	 * Min number of cells between successive anchor points in different zooms
+	 */
+	NumCellsBetweenAnchorPtFreeze: {
+		[kToPrimitive]: () => 0xc804dd92,
+		[kPropertyId]: 0xc804dd92,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * How far away from the terrain is the network allowed to be [0.0 -
+	 * 100000.0]
+	 */
 	MaxDistFromTerrain: {
 		[kToPrimitive]: () => 0xc804dd93,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd93,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max height of the retaining walls [0.0 - 100000.0]
+	 */
 	MaxRetainingWallHt: {
 		[kToPrimitive]: () => 0xc804dd94,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd94,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max height of the supporting pylons [Reating wall ht - 100000.0]
+	 */
 	MaxPylonHt: {
 		[kToPrimitive]: () => 0xc804dd95,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd95,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max allowed terrain height diff between the two ends of land bridges
+	 */
 	MaxHtDiffBetweenLandBridgeEnds: {
 		[kToPrimitive]: () => 0xc804dd96,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd96,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Smoothen only those tiles that are connected to the segment being placed
+	 */
 	SmoothenOnlyConnectedTiles: {
 		[kToPrimitive]: () => 0xc804dd97,
-		[kType]: Bool,
+		[kPropertyId]: 0xc804dd97,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Number of times we attempt expanding the smoothing region before giving
+	 * up
+	 */
 	NumSmoothingProgressionSteps: 0xc804dd98,
+	/**
+	 * How much (in cells) does the smoothing region expand in each smoothing
+	 * progression step
+	 */
 	DistAddedPerSmoothingProgressionStep: 0xc804dd99,
+	/**
+	 * If an existing network moves by less than this, we do not attempt to fix
+	 * it (for efficiency)
+	 */
 	NetworkHtChangeThatRequiresFixing: {
 		[kToPrimitive]: () => 0xc804dd9a,
-		[kType]: Float32,
+		[kPropertyId]: 0xc804dd9a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Time in milliseconds between the freezing of successive anchor points
+	 */
 	TimeBetweenAnchorPtFreeze: 0xc804dd9b,
+	/**
+	 * Amount of water treated per month
+	 */
 	WaterTreatmentMonthlyCapacity: 0xc8ebd131,
+	/**
+	 * Amount of water consumed by this building per month.
+	 */
 	WaterConsumed: 0xc8ed2d84,
+	/**
+	 * Cost to produce one unit of electricity, not including infrastructure
+	 * maintenance
+	 */
 	PowerPlantEnergyConversionCost: {
 		[kToPrimitive]: () => 0xc910b4ce,
-		[kType]: Float32,
+		[kPropertyId]: 0xc910b4ce,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Size of a texture in meters. Defaults to standard city cell size.
+	 */
 	KSC4FoundationPropertySideTextureSize: {
 		[kToPrimitive]: () => 0xc911eda0,
-		[kType]: Float32,
+		[kPropertyId]: 0xc911eda0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Size of a texture in meters. Defaults to standard city cell size.
+	 */
 	KSC4FoundationPropertyTopTextureSize: {
 		[kToPrimitive]: () => 0xc911eda1,
-		[kType]: Float32,
+		[kPropertyId]: 0xc911eda1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum acceptable percentage for School department funding
+	 */
 	OBSSchoolMinAcceptableFunding: {
 		[kToPrimitive]: () => 0xc91894a8,
-		[kType]: Float32,
+		[kPropertyId]: 0xc91894a8,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to % chance
+	 * of a School strike
+	 */
 	SchoolStrikeResponseCurve: {
 		[kToPrimitive]: () => 0xc91894cb,
-		[kType]: Float32,
+		[kPropertyId]: 0xc91894cb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps average age to EQ boost %
+	 */
 	SchoolEffectivenessVsAverageAgeEffect: {
 		[kToPrimitive]: () => 0xc91b3b02,
-		[kType]: Float32,
+		[kPropertyId]: 0xc91b3b02,
+		[kPropertyType]: [Float32],
 		10: 0x0000000a,
 		20: 0x00000014,
 		30: 0x0000001e,
@@ -4546,112 +9318,241 @@ export default {
 		90: 0x0000005a,
 		100: 0x00000064,
 	},
+	/**
+	 * Amount of monthly HQ boost from this building.  HQ can range between 0
+	 * and 200 and is automatically reduced by 3 each month, so to have a net
+	 * positive effect this number should be greater than 3.
+	 */
 	HospitalHQBoost: {
 		[kToPrimitive]: () => 0xc9299659,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9299659,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps Average age of a tract to the % EQ boost the school gives the tract
+	 */
 	SchoolEffectivenessVsAverageAge: {
 		[kToPrimitive]: () => 0xc9299662,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9299662,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Amount by which EQ decays each month
+	 */
 	EQDecay: {
 		[kToPrimitive]: () => 0xc929c433,
-		[kType]: Float32,
+		[kPropertyId]: 0xc929c433,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Average age assigned to new Low Wealth residents
+	 */
 	LowWealthAverageAge: {
 		[kToPrimitive]: () => 0xc929c652,
-		[kType]: Uint8,
+		[kPropertyId]: 0xc929c652,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * EQ assigned to new Low Wealth residents
+	 */
 	LowWealthEQ: {
 		[kToPrimitive]: () => 0xc929cc58,
-		[kType]: Uint8,
+		[kPropertyId]: 0xc929cc58,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * HQ assigned to new Low Wealth residents
+	 */
 	LowWealthHQ: {
 		[kToPrimitive]: () => 0xc929cc8d,
-		[kType]: Uint8,
+		[kPropertyId]: 0xc929cc8d,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Maps wealth level to EQ boost %
+	 */
 	SchoolEffectivenessVsWealth: {
 		[kToPrimitive]: () => 0xc92d7ec0,
-		[kType]: Float32,
+		[kPropertyId]: 0xc92d7ec0,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects the rate at
+	 * which HQ decays
+	 */
 	HealthQuotientDecayEffect: {
 		[kToPrimitive]: () => 0xc92d9c7a,
-		[kType]: Float32,
+		[kPropertyId]: 0xc92d9c7a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps amount of garbage pollution in a tract to the rate at which the HQ
+	 * in that tract decays
+	 */
 	GarbagePollutionToHQDecayCurve: {
 		[kToPrimitive]: () => 0xc941b02e,
-		[kType]: Float32,
+		[kPropertyId]: 0xc941b02e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Which automata layers this model can appear in
+	 */
 	LayerFilter: {
 		[kToPrimitive]: () => 0xc973c9aa,
-		[kType]: Uint8,
+		[kPropertyId]: 0xc973c9aa,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If present, indicates an effect by string name. If not present, then
+	 * 'kExemplarPropertyID_ExemplarName' is used.
+	 */
 	VisualEffectName: {
 		[kToPrimitive]: () => 0xc98204b8,
-		[kType]: String,
+		[kPropertyId]: 0xc98204b8,
+		[kPropertyType]: String,
 	},
 	VisualEffectName1: {
 		[kToPrimitive]: () => 0xc98204b9,
-		[kType]: String,
+		[kPropertyId]: 0xc98204b9,
+		[kPropertyType]: String,
 	},
+	/**
+	 * kPropertyID_LotConfigNetworkTileId
+	 */
 	KPropertyID_LotConfigNetworkTileId: 0xc9a5a1be,
+	/**
+	 * flammability multiplier during summer
+	 */
 	FlammabilityMultiplierSummer: {
 		[kToPrimitive]: () => 0xc9b40128,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9b40128,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * GUID of sound played when building is plopped
+	 */
 	SFXDefaultPlopSound: 0xc9b93a56,
+	/**
+	 * How often (0.0-1.0) a moving van will be created in response to a new
+	 * residence
+	 */
 	MovingVanFrequency: {
 		[kToPrimitive]: () => 0xc9c18eae,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9c18eae,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Magnitude of a repulsor or attractor at which peds will break their paths
+	 * to get away from or closer to it
+	 */
 	AttractionThreshold: {
 		[kToPrimitive]: () => 0xc9da95d4,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9da95d4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Days between sweeps for burnt stumps (may be fractional)
+	 */
 	FloraBurntSweepInterval: {
 		[kToPrimitive]: () => 0xc9dbdd00,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9dbdd00,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum number of burnt stumps removed per sweep (may be fractional)
+	 */
 	FloraBurntSweepSize: {
 		[kToPrimitive]: () => 0xc9dbdd01,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9dbdd01,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Meters from sea level over which to distribute the 16 elevation rows
+	 */
 	FloraElevationScaleRange: {
 		[kToPrimitive]: () => 0xc9dbdd02,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9dbdd02,
+		[kPropertyType]: Float32,
 	},
-	AuxiliaryModel2Key: 0xc9e69af6,
+	/**
+	 * Type/Group/Instance for additional model (e.g. flashing lights on emerg.
+	 * vehicles)
+	 */
+	AuxiliaryModel2Key: {
+		[kToPrimitive]: () => 0xc9e69af6,
+		[kPropertyId]: 0xc9e69af6,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maximum angle (in degrees) of network grade that will change the speed of
+	 * a vehicle
+	 */
 	GradeMaxAngle: {
 		[kToPrimitive]: () => 0xc9ee640a,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9ee640a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percentage that will be added to/subtracted from a vehicle's speed when
+	 * driving up/down a grade at max angle
+	 */
 	GradeSpeedMultiplier: {
 		[kToPrimitive]: () => 0xc9ee640b,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9ee640b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max distance between fire and crew for the crew to aim its water stream
+	 * at it
+	 */
 	FireCrewMaxStreamDist: {
 		[kToPrimitive]: () => 0xc9ee640c,
-		[kType]: Float32,
+		[kPropertyId]: 0xc9ee640c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of tiles around emergency vehicles on which traffic will be
+	 * removed
+	 */
 	EmergencyVehicleClearRadius: {
 		[kToPrimitive]: () => 0xc9ee640d,
-		[kType]: Uint8,
+		[kPropertyId]: 0xc9ee640d,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * When average age reaches life expectancy in a tract, the tract's average
+	 * age is set to this value
+	 */
 	AverageAgeResetValue: {
 		[kToPrimitive]: () => 0xca027307,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca027307,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * When average age reaches life expectancy in a tract, the tract's EQ is
+	 * multiplied by this value
+	 */
 	EQResetPercent: {
 		[kToPrimitive]: () => 0xca027325,
-		[kType]: Float32,
+		[kPropertyId]: 0xca027325,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When average age reaches life expectancy in a tract, the tract's HQ is
+	 * multiplied by this value
+	 */
 	HQResetPercent: {
 		[kToPrimitive]: () => 0xca027328,
-		[kType]: Float32,
+		[kPropertyId]: 0xca027328,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * GUID of sound played when building is around and in good working order.
+	 */
 	SFXAmbienceGoodSound: {
 		[kToPrimitive]: () => 0xca19d7ca,
-		[kType]: Uint32,
+		[kPropertyId]: 0xca19d7ca,
+		[kPropertyType]: Uint32,
 		CoalPowerPlant: 0x2a4c43bd,
 		HydrogenPowerPlant: 0x4a4c42d4,
 		NaturalGasPowerPlant: 0x6a4c467c,
@@ -4663,246 +9564,570 @@ export default {
 		WaterPump: 0xea5b166e,
 		WaterPurificationPlant: 0x8a55b1a2,
 	},
+	/**
+	 * Number of growth stages (i.e. number of lots) for this particular airport
+	 * type
+	 */
 	NumGrowthStages: 0xca271780,
+	/**
+	 * List of template IDs for each growth stage
+	 */
 	LotStageTemplateIDs: 0xca271781,
+	/**
+	 * List of demand thresholds for each growth stage. What this value refers
+	 * to is zone type specific.
+	 */
 	ObsoleteDemandThresholdsList: {
 		[kToPrimitive]: () => 0xca271782,
-		[kType]: Float32,
+		[kPropertyId]: 0xca271782,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * List of budget requirements for each growth stage - in Simoleans (tm)
+	 */
 	BudgetRequirementsList: {
 		[kToPrimitive]: () => 0xca271783,
-		[kType]: Sint64,
+		[kPropertyId]: 0xca271783,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * List of trip capacities for each growth stage for airport or seaport
+	 */
 	TripCapacityList: 0xca271784,
+	/**
+	 * Efficiency value under which the lot begins to distress
+	 */
 	EfficiencyDistressThreshold: {
 		[kToPrimitive]: () => 0xca480830,
-		[kType]: Float32,
+		[kPropertyId]: 0xca480830,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * List of costs in Simoleans (tm) associated with each growth stage
+	 */
 	StageUpgradeCost: {
 		[kToPrimitive]: () => 0xca271786,
-		[kType]: Sint64,
+		[kPropertyId]: 0xca271786,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Port Size identifier. 1=small, 2=medium, 3=large
+	 */
 	PortSize: {
 		[kToPrimitive]: () => 0xca271787,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca271787,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Width of the port lot (in North rotation)
+	 */
 	PortWidth: {
 		[kToPrimitive]: () => 0xca271788,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca271788,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Height of the port lot (in North rotation)
+	 */
 	PortHeight: {
 		[kToPrimitive]: () => 0xca271789,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca271789,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Optional list of vertex altitude values corresponding to each cell in the
+	 * lot for airport or seaport
+	 */
 	HeightMap: {
 		[kToPrimitive]: () => 0xca271800,
-		[kType]: Float32,
+		[kPropertyId]: 0xca271800,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Distance above ground or sea for microphone position
+	 */
 	AudioZoomDistances: {
 		[kToPrimitive]: () => 0xca359f17,
-		[kType]: Float32,
+		[kPropertyId]: 0xca359f17,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * When right-click scrolling, this is the number of pixels away from the
+	 * anchor that the user must move before scrolling begins.
+	 */
 	IntelliScrollInnerRadiusPixels: 0xe90f5de4,
+	/**
+	 * Horizontal scroll hull edge in pixels.
+	 */
 	HullHorizontal: 0xca383ca5,
+	/**
+	 * Vertical scroll hull edge in pixels.
+	 */
 	HullVertical: 0xca383ca6,
+	/**
+	 * # of pixels per speed increase (higher is slower).
+	 */
 	ScrollGradient: {
 		[kToPrimitive]: () => 0xca383ca7,
-		[kType]: Float32,
+		[kPropertyId]: 0xca383ca7,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Auto gen region: water erosion steps.
+	 */
 	WaterErosionIterations: 0xca383ca8,
+	/**
+	 * Auto gen region: water erosion flow steps.
+	 */
 	FlowStepsForWaterErosion: 0xca383ca9,
+	/**
+	 * Auto gen region: wind erosion steps.
+	 */
 	SmoothingStepsForWindErosion: 0xca383caa,
+	/**
+	 * Color of regional grid, in 0xRRGGBB form.
+	 */
 	RegionUIGridColor: 0xca383cab,
+	/**
+	 * Color of regional highlight, in 0xRRGGBB form.
+	 */
 	RegionUIHighlight: 0xca383cac,
+	/**
+	 * Height map fill value for new cities in plains regions (0-255).
+	 */
 	RegionUIPlainsMapLevel: {
 		[kToPrimitive]: () => 0xca383cad,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca383cad,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Height map fill value for new cities in water regions (0-255).
+	 */
 	RegionUIWaterMapLevel: {
 		[kToPrimitive]: () => 0xca383cae,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca383cae,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Range of opacity values for clouds (min,max; 0-255).
+	 */
 	RegionUICloudOpacityRange: {
 		[kToPrimitive]: () => 0xca383cb1,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca383cb1,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Density to freshness play percentage curve
+	 */
 	AudioDensity2FreshPlayCurve: {
 		[kToPrimitive]: () => 0xca4132e9,
-		[kType]: Float32,
+		[kPropertyId]: 0xca4132e9,
+		[kPropertyType]: [Float32],
 	},
-	ItemDescriptionKey: 0xca416ab5,
-	DescriptionKey: 0xca416b2a,
-	MySimNameResKey: 0xca416b3f,
+	/**
+	 * Resource key of the string resource of the description
+	 */
+	ItemDescriptionKey: {
+		[kToPrimitive]: () => 0xca416ab5,
+		[kPropertyId]: 0xca416ab5,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Resource key of ordinance description
+	 */
+	DescriptionKey: {
+		[kToPrimitive]: () => 0xca416b2a,
+		[kPropertyId]: 0xca416b2a,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * My sim default name resource key
+	 */
+	MySimNameResKey: {
+		[kToPrimitive]: () => 0xca416b3f,
+		[kPropertyId]: 0xca416b3f,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Min term required for the neighbor to be able to sustain sell deal cost
+	 */
 	NDa_MinTermToSustainSellDealCostMonths: {
 		[kToPrimitive]: () => 0xca46931f,
-		[kType]: Float32,
+		[kPropertyId]: 0xca46931f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max deal profit factor (1 + NDc_MinDealProfitFactor)
+	 */
 	NDc_MaxDealProfitFactor: {
 		[kToPrimitive]: () => 0xca469346,
-		[kType]: Float32,
+		[kPropertyId]: 0xca469346,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps city population to a multiplier (0.0-1.0) for freight truck density
+	 */
 	FreightTruckDensityCurve: {
 		[kToPrimitive]: () => 0xca51189a,
-		[kType]: Float32,
+		[kPropertyId]: 0xca51189a,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max number of commute trains to cross a tile per second
+	 */
 	MaxCommuteTrainsPerSecond: {
 		[kToPrimitive]: () => 0xca511de6,
-		[kType]: Float32,
+		[kPropertyId]: 0xca511de6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max number of freight trucks to cross a tile per second
+	 */
 	MaxFreightTrucksPerSecond: {
 		[kToPrimitive]: () => 0xca511df2,
-		[kType]: Float32,
+		[kPropertyId]: 0xca511df2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Speed in KPH at which vehicles will draw motion blur effect.
+	 */
 	VehicleBlurSpeedKPH: 0xca5545ea,
+	/**
+	 * Mayor Rating effect. Magnitude (-100 to +100), radius (in cells).
+	 */
 	MayorRatingEffect: {
 		[kToPrimitive]: () => 0xca5b9305,
-		[kType]: Sint32,
+		[kPropertyId]: 0xca5b9305,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * Maps the budget percent (0-100%) to a multiplier on the time cost of
+	 * using a transit switch.
+	 */
 	TransitSwitchEntryCostVsBudget: {
 		[kToPrimitive]: () => 0xca5f7821,
-		[kType]: Float32,
+		[kPropertyId]: 0xca5f7821,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Converts a funding level (percentage) into a decay rate (negative
+	 * numbers) or repair rate (positive numbers)
+	 */
 	FundingPercentageToPipeDecayrepair: {
 		[kToPrimitive]: () => 0xca7138c4,
-		[kType]: Float32,
+		[kPropertyId]: 0xca7138c4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Simulator MONTH (1-12) and DAY (1-31) to start this prop's date interval
+	 */
 	SimulatorDateStart: {
 		[kToPrimitive]: () => 0xca7515cc,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca7515cc,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Multiply the trip length map values (0-255, 255 = Max Commute Time) by
+	 * this value to get a time in minutes for display purposes
+	 */
 	TripLengthToMinutesDisplayMultiplier: {
 		[kToPrimitive]: () => 0xca76013b,
-		[kType]: Float32,
+		[kPropertyId]: 0xca76013b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Specifies the camera zoom level to use on disaster go to
+	 */
 	GoToZoomLevel: {
 		[kToPrimitive]: () => 0xca821b8c,
-		[kType]: Uint8,
+		[kPropertyId]: 0xca821b8c,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Present in the Medical Clinic and Hospital. It is not used within the exe
+	 * file though.
+	 */
 	UnusedMedicalProperty: {
 		[kToPrimitive]: () => 0xca9b4ca8,
-		[kType]: Bool,
+		[kPropertyId]: 0xca9b4ca8,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * If present, the occupant will respond to hover queries but not to
+	 * click-queries
+	 */
 	HoverQueryOnly: {
 		[kToPrimitive]: () => 0xcaa9ab92,
-		[kType]: Bool,
+		[kPropertyId]: 0xcaa9ab92,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Min value of desirability for subjective factors
+	 * (pollution,garbage,school,hospital,crime,traffic,triplength).
+	 */
 	SubjectiveFactorThresholdMinValue: {
 		[kToPrimitive]: () => 0xcab1ce3a,
-		[kType]: Sint32,
+		[kPropertyId]: 0xcab1ce3a,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * Max value of desirability for subjective factors
+	 * (pollution,garbage,school,hospital,crime,traffic,triplength).
+	 */
 	SubjectiveFactorThresholdMaxValue: {
 		[kToPrimitive]: () => 0xcab1ce3c,
-		[kType]: Sint32,
+		[kPropertyId]: 0xcab1ce3c,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * Starting overhead cost in time for each travel type for car preferred
+	 * trips
+	 */
 	TripStartingCostByTravelTypeForCarPref: {
 		[kToPrimitive]: () => 0xcad64136,
-		[kType]: Float32,
+		[kPropertyId]: 0xcad64136,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maximum number of simultaneous riot instances
+	 */
 	RiotMaxInstances: 0xcadb6b3e,
+	/**
+	 * a% (0.0-1.0) chance of adding/removing automaton from tile when actual
+	 * auto count is b% (0.0-1.0) lower/higher than desired.
+	 */
 	SpawnRecallForStreets: {
 		[kToPrimitive]: () => 0xcba5895b,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba5895b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * a% (0.0-1.0) chance of adding/removing automaton from tile when actual
+	 * auto count is b% (0.0-1.0) lower/higher than desired.
+	 */
 	SpawnRecallForRoads: {
 		[kToPrimitive]: () => 0xcba5895c,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba5895c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * a% (0.0-1.0) chance of adding/removing automaton from tile when actual
+	 * auto count is b% (0.0-1.0) lower/higher than desired.
+	 */
 	SpawnRecallForAvenues: {
 		[kToPrimitive]: () => 0xcba5895d,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba5895d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * a% (0.0-1.0) chance of adding/removing automaton from tile when actual
+	 * auto count is b% (0.0-1.0) lower/higher than desired.
+	 */
 	SpawnRecallForHighway: {
 		[kToPrimitive]: () => 0xcba5895e,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba5895e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * a% (0.0-1.0) chance of adding/removing automaton from tile when actual
+	 * auto count is b% (0.0-1.0) lower/higher than desired.
+	 */
 	SpawnRecallForRail: {
 		[kToPrimitive]: () => 0xcba5895f,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba5895f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Response curve of congestion vs. expected automata per second on a tile
+	 */
 	CongestionToCPSForStreets: {
 		[kToPrimitive]: () => 0xcba58a5b,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba58a5b,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Response curve of congestion vs. expected automata per second on a tile
+	 */
 	CongestionToCPSForRoads: {
 		[kToPrimitive]: () => 0xcba58a5c,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba58a5c,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Response curve of congestion vs. expected automata per second on a tile
+	 */
 	CongestionToCPSForAvenues: {
 		[kToPrimitive]: () => 0xcba58a5d,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba58a5d,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Response curve of congestion vs. expected automata per second on a tile
+	 */
 	CongestionToCPSForHighway: {
 		[kToPrimitive]: () => 0xcba58a5e,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba58a5e,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Response curve of congestion vs. expected automata per second on a tile
+	 */
 	CongestionToCPSForRail: {
 		[kToPrimitive]: () => 0xcba58a5f,
-		[kType]: Float32,
+		[kPropertyId]: 0xcba58a5f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Refers to an .abk file with player-drive sounds
+	 */
 	SoundBankID: 0xcbbba52f,
+	/**
+	 * Max volume for AEMS systems
+	 */
 	AudioAEMSMaxVolume: {
 		[kToPrimitive]: () => 0xcbfb03fa,
-		[kType]: Float32,
+		[kPropertyId]: 0xcbfb03fa,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Master FX level
+	 */
 	AudioAEMSMasterFxLevel: {
 		[kToPrimitive]: () => 0xcbfb03ff,
-		[kType]: Float32,
+		[kPropertyId]: 0xcbfb03ff,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Number of police helicopters this station can send.
+	 */
 	PoliceStationTotalCopterDispatches: {
 		[kToPrimitive]: () => 0xcc0b0705,
-		[kType]: Sint32,
+		[kPropertyId]: 0xcc0b0705,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Desired # of vehicles per second that will be generated on roads during
+	 * player-drive
+	 */
 	PlayerdriveVehiclesPerSecond: {
 		[kToPrimitive]: () => 0xcc101142,
-		[kType]: Float32,
+		[kPropertyId]: 0xcc101142,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Index (1,2,3,etc.) of auxiliary model to load automatically on Init
+	 */
 	AutoloadAuxiliaryModels: 0xcc21420d,
+	/**
+	 * kPropertyID_FlipsAllowed
+	 */
 	KPropertyID_FlipsAllowed: {
 		[kToPrimitive]: () => 0xcc3e4755,
-		[kType]: Uint8,
+		[kPropertyId]: 0xcc3e4755,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If assigned to an occupant, this property denotes it as a prop. Must use
+	 * a valid prop ID as a property value. See SC4PropOccupant.h
+	 */
 	PropType: 0xe82b68eb,
+	/**
+	 * If property is present (regardless of value), then the model can be
+	 * rotated and contains 'full geometry'.
+	 */
 	KSC4BuildingModelRotationProperty: {
 		[kToPrimitive]: () => 0xe83a081d,
-		[kType]: Bool,
+		[kPropertyId]: 0xe83a081d,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * How often the Crime simulator updates, in days
+	 */
 	CrimeUpdatePeriod: 0xe8ec2720,
+	/**
+	 * Crime Police Factor
+	 */
 	CrimePoliceFactor: {
 		[kToPrimitive]: () => 0xe8ec2721,
-		[kType]: Float32,
+		[kPropertyId]: 0xe8ec2721,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on water pollution
+	 */
 	WaterEffect: {
 		[kToPrimitive]: () => 0xe8f79c8b,
-		[kType]: Float32,
+		[kPropertyId]: 0xe8f79c8b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Effect (multiplier) this ordinance has on garbage
+	 */
 	GarbageEffect: {
 		[kToPrimitive]: () => 0xe8f79c90,
-		[kType]: Float32,
+		[kPropertyId]: 0xe8f79c90,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * kMaxCellAltitudeDeltaForFlatnessProperty
+	 */
 	KMaxCellAltitudeDeltaForFlatnessProperty: {
 		[kToPrimitive]: () => 0xe900ea24,
-		[kType]: Float32,
+		[kPropertyId]: 0xe900ea24,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * kMaxSlopeForFlatnessProperty
+	 */
 	KMaxSlopeForFlatnessProperty: {
 		[kToPrimitive]: () => 0xe900ea25,
-		[kType]: Float32,
+		[kPropertyId]: 0xe900ea25,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * kDefaultLotFoundationTypeProperty
+	 */
 	KDefaultLotFoundationTypeProperty: 0xe900ea26,
+	/**
+	 * kShouldAttemptLotLevellingProperty
+	 */
 	KShouldAttemptLotLevellingProperty: 0xe900ea27,
+	/**
+	 * kShouldAttemptInternalLotLevellingProperty
+	 */
 	KShouldAttemptInternalLotLevellingProperty: 0xe900ea28,
+	/**
+	 * kLotAutoLevelInternalAltitudeDeltaProperty
+	 */
 	KLotAutoLevelInternalAltitudeDeltaProperty: {
 		[kToPrimitive]: () => 0xe900ea29,
-		[kType]: Float32,
+		[kPropertyId]: 0xe900ea29,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * MaxAreaSlopeAllowedForLevellingProperty
+	 */
 	MaxAreaSlopeAllowedForLevellingProperty: {
 		[kToPrimitive]: () => 0xe900ea2a,
-		[kType]: Float32,
+		[kPropertyId]: 0xe900ea2a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Update interval in milliseconds for toggling building lights.
+	 */
 	LotDeveloperNightUpdateInterval: 0xe900ea2b,
+	/**
+	 * Number of buildings to toggle lights on per update interval (integer).
+	 */
 	LotDeveloperNightUpdateCount: 0xe900ea2c,
+	/**
+	 * Paired entries indicating this building allows a travelling Sim to switch
+	 * between transit types
+	 */
 	TransitSwitchPoint: {
 		[kToPrimitive]: () => 0xe90e25a1,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe90e25a1,
+		[kPropertyType]: [Uint8],
 		Walk: 0x00000000,
 		DriveCar: 0x00000001,
 		RideBus: 0x00000002,
@@ -4930,378 +10155,858 @@ export default {
 		OutsidetoInside: 0x00000081,
 		InsidetoOutside: 0x00000082,
 	},
+	/**
+	 * Cost in travel time to enter this transit switch. Once inside, travel
+	 * time inside the building is zero.
+	 */
 	TransitSwitchEntryCost: {
 		[kToPrimitive]: () => 0xe90e25a2,
-		[kType]: Float32,
+		[kPropertyId]: 0xe90e25a2,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When traffic density rises above this capacity, it costs trips extra
+	 * travel time.
+	 */
 	TransitSwitchTrafficCapacity: {
 		[kToPrimitive]: () => 0xe90e25a3,
-		[kType]: Float32,
+		[kPropertyId]: 0xe90e25a3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum allowed funding percentage for utilities
+	 */
 	PowerMaxAllowedFunding: {
 		[kToPrimitive]: () => 0xe911e2d1,
-		[kType]: Float32,
+		[kPropertyId]: 0xe911e2d1,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maximum allowed percentage for power plant production
+	 */
 	PowerPlantMaxProductionRatio: {
 		[kToPrimitive]: () => 0xe911e2fc,
-		[kType]: Float32,
+		[kPropertyId]: 0xe911e2fc,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Minimum acceptable percentage for Health department funding
+	 */
 	OBSHealthMinAcceptableFunding: {
 		[kToPrimitive]: () => 0xe918946f,
-		[kType]: Float32,
+		[kPropertyId]: 0xe918946f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Efficiency of School buildings will drop to this % during a strike
+	 */
 	SchoolStrikeEfficiency: {
 		[kToPrimitive]: () => 0xe91894b3,
-		[kType]: Float32,
+		[kPropertyId]: 0xe91894b3,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Multiplier to tweak the relative weighting of the R$$ occupant type's
+	 * taxes
+	 */
 	BudgetTaxRateOccWeight_R$$: {
 		[kToPrimitive]: () => 0xe918c920,
-		[kType]: Float32,
+		[kPropertyId]: 0xe918c920,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Base value in simoleons of this building.
+	 */
 	BuildingValue: {
 		[kToPrimitive]: () => 0xe91a0b5f,
-		[kType]: Sint64,
+		[kPropertyId]: 0xe91a0b5f,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Percentage (from 0 to 200%) by which this ordinance affects all HQ values
+	 */
 	HealthQuotientBoostEffect: {
 		[kToPrimitive]: () => 0xe91b3aee,
-		[kType]: Float32,
+		[kPropertyId]: 0xe91b3aee,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Maps distance from a covered tract to a % of that tract's population that
+	 * is actually served.
+	 */
 	SchoolPopulationVsDistance: {
 		[kToPrimitive]: () => 0xe921a936,
-		[kType]: Float32,
+		[kPropertyId]: 0xe921a936,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps average age of a tract to addional HQ boost %
+	 */
 	HealthEffectivenessVsAverageAgeEffect: {
 		[kToPrimitive]: () => 0xe92d9db4,
-		[kType]: Float32,
+		[kPropertyId]: 0xe92d9db4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * kZM_mZoneMinCellSize
+	 */
 	KZM_mZoneMinCellSize: {
 		[kToPrimitive]: () => 0xe94825b2,
-		[kType]: Sint32,
+		[kPropertyId]: 0xe94825b2,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * kZM_mZoneMaxCellSize
+	 */
 	KZM_mZoneMaxCellSize: {
 		[kToPrimitive]: () => 0xe94825b3,
-		[kType]: Sint32,
+		[kPropertyId]: 0xe94825b3,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * kZM_mZoneCreationCostArray
+	 */
 	KZM_mZoneCreationCostArray: {
 		[kToPrimitive]: () => 0xe94825b4,
-		[kType]: Sint64,
+		[kPropertyId]: 0xe94825b4,
+		[kPropertyType]: [Sint64],
 	},
+	/**
+	 * kZM_mZoneDestructionCostArray
+	 */
 	KZM_mZoneDestructionCostArray: {
 		[kToPrimitive]: () => 0xe94825b5,
-		[kType]: Sint64,
+		[kPropertyId]: 0xe94825b5,
+		[kPropertyType]: [Sint64],
 	},
-	KZM_mZoneTextureResourceInstanceArray: 0xe94825b6,
+	/**
+	 * kZM_mZoneTextureResourceInstanceArray
+	 */
+	KZM_mZoneTextureResourceInstanceArray: {
+		[kToPrimitive]: () => 0xe94825b6,
+		[kPropertyId]: 0xe94825b6,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Replaces drag color alpha after zone placement
+	 */
 	ZoneDisplayAlpha: {
 		[kToPrimitive]: () => 0xe94825b7,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe94825b7,
+		[kPropertyType]: Uint8,
 	},
-	ZoneDragColor: 0xe94825b8,
+	/**
+	 * RGBA color to blend with black and white texture NRRRCCCIIIMASSLP
+	 */
+	ZoneDragColor: {
+		[kToPrimitive]: () => 0xe94825b8,
+		[kPropertyId]: 0xe94825b8,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Meters per cell must be less than this value NRRRCCCIIIMASSLP
+	 */
 	ZoneMaxSlope: {
 		[kToPrimitive]: () => 0xe94825b9,
-		[kType]: Float32,
+		[kPropertyId]: 0xe94825b9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Id of the network texture for which it is OK to have pylon/retaining wall
+	 */
 	NetworkTextureId: 0xe974eaa1,
-	ConnectedVerts: 0xe974eaa2,
+	/**
+	 * Pairs of cell vertices connected by retaining walls / side flaps
+	 */
+	ConnectedVerts: {
+		[kToPrimitive]: () => 0xe974eaa2,
+		[kPropertyId]: 0xe974eaa2,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * (x,z) corresponding to the 4 corners of the pylon w.r.t cell center
+	 */
 	PylonCornerXZs: {
 		[kToPrimitive]: () => 0xe974eaa3,
-		[kType]: Float32,
+		[kPropertyId]: 0xe974eaa3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Model resource id(s) for tunnel piece(s)
+	 */
 	TunnelResourceIds: 0xe974eaa4,
+	/**
+	 * Tunnel model rotations
+	 */
 	TunnelModelRotations: 0xe974eaa5,
+	/**
+	 * Tunnel piece model heights
+	 */
 	TunnelModelHeights: {
 		[kToPrimitive]: () => 0xe974eaa6,
-		[kType]: Float32,
+		[kPropertyId]: 0xe974eaa6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Pylon model exemplar instance used by some networks (can be single
+	 * instance or one per zoom)
+	 */
 	SpecialPylonModelId: 0xe974eaa7,
+	/**
+	 * RGBA color for watered buildings in pipe view
+	 */
 	WateredBuildingColor: {
 		[kToPrimitive]: () => 0xe97f42b0,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe97f42b0,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * If present, then there are no building-style models for this building and
+	 * if there are any, they should be ignored.
+	 */
 	KSC4BuildingNoModelProperty: {
 		[kToPrimitive]: () => 0xe9822d62,
-		[kType]: Bool,
+		[kPropertyId]: 0xe9822d62,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * The Max slope this lot will develop on
+	 */
 	LotConfigPropertyMaxSlopeAllowed: {
 		[kToPrimitive]: () => 0xe99b068c,
-		[kType]: Float32,
+		[kPropertyId]: 0xe99b068c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * If non-zero, buildings on the lot will construct, otherwise they will be
+	 * fully constructed when plopped
+	 */
 	LotConfigPropertyDoConstruction: {
 		[kToPrimitive]: () => 0xe99b068d,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe99b068d,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Max horizontal distance from the center of the line at which the control
+	 * points are placed
+	 */
 	PowerLineControlMaxHorizDistance: {
 		[kToPrimitive]: () => 0xe9a18d3f,
-		[kType]: Float32,
+		[kPropertyId]: 0xe9a18d3f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Percent of line length at which to place control points, vertically
+	 */
 	PowerLineControlVertical: {
 		[kToPrimitive]: () => 0xe9a1e8d4,
-		[kType]: Float32,
+		[kPropertyId]: 0xe9a1e8d4,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * What wealth level this prop will answer. Choices are None, Low Wealth,
+	 * Medium Wealth and High Wealth.
+	 */
 	PropWealth: {
 		[kToPrimitive]: () => 0xe9a316eb,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe9a316eb,
+		[kPropertyType]: Uint8,
 		None: 0x00000000,
 		LowWealth: 0x00000001,
 		MediumWealth: 0x00000002,
 		HighWealth: 0x00000003,
 	},
+	/**
+	 * Array of scaling factors for the width of the power lines, one per zoom
+	 * level.
+	 */
 	PowerLineScalingFactor: {
 		[kToPrimitive]: () => 0xe9ac43e7,
-		[kType]: Float32,
+		[kPropertyId]: 0xe9ac43e7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Group(s) of vehicle automata that will be created when this building is
+	 * constructed or plopped.
+	 */
 	ResponseVehicleType: 0xe9aee3da,
+	/**
+	 * How many of each type will be created when building is constructed or
+	 * plopped.
+	 */
 	ResponseVehicleCount: {
 		[kToPrimitive]: () => 0xe9aee3db,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe9aee3db,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Group(s) of pedestrian automata that will be created when this building
+	 * is constructed or plopped.
+	 */
 	ResponsePedestrianType: 0xe9aee3dc,
+	/**
+	 * How many of each type (in Response Pedestrian Type property) will be
+	 * created when building is constructed or plopped.
+	 */
 	ResponsePedestrianCount: {
 		[kToPrimitive]: () => 0xe9aee3dd,
-		[kType]: Uint8,
+		[kPropertyId]: 0xe9aee3dd,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * If set, occupant is never chosen based on user action or normal
+	 * simulation.
+	 */
 	SpecialCaseOnly: {
 		[kToPrimitive]: () => 0xe9d117c3,
-		[kType]: Bool,
+		[kPropertyId]: 0xe9d117c3,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * If set to true, specifies that the prop should be treated as self-lit
+	 */
 	Selfilluminated: {
 		[kToPrimitive]: () => 0xe9f0fa86,
-		[kType]: Bool,
+		[kPropertyId]: 0xe9f0fa86,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraParkEffect: {
 		[kToPrimitive]: () => 0xea023270,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023270,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraPollutionEffectAir: {
 		[kToPrimitive]: () => 0xea023271,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023271,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraPollutionEffectWater: {
 		[kToPrimitive]: () => 0xea023272,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023272,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraPollutionEffectGarbage: {
 		[kToPrimitive]: () => 0xea023273,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023273,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraPollutionEffectRadiation: {
 		[kToPrimitive]: () => 0xea023274,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023274,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraSchoolEffect: {
 		[kToPrimitive]: () => 0xea023275,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023275,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraHospitalEffect: {
 		[kToPrimitive]: () => 0xea023276,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023276,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraCrimeEffect: {
 		[kToPrimitive]: () => 0xea023277,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023277,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraTripLength: {
 		[kToPrimitive]: () => 0xea023278,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023278,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps grid data to aura effect
+	 */
 	AuraTraffic: {
 		[kToPrimitive]: () => 0xea023279,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023279,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * (1.0 means no decay, 0.0 means full decay (no smoothing)
+	 */
 	AuraLongTermDecayFactor: {
 		[kToPrimitive]: () => 0xea02327a,
-		[kType]: Float32,
+		[kPropertyId]: 0xea02327a,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * (1.0 means no decay, 0.0 means full decay (no smoothing)
+	 */
 	AuraShortTermDecayFactor: {
 		[kToPrimitive]: () => 0xea02327b,
-		[kType]: Float32,
+		[kPropertyId]: 0xea02327b,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Base aura for R$,Cs$,Id occupancy
+	 */
 	AuraBaseAuraLow: {
 		[kToPrimitive]: () => 0xea02327c,
-		[kType]: Sint32,
+		[kPropertyId]: 0xea02327c,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Base aura for R$$,Cs$$,Co$$,Ir,Im occupancy
+	 */
 	AuraBaseAuraMed: {
 		[kToPrimitive]: () => 0xea02327d,
-		[kType]: Sint32,
+		[kPropertyId]: 0xea02327d,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Base aura for R$$$,Cs$$$,Co$$$ occupancy
+	 */
 	AuraBaseAuraHigh: {
 		[kToPrimitive]: () => 0xea02327e,
-		[kType]: Sint32,
+		[kPropertyId]: 0xea02327e,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Maps tax rate change (in percent) to aura effect
+	 */
 	AuraTaxRateChangeEffect: {
 		[kToPrimitive]: () => 0xea02327f,
-		[kType]: Float32,
+		[kPropertyId]: 0xea02327f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Maps (value_type-wealth_type) to aura effect
+	 */
 	AuraValueWealthEffect: {
 		[kToPrimitive]: () => 0xea023280,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023280,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * magnitude and radius in meters of transient aura effect
+	 */
 	AuraTransientEffectFire: {
 		[kToPrimitive]: () => 0xea023290,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023290,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * magnitude and radius in meters of transient aura effect
+	 */
 	AuraTransientEffectFlora: {
 		[kToPrimitive]: () => 0xea023291,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023291,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * magnitude and radius in meters of transient aura effect
+	 */
 	AuraTransientEffectCivicPlop: {
 		[kToPrimitive]: () => 0xea023292,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023292,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * magnitude and radius in meters of transient aura effect
+	 */
 	AuraTransientEffectNetworkPlop: {
 		[kToPrimitive]: () => 0xea023293,
-		[kType]: Float32,
+		[kPropertyId]: 0xea023293,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * hotspot settings: threshold value (0-255), radius (in tracts), minimum
+	 * weight
+	 */
 	AuraHotspotSettings: {
 		[kToPrimitive]: () => 0xea0232a0,
-		[kType]: Sint32,
+		[kPropertyId]: 0xea0232a0,
+		[kPropertyType]: [Sint32],
 	},
+	/**
+	 * maps hotspot weight (# of cells above threshold) to monthly fire
+	 * probability (in percent 0-100)
+	 */
 	AuraHotspotRiotProbability: {
 		[kToPrimitive]: () => 0xea0232a1,
-		[kType]: Float32,
+		[kPropertyId]: 0xea0232a1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * If present, specifies a GZCLSID (class id) for the model class to use.
+	 * Otherwise, just use the default kGZCLSID_cS3DModelInstance.
+	 */
 	KSC4BuildingModelClassProperty: 0xea123cef,
+	/**
+	 * How fast this building's condition decays over time. The "life
+	 * expectancy" of the plant in months can be calculated roughly as the
+	 * reciprocal of this number. Thus, a plant with a 50-year lifespan will have
+	 * a base decay rate of 1.0 / (50 * 12) and 0.00333 = 25 years.
+	 */
 	AgeDegradationRate: {
 		[kToPrimitive]: () => 0xea1cf220,
-		[kType]: Float32,
+		[kPropertyId]: 0xea1cf220,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When a building's "Age Degradation" exceeds this level, the plant will
+	 * begin to exhibit various kinds of "soft" failures (visual distress,
+	 * sounds, frequent outages, etc.). This will typically be a number near 1.0.
+	 */
 	SoftFailureThreshold: {
 		[kToPrimitive]: () => 0xea1cf221,
-		[kType]: Float32,
+		[kPropertyId]: 0xea1cf221,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * When a building's "Age Degradation" exceeds this level, the plant will
+	 * either become abandoned or will have a chance to undergo violent
+	 * catastrophic failure (i.e., blow up). This will typically be 1.0 or
+	 * higher.
+	 */
 	HardFailureThreshold: {
 		[kToPrimitive]: () => 0xea1cf222,
-		[kType]: Float32,
+		[kPropertyId]: 0xea1cf222,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to produce one unit of water, not including infrastructure
+	 * maintenance.
+	 */
 	WaterBuildingPumpingCost: {
 		[kToPrimitive]: () => 0xea1e3c53,
-		[kType]: Float32,
+		[kPropertyId]: 0xea1e3c53,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * For ploppable buildings: Resource instance ID of lot exemplar for this
+	 * building
+	 */
 	LotResourceKey: 0xea260589,
+	/**
+	 * Specify ID for bitmap in Select-A-My-Sim dialog.
+	 */
 	MySimBitmapID: 0xea296f8d,
+	/**
+	 * Specifies default name for My Sim.
+	 */
 	MySimDefaultName: {
 		[kToPrimitive]: () => 0xea296f8f,
-		[kType]: String,
+		[kPropertyId]: 0xea296f8f,
+		[kPropertyType]: String,
 	},
+	/**
+	 * Specify default zodiac sign for My Sim.
+	 */
 	MySimZodiacSign: {
 		[kToPrimitive]: () => 0xea296f90,
-		[kType]: Uint8,
+		[kPropertyId]: 0xea296f90,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * Specify My Sim gender (true=male, false=female)
+	 */
 	MySimIsMale: {
 		[kToPrimitive]: () => 0xea296f91,
-		[kType]: Bool,
+		[kPropertyId]: 0xea296f91,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * For ploppable buildings: No more than one building within the specified
+	 * group can be built in a single city.
+	 */
 	CityExclusionGroup: 0xea2e078b,
+	/**
+	 * If true, building will appear ghosted in the menu until triggered by a
+	 * script condition
+	 */
 	ConditionalBuilding: {
 		[kToPrimitive]: () => 0xea3209f8,
-		[kType]: Bool,
+		[kPropertyId]: 0xea3209f8,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * If true, building will not draw shadows
+	 */
 	NoShadows: {
 		[kToPrimitive]: () => 0xea3209f9,
-		[kType]: Bool,
+		[kPropertyId]: 0xea3209f9,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Brush belongs to god mode, valley category
+	 */
 	CategoryGodValley: 0xea33d694,
+	/**
+	 * If this property is present, then the given flora is a water flora and
+	 * its elevation preference table entries are interpreted as depth below sea
+	 * level instead of altitude above sea level
+	 */
 	KPropertyID_WaterFlora: {
 		[kToPrimitive]: () => 0xea346888,
-		[kType]: Bool,
+		[kPropertyId]: 0xea346888,
+		[kPropertyType]: Bool,
 	},
-	MiniMapTerrainRamp: 0xea3573af,
-	AudioFreshScoreKey: 0xea3fbdd7,
+	/**
+	 * Color progression to use for terrain.
+	 */
+	MiniMapTerrainRamp: {
+		[kToPrimitive]: () => 0xea3573af,
+		[kPropertyId]: 0xea3573af,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Freshness score key without the class id
+	 */
+	AudioFreshScoreKey: {
+		[kToPrimitive]: () => 0xea3fbdd7,
+		[kPropertyId]: 0xea3fbdd7,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Loop Volume
+	 */
 	AudioLoopVolume: 0xea3fc42a,
+	/**
+	 * Total number of stages
+	 */
 	RiotNumStages: 0xea400620,
+	/**
+	 * Number of seconds per stage
+	 */
 	RiotSecondsBetweenStages: 0xea400621,
+	/**
+	 * Stage at which second controller gets added
+	 */
 	RiotController2Stage: 0xea400622,
-	RiotSpawnArray: 0xea400623,
+	/**
+	 * Array of number of new leaders to spawn at each stage
+	 */
+	RiotSpawnArray: {
+		[kToPrimitive]: () => 0xea400623,
+		[kPropertyId]: 0xea400623,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * Maps Police Protection value (0-255) to Riot Suppression( 0=none, 1=riot
+	 * progression halted, 2+=riot regresses
+	 */
 	RiotProtectionvsSuppression: {
 		[kToPrimitive]: () => 0xea400624,
-		[kType]: Float32,
+		[kPropertyId]: 0xea400624,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max funding percentage for the water department
+	 */
 	WaterDepartmentMaxFunding: {
 		[kToPrimitive]: () => 0xea4025a9,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4025a9,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Min/max length in cars, including engine, of freight trains
+	 */
 	FreightTrainLength: {
 		[kToPrimitive]: () => 0xea441c97,
-		[kType]: Uint8,
+		[kPropertyId]: 0xea441c97,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Min deal amount for power deal
+	 */
 	NDb_MinDealAmountPower: {
 		[kToPrimitive]: () => 0xea46932c,
-		[kType]: Float32,
+		[kPropertyId]: 0xea46932c,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Max term a deal can be had before renewal.
+	 */
 	NDd_MaxDealTermYears: {
 		[kToPrimitive]: () => 0xea46934f,
-		[kType]: Float32,
+		[kPropertyId]: 0xea46934f,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Amount of horz dist to camera to pull to camera
+	 */
 	AudioZoomDistanceCameraPull: {
 		[kToPrimitive]: () => 0xea4a7c55,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4a7c55,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * buyer_demand * NDa_MaxOverDemandFactorForBuyer is the maximum amount the
+	 * buyer can buy.
+	 */
 	NDa_MaxOverDemandFactorForBuyer: {
 		[kToPrimitive]: () => 0xea4ad2ff,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4ad2ff,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Budget level below which new buy deals become prohibited.
+	 */
 	NDa_MinBudgetForBuyDeals: {
 		[kToPrimitive]: () => 0xea4ae9ef,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4ae9ef,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Overrides the automatic minimum Y value.
+	 */
 	GraphMinimumYValue: {
 		[kToPrimitive]: () => 0xea4aedc6,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4aedc6,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Production Rate for the Flow of VolcanoLava (Input Time in Fraction from
+	 * [0, 1])
+	 */
 	VolcanoLavaCurveProductionRate: {
 		[kToPrimitive]: () => 0xea4bc6e4,
-		[kType]: Float32,
+		[kPropertyId]: 0xea4bc6e4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max number of freight trains to cross a tile per second
+	 */
 	MaxFreightTrainsPerSecond: {
 		[kToPrimitive]: () => 0xea511de0,
-		[kType]: Float32,
+		[kPropertyId]: 0xea511de0,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Set this to true if the occupant requires power to animate
+	 */
 	RequiresPowerToAnimate: {
 		[kToPrimitive]: () => 0xea5393ed,
-		[kType]: Bool,
+		[kPropertyId]: 0xea5393ed,
+		[kPropertyType]: Bool,
 	},
+	/**
+	 * Maps difference between actual % funding and % ideal funding to %
+	 * coverage
+	 */
 	SchoolFundingToCoverageCurve: {
 		[kToPrimitive]: () => 0xea53b30f,
-		[kType]: Float32,
+		[kPropertyId]: 0xea53b30f,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 1-10 age group
+	 */
 	AvgAgeTo1_10AgeGroup: {
 		[kToPrimitive]: () => 0xea540621,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540621,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 11-20 age group
+	 */
 	AvgAgeTo11_20AgeGroup: {
 		[kToPrimitive]: () => 0xea540622,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540622,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 21-30 age group
+	 */
 	AvgAgeTo21_30AgeGroup: {
 		[kToPrimitive]: () => 0xea540623,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540623,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 31-40 age group
+	 */
 	AvgAgeTo31_40AgeGroup: {
 		[kToPrimitive]: () => 0xea540624,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540624,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 41-50 age group
+	 */
 	AvgAgeTo41_50AgeGroup: {
 		[kToPrimitive]: () => 0xea540625,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540625,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 51-60 age group
+	 */
 	AvgAgeTo51_60AgeGroup: {
 		[kToPrimitive]: () => 0xea540626,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540626,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 61-70 age group
+	 */
 	AvgAgeTo61_70AgeGroup: {
 		[kToPrimitive]: () => 0xea540627,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540627,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 71-80 age group
+	 */
 	AvgAgeTo71_80AgeGroup: {
 		[kToPrimitive]: () => 0xea540628,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540628,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * How average age translates to the distribution of population into the
+	 * 81-90 age group
+	 */
 	AvgAgeTo81_90AgeGroup: {
 		[kToPrimitive]: () => 0xea540629,
-		[kType]: Float32,
+		[kPropertyId]: 0xea540629,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * GUID(s) of department ID for this budget item.
+	 */
 	BudgetItemDepartment: {
 		[kToPrimitive]: () => 0xea54d283,
-		[kType]: Uint32,
+		[kPropertyId]: 0xea54d283,
+		[kPropertyType]: Uint32,
 		MassTransit: 0xc921ceeb,
 		HealthStaff: 0x09188f42,
 		HealthCoverage: 0xaa538cb3,
@@ -5321,10 +11026,17 @@ export default {
 		ParkAndRec: 0x8a4260a6,
 		Roads: 0xc921ceea,
 	},
+	/**
+	 * GUID(s) of line item ID for this budget item.
+	 */
 	BudgetItemLine: 0xea54d284,
+	/**
+	 * GUID(s) of purpose ID for this budget item.
+	 */
 	BudgetItemPurpose: {
 		[kToPrimitive]: () => 0xea54d285,
-		[kType]: Uint32,
+		[kPropertyId]: 0xea54d285,
+		[kPropertyType]: Uint32,
 		MassTransitSwitch: 0xca550301,
 		HospitalStaff: 0xca565486,
 		HospitalCoverage: 0xea56549e,
@@ -5341,99 +11053,218 @@ export default {
 		ParkEffect: 0xca639989,
 		TollBoothMaintenance: 0x0c3bf549,
 	},
+	/**
+	 * Monthly cost(s) in Simoleans for this budget item.
+	 */
 	BudgetItemCost: {
 		[kToPrimitive]: () => 0xea54d286,
-		[kType]: Sint64,
+		[kPropertyId]: 0xea54d286,
+		[kPropertyType]: Sint64,
 	},
+	/**
+	 * Maps REAL jail capacity to jailbreak chance
+	 */
 	JailJailbreakResponseCurve: {
 		[kToPrimitive]: () => 0xea614f63,
-		[kType]: Float32,
+		[kPropertyId]: 0xea614f63,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Min/max percentage (0.0-100.0) of jail capacity that will escape during
+	 * jailbreaks
+	 */
 	JailJailbreakEscapeePercentage: {
 		[kToPrimitive]: () => 0xea614f64,
-		[kType]: Float32,
+		[kPropertyId]: 0xea614f64,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Stop any jailbreak in progress when REAL jail capacity percentage goes
+	 * below this value
+	 */
 	JailEndJailbreakCapacity: {
 		[kToPrimitive]: () => 0xea614f65,
-		[kType]: Float32,
+		[kPropertyId]: 0xea614f65,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * -
+	 */
 	NoHighlight: {
 		[kToPrimitive]: () => 0xea639fb1,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb1,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	GeneralOK: {
 		[kToPrimitive]: () => 0xea639fb2,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb2,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	GeneralNotOK: {
 		[kToPrimitive]: () => 0xea639fb3,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb3,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	CreateOK: {
 		[kToPrimitive]: () => 0xea639fb4,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb4,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	CreateNotOK: {
 		[kToPrimitive]: () => 0xea639fb5,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb5,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	DestroyOK: {
 		[kToPrimitive]: () => 0xea639fb6,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb6,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	DestroyNotOK: {
 		[kToPrimitive]: () => 0xea639fb7,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	QueryOK: {
 		[kToPrimitive]: () => 0xea639fb8,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb8,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * -
+	 */
 	QueryNotOK: {
 		[kToPrimitive]: () => 0xea639fb9,
-		[kType]: Float32,
+		[kPropertyId]: 0xea639fb9,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Max time in raw trip length that the mass transit preferred strategy will
+	 * go using mass transit
+	 */
 	MaxMassTransitStrategyTripLength: {
 		[kToPrimitive]: () => 0xea7b5f06,
-		[kType]: Float32,
+		[kPropertyId]: 0xea7b5f06,
+		[kPropertyType]: Float32,
 	},
+	/**
+	 * Cost to demolish a tile of network using this tool
+	 */
 	SimoleanCostPerTileToDemolish: 0xea86e3b5,
+	/**
+	 * Starting overhead cost in time for each travel type for mass transit
+	 * preferred trips
+	 */
 	TripStartingCostByTravelTypeForMassTransit: {
 		[kToPrimitive]: () => 0xea8c3cdb,
-		[kType]: Float32,
+		[kPropertyId]: 0xea8c3cdb,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * For static (one-shot) sims: How many times automaton will loop through
+	 * its animation before fading out
+	 */
 	AnimLoopCountRange: {
 		[kToPrimitive]: () => 0xea958845,
-		[kType]: Uint8,
+		[kPropertyId]: 0xea958845,
+		[kPropertyType]: [Uint8],
 	},
+	/**
+	 * Effect type
+	 */
 	AudioAEMSMasterFxType: 0xebfb0404,
+	/**
+	 * Maximum number of city-situation-indicators that will be visible
+	 */
 	MaxCSIs: {
 		[kToPrimitive]: () => 0xebfb4a0a,
-		[kType]: Uint8,
+		[kPropertyId]: 0xebfb4a0a,
+		[kPropertyType]: Uint8,
 	},
+	/**
+	 * 0 = $, 1 = $$, 2 = $$$
+	 */
 	MySimWealthLevel: 0xebfc5e26,
+	/**
+	 * Resource ID of the icon to be used in the choose vehicle dialog
+	 */
 	MySimIconImage: 0xebfc5e5e,
+	/**
+	 * Relative sort ordering in the catalog
+	 */
 	MySimSortOrder: {
 		[kToPrimitive]: () => 0xebfc5fba,
-		[kType]: Sint32,
+		[kPropertyId]: 0xebfc5fba,
+		[kPropertyType]: Sint32,
 	},
+	/**
+	 * Multiplier for tax revenue by difficulty type
+	 */
 	BudgetDifficultyTaxMultiplier: {
 		[kToPrimitive]: () => 0xebff69e7,
-		[kType]: Float32,
+		[kPropertyId]: 0xebff69e7,
+		[kPropertyType]: [Float32],
 	},
+	/**
+	 * Cost per second, desirability radius meters, desirability magnitude
+	 */
 	MayorLimoMoneyProperties: {
 		[kToPrimitive]: () => 0xec15654a,
-		[kType]: Float32,
+		[kPropertyId]: 0xec15654a,
+		[kPropertyType]: [Float32],
 	},
-	AuxiliaryModel3Key: 0xec214180,
+	/**
+	 * Type/Group/Instance for additional model
+	 */
+	AuxiliaryModel3Key: {
+		[kToPrimitive]: () => 0xec214180,
+		[kPropertyId]: 0xec214180,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * kPropertyID_RotationsAllowed
+	 */
 	KPropertyID_RotationsAllowed: {
 		[kToPrimitive]: () => 0xec3bd470,
-		[kType]: Uint8,
+		[kPropertyId]: 0xec3bd470,
+		[kPropertyType]: Uint8,
 	},
-	SchoolCapacityChunkSize: 0xec43826b,
+	/**
+	 * How many people are represented by one unit in the coverage map
+	 */
+	SchoolCapacityChunkSize: {
+		[kToPrimitive]: () => 0xec43826b,
+		[kPropertyId]: 0xec43826b,
+		[kPropertyType]: [Uint32],
+	},
+	/**
+	 * The parent Button ID that opens the submenu this item belongs to
+	 */
 	ItemSubmenuParentId: {
 		[kToPrimitive]: () => 0x8a2602ca,
-		[kType]: Uint32,
+		[kPropertyId]: 0x8a2602ca,
+		[kPropertyType]: Uint32,
 		Flora: 0x4a22ea06,
 		Residential: 0x29920899,
 		Commercial: 0xa998af42,
@@ -5455,12 +11286,26 @@ export default {
 		Reward: 0x00000034,
 		Park: 0x00000003,
 	},
+	/**
+	 * Required for submenu functionality, but usually should not need to be
+	 * changed
+	 */
 	ItemButtonClass: {
 		[kToPrimitive]: () => 0x8a2602cc,
-		[kType]: Uint32,
+		[kPropertyId]: 0x8a2602cc,
+		[kPropertyType]: Uint32,
 		SubmenuButton: 0x00000001,
 		NetworkItemInSubmenu: 0x00000002,
 		FloraItemInSubmenu: 0x00000004,
 	},
-	ExemplarPatchTargets: 0x0062e78a,
+	/**
+	 * A list of Exemplar files this patch applies to (format: Group ID 1,
+	 * Instance ID 1, Group ID 2, Instance ID 2, ...). The list must contain an
+	 * even number of IDs
+	 */
+	ExemplarPatchTargets: {
+		[kToPrimitive]: () => 0x0062e78a,
+		[kPropertyId]: 0x0062e78a,
+		[kPropertyType]: [Uint32],
+	},
 } as const;
