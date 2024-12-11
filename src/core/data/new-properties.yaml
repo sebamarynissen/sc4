@@ -68,17 +68,17 @@
     AutoTracks: 0x67cd5fa1
 - name: MaxNetworkSlopeChange
   id: 0x7b36c71
-  type: Float32
+  type: Float
   description: "Range: [0.0 - 90.0]"
   default: 6
 - name: KSC4FloraParametersProperty
   id: 0x83dc35b
-  type: Float32
+  type: Float
   count: 14
   description: kSC4FloraParametersProperty
 - name: KSC4FloraPreferencesProperty
   id: 0x83dc487
-  type: Float32
+  type: Float
   count: 256
   description: kSC4FloraPreferencesProperty
 - name: KSC4FloraCursorProperty
@@ -97,52 +97,52 @@
   description: ID of FSH texture to use for flora's shadow
 - name: ShadowOffset
   id: 0x85489c9
-  type: Float32
+  type: Float
   count: 2
   description: Offset of shadow from object center
 - name: ShadowSize
   id: 0x85489ca
-  type: Float32
+  type: Float
   description: Size of shadow
   default: 1
 - name: ShadowColor
   id: 0x85489cb
-  type: Float32
+  type: Float
   count: 3
   description: Color of shadow
 - name: ShadowStrength
   id: 0x85489cc
-  type: Float32
+  type: Float
   description: Strength of flora shadows
   default: 0.5
 - name: ShadowThreshold
   id: 0x85489cd
-  type: Float32
+  type: Float
   description: Mask threshold of flora shadows
   default: 0.5
 - name: SunDirection
   id: 0x85489ce
-  type: Float32
+  type: Float
   description: Sun direction in degrees, clockwise from Z axis
   default: 67.5
 - name: SunPitch
   id: 0x85489cf
-  type: Float32
+  type: Float
   description: Sun pitch in degrees, up from XZ plane
   default: 45
 - name: HillShadowStrength
   id: 0x85489d0
-  type: Float32
+  type: Float
   description: Strength of hill shadows
   default: 1
 - name: HillShadowWarp
   id: 0x85489d1
-  type: Float32
+  type: Float
   description: Can be used to bend shadows downwards (below 1) or upwards (above 1)
   default: 0.68
 - name: HillShadowFadeDistance
   id: 0x85489d2
-  type: Float32
+  type: Float
   description: Depth below the hill shadow at which object shadows fade to nothingness
   default: 50
 - name: FireStationCenterStrength
@@ -156,7 +156,7 @@
   description: "Protection effect of station at its limit (in protection units: 0-255)."
 - name: FireStationRadius
   id: 0x8f55dc2
-  type: Float32
+  type: Float
   description: Effect radius of station (in meters).
   default: 400
 - name: FireStationTotalDispatches
@@ -166,7 +166,7 @@
   default: 1
 - name: AirEffect
   id: 0x8f79b8e
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinance has on air pollution
   default: 1
 - name: BudgetMinAllowableFunds
@@ -179,34 +179,34 @@
   description: The maximum number of outstanding bonds that is allowed
 - name: PowerReductionEffect
   id: 0x911e117
-  type: Float32
+  type: Float
   description: Factor by which this ordinance reduces power consumption
   default: 1
 - name: UtilityStrikeResponseCurve
   id: 0x911e2e6
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     chance of a utility strike
 - name: AgeToMaintenanceCostMultiplierResponseCurve
   id: 0x911e2e7
-  type: Float32
+  type: Float
   count: -4
   description: Converts the current radation of the plant to a multiplier for
     maintenance cost
 - name: FundingPercentageToDecayRateMultiplierResponseCurve
   id: 0x911e2e8
-  type: Float32
+  type: Float
   count: -4
   description: Multiples the rate of aging based on funding level
 - name: UsagePercentageToDecayRateMultiplierResponseCurve
   id: 0x911e2e9
-  type: Float32
+  type: Float
   count: -4
   description: Multiples the rate of aging based on usage level
 - name: UtilityStrikeEfficiency
   id: 0x9122027
-  type: Float32
+  type: Float
   description: Efficiency of utility buildings will drop to this % during a strike
   default: 50
 - name: PowerPoleMonthlyUpkeep
@@ -236,19 +236,19 @@
   default: 5000
 - name: GarbageUIScalingFactor
   id: 0x9135482
-  type: Float32
+  type: Float
   description: Scaling factor to convert simulator garbage units to whatever units
     the UI displays (tons, Kgs)
   default: 0.108
 - name: HospitalCoverageRadius
   id: 0x91b42a2
-  type: Float32
+  type: Float
   description: Radius of this hospital's coverage, in meters.  Current settings
     are 384 for clinic; 800 for hospital; 5800 for disease lab.
   default: 10
 - name: HQDecay
   id: 0x929c439
-  type: Float32
+  type: Float
   description: Amount by which HQ decays each month
   default: 1
 - name: MediumWealthAverageAge
@@ -268,13 +268,13 @@
   default: 1
 - name: HealthCapacityEffect
   id: 0x92d909b
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects the
     capacity of hospitals
   default: 100
 - name: UndergroundIntersectionHeight
   id: 0x96e5653
-  type: Float32
+  type: Float
   description: Default height above trench floor to place intersectons
   default: 10
 - name: UnwateredTerrainColor
@@ -289,7 +289,7 @@
   default: 20
 - name: MinimumPowerLineHeight
   id: 0x98b27d0
-  type: Float32
+  type: Float
   description: The minimum distance allowed between a power line and the terrain
   default: 7
 - name: BulldozeCost
@@ -299,48 +299,48 @@
   default: 100
 - name: ParticleLife
   id: 0x9b00b2b
-  type: Float32
+  type: Float
   description: Total lifetime of fog particle (ms)
   default: 30000
 - name: WindFactor
   id: 0x9b00b2c
-  type: Float32
+  type: Float
   description: Wind power coefficient (v = wind * c)
   default: 0.1
 - name: TerrainFactor
   id: 0x9b00b2d
-  type: Float32
+  type: Float
   description: Terrain gradient coefficient (effect of hills)
   default: 0.3
 - name: MaxParticleRate
   id: 0x9b00b2e
-  type: Float32
+  type: Float
   description: Max fog creation rate (particles/sec)
   default: 13.3
 - name: ParticleFOV
   id: 0x9b00b2f
-  type: Float32
+  type: Float
   description: Angular window centered around anti-wind direction in which fog
     appears (degrees)
   default: 57
 - name: FloatAltitude
   id: 0x9b00b30
-  type: Float32
+  type: Float
   description: Floating distance of fog above terrain
   default: 50
 - name: MaxOpacity
   id: 0x9b00b31
-  type: Float32
+  type: Float
   description: Maximum alpha value for particles (0-255)
   default: 128
 - name: FadeinTime
   id: 0x9b00b32
-  type: Float32
+  type: Float
   description: Initial portion of particle life for fade-in (ms)
   default: 5000
 - name: FadeoutTime
   id: 0x9b00b33
-  type: Float32
+  type: Float
   description: Terminal portion of particle life for fade-out (ms)
   default: 5000
 - name: ParticleCount
@@ -350,12 +350,12 @@
   default: 200
 - name: FogRateByHour
   id: 0x9b00b35
-  type: Float32
+  type: Float
   count: -2
   description: Fraction (0-1) of maximum particle rate by hour of the clock
 - name: NighttimeGlobalColor
   id: 0x9b6d6ae
-  type: Float32
+  type: Float
   count: 3
   description: Global lighting value for night time -- everything gets multiplied by this.
 - name: K24HourClockNightBeginProperty
@@ -370,33 +370,33 @@
   default: 4
 - name: TextureBlendStrength
   id: 0x9c2aef0
-  type: Float32
+  type: Float
   description: Higher this value, the more weightage this texture gets while
     blending with others
   default: 1
 - name: Z0_TextureSpreadCurve
   id: 0x9c2aef3
-  type: Float32
+  type: Float
   count: -6
   description: Specifiess how does the texture strength fall off with distance
 - name: Z1_TextureSpreadCurve
   id: 0x9c2aef4
-  type: Float32
+  type: Float
   count: -6
   description: Specifiess how does the texture strength fall off with distance
 - name: Z2_TextureSpreadCurve
   id: 0x9c2aef5
-  type: Float32
+  type: Float
   count: -6
   description: Specifiess how does the texture strength fall off with distance
 - name: Z3_TextureSpreadCurve
   id: 0x9c2aef6
-  type: Float32
+  type: Float
   count: -6
   description: Specifiess how does the texture strength fall off with distance
 - name: Z4_TextureSpreadCurve
   id: 0x9c2aef7
-  type: Float32
+  type: Float
   count: -6
   description: Specifiess how does the texture strength fall off with distance
 - name: ModelResourceKey
@@ -411,27 +411,27 @@
   description: Type/Group/Instance ID for headlight/taillight model
 - name: IgnoreLotStateEffects
   id: 0x9f00e59
-  type: Bool
+  type: Boolean
   description: If set to true, specifies that the prop should ignore lot state
     effects (distressed, abandoned, etc.).
 - name: WaterPollutionEffectStrengthCurve
   id: 0xa10c772
-  type: Float32
+  type: Float
   count: -4
   description: Water Pollution Average Level to Water Pollution Decal Alpha curve
 - name: AirPollutionEffectStrengthCurve
   id: 0xa10c773
-  type: Float32
+  type: Float
   count: -4
   description: Air Pollution Average Level to Air Pollution Particle Emission Rage curve
 - name: RadiationPollutionEffectStrengthCurve
   id: 0xa10c774
-  type: Float32
+  type: Float
   count: -4
   description: Radiation Pollution Average Level to Radiation Effect Strength curve
 - name: GarbagePollutionEffectStrengthCurve
   id: 0xa10c775
-  type: Float32
+  type: Float
   count: -4
   description: Radiation Pollution Average Level to Radiation Effect Strength curve
 - name: AudioZoomScoreEnable
@@ -440,7 +440,7 @@
   description: Bitfield describing which zoom levels score is active for
 - name: PowerPoleDemolitionCost
   id: 0xa2eced8
-  type: Float32
+  type: Float
   description: Cost to demolish a power pole. Lines are ignored
   default: 5
 - name: SFXAlarmSoundId
@@ -450,7 +450,7 @@
   default: 1
 - name: AudioAmbienceAttentionSpanRadii
   id: 0xa36f410
-  type: Float32
+  type: Float
   count: 5
   description: Radii for attention per zoom
   default: 300
@@ -466,17 +466,17 @@
   description: Filter GUIDs any of which must be satisfied
 - name: AudioOccupantGroupRadius
   id: 0xa4168e1
-  type: Float32
+  type: Float
   description: Size of glob for grouping single layer, or occupant
   default: 50
 - name: NDe_ProfitResponseCurve
   id: 0xa469353
-  type: Float32
+  type: Float
   count: -4
   description: Maps supply-over-demand to profit factor
 - name: VolcanoLavaTotalLavaTimeInSecs
   id: 0xa4bc742
-  type: Float32
+  type: Float
   description: Time In Seconds until lava flowing and solidification continues
   default: 20
 - name: VolcanoLavaOrificeRadius
@@ -501,12 +501,12 @@
     WaterPurificationPlant: 0x2a55b192
 - name: FreightTrainDensityCurve
   id: 0xa51188a
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for freight train density
 - name: HealthFundingToCoverageCurve
   id: 0xa53b2f9
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to % coverage
 - name: SimsPerTrainCar
@@ -516,12 +516,12 @@
   default: 20
 - name: AudioCellGroupRadius
   id: 0xa56212a
-  type: Float32
+  type: Float
   description: Size of glob for grouping cells
   default: 50
 - name: PowerLinePlacementCost
   id: 0xa5f596b
-  type: Float32
+  type: Float
   description: Cost of placing each cell of wire
   default: 2
 - name: SimulatorDateInterval
@@ -543,7 +543,7 @@
   description: Max playing one-shots
 - name: AudioVolumeDecayLimit
   id: 0xa9599bf
-  type: Float32
+  type: Float
   description: Max amount of full volume to change down per second
   default: 1
 - name: AppearanceZoomsFlag
@@ -600,19 +600,19 @@
   default: 500000
 - name: MOperationQuantaForOccupiedCell
   id: 0xb579c24
-  type: Float32
+  type: Float
   default: 1
 - name: MOperationQuantaForEmptyCell
   id: 0xb579c25
-  type: Float32
+  type: Float
   default: 0.1
 - name: MOperationQuantaBeforeTimerCall
   id: 0xb579c26
-  type: Float32
+  type: Float
   default: 8
 - name: DisableBackgroundLoader
   id: 0xb579c27
-  type: Bool
+  type: Boolean
   description: if true, background loader is disabled
 - name: MinLoadRadius
   id: 0xb579c28
@@ -621,7 +621,7 @@
   description: Mininum extra radius to load (by zoom level)
 - name: ExtraLoadRadiusPerMeg
   id: 0xb579c29
-  type: Float32
+  type: Float
   count: 5
   description: extra radius to load per free meg (by zoom level)
 - name: FerryTerminalType
@@ -633,12 +633,12 @@
     CarAndPassenger: 0x1
 - name: FundingToDamageAccelerationCurve
   id: 0xbd86fd4
-  type: Float32
+  type: Float
   count: -4
   description: Maps funding (as percentage) to road/rail damage acceleration
 - name: RailDamageAccidentFactor
   id: 0xbd86fd5
-  type: Float32
+  type: Float
   description: Probability (0 to 1.0) that a train going over a rail pothole will
     cause derailment
   default: 1
@@ -654,11 +654,11 @@
     Military: 0x4
 - name: TransitSwitchFare
   id: 0xbfc0a4c
-  type: Float32
+  type: Float
   description: Simoleon charge per traveller to enter the switch
 - name: BudgetInitialTaxRate
   id: 0xc032488
-  type: Float32
+  type: Float
   count: 3
   description: Starting tax rate for all developer types, indexed by difficulty type
   default: 9
@@ -669,13 +669,13 @@
   default: 1
 - name: OccupantSize
   id: 0x27812810
-  type: Float32
+  type: Float
   count: 3
   description: "In meters: Width Height Depth"
   default: 1
 - name: FillingDegree
   id: 0x27812811
-  type: Float32
+  type: Float
   default: 1
 - name: ResourceKeyType0
   id: 0x27812820
@@ -754,7 +754,7 @@
     IHT: 0x4400
 - name: AllowJointOccupancy
   id: 0x27812836
-  type: Bool
+  type: Boolean
   description: if true, different types can occupy the building simultaneously
 - name: GrowthStage
   id: 0x27812837
@@ -764,7 +764,7 @@
   default: 1
 - name: MonopolyPiece
   id: 0x2781283f
-  type: Bool
+  type: Boolean
   description: If true, this building is for debug and tuning use only
 - name: DemandSatisfied
   id: 0x27812840
@@ -807,30 +807,30 @@
     IHT: 0x4400
 - name: DemandSatisfiedFloat
   id: 0x27812842
-  type: Float32
+  type: Float
   count: -1
   description: IDs from Demand Satisfied are associated to these values instead of
     the Uint32 values
 - name: DemandCreatedFloat
   id: 0x27812843
-  type: Float32
+  type: Float
   count: -1
   description: IDs from Demand Created are associated to these values instead of
     the Uint32 values
 - name: DemandIsVariable
   id: 0x27812844
-  type: Bool
+  type: Boolean
   description: if true, the demand simulator ignores demand created and demand
     satisfied until instructed
 - name: LandmarkEffect
   id: 0x87cd6399
-  type: Float32
+  type: Float
   count: -2
   description: This determines the landmark building's impact on desirability.
     Magnitude (-100 to +100), radius (in cells).
 - name: ParkEffect
   id: 0x87cd6341
-  type: Float32
+  type: Float
   count: -2
   description: Affects desirability of residential buildings.   The first number
     in this array is the amount of the effect (-100 to 100) and the second
@@ -898,7 +898,7 @@
   description: Specifies 1 model key for each Z/R/state
 - name: MaxSlopeOnNetworkSide
   id: 0x279d1707
-  type: Float32
+  type: Float
   description: "Range: [0.0 - 90.0]"
   default: 30
 - name: ID
@@ -919,7 +919,7 @@
   description: Year this ordinance becomes available
 - name: MonthlyChance
   id: 0x28ebbc36
-  type: Float32
+  type: Float
   description: Monthly chance of this ordinance bemoming available
   default: 0.0049
 - name: EnactmentIncome
@@ -936,7 +936,7 @@
   description: Constant part of monthly income generated by this ordinance
 - name: MonthlyIncomeFactor
   id: 0x28ebbc3a
-  type: Float32
+  type: Float
   description: Factor applied to ordinance cost basis
   default: 1
 - name: AdvisorID
@@ -945,7 +945,7 @@
   description: Advisor ID for this ordinance
 - name: IncomeOrdinance
   id: 0x28ebbc3c
-  type: Bool
+  type: Boolean
   description: True for ordinances that should appear on income part of budget
 - name: CrimeEffect
   id: 0xca5b9306
@@ -955,11 +955,11 @@
     but can negate effects of police stations"
 - name: FlammabilityEffect
   id: 0x28f42aa0
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinance has on flammability
 - name: PowerMinAcceptableFunding
   id: 0x29121e8b
-  type: Float32
+  type: Float
   description: Minimum acceptable percentage for Utility department funding
   default: 60
 - name: UtilityStrikeDuration
@@ -974,96 +974,96 @@
   default: 1
 - name: MonthlyTrafficDensityReduction
   id: 0x29136788
-  type: Float32
+  type: Float
   description: Traffic density multiplied by this each month
   default: 0.25
 - name: HealthFundingToEfficiencyCurve
   id: 0x2918949e
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     of Health output
 - name: TextureFloor
   id: 0x29189beb
-  type: Float32
+  type: Float
   description: Brightness floor for terrain textures
   default: 0.1
 - name: UseEnvironmentMap
   id: 0x29189bec
-  type: Bool
+  type: Boolean
   description: Whether to use art-supplied environment map for lighting
 - name: TestEnvironmentMap
   id: 0x29189bed
-  type: Bool
+  type: Boolean
   description: Use test environment map to determine orientation
 - name: TerrainShadowAmount
   id: 0x29189bee
-  type: Float32
+  type: Float
   description: How much models are shadowed by the terrain
   default: 0.6
 - name: TestTerrainShadowing
   id: 0x29189bef
-  type: Bool
+  type: Boolean
   description: Test model shadowing by terrain
 - name: DaytimeGlobalColor
   id: 0x29189bf0
-  type: Float32
+  type: Float
   count: 3
   description: Global lighting value for day time -- everything gets multiplied by this.
   default: 1
 - name: FloraTerrainShadowAmount
   id: 0x29189bf1
-  type: Float32
+  type: Float
   description: How much flora are shadowed by the terrain
   default: 0.6
 - name: ModelTerrainShadowAmount
   id: 0x29189bf2
-  type: Float32
+  type: Float
   description: How much models (buildings) are shadowed by the terrain
   default: 0.6
 - name: AutomataTerrainShadowAmount
   id: 0x29189bf3
-  type: Float32
+  type: Float
   description: How much automata are shadowed by the terrain
   default: 0.6
 - name: AtmosphericScatteringColour
   id: 0x29189bf4
-  type: Float32
+  type: Float
   count: 3
   description: The colour the terrain gets tinted by in the distance
 - name: AtmosphericScattering
   id: 0x29189bf5
-  type: Float32
+  type: Float
   description: How much the terrain gets tinted
   default: 0.6
 - name: LightingUpdateDelta
   id: 0x29189bf6
-  type: Float32
+  type: Float
   description: The required change in brightness before the terrain gets updated
   default: 0.001
 - name: NightThreshold
   id: 0x29189bf7
-  type: Float32
+  type: Float
   description: The brightness below which night falls
   default: 0.8
 - name: HospitalPopulationVsDistance
   id: 0x2921a9cc
-  type: Float32
+  type: Float
   count: -2
   description: Maps distance from hospital to a % of population covered
 - name: FireProtectionSimFundingEfficiencyCurve
   id: 0x29233e8d
-  type: Float32
+  type: Float
   count: -2
   description: See ISC4FireProtectionSimulator.h
 - name: FireProtectionSimMaxAllowedFunding
   id: 0x29233e8f
-  type: Float32
+  type: Float
   description: 100.0+ Maximum percentage you can fund a fire station
   default: 120
 - name: FireProtectionSimStrikeEfficiencyMultiplier
   id: 0x29233e94
-  type: Float32
+  type: Float
   description: 0.0-1.0 efficiency multiplier when stations are on strike
   default: 0.5
 - name: FireProtectionSimMaxStrikeDuration
@@ -1073,12 +1073,12 @@
   default: 90
 - name: FireProtectionSimMinFundingToEndStrikes
   id: 0x29233e96
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4FireProtectionSimulator.h
   default: 90
 - name: FireProtectionSimStrikeResponseCurve
   id: 0x29233e98
-  type: Float32
+  type: Float
   count: -2
   description: See ISC4FireProtectionSimulator.h"
 - name: FireStationDispatchCenterStrength
@@ -1092,7 +1092,7 @@
   description: "Protection effect of vehicle at its limit (in protection units: 0-255)."
 - name: FireStationDispatchRadius
   id: 0x29233e9c
-  type: Float32
+  type: Float
   description: Effect radius of active vehicle (in meters).
   default: 200
 - name: Flammability
@@ -1116,7 +1116,7 @@
   description: Texture IDs for each zoom level.
 - name: KSC4RetainingWallPropertyWallTextureSize
   id: 0x295961f3
-  type: Float32
+  type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
   default: 16
 - name: WealthFilter
@@ -1127,11 +1127,11 @@
     any wealth)
 - name: DrawUnwateredTerrainCellColor
   id: 0x297f42b7
-  type: Bool
+  type: Boolean
   description: Determines whether unwatered terrain cells are colored in pipe view
 - name: WaterDepthForMaxAlpha
   id: 0x29ab15c0
-  type: Float32
+  type: Float
   description: At this depth (meters), water becomes opaque
   default: 20
 - name: WaterMinAlpha
@@ -1141,40 +1141,40 @@
   default: 50
 - name: WaterDepthToColorGradientFactor
   id: 0x29ab15c2
-  type: Float32
+  type: Float
   description: Number of pixels in the gradient corresponding to each meter of water depth
   default: 0.75
 - name: DisplayWaterSurface
   id: 0x29ab15c3
-  type: Bool
+  type: Boolean
   description: Enable/Disable the display of water surface
 - name: DisplayTerrainSurface
   id: 0x29ab15c4
-  type: Bool
+  type: Boolean
   description: Enable/Disable the display of terrain surface
 - name: WaterNightColorAdjustment
   id: 0x29ab15c5
-  type: Float32
+  type: Float
   count: 3
   description: Modifications to the r,g,b of water at night
 - name: CityEdgeLayerHeights
   id: 0x29ab15c6
-  type: Float32
+  type: Float
   count: -2
   description: Heights (meters) of all but the bottom-most layers on city edge
 - name: CityEdgeBrightnessKludgeFactor
   id: 0x29ab15c7
-  type: Float32
+  type: Float
   description: Multiplication factor to tune the brightness of cliffs on city edges
   default: 0.75
 - name: FlammabilityMultiplierAbandonment
   id: 0x29b40134
-  type: Float32
+  type: Float
   description: flammability multiplier if building if abandoned
   default: 1
 - name: FlammabilityMultiplierNoWater
   id: 0x29b4013b
-  type: Float32
+  type: Float
   description: flammability multiplier if building is not watered
   default: 1
 - name: FlammabilityHotspotSettings
@@ -1185,13 +1185,13 @@
     minimum weight"
 - name: FlammabilityHotspotFireProbability
   id: 0x29b4013d
-  type: Float32
+  type: Float
   count: -2
   description: maps hotspot weight (# of cells above threshold) to monthly fire
     probability (in percent 0-100)
 - name: FlammabilityRandomFireProbability
   id: 0x29b4013e
-  type: Float32
+  type: Float
   description: monthly fire probability (in percent 0-100) of random lot fire
 - name: FieldLots
   id: 0x29b55f73
@@ -1208,13 +1208,13 @@
     GreenPatch: 0xea6e4722
 - name: PathOffsetRangeForPeds
   id: 0x29dd40c1
-  type: Float32
+  type: Float
   count: 2
   description: Minimum (left side) and maximum (right side) range of offset from
     paths for pedestrians
 - name: PathOffsetRangeForVehicles
   id: 0x29dd40c2
-  type: Float32
+  type: Float
   count: 2
   description: Minimum (left side) and maximum (right side) range of offset from
     paths for vehicles
@@ -1225,17 +1225,17 @@
     or lesser value.
 - name: FloraClusterMaxRadius
   id: 0x2a0348bb
-  type: Float32
+  type: Float
   description: Maximum plane distance for this flora to cluster with others.
   default: 16
 - name: FloraClusterMaxHeight
   id: 0x2a0348bc
-  type: Float32
+  type: Float
   description: Maximum altitude differential for this flora to cluster with others.
   default: 16
 - name: LotDeveloperCostMultiplierVsLotSlope
   id: 0x2a2d7824
-  type: Float32
+  type: Float
   count: -4
   description: Cost to plop a lot is building + area x this response curve
 - name: CategoryMayorMisc
@@ -1244,12 +1244,12 @@
   description: Brush belongs to mayor mode, miscellaneous category
 - name: AudioZoomScaleFactor
   id: 0x2a35a25f
-  type: Float32
+  type: Float
   description: Scale factor for all zoom levels
   default: 1
 - name: AudioListenerRolloffFactor
   id: 0x2a36e3cb
-  type: Float32
+  type: Float
   description: How fast sounds rolloff with distance
   default: 1
 - name: AudioANDFilters
@@ -1273,12 +1273,12 @@
   description: GUID for this building's Query exemplar
 - name: CommuteTrainDensityCurve
   id: 0x2a511893
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for commute train density
 - name: CurveSpeedMultiplier
   id: 0x2a511cbc
-  type: Float32
+  type: Float
   description: Multiplied by a vehicle's default speed when it goes around a curve
   default: 0.6
 - name: SFXAlarmAmbienceSound
@@ -1307,67 +1307,67 @@
     TPing: 0x13
 - name: CommercialDemandEffect
   id: 0x2a633000
-  type: Float32
+  type: Float
   description: Factor applied to commercial demand
   default: 1
 - name: IndustrialDemandEffect
   id: 0x2a634000
-  type: Float32
+  type: Float
   description: Factor applied to industrial demand
   default: 1
 - name: DemandEffectCs$
   id: 0x2a653110
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on Cs$ when active
   default: 1
 - name: DemandEffectCs$$
   id: 0x2a653120
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on Cs$$ when active
   default: 1
 - name: DemandEffectCs$$$
   id: 0x2a653130
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on Cs$$$ when active
   default: 1
 - name: DemandEffectCo$$
   id: 0x2a653320
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on Co$$ when active
   default: 1
 - name: DemandEffectCo$$$
   id: 0x2a653330
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on Co$$$ when active
   default: 1
 - name: DemandEffectIR
   id: 0x2a654100
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on IR when active
   default: 1
 - name: DemandEffectID
   id: 0x2a654200
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on ID when active
   default: 1
 - name: DemandEffectIM
   id: 0x2a654300
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on IM when active
   default: 1
 - name: DemandEffectIHT
   id: 0x2a654400
-  type: Float32
+  type: Float
   description: This is the % Effect the Ordinance will have on IHT when active
   default: 1
 - name: PropDestroysLot
   id: 0x2a89b677
-  type: Bool
+  type: Boolean
   description: Whether or not prop destroys entire lot when it burns
     down.  Default is true for flammable props.
 - name: AudioVolumeAttackLimit
   id: 0x2a9590de
-  type: Float32
+  type: Float
   description: Max amount of full volume to change up per second
   default: 1
 - name: LandfillCostForAltitudeChange
@@ -1377,12 +1377,12 @@
   default: 1
 - name: AudioListenerGranularity
   id: 0x2aa40ccc
-  type: Float32
+  type: Float
   count: 5
   description: Values per zoom controlling update garnularity in meters
 - name: MaximumHQBoost
   id: 0x2aa84164
-  type: Float32
+  type: Float
   description: Max HQ boost achievable without reward buildings.  Used to scale
     values for Sims opinion polls.
   default: 10
@@ -1483,7 +1483,7 @@
   description: "Effect of water on land value: size, radius"
 - name: LandValueAltitudeEffect
   id: 0x47e2c320
-  type: Float32
+  type: Float
   count: -14
   description: Maps altitude to land value
 - name: LandValueDesirabilityIDs
@@ -1494,13 +1494,13 @@
   default: 1000
 - name: LandValueDesirabilityFactors
   id: 0x47e2c331
-  type: Float32
+  type: Float
   count: -1
   description: Size of effects (see IDs)
   default: 1
 - name: LandValueDesirabilityCurve
   id: 0x47e2c332
-  type: Float32
+  type: Float
   count: -6
   description: Maps desirability to land value
 - name: ConstructionResourcesMinMax
@@ -1510,7 +1510,7 @@
   description: Amount of capacity that can be under construction at any one time
 - name: ConstructionResourcesPerResident
   id: 0x47e2c381
-  type: Float32
+  type: Float
   description: Factor applied to population to calculate construction resources
   default: 0.5
 - name: ConstructionTypeSelectionBias
@@ -1520,7 +1520,7 @@
   default: 10
 - name: StagePopluationMultiplier
   id: 0x47e2c383
-  type: Float32
+  type: Float
   count: 3
   description: Values >1 allow big stage buildings sooner. Indexed by difficulty level
 - name: LotDeveloperStayNewTime
@@ -1530,49 +1530,49 @@
   default: 90
 - name: LotDeveloperOccupancyThresholds
   id: 0x47e2c401
-  type: Float32
+  type: Float
   count: 3
   description: When to abandon, distress, and renew. Values 0-1
 - name: TractDeveloperOverbuild
   id: 0x47e2c500
-  type: Float32
+  type: Float
   description: Factor applied to desired capacity when growing buildings in a tract
   default: 1.5
 - name: TractDeveloperReoccupyThresholds
   id: 0x47e2c501
-  type: Float32
+  type: Float
   count: 2
   description: Start and Stop percentage of desired capacity that can be fulfilled
     by abandoned buildings
 - name: TractDeveloperRedevelopSizeThreshold
   id: 0x47e2c502
-  type: Float32
+  type: Float
   description: What percentage of the existing capacity must be demanded before we redevelop
   default: 1.5
 - name: TractDeveloperDemolitionCosts
   id: 0x47e2c510
-  type: Float32
+  type: Float
   count: 2
   description: for occupied/abandoned buildings"
 - name: TractDeveloperNewLotCosts
   id: 0x47e2c511
-  type: Float32
+  type: Float
   count: 2
   description: Fictional cost to aggregate a lot/subdivide a lot
   default: 10
 - name: TractDeveloperOccupancyVariation
   id: 0x47e2c530
-  type: Float32
+  type: Float
   description: Building occupancy rate +/- variation from tract rate
   default: 0.2
 - name: TractDeveloperMinVacancyRange
   id: 0x47e2c531
-  type: Float32
+  type: Float
   count: 2
   description: When 100% full, subtract a little from the occupancy rate
 - name: TractDeveloperKickOutLowerWealth
   id: 0x47e2c540
-  type: Bool
+  type: Boolean
   description: If true, higher wealth buildings can replace non-empty lower wealth buildings
 - name: TractDeveloperAvailableStyles
   id: 0x47e2c550
@@ -1586,7 +1586,7 @@
   default: 40
 - name: MinClearance
   id: 0x482cb441
-  type: Float32
+  type: Float
   description: Min clearance below bridge (meters)
   default: 22.5
 - name: NumEndPieces
@@ -1637,47 +1637,47 @@
   description: Model rotations for support pieces
 - name: EndPieceSpanLocations
   id: 0x482cb44b
-  type: Float32
+  type: Float
   count: -1
   description: Dist from top the two spans of each end piece are
 - name: ColumnTopPosForSupportPieces
   id: 0x482cb44c
-  type: Float32
+  type: Float
   count: -1
   description: Dist from pivot point to the top of concrete column (-ve for no column)
   default: -1
 - name: ColumnTopPosForEndPieces
   id: 0x482cb44d
-  type: Float32
+  type: Float
   count: -1
   description: Dist from pivot point to the top of concrete column (-ve for no column)
   default: -1
 - name: SupportColumnCorners
   id: 0x482cb44e
-  type: Float32
+  type: Float
   count: 8
   description: (x,z) corresponding to the 4 corners of the support column w.r.t
     column center
 - name: CanWorkAsLandBridge
   id: 0x482cb44f
-  type: Bool
+  type: Boolean
   description: Set to true if this bridge can work as land bridge
 - name: CanWorkAsWaterBridge
   id: 0x482cb450
-  type: Bool
+  type: Boolean
   description: Set to true if this bridge can work as water bridge
 - name: MinHold
   id: 0x482cb455
-  type: Float32
+  type: Float
   description: The lowest suspend wire can get in the middle
   default: 0.3
 - name: MinEndHold
   id: 0x482cb456
-  type: Float32
+  type: Float
   description: The lowest suspend wire can get at the ends (leave it at 0 please)
 - name: PylonsHeight
   id: 0x482cb457
-  type: Float32
+  type: Float
   description: Pylons height (meters)
   default: 60
 - name: MinSpan
@@ -1709,7 +1709,7 @@
   description: Texture ID for vertical suspension wires
 - name: MainPylonCorners
   id: 0x482cb45e
-  type: Float32
+  type: Float
   count: 8
   description: (x,z) corresponding to the 4 corners of the pylon w.r.t pylon center
 - name: BridgeWidth
@@ -1724,16 +1724,16 @@
   default: 20
 - name: CeilingHeight
   id: 0x482cb468
-  type: Float32
+  type: Float
   description: Distance from road top to ceiling of water passage below bridge tiles.
 - name: CableStayedFrontAnchors
   id: 0x482cb469
-  type: Float32
+  type: Float
   count: 6
   description: 3D start and end (x,y,z) of cable attachments on front side of pylon.
 - name: CableStayedRearAnchors
   id: 0x482cb46a
-  type: Float32
+  type: Float
   count: 6
   description: 3D start and end (x,y,z) of cable attachments on rear side of pylon.
 - name: CableStayedWireTexture
@@ -1742,12 +1742,12 @@
   description: Instance ID of texture to use for cable-stayed bridge wires.
 - name: CableStayedWireThickness
   id: 0x482cb46c
-  type: Float32
+  type: Float
   description: Thickness of cable-stayed wires in meters.
   default: 1.5
 - name: CableStayedSpanAnchors
   id: 0x482cb46d
-  type: Float32
+  type: Float
   description: Start and end positions for cable-stayed bridge wires on the span,
     relative to the pylon.
 - name: CableStayedWireCount
@@ -1767,37 +1767,37 @@
   description: One-time and per-tile costs for bridge, in simoleons.
 - name: WireTilingUnit
   id: 0x482cb471
-  type: Float32
+  type: Float
   description: Height of a repeating wire tile for suspension bridges.
   default: 16
 - name: BridgeHeightBias
   id: 0x482cb472
-  type: Float32
+  type: Float
   description: Vertical displacement for all models in a bridge.
 - name: SuspensionWireBase
   id: 0x482cd460
-  type: Float32
+  type: Float
   description: Offset of suspension wire base
 - name: SuspensionWireInside
   id: 0x482cd461
-  type: Float32
+  type: Float
   description: Offset of suspension wire inside the bridge tile
 - name: SupportColumnBase
   id: 0x482cd462
-  type: Float32
+  type: Float
   description: Offset of pylon base
 - name: MinAltitudeAboveWater
   id: 0x482cd463
-  type: Float32
+  type: Float
   description: Minimum estimated elevation above water
 - name: MaxAltitudeAboveWater
   id: 0x482cd464
-  type: Float32
+  type: Float
   description: Maximum estimated elevation above water
   default: 10000
 - name: MinEndIntervalFraction
   id: 0x482cd465
-  type: Float32
+  type: Float
   description: Force pylon-to-end distance to be at least some% of pylon-to-pylon distance.
   default: 0.6
 - name: BridgeNameKey
@@ -1807,13 +1807,13 @@
   description: Group and instance ID for string name of bridge.
 - name: PivotPointPosition
   id: 0x4835c6a4
-  type: Float32
+  type: Float
   count: 3
   description: Relative to left, bottom, far corner of bounding box (x,y,z meters)
   default: 8
 - name: BoundingBox
   id: 0x4835c6a5
-  type: Float32
+  type: Float
   count: 6
   description: Dist (meters) from the pivot pt to left, right, back, front,
     bottom, top side of model
@@ -1824,68 +1824,68 @@
   description: Test for Resource key table editor
 - name: MaxNormalTerrainHeight
   id: 0x48cd7b20
-  type: Float32
+  type: Float
   count: 3
   description: Max normal height in fractally generated terrains, for different
     city size choices
   default: 308
 - name: SeaLevel
   id: 0x48cd7b21
-  type: Float32
+  type: Float
   description: Sea level (meters)
   default: 0.15
 - name: MinRegularHtFactor
   id: 0x48cd7b22
-  type: Float32
+  type: Float
   count: 3
   description: Factor governing the min ht for regular terrain
   default: 0.25
 - name: MaxRegularHtFactor
   id: 0x48cd7b23
-  type: Float32
+  type: Float
   count: 3
   description: Factor governing the max ht for regular terrain
   default: 0.3
 - name: MinMountainHtFactor
   id: 0x48cd7b24
-  type: Float32
+  type: Float
   count: 3
   description: Factor governing the min ht for mountain terrain
   default: 0.4
 - name: MaxMountainHtFactor
   id: 0x48cd7b25
-  type: Float32
+  type: Float
   count: 3
   description: Factor governing the max ht for mountain terrain
   default: 1
 - name: MaxTerrainHeight
   id: 0x48cd7b26
-  type: Float32
+  type: Float
   description: Maximum altitude of a terrain vertex
   default: 600
 - name: MinTerrainHeight
   id: 0x48cd7b27
-  type: Float32
+  type: Float
   description: Minimum altitude of a terrain vertex
   default: 6
 - name: ImageImportScaleFactor
   id: 0x48cd7b28
-  type: Float32
+  type: Float
   description: How many meters correspond to one unit of gray scale value in image
   default: 2.4
 - name: DefaultTerrainHeight
   id: 0x48cd7b2a
-  type: Float32
+  type: Float
   description: Default terrain height for new city (meters)
   default: 50
 - name: TemperatureRangeFactor
   id: 0x48cd7b30
-  type: Float32
+  type: Float
   description: Factor governing the max temperature range for texture assignment
   default: 0.68
 - name: WaterProximityRangeFactor
   id: 0x48cd7b31
-  type: Float32
+  type: Float
   description: Factor governing the max water proxmity range for texture assignment
   default: 0.6
 - name: NumInitialErosionPasses
@@ -1905,7 +1905,7 @@
   default: 3
 - name: SeaLevelChangeDueToWaterSlider
   id: 0x48cd7b43
-  type: Float32
+  type: Float
   count: 3
   description: The sea level change range (meters) corresponding to the water
     slider, for diff city sizes
@@ -1917,17 +1917,17 @@
   default: 400
 - name: MaxHtChangeToFlattenFactor
   id: 0x48cd7b51
-  type: Float32
+  type: Float
   description: Controls the extent of height change allowed in auto-flattening
   default: 0.059
 - name: MaxTerraceAltitudeFactor
   id: 0x48cd7b52
-  type: Float32
+  type: Float
   description: Controls the maximum altitude upto which auto-flattening gets done
   default: 0.5
 - name: MinTerraceAltitudeFactor
   id: 0x48cd7b53
-  type: Float32
+  type: Float
   description: Controls the lowest altitude at which terraces get created
   default: 0.1
 - name: AutoFlatAreaEdgeSmootheningRadius
@@ -1942,18 +1942,18 @@
   default: 4
 - name: MinShoreCliffCandidateHt
   id: 0x48cd7b61
-  type: Float32
+  type: Float
   description: Minimum pre-existing ht difference at shore for it to be considered
     for turning into a cliff
   default: 15
 - name: MinShoreCliffHt
   id: 0x48cd7b62
-  type: Float32
+  type: Float
   description: Minimum ht above sea level at a shore cliff (after cliff creation)
   default: 40
 - name: MaxShoreCliffHt
   id: 0x48cd7b63
-  type: Float32
+  type: Float
   description: Maximum ht above sea level at a shore cliff (after cliff creation)
   default: 50
 - name: MaxShoreCliffSize
@@ -1963,27 +1963,27 @@
   default: 60
 - name: MaxNormalYForCliff
   id: 0x48cd7b65
-  type: Float32
+  type: Float
   description: A face is considered cliff if the y-component of its normal is less than this
   default: 0.3
 - name: MinSeaLevel
   id: 0x48cd7b70
-  type: Float32
+  type: Float
   description: Minimum sea altitude
   default: -10
 - name: MaxSeaLevel
   id: 0x48cd7b71
-  type: Float32
+  type: Float
   description: Maximum sea altitude
   default: 200
 - name: SeaRaiseLowerAmount
   id: 0x48cd7b72
-  type: Float32
+  type: Float
   description: Extent by which the sea level is raised/lowered for each player click
   default: 20
 - name: TerrainRaiseLowerAmount
   id: 0x48cd7b73
-  type: Float32
+  type: Float
   description: Extent by which the terrain level is raised/lowered each time
     raise/lower menu is selected
   default: 20
@@ -1998,7 +1998,7 @@
   default: 1
 - name: TypicalBrushAngleIncrement
   id: 0x48cd7ba0
-  type: Float32
+  type: Float
   count: 5
   description: Angle (in degrees) by which the brush rotates between successive applications
   default: 11.5
@@ -2020,7 +2020,7 @@
   default: 1
 - name: EdgeReconcilliationSmoothingRadiusVsHeightDiff
   id: 0x48cd7c00
-  type: Float32
+  type: Float
   count: -4
   description: Specifiess the smoothing radius as a function of height adjustment needed
 - name: EdgeReconcilliationSmoothingIterations
@@ -2030,7 +2030,7 @@
   default: 5
 - name: EdgeReconcilliationHtDifferenceThreshold
   id: 0x48cd7c02
-  type: Float32
+  type: Float
   description: If the height difference is less than this, don't reconcile
   default: 1
 - name: PoliceStationCenterStrength
@@ -2044,7 +2044,7 @@
   description: "Protection effect of station at its limit (in protection units: 0-255)."
 - name: PoliceStationRadius
   id: 0x48d71ed2
-  type: Float32
+  type: Float
   description: Effect radius of station (in meters).
   default: 400
 - name: PoliceStationTotalDispatches
@@ -2063,7 +2063,7 @@
   description: "Protection effect of vehicle at its limit (in protection units: 0-255)."
 - name: PoliceStationDispatchRadius
   id: 0x48d71edb
-  type: Float32
+  type: Float
   description: Effect radius of active vehicle (in meters).
   default: 200
 - name: JailInmateCapacity
@@ -2102,61 +2102,61 @@
   description: Bonds are issued in values that are of this increment
 - name: UtilityMinFundingToEndStrike
   id: 0x49122036
-  type: Float32
+  type: Float
   description: Minimum funding percentage that must be restored to end a utility strike
   default: 90
 - name: TrafficVolumePerPopulation
   id: 0x491332e6
-  type: Float32
+  type: Float
   description: Traffic volume generated per point of population in a building
   default: 1
 - name: MaxSpeedByNetworkForWalking
   id: 0x491332e7
-  type: Float32
+  type: Float
   count: 13
   description: Speed to walk through rd, rl, hwy, st, x, x, ave, sub, lr, mo, ow, dr, gh
 - name: MaxSpeedByNetworkForDriving
   id: 0x491332e8
-  type: Float32
+  type: Float
   count: 13
   description: Speed to drive through rd, rl, hwy, st, x, x, ave, sub, lr, mo, ow, dr, gh
 - name: MaxSpeedByNetworkForABus
   id: 0x491332e9
-  type: Float32
+  type: Float
   count: 13
   description: Speed to bus travel through rd, rl, hwy, st, x, x, ave, sub, lr,
     mo, ow, dr, gh
 - name: MaxSpeedByNetworkForATrain
   id: 0x491332ea
-  type: Float32
+  type: Float
   count: 13
   description: Speed to train travel through rd, rl, hwy, st, x, x, ave, sub, lr,
     mo, ow, dr, gh
 - name: MaxSpeedByNetworkForATruck
   id: 0x491332eb
-  type: Float32
+  type: Float
   count: 13
   description: Speed to truck travel through rd, rl, hwy, st, x, x, ave, sub, lr,
     mo, ow, dr, gh
 - name: MaxSpeedByNetworkForAFrtTrain
   id: 0x491332ec
-  type: Float32
+  type: Float
   count: 13
   description: Speed to train travel through rd, rl, hwy, st, x, x, ave, sub, lr,
     mo, ow, dr, gh
 - name: MaxSpeedByNetworkForSubways
   id: 0x491332ed
-  type: Float32
+  type: Float
   count: 13
   description: Speed to subway travel. Set the eighth value.
 - name: MaxSpeedByNetworkForElTrain
   id: 0x491332ee
-  type: Float32
+  type: Float
   count: 13
   description: Speed to ride el train.  Set the eighth value.
 - name: MaxSpeedByNetworkForMonorail
   id: 0x491332ef
-  type: Float32
+  type: Float
   count: 13
   description: Speed to ride monorail.  Set the ninth value.
 - name: MaxGarbageValueForUI
@@ -2171,33 +2171,33 @@
   default: 27000
 - name: BudgetTaxRateOccWeight_R$$$
   id: 0x4918c925
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the R$$$ occupant type's taxes
   default: 1
 - name: BudgetTaxRateOccWeight_Cs$$
   id: 0x4918c92c
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the CS$$ occupant type's taxes
   default: 1
 - name: BudgetTaxRateOccWeight_Cs$$$
   id: 0x4918c930
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the CS$$$ occupant type's taxes
   default: 1
 - name: BudgetTaxRateOccWeight_Co$$$
   id: 0x4918c93a
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the CO$$$ occupant type's taxes
   default: 1
 - name: HealthCoverageRadiusEffect
   id: 0x491b3ad5
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200) by which this ordinance affects coverage
     radius of health buildings
   default: 110
 - name: RipplesEnabled
   id: 0x491c9c00
-  type: Bool
+  type: Boolean
   description: Enable/disable ripples
 - name: RippleMinShoreSizeForPlacement
   id: 0x491c9c01
@@ -2206,31 +2206,31 @@
   default: 10
 - name: RippleQuadWidth
   id: 0x491c9c02
-  type: Float32
+  type: Float
   count: 5
   description: Approximate width of the quads along the ribbon axis (meters)
   default: 16
 - name: RippleLandVertexHtAboveSeaLevel
   id: 0x491c9c03
-  type: Float32
+  type: Float
   description: Land side of the ribbon is keptabove sea level to get ripple
     washing the beach effect
   default: 2
 - name: RippleTextureUIncrementPerQuad
   id: 0x491c9c04
-  type: Float32
+  type: Float
   count: 5
   description: What portion of the texture corresponds to each quad
   default: 0.4
 - name: RippleWaterSideRibbonWidth
   id: 0x491c9c05
-  type: Float32
+  type: Float
   count: 5
   description: Dist (meters) from ribbon center to the quad edge on water side
   default: 24
 - name: RippleLandSideRibbonWidth
   id: 0x491c9c06
-  type: Float32
+  type: Float
   count: 5
   description: Dist (meters) from ribbon center to the quad edge on land side
   default: 1
@@ -2251,13 +2251,13 @@
   description: Alpha values for the ribbon vertices on the water side
 - name: RippleWaterSideRibbonWidthVariation
   id: 0x491c9c0a
-  type: Float32
+  type: Float
   count: 5
   description: Factor governing the variation of the ribbon width [0-1]
   default: 0.2
 - name: RippleConcavityThresholdAngle
   id: 0x491c9c0b
-  type: Float32
+  type: Float
   count: 5
   description: If the variation in ripple tangent direction is more than this, we
     break the ripple there
@@ -2281,7 +2281,7 @@
   default: 1
 - name: LifeExpectancyToWorkforceCurve
   id: 0x4941a92b
-  type: Float32
+  type: Float
   count: -2
   description: Maps Life Expectancy of a tract to the % of that tract that is in
     the workforce
@@ -2307,12 +2307,12 @@
   description: Odds of selecting each travel strategy
 - name: UndergroundPieceDepth
   id: 0x496e564c
-  type: Float32
+  type: Float
   description: Default depth of underground network piece below terrain
   default: 2
 - name: UsePipeDepth
   id: 0x496e5a36
-  type: Bool
+  type: Boolean
   description: If false, normal pipe pieces are placed as per intersections
 - name: ZonePurposeFilter
   id: 0xaa12fcb4
@@ -2322,12 +2322,12 @@
     any purpose)
 - name: ScrollingDeceleration
   id: 0xca383ca2
-  type: Float32
+  type: Float
   description: Percent amount to decelerate scrolling speed per GZPaint tick.
   default: 1
 - name: ScrollingDecelerationIsPercentage
   id: 0x4975dd25
-  type: Bool
+  type: Boolean
   description: True if ScrollingDeceleration should be the percentage (0.0-1.0) to
     decelerate per GZPaint tick.  False if that amount should be the absolute
     amount to decrement the speed per tick.
@@ -2338,7 +2338,7 @@
   description: RGBA color for unwatered buildings in pipe view
 - name: VehicleDensityCurve
   id: 0x4998c89c
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for vehicle density
 - name: ActiveTravelTypes
@@ -2360,7 +2360,7 @@
     Monorail: 0xa
 - name: MaxVehiclesPerSecond
   id: 0x4998c89e
-  type: Float32
+  type: Float
   description: Max number of vehicles to cross a tile per second
   default: 2
 - name: MaxVehicles
@@ -2375,7 +2375,7 @@
   description: Minimum and maximum DEFAULT speed for vehicles, in kilometers per hour
 - name: PedDensityCurve
   id: 0x4998c901
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for ped (sim) density
 - name: VehicleLifespanRange
@@ -2385,7 +2385,7 @@
   description: Number of cells that occupant-trip vehicles should travel before disappearing
 - name: MaxPedsPerSecond
   id: 0x4998c903
-  type: Float32
+  type: Float
   description: Max number of peds to cross a tile per second
   default: 8
 - name: MaxPeds
@@ -2411,7 +2411,7 @@
     disappearing
 - name: OccupantTripNoiseRange
   id: 0x4998c90a
-  type: Float32
+  type: Float
   count: 2
   description: Range for random value used to dampen occupancy values when
     generating occupant trips
@@ -2422,65 +2422,65 @@
   default: 20
 - name: CommuteClock
   id: 0x4998c90c
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of commute
     automata generated (0.0 - 1.0)
 - name: BusClock
   id: 0x4998c90d
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of bus automata
     generated (0.0 - 1.0)
 - name: FreightTrainClock
   id: 0x4998c90e
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of freight train
     automata generated (0.0 - 1.0)
 - name: CommuteTrainClock
   id: 0x4998c90f
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of commute train
     automata generated (0.0 - 1.0)
 - name: OccupantTripClock
   id: 0x4998c910
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of occupant trip
     automata generated (0.0 - 1.0)
 - name: FreightTruckClock
   id: 0x4998c911
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of freight truck
     automata generated (0.0 - 1.0)
 - name: StopSignDelay
   id: 0x4998c912
-  type: Float32
+  type: Float
   description: How long in seconds an automaton will pause at a stop sign
   default: 1
 - name: StreetGoTime
   id: 0x4998c913
-  type: Float32
+  type: Float
   description: How long in seconds traffic coming from secondary streets gets the
     green light
   default: 0.8
 - name: RoadGoTime
   id: 0x4998c914
-  type: Float32
+  type: Float
   description: How long in seconds traffic coming from main roads gets the green light
   default: 4
 - name: AvenueGoTime
   id: 0x4998c915
-  type: Float32
+  type: Float
   description: How long in seconds traffic coming from avenues/boulevards gets the
     green light
   default: 8
 - name: FadeTime
   id: 0x4998c916
-  type: Float32
+  type: Float
   description: How long in seconds it takes automata to fade in or out
   default: 1
 - name: VehicleMinZoomVisibility
@@ -2505,7 +2505,7 @@
   default: 3
 - name: Use24hourClock
   id: 0x4998c91c
-  type: Bool
+  type: Boolean
   description: Automata should base traffic levels on 24-hour clock
 - name: OccupantTripPopulationRadius
   id: 0x4998c91d
@@ -2520,7 +2520,7 @@
   default: 30
 - name: PowerLineCurveDistanceBetweenPoints
   id: 0x49a195c0
-  type: Float32
+  type: Float
   description: Distance between the points generated for power line curves
   default: 8
 - name: RequesterSatisfaction
@@ -2535,22 +2535,22 @@
     Garbage: 0xe9a4300b
 - name: PowerLineControlHoriz
   id: 0x49a1e8c4
-  type: Float32
+  type: Float
   description: Percent of line length at which to place control points, horizontally
   default: 10
 - name: FreightTrafficScalingFactor
   id: 0x49a2e8be
-  type: Float32
+  type: Float
   description: Percentage of industrial bldg. population that will generate freight trips
   default: 0.5
 - name: CrimePropRequestCurve
   id: 0x49a34301
-  type: Float32
+  type: Float
   count: -4
   description: Crime level (0-1) vs. Prop Share
 - name: DriveOnRight
   id: 0x49be9565
-  type: Bool
+  type: Boolean
   description: DEBUG ONLY - Sims drive on the right side of the road, like proper Americans
 - name: MaxFireStage
   id: 0x49beda31
@@ -2576,47 +2576,47 @@
   description: kPropertyID_NetworkPlacementPattern
 - name: AutoScrollSpeed
   id: 0x49e5522f
-  type: Float32
+  type: Float
   description: Speed of scrolling when cursor hits screen edge.
   default: 0.2
 - name: QuakeBrushStrengthAtEpicenterVsQuakeIntensity
   id: 0x4a08c500
-  type: Float32
+  type: Float
   count: -4
   description: Brush strength multiplier at epicenter vs. quake intensity
 - name: QuakeBrushWidthAtEpicenterVsQuakeIntensity
   id: 0x4a08c501
-  type: Float32
+  type: Float
   count: -4
   description: Brush width multiplier at epicenter vs. quake intensity
 - name: QuakeBrushStrengthVsDistance
   id: 0x4a08c502
-  type: Float32
+  type: Float
   count: -4
   description: Variation of brush strength with distance from epicenter
 - name: QuakeBrushWidthVsDistance
   id: 0x4a08c503
-  type: Float32
+  type: Float
   count: -4
   description: Variation of brush width with distance from epicenter
 - name: QuakeDistBetweenEffects
   id: 0x4a08c504
-  type: Float32
+  type: Float
   description: Distance in meters, specifying how far apart we place effects
   default: 40
 - name: QuakeFaultLineCurviness
   id: 0x4a08c505
-  type: Float32
+  type: Float
   description: Max deviation from a straight fault line
   default: 30
 - name: QuakeMaxFaultLineSlopeVariation
   id: 0x4a08c506
-  type: Float32
+  type: Float
   description: Max variation (degrees) in the slope of fault line
   default: 10
 - name: QuakeBrushTravelSpeed
   id: 0x4a08c507
-  type: Float32
+  type: Float
   description: Speed (meters/sec) with which earthquake brush moves
   default: 32
 - name: QuakeMicroSecsBetweenShakeEffects
@@ -2626,17 +2626,17 @@
   default: 10000
 - name: QuakeDistBetweenAutomataRepulsors
   id: 0x4a08c509
-  type: Float32
+  type: Float
   description: Distance in meters, specifying how far apart we place automata repulsors
   default: 100
 - name: PipeBurstMinLeakTimeBeforeBurst
   id: 0x4a08c600
-  type: Float32
+  type: Float
   description: Min time (secs) from onset of leak until burst happens
   default: 5
 - name: PipeBurstMaxLeakTimeBeforeBurst
   id: 0x4a08c601
-  type: Float32
+  type: Float
   description: Max time (secs) from onset of leak until burst happens
   default: 10
 - name: EffectName
@@ -2649,7 +2649,7 @@
   description: Specifies the id of the disaster manager to use
 - name: StopPickAtWaterSurface
   id: 0x4a08c702
-  type: Bool
+  type: Boolean
   description: Mouse pick for disaster trigger should choose water surface instead
     of terrain bed underneath
 - name: DataViewTypeFilter
@@ -2659,11 +2659,11 @@
   description: Occupant types to include or exclude (0=unused).
 - name: DataViewInvertFilter
   id: 0x4a0b47e1
-  type: Bool
+  type: Boolean
   description: If true, the occupant filter is exclusive rather than inclusive.
 - name: DataViewHideZones
   id: 0x4a0b47e2
-  type: Bool
+  type: Boolean
   description: If true, zoning decals are hidden.
 - name: DataViewViewLevel
   id: 0x4a0b47e3
@@ -2684,7 +2684,7 @@
   description: Override value for undeveloped zone opacity (0-255).
 - name: DataViewInterpolateData
   id: 0x4a0b47e7
-  type: Bool
+  type: Boolean
   description: If true, data map is interpolated to city cell resolution.
 - name: DataViewQuantizeLots
   id: 0x4a0b47e8
@@ -2724,7 +2724,7 @@
   default: 4278255360
 - name: DataViewForceZones
   id: 0x4a0b47f0
-  type: Bool
+  type: Boolean
   description: If true, developed lots will show up as plain zone coloring.
 - name: DataViewNetworkVislevel
   id: 0x4a0b47f1
@@ -2746,22 +2746,22 @@
   description: Selects building types for coverage rings and highlights.
 - name: DataViewShowZoneMap
   id: 0x4a0b47f5
-  type: Bool
+  type: Boolean
   description: Displays zone coloring in the 2D map.
 - name: PropTimeOfDay
   id: 0x4a149631
-  type: Float32
+  type: Float
   count: 2
   description: Range of hours on 24-hour clock (0-23) when prop will be at state 0
     (visible).  If start and end times are both 0, always visible.
 - name: DemandNeutralTaxRateVsPopulation
   id: 0x4a1f38b5
-  type: Float32
+  type: Float
   count: -2
   description: What is the highest tax rate you can set before demand suffers?
 - name: DemandTaxModifierVsRateVariance
   id: 0x4a1f38b6
-  type: Float32
+  type: Float
   count: -2
   description: How much is demand impacted by tax rates above or below neutral?
 - name: DemandDaysOfTaxPenalty
@@ -2771,32 +2771,32 @@
   default: 90
 - name: DemandCommercicalCapReliefForConnections
   id: 0x4a1f38c5
-  type: Float32
+  type: Float
   count: 13
   description: Relief for first connection (more have diminishing returns)
 - name: DemandCommercicalCapReliefForAirports
   id: 0x4a1f38c6
-  type: Float32
+  type: Float
   description: Relief per connected Co population
   default: 1
 - name: DemandCommercicalCapReliefForSeaports
   id: 0x4a1f38c7
-  type: Float32
+  type: Float
   description: Relief per industrial trip
   default: 2
 - name: DemandIndustrialCapReliefForTrips
   id: 0x4a1f38c8
-  type: Float32
+  type: Float
   description: Relief per neighbor trip
   default: 20
 - name: DemandIndustrialCapReliefForAirports
   id: 0x4a1f38c9
-  type: Float32
+  type: Float
   description: Relief per connected Co population
   default: 0.1
 - name: DemandIndustrialCapReliefForSeaports
   id: 0x4a1f38ca
-  type: Float32
+  type: Float
   description: Relief per industrial trip
   default: 20
 - name: NationDemandIDList
@@ -2806,83 +2806,83 @@
   description: List of IDs corresponding to Demand Modifiers
 - name: NationDefaultDemandModifierVsMonth
   id: 0x4a1f62a0
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier1VsMonth
   id: 0x4a1f62a1
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier2VsMonth
   id: 0x4a1f62a2
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier3VsMonth
   id: 0x4a1f62a3
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier4VsMonth
   id: 0x4a1f62a4
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier5VsMonth
   id: 0x4a1f62a5
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier6VsMonth
   id: 0x4a1f62a6
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier7VsMonth
   id: 0x4a1f62a7
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier8VsMonth
   id: 0x4a1f62a8
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier9VsMonth
   id: 0x4a1f62a9
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier10VsMonth
   id: 0x4a1f62b0
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier11VsMonth
   id: 0x4a1f62b1
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDemandModifier12VsMonth
   id: 0x4a1f62b2
-  type: Float32
+  type: Float
   count: -2
   description: Demand boost over time
 - name: NationDifficultyDemandModifier
   id: 0x4a1f6300
-  type: Float32
+  type: Float
   count: 3
   description: Demand boost, indexed by difficulty
 - name: ConstructionCrewTime
   id: 0x4a270db0
-  type: Float32
+  type: Float
   description: Number of seconds the construction crew will spend per tile while
     building network
   default: 1.5
 - name: ConstructionCrewVehicleSpeed
   id: 0x4a270e94
-  type: Float32
+  type: Float
   description: Speed of construction crew vehicles in meters/second
   default: 32
 - name: ConstructionCrewLeadVehicleInstance
@@ -2901,12 +2901,12 @@
   default: 1
 - name: LandfillGarbageDecayRate
   id: 0x4a280510
-  type: Float32
+  type: Float
   description: The rate at which garbage decays in units per month
   default: 0.1
 - name: LandfillLevelToleranceThreshold
   id: 0x4a280513
-  type: Float32
+  type: Float
   description: The altitude variance of the landfill zone before levelling will take place
   default: 2
 - name: SimoleanCostPerTile
@@ -2929,7 +2929,7 @@
     RightCorner: 0xc
 - name: VolcanoLavaCurveSolidifcationRate
   id: 0x4a4bc714
-  type: Float32
+  type: Float
   count: -4
   description: Solidification Rate for the Flow of VolcanoLava (Input Time in
     Fraction from [0, 1])
@@ -2950,7 +2950,7 @@
     WaterPurificationPlant: 0x2a55b1b1
 - name: BusDensityCurve
   id: 0x4a511873
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for bus density
 - name: PowerPolePlacementCost
@@ -2960,7 +2960,7 @@
   default: 15
 - name: DesirabilityEffectValues
   id: 0x4a5f7315
-  type: Float32
+  type: Float
   count: -3
   description: Radius in cells, Max effect, and min effect for each developer
 - name: DesirabilityEffectIDs
@@ -2981,7 +2981,7 @@
   default: 16384
 - name: ZooEscapeChanceCurve
   id: 0x4a6676ad
-  type: Float32
+  type: Float
   count: -2
   description: "Input: park efficiency (0-100)  Output: Chance of zoo escape each
     month (0-100)"
@@ -2997,7 +2997,7 @@
   default: 10000
 - name: LandfillMoveLandfillTilesWithTerrain
   id: 0x4a677e5d
-  type: Bool
+  type: Boolean
   description: Flag indicating whether or not to move landfill tiles with terrain
 - name: LandfillMonthlyMaxGarbageDecayedPerLandfill
   id: 0x4a677e5e
@@ -3012,12 +3012,12 @@
   default: 1
 - name: NearestDestinationAttractiveness
   id: 0x4a678060
-  type: Float32
+  type: Float
   description: Lower scores means more side explorations but also more CPU time
   default: 0.75
 - name: StatesAsFrames
   id: 0x4a70d491
-  type: Bool
+  type: Boolean
   description: Add this property only if prop states are visually depicted by
     different frames in an animated model instance
 - name: PropRandomChance
@@ -3059,7 +3059,7 @@
   default: 4000
 - name: Previewable
   id: 0x4a89fcf3
-  type: Bool
+  type: Boolean
   description: If set to true, the prop will appear in the building plop preview
 - name: AudioMaxPlayingSounds
   id: 0x4a946a5d
@@ -3067,7 +3067,7 @@
   description: Max playing sounds
 - name: Light
   id: 0x4a9f188b
-  type: Bool
+  type: Boolean
   description: Set if prop has a light mask and should light up at night with the
     lot building.
 - name: AudioLayerVolumeSmoothDelta
@@ -3111,30 +3111,30 @@
     port) in the catalog - not simulated
 - name: MaximumEQBoost
   id: 0x4aa84161
-  type: Float32
+  type: Float
   description: Max EQ boost achievable without reward buildings.  Used to scale
     values for Sims opinion polls.
   default: 10
 - name: DeathsDoorEffectChance
   id: 0x4ab70dac
-  type: Float32
+  type: Float
   description: Percent chance (0-100.0) that the effect will play for a tract
     that's at death's door.
   default: 20
 - name: DeathsDoorEffectHeightDelta
   id: 0x4ab71659
-  type: Float32
+  type: Float
   description: Random height variance for effect for a tract that's at death's door.
   default: 50
 - name: BudgetLandValueToSimoleans
   id: 0x4ac519b8
-  type: Float32
+  type: Float
   count: -2
   description: For each taxable square of the given land value, the number of
     Simoleans produced
 - name: NDe_MaxUnitCostForGarbageDealsRCurve
   id: 0x4b61ffc9
-  type: Float32
+  type: Float
   count: -4
   description: Maps true simulation cost to synthetic cost value used by garbage deals.
 - name: AutomatonDisplayName
@@ -3143,136 +3143,136 @@
   description: Player-visible name of this automaton during query
 - name: SpeedMultiplierByNetwork
   id: 0x4bae8fe0
-  type: Float32
+  type: Float
   count: 13
   description: Multiply by default speed on road, rail, highway, street, pipe,
     powerline, avenue, subway, light rail, monorail, 1-way road, dirt road,
     ground highway
 - name: LaneSwitchCost
   id: 0x4bae8fe1
-  type: Float32
+  type: Float
   description: Cost to add per vehicle when deciding whether to switch lanes to
     pass slower-moving vehicles
   default: 3
 - name: LaneSwitchMaxDistance
   id: 0x4bae8fe2
-  type: Float32
+  type: Float
   description: Max distance in meters that a vehicle will switch lanes on a
     multi-lane network
   default: 4
 - name: CongestionToAccidentProbability
   id: 0x4be09ec9
-  type: Float32
+  type: Float
   count: -4
   description: Maps congestion to accident probablity
 - name: CapacityToAccidentProbability
   id: 0x4be09eca
-  type: Float32
+  type: Float
   count: -4
   description: Maps capacity to accident probablity
 - name: AccidentDuration
   id: 0x4be09ecb
-  type: Float32
+  type: Float
   description: Time (in seconds) that a traffic accident lasts
   default: 10
 - name: AccidentCheckPeriod
   id: 0x4be09ecc
-  type: Float32
+  type: Float
   description: Period (in seconds) that the traffic sim tests for accidents
   default: 60
 - name: TransitSwitchCapacityEffect
   id: 0x4bfc47b0
-  type: Bool
+  type: Boolean
   description: If true, this building radiates capacity reduction like intersections
 - name: AudioAEMSVolumeCurve
   id: 0x4bfdd955
-  type: Float32
+  type: Float
   count: -2
   description: AEMS Volume curve
 - name: MtnCloudsHeight
   id: 0x66fbf7a9
-  type: Float32
+  type: Float
   description: Height that clouds float at
   default: 500
 - name: MtnCloudsFormHeight
   id: 0x66fbf7aa
-  type: Float32
+  type: Float
   description: Lowest terrain height that clouds form over
   default: 200
 - name: MtnCloudsFadeInHeight
   id: 0x66fbf7ab
-  type: Float32
+  type: Float
   description: Lowest terrain height that clouds have max opacity
   default: 250
 - name: MtnCloudsFadeOutHeight
   id: 0x66fbf7ac
-  type: Float32
+  type: Float
   description: Terrain height above which clouds begin to fade
   default: 425
 - name: MtnCloudsDisperseHeight
   id: 0x66fbf7ad
-  type: Float32
+  type: Float
   description: Terrain height above which clouds fade completely
   default: 450
 - name: MtnCloudsSlowDownHeight
   id: 0x66fbf7ae
-  type: Float32
+  type: Float
   description: Terrain height above which clouds begin to slow
   default: 425
 - name: MtnCloudsStopHeight
   id: 0x66fbf7af
-  type: Float32
+  type: Float
   description: Terrain height above which clouds stop completely
   default: 445
 - name: MtnCloudsSizeRange
   id: 0x66fbf7b0
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max of cloud size variation (meters)
 - name: MtnCloudsAspectRange
   id: 0x66fbf7b1
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max of cloud aspect ratio variation (0-1)
 - name: MtnCloudsOpacityRange
   id: 0x66fbf7b2
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max of cloud opacity variation (0-1)
 - name: MtnCloudsIntensityRange
   id: 0x66fbf7b3
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max of cloud intensity variation (0-1)
 - name: MtnCloudsSpeedRange
   id: 0x66fbf7b4
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max of cloud speed variation (meters/msec)
 - name: MtnCloudsShadeOffsetRange
   id: 0x66fbf7b5
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max scale factors for ShadeOffsetDir
 - name: MtnCloudsCursorHideRange
   id: 0x66fbf7b6
-  type: Float32
+  type: Float
   count: 2
   description: Min and Max radii in world units where clouds are hidden by cursor.
 - name: MtnCloudsShadeIntensity
   id: 0x66fbf7b8
-  type: Float32
+  type: Float
   description: brightness of shadow quad as % of highlight (0-1)
   default: 0.34
 - name: MtnCloudsSimSpeedFactor
   id: 0x66fbf7ba
-  type: Float32
+  type: Float
   count: 4
   description: Multiplier for cloud speed based on sim speed. Slow Med Fast Paused
   default: 1
 - name: MtnCloudsShadeOffsetDir
   id: 0x66fbf7bb
-  type: Float32
+  type: Float
   count: 2
   description: X and Y(Z) offset of shade quad as a ratio of particle size (0-1)
 - name: MtnCloudsMaxParticles
@@ -3282,54 +3282,54 @@
   default: 30
 - name: MtnCloudsMinFadeInTime
   id: 0x66fbf7bd
-  type: Float32
+  type: Float
   description: Min time for particles to fade in when they spawn visible, or to
     fade out when they die due to age. (Milliseconds)
   default: 1500
 - name: MtnCloudsParticleMaxAge
   id: 0x66fbf7be
-  type: Float32
+  type: Float
   description: Max particle lifetime (Milliseconds)
   default: 45000
 - name: MtnCloudsParticleGenRate
   id: 0x66fbf7bf
-  type: Float32
+  type: Float
   description: Particle spawning rate (Particles per second)
   default: 45000
 - name: MtnCloudsAllowHiddenParticles
   id: 0x66fbf7c0
-  type: Bool
+  type: Boolean
   description: if true, particles are still simulated outside of regions where
     clouds are visible
 - name: MtnCloudsZoomFade
   id: 0x66fbf7c1
-  type: Float32
+  type: Float
   count: 5
   description: Percent of normal opacity by zoom level. Set to 0 to disable a
     particular zoom. Top is zoom 1 bottom is zoom 5
   default: 1
 - name: PoliceMaxJailOvercrowdingPercentage
   id: 0x68ddae92
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4PoliceSimulator.h
   default: 110
 - name: PoliceFundingToEfficiencyResponseCurve
   id: 0x68ddae93
-  type: Float32
+  type: Float
   count: -2
   description: See ISC4PoliceSimulator.h
 - name: PoliceMaxAllowedFundingPercentage
   id: 0x68ddae95
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4PoliceSimulator.h
   default: 120
 - name: PoliceMonthlyCriminalRehabilitationPercent
   id: 0x68ddae97
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4PoliceSimulator.h
 - name: PoliceStrikeEfficiency
   id: 0x68ddae9a
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4PoliceSimulator.h
   default: 50
 - name: PoliceMaxStrikeDuration
@@ -3339,12 +3339,12 @@
   default: 10
 - name: PoliceMinFundingToEndStrikes
   id: 0x68ddae9c
-  type: Float32
+  type: Float
   description: 0.0-100.0, See ISC4PoliceSimulator.h
   default: 90
 - name: PoliceStrikeResponseCurve
   id: 0x68ddae9e
-  type: Float32
+  type: Float
   count: -2
   description: See ISC4PoliceSimulator.h
 - name: PoliceArrestThreshold
@@ -3355,7 +3355,7 @@
   default: 16
 - name: JailFundingToEfficiencyResponseCurve
   id: 0x68ddaea0
-  type: Float32
+  type: Float
   count: -2
   description: See ISC4PoliceSimulator.h
 - name: RecyclingCenterPopulationServed
@@ -3364,7 +3364,7 @@
   description: Number of people that can be served by this recycling center
 - name: PollutionRadii
   id: 0x68ee9764
-  type: Float32
+  type: Float
   count: 4
   description: Radii of pollution (in cells) generated by the building, for each
     type (air, water, garbage, radiation).
@@ -3413,30 +3413,30 @@
     model properties.
 - name: PowerFundingToEfficiencyCurve
   id: 0x6911e2df
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     of a utility output
 - name: HealthStrikeResponseCurve
   id: 0x691894a4
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     chance of a Health strike
 - name: SchoolMinGradeToEndStrike
   id: 0x691894c0
-  type: Float32
+  type: Float
   description: Minimum grade that all schools must have to end a School strike
   default: 90
 - name: SchoolFundingToEfficiencyCurve
   id: 0x691894c6
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     of Education output
 - name: SchoolCoverageRadius
   id: 0x691b42b3
-  type: Float32
+  type: Float
   description: Radius of a school's coverage, in meters.
   default: 10
 - name: HospitalPatientCapacity
@@ -3451,95 +3451,95 @@
   default: 1
 - name: SchoolEQDecayEffect
   id: 0x692ef65a
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects the
     rate at which EQ decays
   default: 100
 - name: DistFromShoreToWaveStartLocation
   id: 0x6932dc00
-  type: Float32
+  type: Float
   description: Distance (meters) from the shore to the starting location of waves
   default: 320
 - name: WaveMinProductionInterval
   id: 0x6932dc01
-  type: Float32
+  type: Float
   description: Min time (sec) between the production of successive waves
   default: 3
 - name: WaveMaxProductionInterval
   id: 0x6932dc02
-  type: Float32
+  type: Float
   description: Max time (sec) between the production of successive waves
   default: 8
 - name: WaveInnerRadius
   id: 0x6932dc03
-  type: Float32
+  type: Float
   description: Inner radius (meter) of the wave arc
   default: 600
 - name: WaveOuterRadius
   id: 0x6932dc04
-  type: Float32
+  type: Float
   description: Outer radius (meter) of the wave arc
   default: 635
 - name: WaveArcAngle
   id: 0x6932dc05
-  type: Float32
+  type: Float
   description: Arc angle (degrees) for the wave
   default: 30
 - name: WaveMinTimeInState
   id: 0x6932dc06
-  type: Float32
+  type: Float
   count: 4
   description: Min time (sec) the wave spends in each of the states
 - name: WaveMaxTimeInState
   id: 0x6932dc07
-  type: Float32
+  type: Float
   count: 4
   description: Max time (sec) the wave spends in each of the states
 - name: WaveInitialMoveSpeed
   id: 0x6932dc08
-  type: Float32
+  type: Float
   description: Initial movement speed (meter/sec) of  the wave
   default: 10
 - name: WaveInitialExpandSpeed
   id: 0x6932dc09
-  type: Float32
+  type: Float
   description: Initial expansion speed (meter/sec) of  the wave
 - name: WaveMinMoveSpeed
   id: 0x6932dc0a
-  type: Float32
+  type: Float
   description: Min movement speed (meter/sec) of  the wave
 - name: WaveMinExpandSpeed
   id: 0x6932dc0b
-  type: Float32
+  type: Float
   description: Min expansion speed (meter/sec) of  the wave
 - name: WaveMaxMoveSpeed
   id: 0x6932dc0c
-  type: Float32
+  type: Float
   description: Max movement speed (meter/sec) of  the wave
   default: 100
 - name: WaveMaxExpandSpeed
   id: 0x6932dc0d
-  type: Float32
+  type: Float
   description: Max expansion speed (meter/sec) of  the wave
   default: 50
 - name: WaveMinExpandAcceleration
   id: 0x6932dc0e
-  type: Float32
+  type: Float
   count: 4
   description: Min acceleration of expansion in each of the states
 - name: WaveMaxExpandAcceleration
   id: 0x6932dc0f
-  type: Float32
+  type: Float
   count: 4
   description: Max acceleration of expansion in each of the states
 - name: WaveMinMoveAcceleration
   id: 0x6932dc10
-  type: Float32
+  type: Float
   count: 4
   description: Min acceleration of movement in each of the states
 - name: WaveMaxMoveAcceleration
   id: 0x6932dc11
-  type: Float32
+  type: Float
   count: 4
   description: Max acceleration of movement in each of the states
 - name: MaxWaves
@@ -3549,28 +3549,28 @@
   default: 4
 - name: InterWaveGap
   id: 0x6932dc13
-  type: Float32
+  type: Float
   description: Gap (meters) between two waves
   default: 480
 - name: WaveMaxOrientationDifference
   id: 0x6932dc14
-  type: Float32
+  type: Float
   description: Maximum difference in the orientation of different waves
   default: 10
 - name: HealthQuotientToLifeExpectancyCurve
   id: 0x6941a67f
-  type: Float32
+  type: Float
   count: -2
   description: Maps HQ of a tract to the Life Expectancy of that tract
 - name: AirPollutionToHQDecayCurve
   id: 0x6941b022
-  type: Float32
+  type: Float
   count: -2
   description: Maps amount of air pollution in a tract to the rate at which the HQ
     in that tract decays
 - name: TrafficAirPollutionFactor
   id: 0x69501944
-  type: Float32
+  type: Float
   description: Affects how traffic density equates to air pollution
   default: 8
 - name: ZoneFilter
@@ -3580,22 +3580,22 @@
   description: Zone types compatible with crime (none == can appear in any zone)
 - name: LavaColorGradientMapFactor
   id: 0x69987e60
-  type: Float32
+  type: Float
   description: Number of pixels in color gradient corresponding to every meter of lava depth
   default: 6.4
 - name: LavaMaxFlowRate
   id: 0x69987e61
-  type: Float32
+  type: Float
   description: Higher the viscosity, lower should this number be.
   default: 0.8
 - name: LavaHtDiffForMaxFlowRate
   id: 0x69987e62
-  type: Float32
+  type: Float
   description: Lava height differential at which the max flow rate is reached
   default: 12
 - name: LavaLiquidToSolidConversionFactor
   id: 0x69987e63
-  type: Float32
+  type: Float
   description: When unit amount of lava solidifies, it increases the terrain
     height by this much
   default: 0.8
@@ -3606,32 +3606,32 @@
   default: 20
 - name: LavaMinAlphaDepth
   id: 0x69987e65
-  type: Float32
+  type: Float
   description: When the lava depth is less than this, we set alpha to be LavaMinAlpha
   default: 0.5
 - name: LavaMaxAlphaDepth
   id: 0x69987e66
-  type: Float32
+  type: Float
   description: If lava depth is more than this, it becomes opaque (i.e., max alpha)
   default: 2.078
 - name: LavaScorchedTerrainDecalSize
   id: 0x69987e67
-  type: Float32
+  type: Float
   description: Width of scorched terrain decal (meters)
   default: 64
 - name: LavaUnderWaterSolidificationMultiple
   id: 0x69987e68
-  type: Float32
+  type: Float
   description: Solidification rate under water this many times that over land
   default: 5.19
 - name: LavaDepthBurnThreshold
   id: 0x69987e69
-  type: Float32
+  type: Float
   description: The lava depth at which occupants will catch on fire
   default: 0.0098
 - name: LavaDepthDeepFryThreshold
   id: 0x69987e6a
-  type: Float32
+  type: Float
   description: The lava depth at which occupants will instantly burn down
   default: 2
 - name: LavaAnimationFrameDuration
@@ -3641,7 +3641,7 @@
   default: 200000
 - name: LavaMinAmountForDepositToHappen
   id: 0x69987e6c
-  type: Float32
+  type: Float
   description: If lava amount is less than this, we don't deposit it (We simply dry it up!)
   default: 3
 - name: LavaScorchDecalLifeTime
@@ -3651,43 +3651,43 @@
   default: 20000000
 - name: LavaScorchDecalFadeInTime
   id: 0x69987e6e
-  type: Float32
+  type: Float
   description: Fade in time (Secs) of scorch decal
   default: 2
 - name: LavaScorchDecalFadeOutTime
   id: 0x69987e6f
-  type: Float32
+  type: Float
   description: Fade out time (Secs) of scorch decal
   default: 6
 - name: LotConfigPropertyMinSlopeAllowed
   id: 0x699b08a4
-  type: Float32
+  type: Float
   description: The Min slope this lot will develop on
 - name: BudgetTaxRateOccWeight_IResource
   id: 0x69a36e40
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the IResource
     occupant type's taxes
   default: 1
 - name: GarbagePropRequestCurve
   id: 0x69a437f6
-  type: Float32
+  type: Float
   count: -4
   description: Shares of garbage props requested vs. garbage percentage of max
 - name: MinWaterDepthForDeepSeaBedTexture
   id: 0x69ac5640
-  type: Float32
+  type: Float
   description: If the water depth exceeds this, we apply deep seabed texture
   default: 15
 - name: MaxWaterDepthForDeepSeaBedTexture
   id: 0x69ac5641
-  type: Float32
+  type: Float
   description: Upto this water depth we use deep seabed texture for terrain (No
     texturing beyond that depth)
   default: 30
 - name: FireProtectionSimStationNoRoadMultiplier
   id: 0x69b425db
-  type: Float32
+  type: Float
   description: (0.0 - 1.0)
   default: 0.8
 - name: TextureUpdateIntervalForTerrainBrushes
@@ -3698,36 +3698,36 @@
   default: 200
 - name: ModKey1StrengthMultiplier
   id: 0x69db8d01
-  type: Float32
+  type: Float
   description: Controls how the brush strength is modified by the control key
   default: 0.25
 - name: ModKey1WidthMultiplier
   id: 0x69db8d02
-  type: Float32
+  type: Float
   description: Controls how the brush strength is modified by the control key
   default: 0.25
 - name: ModKey2StrengthMultiplier
   id: 0x69db8d03
-  type: Float32
+  type: Float
   description: Controls how the brush strength is modified by the shift key
   default: 4
 - name: ModKey2WidthMultiplier
   id: 0x69db8d04
-  type: Float32
+  type: Float
   description: Controls how the brush strength is modified by the shift key
   default: 1
 - name: ApplicationTimeIntervalForFullBrushStrength
   id: 0x69db8d05
-  type: Float32
+  type: Float
   description: Time interval (secs) between applications to get full brush strength
   default: 0.1
 - name: OrientToSlope
   id: 0x69f14d33
-  type: Bool
+  type: Boolean
   description: Prop rotates x/z to match slope.
 - name: CrimeSimMultiplier
   id: 0x6a09f62f
-  type: Float32
+  type: Float
   description: Percentage (0.0-1.0) of actual crimes in a cell that will generate
     a corresponding crime sim
   default: 0.1
@@ -3739,18 +3739,18 @@
     animation before fading out
 - name: CrimeLayerClock
   id: 0x6a09f631
-  type: Float32
+  type: Float
   count: -2
   description: Maps time of day on 24-hour clock to a percentage of crime props
     generated (0.0 - 1.0)
 - name: HealthEffectRadius
   id: 0x6a19f6b5
-  type: Float32
+  type: Float
   description: This is an optional property. It is used in conjunction with the
     "Health Effect Strength". Radius is in cells.
 - name: SimoleanCostPerMeterDisplaced
   id: 0x6a2d49f4
-  type: Float32
+  type: Float
   description: Cost to raise/lower one vertex one meter when using this tool
   default: 1
 - name: CategoryGodMountain
@@ -3759,13 +3759,13 @@
   description: Brush belongs to god mode, mountain category
 - name: AudioZoomDistanceTweaks
   id: 0x6a359f22
-  type: Float32
+  type: Float
   count: 5
   description: Tweak values to nudge each delta
   default: 1
 - name: SFXAlarmTime
   id: 0x6a36afab
-  type: Float32
+  type: Float
   count: -1
   description: 24hour times i.e. 15.5
 - name: SFXOccupantInstanceSound
@@ -3775,7 +3775,7 @@
     per occupant.
 - name: FloraWild
   id: 0x6a37ebb6
-  type: Bool
+  type: Boolean
   description: Controls whether the flora appears in landscape mode (wild) or
     mayor mode (domestic).
 - name: AudioLoopId
@@ -3800,18 +3800,18 @@
   default: 50
 - name: WaterFundingToEfficiencyCurve
   id: 0x6a410bf2
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     of a utility output
 - name: AudioDensity2FreshVolumeCurve
   id: 0x6a4132f3
-  type: Float32
+  type: Float
   count: -2
   description: Density to freshness volume curve
 - name: AudioDensity2LoopVolumeCurve
   id: 0x6a4132f6
-  type: Float32
+  type: Float
   count: -2
   description: Density to loop volume curve
 - name: NameKey
@@ -3836,20 +3836,20 @@
   description: Min/max speed of trains in kilometers per hour
 - name: NDb_MinDealAmountWater
   id: 0x6a469337
-  type: Float32
+  type: Float
   description: Min deal amount for water deal
   default: 1000
 - name: NDc_MinDealProfitFactor
   id: 0x6a469342
-  type: Float32
+  type: Float
   description: Min deal profit factor (1 + NDc_MinDealProfitFactor)
 - name: GraphMaximumYValue
   id: 0x6a4aeded
-  type: Float32
+  type: Float
   description: Overrides the automatic maximum Y value.
 - name: GraphYTickSpacing
   id: 0x6a4aedef
-  type: Float32
+  type: Float
   description: Overrides the automatic Y tick spacing.
 - name: GraphPlotDataSource1
   id: 0x6a4aee40
@@ -3880,7 +3880,7 @@
   description: Array of RGB triplets, 3 integers per plot, each representing a line color.
 - name: GraphPlotScale
   id: 0x6a4aeee2
-  type: Float32
+  type: Float
   count: -1
   description: Array of floats, one per plot, which scales the plot by that amount.
 - name: GraphPlotSeries
@@ -3903,7 +3903,7 @@
     representing a outline color a whole series.
 - name: VolcanoLavaShouldLavaFlow
   id: 0x6a4bc8ed
-  type: Bool
+  type: Boolean
   description: To Allow the flow of lava flow
 - name: Obliterate_ClusterWindowWidth
   id: 0x6a5a6700
@@ -3912,12 +3912,12 @@
   default: 8
 - name: Obliterate_NumClustersVsTime
   id: 0x6a5a6701
-  type: Float32
+  type: Float
   count: -4
   description: Cumulative number of clusters to demolish as a function of time (secs)
 - name: Obliterate_SmokeScreenFormationTime
   id: 0x6a5a6702
-  type: Float32
+  type: Float
   description: Time (secs) between the creation of Finale effect and our last big
     wipe-out sweep of the ciry
   default: 3
@@ -3941,12 +3941,12 @@
   description: History data source for this trend bar
 - name: TrendBarResponseCurve
   id: 0x6a6564f6
-  type: Float32
+  type: Float
   count: -4
   description: Converts from input data source range to {0,1}
 - name: MonthlyCostForNetworkTile
   id: 0x6a84493e
-  type: Float32
+  type: Float
   count: 13
   description: Upkeep cost per tile of each network type (rd, rl, hwy, st, x, x,
     ave, sub, lr)
@@ -3963,16 +3963,16 @@
   default: 1
 - name: AudioVolumeLimitingCurve
   id: 0x6a946a50
-  type: Float32
+  type: Float
   count: -2
   description: Volume limiting curve
 - name: RequiresPowerToAppear
   id: 0x6a959e71
-  type: Bool
+  type: Boolean
   description: Prop only appears if lot is powered
 - name: QueryAsMainBuilding
   id: 0x6a95e503
-  type: Bool
+  type: Boolean
   description: If set to true, when the prop is hover-queried, it will highlight
     both itself and the main building (and give the same hover data). Setting to
     True creates the effect of a main building that is composed of multiple
@@ -3990,17 +3990,17 @@
   default: 1
 - name: CoverageRadiusSlopMultiplier
   id: 0x6a9f6edd
-  type: Float32
+  type: Float
   description: Coverage radii are multiplied by this value when computing tract coverage
   default: 1.1
 - name: DeathsDoorHQ
   id: 0x6ab70da7
-  type: Float32
+  type: Float
   description: If a tract's HQ falls below this number, they're at death's door.
   default: 1
 - name: DeathsDoorEffectHeight
   id: 0x6ab71654
-  type: Float32
+  type: Float
   description: Base height above terrain at which the effect will play for a tract
     that's at death's door.
   default: 100
@@ -4011,13 +4011,13 @@
   description: Value for displaying monthly cost in the catalog - not simulated
 - name: SimulationSpeedMultiplier
   id: 0x6b42922c
-  type: Float32
+  type: Float
   count: 4
   description: Multiplier for automata speed when sim is in slow, medium, fast,
     and player-drive mode.  1.0 = default speed
 - name: NDd_SuspensionPeriod
   id: 0x6b588fad
-  type: Float32
+  type: Float
   description: Defaulted deals get suspended for this number of days.
   default: 90
 - name: MiniMapWaterRamp
@@ -4052,7 +4052,7 @@
   default: 1
 - name: MaxSlopeAlongNetwork
   id: 0x879d12e7
-  type: Float32
+  type: Float
   description: "Range: [0.0 - 90.0]"
   default: 30
 - name: TargetZone
@@ -4086,66 +4086,66 @@
   description: Specifies acceptable land values (0, 0 disables)
 - name: LandValueUseIntrinsic
   id: 0x87cd633f
-  type: Bool
+  type: Boolean
   description: True means use total land value
 - name: LandValueEffect
   id: 0x87cd6340
-  type: Float32
+  type: Float
   count: -2
   description: How much land value is a factor in desirability
 - name: R$ProximityEffect
   id: 0x87cd6343
-  type: Float32
+  type: Float
   count: -2
   description: How much proximity to R$ is a factor in desirability
 - name: R$$ProximityEffect
   id: 0x87cd6344
-  type: Float32
+  type: Float
   count: -2
   description: How much proximity to R$$ is a factor in desirability
 - name: R$$$ProximityEffect
   id: 0x87cd6345
-  type: Float32
+  type: Float
   count: -2
   description: How much proximity to R$$$ is a factor in desirability
 - name: TrafficEffect
   id: 0x87cd6346
-  type: Float32
+  type: Float
   count: -2
   description: How much traffic volume is a factor in desirability
 - name: TripLengthEffect
   id: 0x87cd6347
-  type: Float32
+  type: Float
   count: -2
   description: How much travel time is a factor in desirability
 - name: SchoolEffect
   id: 0x87cd6348
-  type: Float32
+  type: Float
   count: -2
   description: How much school grade is a factor in desirability
 - name: HospitalEffect
   id: 0x87cd6349
-  type: Float32
+  type: Float
   count: -2
   description: How much hospital grade is a factor in desirability
 - name: PollutionEffectAir
   id: 0x87cd634b
-  type: Float32
+  type: Float
   count: -2
   description: How much air pollution proximity affects desirability
 - name: PollutionEffectWater
   id: 0x87cd634c
-  type: Float32
+  type: Float
   count: -2
   description: How much water pollution proximity affects desirability
 - name: PollutionEffectGarbage
   id: 0x87cd634d
-  type: Float32
+  type: Float
   count: -2
   description: How much garbage pollution proximity affects desirability
 - name: PollutionEffectRadiation
   id: 0x87cd634e
-  type: Float32
+  type: Float
   count: -2
   description: How much radiation pollution proximity affects desirability
 - name: DesirabilityThresholdDecline
@@ -4161,7 +4161,7 @@
   default: 80
 - name: PhantomDemand
   id: 0x87cd6356
-  type: Bool
+  type: Boolean
   description: If true, unhappy sims will create a demand for new growth, which
     results in migration
 - name: BaselineDesirability
@@ -4176,91 +4176,91 @@
   default: 3
 - name: Stage1VsSize
   id: 0x87cd6361
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 1, as a function of
     the population of the city
 - name: Stage2VsSize
   id: 0x87cd6362
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 2, as a function of
     the population of the city
 - name: Stage3VsSize
   id: 0x87cd6363
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 3, as a function of
     the population of the city
 - name: Stage4VsSize
   id: 0x87cd6364
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 4, as a function of
     the population of the city
 - name: Stage5VsSize
   id: 0x87cd6365
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 5, as a function of
     the population of the city
 - name: Stage6VsSize
   id: 0x87cd6366
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 6, as a function of
     the population of the city
 - name: Stage7VsSize
   id: 0x87cd6367
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 7, as a function of
     the population of the city
 - name: Stage8VsSize
   id: 0x87cd6368
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 8, as a function of
     the population of the city
 - name: Stage9VsSize
   id: 0x87cd6369
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 9, as a function of
     the population of the city
 - name: Stage10VsSize
   id: 0x87cd636a
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 10, as a function of
     the population of the city
 - name: Stage11VsSize
   id: 0x87cd636b
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 11, as a function of
     the population of the city
 - name: Stage12VsSize
   id: 0x87cd636c
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 12, as a function of
     the population of the city
 - name: Stage13VsSize
   id: 0x87cd636d
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 13, as a function of
     the population of the city
 - name: Stage14VsSize
   id: 0x87cd636e
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 14, as a function of
     the population of the city
 - name: Stage15VsSize
   id: 0x87cd636f
-  type: Float32
+  type: Float
   count: -2
   description: Percentage of growth which should be of type 15, as a function of
     the population of the city
@@ -4294,22 +4294,22 @@
     UseMonopolyBuildingsOnly: 0x2
 - name: Co$$ProximityEffect
   id: 0x87cd6391
-  type: Float32
+  type: Float
   count: -2
   description: How much proximity to Co$$ is a factor in desirability
 - name: Co$$$ProximityEffect
   id: 0x87cd6392
-  type: Float32
+  type: Float
   count: -2
   description: How much proximity to Co$$$ is a factor in desirability
 - name: TransientAuraEffect
   id: 0x87cd6397
-  type: Float32
+  type: Float
   count: -2
   description: How much transient aura effects (-128, 127) affect desirability
 - name: SlopeEffect
   id: 0x87cd6398
-  type: Float32
+  type: Float
   count: -2
   description: How much slope is a factor in desirability
 - name: StylePercentages
@@ -4344,7 +4344,7 @@
   default: 2835072247
 - name: LotConfigPropertyMaxSlopeBeforeLotFoundation
   id: 0x88edc792
-  type: Float32
+  type: Float
   description: The slope at which it switches to using a Lot foundation
   default: 5
 - name: LotConfigPropertyZoneTypes
@@ -4411,7 +4411,7 @@
   description: LotConfigPropertyLotObject
 - name: KSC4FoundationPropertyMaxHeight
   id: 0x88fcc3e3
-  type: Float32
+  type: Float
   description: The height a foundation can lift an occupant (usually a building or lot).
   default: 1000
 - name: BuildingFoundation
@@ -4452,7 +4452,7 @@
     UtMarina16x64: 0x194c0000
 - name: BudgetMaxTaxRate
   id: 0x890e0a99
-  type: Float32
+  type: Float
   description: Maximum Tax Rate - something like maybe 25%
 - name: BudgetMaxBondAmount
   id: 0x890e0ab4
@@ -4469,7 +4469,7 @@
   description: LotConfigPropertyWaterCompatibility
 - name: HealthStrikeEfficiency
   id: 0x89189482
-  type: Float32
+  type: Float
   description: Efficiency of Health buildings will drop to this % during a strike
   default: 50
 - name: HealthStrikeDuration
@@ -4479,28 +4479,28 @@
   default: 10
 - name: HealthMinGradeToEndStrike
   id: 0x89189495
-  type: Float32
+  type: Float
   description: Minimum grade that all health buildings must have to end a Health strike
   default: 90
 - name: SchoolInitMaxAllowedFunding
   id: 0x891894ad
-  type: Float32
+  type: Float
   count: 2
   description: Initial and Maximum allowed funding percentage for schools
 - name: BudgetTaxRateOccWeight_Co$$
   id: 0x8918c937
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the CO$$ occupant type's taxes
   default: 1
 - name: BudgetTaxRateOccWeight_IManufacturing
   id: 0x8918c93e
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the IManufacturing
     occupant type's taxes
   default: 1
 - name: HealthEffectivenessVsDistanceEffect
   id: 0x891b3ae6
-  type: Float32
+  type: Float
   count: -2
   description: Maps % of coverage distance from a hospital to HQ boost %
 - name: SchoolStudentCapacity
@@ -4510,7 +4510,7 @@
   default: 1000
 - name: SchoolCapacityEffect
   id: 0x892d9d02
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects the
     capacity of schools
   default: 100
@@ -4521,13 +4521,13 @@
   description: Milliseconds per day for slow, medium, fast
 - name: KAnimationTimeDilationProperty
   id: 0x89590e6e
-  type: Float32
+  type: Float
   count: 5
   description: Time dilation factor to apply to animations based on sim speed
     (paused,slow,med,fast,emergency/drive)
 - name: 24HourClockSpeedTimeMagnification
   id: 0x897e709f
-  type: Float32
+  type: Float
   description: Specifies a multiplier from real time to the 24 hour clock's time.
 - name: VolcanicAshLifeTime
   id: 0x89861864
@@ -4536,67 +4536,67 @@
   default: 10000000
 - name: SegmentHeight
   id: 0x8989ec22
-  type: Float32
+  type: Float
   description: Height of one growth level
   default: 3
 - name: PostWidth
   id: 0x8989ec23
-  type: Float32
+  type: Float
   description: Width of corner posts
   default: 1
 - name: ScaffoldGap
   id: 0x8989ec24
-  type: Float32
+  type: Float
   description: Gap between scaffold and building
   default: 1
 - name: PlankWidth
   id: 0x8989ec25
-  type: Float32
+  type: Float
   description: Width of the planks that run around the top of the scaffold
   default: 2
 - name: PlankTextureScale
   id: 0x8989ec26
-  type: Float32
+  type: Float
   description: How large the plank texture is, in meters
   default: 15
 - name: ScaffoldTextureScale
   id: 0x8989ec27
-  type: Float32
+  type: Float
   description: How large the scaffold texture is, in meters
   default: 25
 - name: GirdersTextureScale
   id: 0x8989ec28
-  type: Float32
+  type: Float
   description: How large the top girders texture is, in meters
   default: 25
 - name: ScaffoldGrowthRate
   id: 0x8989ec29
-  type: Float32
+  type: Float
   description: How fast scaffolding goes up in meters per day
   default: 1
 - name: ScaffoldRemovalRate
   id: 0x8989ec2a
-  type: Float32
+  type: Float
   description: How fast scaffolding is removed in meters per day
   default: 0.5
 - name: CranePostWidth
   id: 0x8989ec2b
-  type: Float32
+  type: Float
   description: Width of the post that holds up the crane model
   default: 1.5
 - name: CranePostGap
   id: 0x8989ec2c
-  type: Float32
+  type: Float
   description: Size of gap between the crane post and the scaffold
   default: 0.5
 - name: CraneHeightAboveScaffold
   id: 0x8989ec2d
-  type: Float32
+  type: Float
   description: How far above the scaffold to place the bottom of the crane
   default: 3
 - name: CraneRotationTime
   id: 0x8989ec2e
-  type: Float32
+  type: Float
   description: Milliseconds to complete one full rotation
   default: 6000
 - name: ItemName
@@ -4605,7 +4605,7 @@
   description: The item name that will be visible to the player in game.
 - name: PowerLineControlMaxVerticalDistance
   id: 0x89a18fc4
-  type: Float32
+  type: Float
   description: Max vertical distance from the center of the line at which the
     control points are placed
   default: 10
@@ -4616,7 +4616,7 @@
   default: 5
 - name: TerrainTexTilingFactor
   id: 0x89a312c0
-  type: Float32
+  type: Float
   description: 100 meters of terrain corresponds to this fraction of texture in
     farthest zoom
   default: 0.17
@@ -4628,7 +4628,7 @@
     same texture family member
 - name: EmergencyVehicleIdleTime
   id: 0x89aec88b
-  type: Float32
+  type: Float
   description: How long in seconds an emergency vehicle will remain idle when
     repathing or handling event
   default: 5
@@ -4650,12 +4650,12 @@
   default: 150
 - name: BrushCost
   id: 0x8a020101
-  type: Float32
+  type: Float
   count: 5
   description: Cost/application at different zoom levels
 - name: BrushWiggleAmount
   id: 0x8a020102
-  type: Float32
+  type: Float
   description: Cost/application at different zoom levels
   default: 30
 - name: BrushActiveSound
@@ -4672,17 +4672,17 @@
   description: "Component1: Texture id"
 - name: Comp1AlignedWithMouseMoveDirection
   id: 0x8a020201
-  type: Bool
+  type: Boolean
   description: "Component1: should be aligned with the mouse movement direction"
 - name: Comp1Width
   id: 0x8a020202
-  type: Float32
+  type: Float
   count: 5
   description: "Component1: zoom specific widths"
   default: 128
 - name: Comp1Strength
   id: 0x8a020203
-  type: Float32
+  type: Float
   count: 5
   description: "Component1: zoom specific brush strengths"
   default: 0.4
@@ -4701,7 +4701,7 @@
   description: "Component1: Decal texture id for paint brush"
 - name: Comp1MaxDecalRotation
   id: 0x8a020207
-  type: Float32
+  type: Float
   description: "Component1: Max rotation of decal texture (degrees)"
 - name: Comp1MaxPlacementsPerCell
   id: 0x8a020208
@@ -4719,17 +4719,17 @@
   description: "Component2: Texture id"
 - name: Comp2AlignedWithMouseMoveDirection
   id: 0x8a020301
-  type: Bool
+  type: Boolean
   description: "Component2: should be aligned with the mouse movement direction"
 - name: Comp2Width
   id: 0x8a020302
-  type: Float32
+  type: Float
   count: 5
   description: "Component2: zoom specific widths"
   default: 128
 - name: Comp2Strength
   id: 0x8a020303
-  type: Float32
+  type: Float
   count: 5
   description: "Component2: zoom specific brush strengths"
   default: 0.4
@@ -4748,7 +4748,7 @@
   description: "Component2: Decal texture id for paint brush"
 - name: Comp2MaxDecalRotation
   id: 0x8a020307
-  type: Float32
+  type: Float
   description: "Component2: Max rotation of decal texture (degrees)"
 - name: Comp2MaxPlacementsPerCell
   id: 0x8a020308
@@ -4766,17 +4766,17 @@
   description: "Component3: Texture id"
 - name: Comp3AlignedWithMouseMoveDirection
   id: 0x8a020401
-  type: Bool
+  type: Boolean
   description: "Component3: should be aligned with the mouse movement direction"
 - name: Comp3Width
   id: 0x8a020402
-  type: Float32
+  type: Float
   count: 5
   description: "Component3: zoom specific widths"
   default: 128
 - name: Comp3Strength
   id: 0x8a020403
-  type: Float32
+  type: Float
   count: 5
   description: "Component3: zoom specific brush strengths"
   default: 0.4
@@ -4795,7 +4795,7 @@
   description: "Component3: Decal texture id for paint brush"
 - name: Comp3MaxDecalRotation
   id: 0x8a020407
-  type: Float32
+  type: Float
   description: "Component3: Max rotation of decal texture (degrees)"
 - name: Comp3MaxPlacementsPerCell
   id: 0x8a020408
@@ -4813,17 +4813,17 @@
   description: "Component4: Texture id"
 - name: Comp4AlignedWithMouseMoveDirection
   id: 0x8a020501
-  type: Bool
+  type: Boolean
   description: "Component4: should be aligned with the mouse movement direction"
 - name: Comp4Width
   id: 0x8a020502
-  type: Float32
+  type: Float
   count: 5
   description: "Component4: zoom specific widths"
   default: 128
 - name: Comp4Strength
   id: 0x8a020503
-  type: Float32
+  type: Float
   count: 5
   description: "Component4: zoom specific brush strengths"
   default: 0.4
@@ -4842,7 +4842,7 @@
   description: "Component4: Decal texture id for paint brush"
 - name: Comp4MaxDecalRotation
   id: 0x8a020507
-  type: Float32
+  type: Float
   description: "Component4: Max rotation of decal texture (degrees)"
 - name: Comp4MaxPlacementsPerCell
   id: 0x8a020508
@@ -4860,48 +4860,48 @@
   description: Freight traffic that can arrive at this building.
 - name: CrimeJoblessIndicatorSmoothingFactor
   id: 0x8a0cbaa3
-  type: Float32
+  type: Float
   default: 0.75
 - name: CrimeR$EQBaseCriminalityCurve
   id: 0x8a0cbaa4
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeR$$EQBaseCriminalityCurve
   id: 0x8a0cbaa5
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeR$$$EQBaseCriminalityCurve
   id: 0x8a0cbaa6
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeR$JoblessRatioCriminalityCurve
   id: 0x8a0cbaa7
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeR$$JoblessRatioCriminalityCurve
   id: 0x8a0cbaa8
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeR$$$JoblessRatioCriminalityCurve
   id: 0x8a0cbaa9
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeCriminalityCrimesCurve
   id: 0x8a0cbaaa
-  type: Float32
+  type: Float
   count: -2
 - name: CrimePoliceProtectionCrimeAttenuation
   id: 0x8a0cbaab
-  type: Float32
+  type: Float
   count: -2
 - name: CrimeCrimeGridDecayFactor
   id: 0x8a0cbaac
-  type: Float32
+  type: Float
   description: "Example: 0.5 means values get halved every month"
   default: 0.5
 - name: CrimeCriminalGridDecayFactor
   id: 0x8a0cbaad
-  type: Float32
+  type: Float
   description: Fraction (0 to 1.0) of unjailed criminals that will commit crimes next month
   default: 0.68
 - name: Worth
@@ -4912,13 +4912,13 @@
   default: 100
 - name: AgeToOutputLevelResponseCurve
   id: 0x8a1e07ee
-  type: Float32
+  type: Float
   count: -4
   description: Converts the current age degradation of the plant to a multiplier
     for production level
 - name: PipeBurstProbability
   id: 0x8a235c56
-  type: Float32
+  type: Float
   description: Likelihood per month that a distressed pipe will burst
   default: 0.001
 - name: ItemDescription
@@ -4965,12 +4965,12 @@
   description: Brush belongs to god mode, miscellaneous category
 - name: BudgetBondInterestRate
   id: 0x8a3fb98d
-  type: Float32
+  type: Float
   description: Interest applied to principal once and added to total
   default: 8.5
 - name: AudioLayerWeight
   id: 0x8a3fc5dd
-  type: Float32
+  type: Float
   description: Priority scalar
   default: 1
 - name: WaterPollutionDelta
@@ -4991,25 +4991,25 @@
   description: Min/max length in cars, including engine, of commuter trains
 - name: NDb_MinDealAmountGarbage
   id: 0x8a46933d
-  type: Float32
+  type: Float
   description: Min deal amount for garbage deal
   default: 1000
 - name: BudgetWaningWealthPropertyTaxMultiplier
   id: 0x8a480df7
-  type: Float32
+  type: Float
   count: 3
   description: Multiplier applied to a building tax value for each level of
     difference in wealth level
   default: 1
 - name: VehicleSkid
   id: 0x8a4efa75
-  type: Float32
+  type: Float
   description: Percentage (0.0 - 1.0) of skid that will be applied to vehicle
     turns.  0 = clamp to paths
   default: 0.2
 - name: MaxBusesPerSecond
   id: 0x8a511dd1
-  type: Float32
+  type: Float
   description: Max number of buses to cross a tile per second
   default: 2
 - name: AudioLayerPositionMode
@@ -5019,7 +5019,7 @@
   default: 1
 - name: IsGroundModel
   id: 0x8a5e5db8
-  type: Bool
+  type: Boolean
   description: Present if this prop is a ground-based model suitable for demolish
     fx, shadows, and collision avoidance.
 - name: AudioMusicPlaylistEntry1
@@ -5147,25 +5147,25 @@
     education levels (12 total)
 - name: AirEffectByZoneType
   id: 0x8a67e373
-  type: Float32
+  type: Float
   count: 16
   description: Effect (multiplier) this ordinance has on air pollution for each zone type
   default: 1
 - name: WaterEffectByZoneType
   id: 0x8a67e374
-  type: Float32
+  type: Float
   count: 16
   description: Effect (multiplier) this ordinance has on water pollution for each zone type
   default: 1
 - name: GarbageEffectByZoneType
   id: 0x8a67e376
-  type: Float32
+  type: Float
   count: 16
   description: Effect (multiplier) this ordinance has on garbage for each zone type
   default: 1
 - name: TrafficAirPollutionEffect
   id: 0x8a67e378
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinance has on air pollution generated by traffic
   default: 1
 - name: AudioLayerDensityMode
@@ -5175,7 +5175,7 @@
   default: 1
 - name: MonthlyCostPerPipe
   id: 0x8a84778f
-  type: Float32
+  type: Float
   description: Maintenance cost for each pipe occupant
   default: 0.1
 - name: SchoolCapacityToStaffDivisor
@@ -5192,7 +5192,7 @@
   default: 30
 - name: CatalogMonthlyCostFloat
   id: 0x8a94eee0
-  type: Float32
+  type: Float
   count: -1
   description: Float value for displaying monthly cost in the catalog - not simulated
 - name: AudioLayerPositionSmoothDelta
@@ -5207,13 +5207,13 @@
     generic crime prop.
 - name: NDd_UnsuspensionPeriod
   id: 0x8b58c59e
-  type: Float32
+  type: Float
   description: If after suspension period the deal's at default during this number
     of days it will get killed without being re-suspended.
   default: 90
 - name: ConditionalAutomaton
   id: 0x8bbd735e
-  type: Bool
+  type: Boolean
   description: If true, automaton will be ghosted in the earned vehicle catalog
     view until an advisor condition is satisfied
 - name: RunwayEndNumber
@@ -5222,17 +5222,17 @@
   description: Indicate the location of the end of a runway. Must come in pairs.
 - name: GarbageTransportVersusLandfillTiles
   id: 0x8c19c3e9
-  type: Float32
+  type: Float
   count: -4
   description: How much garbage can be delivered to the landfill each month
 - name: AudioAEMSZoomVolumes
   id: 0x8c376d4f
-  type: Float32
+  type: Float
   count: 5
   description: Volume for AEMS system at each zoom level
 - name: FerryFare
   id: 0x8c3caef5
-  type: Float32
+  type: Float
   description: Income per traveller from a ferry trip
 - name: TravellersPerBus
   id: 0x8c3e8185
@@ -5274,17 +5274,17 @@
   default: 1
 - name: MfYearlyAmbientTemperature
   id: 0xa7607d73
-  type: Float32
+  type: Float
   description: mfYearlyAmbientTemperature
   default: 65
 - name: MfYearlyAmbientTemperatureVariation
   id: 0xa7607d74
-  type: Float32
+  type: Float
   description: mfYearlyAmbientTemperatureVariation
   default: 0.5
 - name: MfYearlyAmbientTemperatureVariationFactor
   id: 0xa7607d75
-  type: Float32
+  type: Float
   description: mfYearlyAmbientTemperatureVariationFactor
   default: 0.5
 - name: MnSeaModerationRadius
@@ -5294,48 +5294,48 @@
   default: 10
 - name: MfSeaModerationFactor
   id: 0xa7607d77
-  type: Float32
+  type: Float
   description: mfSeaModerationFactor
   default: 0.879
 - name: MfAltitudeTemperatureFactor
   id: 0xa7607d78
-  type: Float32
+  type: Float
   description: mfAltitudeTemperatureFactor
   default: 0.082
 - name: MfWindChillTemperatureFactor
   id: 0xa7607d79
-  type: Float32
+  type: Float
   description: mfWindChillTemperatureFactor
   default: 0.25
 - name: MfYearlyAmbientMoisture
   id: 0xa7607d7a
-  type: Float32
+  type: Float
   description: mfYearlyAmbientMoisture
   default: 0.5
 - name: MfYearlyAmbientMoistureVariation
   id: 0xa7607d7b
-  type: Float32
+  type: Float
   description: mfYearlyAmbientMoistureVariation
   default: 0.2
 - name: MfYearlyAmbientMoistureVariationFactor
   id: 0xa7607d7c
-  type: Float32
+  type: Float
   description: mfYearlyAmbientMoistureVariationFactor
   default: 0.2
 - name: MfMoistureHillFactor
   id: 0xa7607d7d
-  type: Float32
+  type: Float
   description: Wind effect on hill moisture (H20 fractional units per m/s of
     perpendicular wind penetration)
   default: 0.5
 - name: MfValleyMoistureBoost
   id: 0xa7607d7e
-  type: Float32
+  type: Float
   description: Moisture boost for areas detected as valleys (0-1)
   default: 0.1
 - name: MfMoistureValleySlopeThreshold
   id: 0xa7607d7f
-  type: Float32
+  type: Float
   description: Minimum concavity required to detect area as valley (linear height
     deviation in meters)
   default: 4
@@ -5351,21 +5351,21 @@
   default: 15
 - name: MfYearlyAmbientWindSpeed
   id: 0xa7607d86
-  type: Float32
+  type: Float
   description: mfYearlyAmbientWindSpeed
   default: 3
 - name: MfYearlyAmbientWindDirection0
   id: 0xa7607d87
-  type: Float32
+  type: Float
   description: mfYearlyAmbientWindDirection[0]
   default: 1
 - name: MfYearlyAmbientWindDirection1
   id: 0xa7607d88
-  type: Float32
+  type: Float
   description: mfYearlyAmbientWindDirection[1]
 - name: MfWindPerturbationRange
   id: 0xa7607d89
-  type: Float32
+  type: Float
   description: Angular window for periodic variation of ambient wind direction
     (0-90 degrees)
   default: 60
@@ -5381,7 +5381,7 @@
   default: 1
 - name: WaterUseReduction
   id: 0xa8f4eb0c
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinace has on water use
   default: 1
 - name: IntelliScrollOuterRadiusPixels
@@ -5397,7 +5397,7 @@
   default: 2
 - name: PowerLineMonthlyUpkeep
   id: 0xa9132ef9
-  type: Float32
+  type: Float
   description: Cost of maintaining each cell of wire connected to this power pole
   default: 0.1
 - name: AirPollutionThreshold
@@ -5407,12 +5407,12 @@
   default: 16000
 - name: BudgetTaxRateOccWeight_R$
   id: 0xa9188ef5
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the R$ occupant type's taxes
   default: 1
 - name: HealthInitMaxAllowedFunding
   id: 0xa9189479
-  type: Float32
+  type: Float
   count: 2
   description: Initial and Maximum allowed funding percentage for health department
 - name: SchoolStrikeDuration
@@ -5422,35 +5422,35 @@
   default: 10
 - name: BudgetTaxRateOccWeight_Cs$
   id: 0xa918c929
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the CS$ occupant type's taxes
   default: 1
 - name: BudgetTaxRateOccWeight_IDirty
   id: 0xa918c942
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the IDirty occupant
     type's taxes
   default: 1
 - name: SchoolCoverageRadiusEffect
   id: 0xa91b3af4
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200) by which this ordinance affects coverage
     radius of schools
   default: 110
 - name: SchoolEffectivenessVsDistanceEffect
   id: 0xa91b3afa
-  type: Float32
+  type: Float
   count: -2
   description: Maps % of coverage distance from a school to EQ boost %
 - name: ShimmerMinQuadWidth
   id: 0xa91cbe00
-  type: Float32
+  type: Float
   count: 5
   description: Min quad widths (meters) in different zooms
   default: 127
 - name: ShimmerMaxQuadWidth
   id: 0xa91cbe01
-  type: Float32
+  type: Float
   count: 5
   description: Max quad widths (meters) in different zooms
   default: 254
@@ -5462,22 +5462,22 @@
   default: 600
 - name: MaxRoadsFundingPercent
   id: 0xa92356ae
-  type: Float32
+  type: Float
   description: Maximum allowed funding percentage for roads
   default: 1.2
 - name: MaxMassTransitFundingPercent
   id: 0xa92356af
-  type: Float32
+  type: Float
   description: Maximum allowed funding percentage for mass transit
   default: 1.2
 - name: DamagedRoadExtraStepCost
   id: 0xa92356b0
-  type: Float32
+  type: Float
   description: Additional cost to travel on a damaged road tile
   default: 32
 - name: IncomePerTileByTravelType
   id: 0xa92356b1
-  type: Float32
+  type: Float
   count: 9
   description: "Income gained for each tile: walk, car, bus, rail, freight truck,
     freight train, subway, lt rl"
@@ -5488,18 +5488,18 @@
   default: 60
 - name: NetworkTrafficCapacity
   id: 0xa92356b3
-  type: Float32
+  type: Float
   count: 13
   description: Level at which traffic volume becomes uncomfortable to sims (rd,
     rl, hwy, st, x, x, ave, sub, lr)
 - name: TravelTypeGeneratesTraffic
   id: 0xa92356b4
-  type: Bool
+  type: Boolean
   count: 9
   description: "Order: walk, car, bus, train, subway, lt rl"
 - name: TravelTypeCanReachDestination
   id: 0xa92356b5
-  type: Bool
+  type: Boolean
   count: 9
   description: "Order: walk, car, bus, train, subway, lt rl"
 - name: MaximumDistanceFromOriginToNetwork
@@ -5509,48 +5509,48 @@
   default: 1
 - name: CongestionVsSpeed
   id: 0xa92356b9
-  type: Float32
+  type: Float
   count: -4
   description: Maps speed multiplier as a function of congestion
 - name: CommuteTripMaxTime
   id: 0xa92356ba
-  type: Float32
+  type: Float
   description: Maximum time for a commute trip in minutes
   default: 90
 - name: IntersectionAndTurnCapacityEffect
   id: 0xa92356bb
-  type: Float32
+  type: Float
   count: -3
   description: Diminishing effect of an intersection or turn on capacity
 - name: TripStartingCostByTravelType
   id: 0xa92356bc
-  type: Float32
+  type: Float
   count: 9
   description: Starting overhead cost in time for each travel type
 - name: JobScalingConstant
   id: 0xa92356bd
-  type: Float32
+  type: Float
   description: Multiplies building capacity to determine number of jobs there
   default: 2
 - name: PopulationBackgroundTraffic
   id: 0xa92356be
-  type: Float32
+  type: Float
   count: 3
   description: Amount of background (non-trip) traffic volume generated per
     population point for R, C, and I zones
 - name: TravelTypeAffectedByTraffic
   id: 0xa92356bf
-  type: Bool
+  type: Boolean
   count: 9
   description: "Order: walk, car, bus, train, freight truck, freight train, subway, lt rl"
 - name: HospitalEffectivenessVsAverageAge
   id: 0xa92ae3bd
-  type: Float32
+  type: Float
   count: -2
   description: Maps Average age of a tract to the % HQ boost the hospital gives the tract
 - name: SchoolEQBoost
   id: 0xa92ae446
-  type: Float32
+  type: Float
   description: The EQ boost the school gives at it's origin.
   default: 10
 - name: SchoolTypeIDList
@@ -5560,23 +5560,23 @@
   description: Variable length list of type IDs for this school
 - name: SchoolEQBoostEffect
   id: 0xa92d9d7a
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects all EQ values
   default: 110
 - name: HospitalEffectivenessVsWealth
   id: 0xa92d9fcd
-  type: Float32
+  type: Float
   count: -2
   description: Maps wealth level to HQ boost %
 - name: WaterPollutionToHQDecayCurve
   id: 0xa941b028
-  type: Float32
+  type: Float
   count: -2
   description: Maps amount of water pollution in a tract to the rate at which the
     HQ in that tract decays
 - name: UndergroundTrenchFloorDepth
   id: 0xa96e5641
-  type: Float32
+  type: Float
   description: Default depth of underground network trench floor below terrain
   default: 15
 - name: PropOccupantClassID
@@ -5591,7 +5591,7 @@
   description: RGBA color for watered terrain cells in pipe view
 - name: BudgetTaxRateOccWeight_IHighTech
   id: 0xa9a36e47
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the IHighTech
     occupant type's taxes
   default: 1
@@ -5624,26 +5624,26 @@
   description: In meters beyond occupant/lot boundaries
 - name: WindScalar
   id: 0xa9b6ecd6
-  type: Float32
+  type: Float
   description: Wind effect on spread direction is directly scaled by this
 - name: FiresAreaTop
   id: 0xa9b6ecd7
-  type: Float32
+  type: Float
   count: -2
   description: Number of top fires per unit area
 - name: FiresAreaSide
   id: 0xa9b6ecd8
-  type: Float32
+  type: Float
   count: -2
   description: Number of side fires per unit area
 - name: ExtinguishRateVsProtection
   id: 0xa9b6ecd9
-  type: Float32
+  type: Float
   count: -2
   description: The rate at which a fire declines as a function of protection
 - name: PercentFireStartVsFlammability
   id: 0xa9b6ecda
-  type: Float32
+  type: Float
   count: -2
   description: Maps Flammability(0-255) to percent chance(0-100) of fire starting
     when ignited
@@ -5654,34 +5654,34 @@
   default: 4
 - name: MaxBeachAltitude
   id: 0xa9c283d1
-  type: Float32
+  type: Float
   description: How high above the sea level(meters), does the beach extend
   default: 7
 - name: FireCrewOffsets
   id: 0xa9d6cc17
-  type: Float32
+  type: Float
   count: 2
   description: Offsets (in meters) of fire team from center of engine and director
     from front of engine
 - name: FireCrewCompetencePct
   id: 0xa9d6cc18
-  type: Float32
+  type: Float
   count: 3
   description: Min Percentage (0.0-1.0) of fire team efficiency that will give the
     super, normal, and incompetent animations
 - name: KeyboardScrollSpeed
   id: 0xa9e581fb
-  type: Float32
+  type: Float
   description: Speed of scrolling when arrow key is held down.
   default: 0.2
 - name: NetworkLotConfigPropertyMaxSlopeAllowed
   id: 0xaa120972
-  type: Float32
+  type: Float
   description: The Max slope this lot will develop on
   default: 64
 - name: NetworkLotConfigPropertyMinSlopeAllowed
   id: 0xaa120973
-  type: Float32
+  type: Float
   description: The Min slope this lot will develop on
 - name: CrimeName
   id: 0xaa12fcb0
@@ -5707,7 +5707,7 @@
   description: Lot conditions compatible with crime
 - name: RelativeOccurrance
   id: 0xaa12fcb8
-  type: Float32
+  type: Float
   description: Relative occurance weight of this crime, only has meaning relative
     to values for other crimes.
   default: 10
@@ -5718,7 +5718,7 @@
   default: 7
 - name: HealthEffectStrength
   id: 0xaa19f6ea
-  type: Float32
+  type: Float
   description: This is an optional property. If defined and less than 0, the
     building is a "health hazard" (in a way other than the standard pollution
     types) and will depress HQ in an area defined by the radius and strength. If
@@ -6391,7 +6391,7 @@
   description: GUID of the sound to play when the occupant is clicked on with query tool
 - name: GarbageServiceCostPerUnitOfGarbage
   id: 0xaa1f8ab7
-  type: Float32
+  type: Float
   description: Cost per unit of garbage sent to landfill, incinerator or w2e
   default: 0.1
 - name: IndustrialBuildingType
@@ -6439,12 +6439,12 @@
   default: 1024
 - name: NDd_MinDealTermYears
   id: 0xaa46934b
-  type: Float32
+  type: Float
   description: Min term a deal can be had before renewal.
   default: 1
 - name: VolcanoLavaScaleIntensityOfProduction
   id: 0xaa4bc72a
-  type: Float32
+  type: Float
   description: Multiplying Factor to the Response curve so response curve shape preserves
   default: 1
 - name: GraphType
@@ -6461,7 +6461,7 @@
     value is zero. This can be negative for buildings that decrease pollution.
 - name: IgnoreLighting
   id: 0xaa5a9633
-  type: Bool
+  type: Boolean
   description: Automaton should not be lit by the lighting manager
 - name: MayorRating
   id: 0xaa5b8407
@@ -6469,12 +6469,12 @@
   description: This value get added globally to mayor rating
 - name: RadiationSpewIntensity
   id: 0xaa5c04c5
-  type: Float32
+  type: Float
   description: Intensity of spewed radiation (at center of area) when nuclear
     power plant explodes.
 - name: RadiationSpewRadius
   id: 0xaa5c04c8
-  type: Float32
+  type: Float
   description: Radius of the area in which radiation is spread when nuclear power
     plant explodes (in cells).
 - name: LandmarkHomageKey
@@ -6484,12 +6484,12 @@
   description: Resource key of string to be displayed in the landmark's query dialog
 - name: GoofyStatResponseCurve
   id: 0xaa60e745
-  type: Float32
+  type: Float
   count: -4
   description: Response curve for the Goofy Stat field in query dialogs
 - name: FundingPercentageToPowerPoleDecayrepair
   id: 0xaa713782
-  type: Float32
+  type: Float
   count: -4
   description: Converts a funding level (percentage) into a decay rate (negative
     numbers) or repair rate (positive numbers)
@@ -6536,7 +6536,7 @@
     UFO: 0x5
 - name: BridgeObstruction
   id: 0xabe1b5a3
-  type: Bool
+  type: Boolean
   description: This property prevents water automata from crossing under the bridge tile.
 - name: ShadowModelKey
   id: 0xac2bc81c
@@ -6551,38 +6551,38 @@
   default: 250
 - name: MaxTerrainHtIncrease
   id: 0xc7b36ca4
-  type: Float32
+  type: Float
   description: How much can terrain be raised during network placement [0.0 - 100000.0]
   default: 300
 - name: MaxTerrainHtDecrease
   id: 0xc7b36ca5
-  type: Float32
+  type: Float
   description: How much can terrain be lowered during network placement [0.0 - 100000.0]
   default: 300
 - name: MaxNetworkHtAdjustment
   id: 0xc804dd86
-  type: Float32
+  type: Float
   description: "Range: [0.0 - 100000.0]"
   default: 100
 - name: MinTerrainSlopeForTunnelStart
   id: 0xc804dd87
-  type: Float32
+  type: Float
   description: Min terrain slope to trigger tunnel placement
   default: 60
 - name: MaxTunnelSlope
   id: 0xc804dd88
-  type: Float32
+  type: Float
   description: Maximum slope of tunnel (in degrees)
   default: 15
 - name: MaxDisplacementBeyondRefPlane
   id: 0xc804dd89
-  type: Float32
+  type: Float
   description: Maximum amount (in meters) by which a network vertex is allowed to
     move beyond reference plane
   default: 15
 - name: UseFreehandMode
   id: 0xc804dd90
-  type: Bool
+  type: Boolean
   description: Use freehand mode of placement (i.e., anchor points freeze)
 - name: NumFramesBetweenAnchorPtFreeze
   id: 0xc804dd91
@@ -6598,27 +6598,27 @@
   default: 10
 - name: MaxDistFromTerrain
   id: 0xc804dd93
-  type: Float32
+  type: Float
   description: How far away from the terrain is the network allowed to be [0.0 - 100000.0]
   default: 300
 - name: MaxRetainingWallHt
   id: 0xc804dd94
-  type: Float32
+  type: Float
   description: Max height of the retaining walls [0.0 - 100000.0]
   default: 10
 - name: MaxPylonHt
   id: 0xc804dd95
-  type: Float32
+  type: Float
   description: Max height of the supporting pylons [Reating wall ht - 100000.0]
   default: 30
 - name: MaxHtDiffBetweenLandBridgeEnds
   id: 0xc804dd96
-  type: Float32
+  type: Float
   description: Max allowed terrain height diff between the two ends of land bridges
   default: 20
 - name: SmoothenOnlyConnectedTiles
   id: 0xc804dd97
-  type: Bool
+  type: Boolean
   description: Smoothen only those tiles that are connected to the segment being placed
 - name: NumSmoothingProgressionSteps
   id: 0xc804dd98
@@ -6633,7 +6633,7 @@
   default: 6
 - name: NetworkHtChangeThatRequiresFixing
   id: 0xc804dd9a
-  type: Float32
+  type: Float
   description: If an existing network moves by less than this, we do not attempt
     to fix it (for efficiency)
   default: 2
@@ -6652,34 +6652,34 @@
   description: Amount of water consumed by this building per month.
 - name: PowerPlantEnergyConversionCost
   id: 0xc910b4ce
-  type: Float32
+  type: Float
   description: Cost to produce one unit of electricity, not including
     infrastructure maintenance
   default: 4
 - name: KSC4FoundationPropertySideTextureSize
   id: 0xc911eda0
-  type: Float32
+  type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
   default: 16
 - name: KSC4FoundationPropertyTopTextureSize
   id: 0xc911eda1
-  type: Float32
+  type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
   default: 16
 - name: OBSSchoolMinAcceptableFunding
   id: 0xc91894a8
-  type: Float32
+  type: Float
   description: Minimum acceptable percentage for School department funding
   default: 60
 - name: SchoolStrikeResponseCurve
   id: 0xc91894cb
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to %
     chance of a School strike
 - name: SchoolEffectivenessVsAverageAgeEffect
   id: 0xc91b3b02
-  type: Float32
+  type: Float
   count: -2
   description: Maps average age to EQ boost %
   options:
@@ -6695,19 +6695,19 @@
     "100": 0x64
 - name: HospitalHQBoost
   id: 0xc9299659
-  type: Float32
+  type: Float
   description: Amount of monthly HQ boost from this building.  HQ can range
     between 0 and 200 and is automatically reduced by 3 each month, so to have a
     net positive effect this number should be greater than 3.
   default: 10
 - name: SchoolEffectivenessVsAverageAge
   id: 0xc9299662
-  type: Float32
+  type: Float
   count: -2
   description: Maps Average age of a tract to the % EQ boost the school gives the tract
 - name: EQDecay
   id: 0xc929c433
-  type: Float32
+  type: Float
   description: Amount by which EQ decays each month
   default: 1
 - name: LowWealthAverageAge
@@ -6727,18 +6727,18 @@
   default: 1
 - name: SchoolEffectivenessVsWealth
   id: 0xc92d7ec0
-  type: Float32
+  type: Float
   count: -2
   description: Maps wealth level to EQ boost %
 - name: HealthQuotientDecayEffect
   id: 0xc92d9c7a
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects the
     rate at which HQ decays
   default: 100
 - name: GarbagePollutionToHQDecayCurve
   id: 0xc941b02e
-  type: Float32
+  type: Float
   count: -2
   description: Maps amount of garbage pollution in a tract to the rate at which
     the HQ in that tract decays
@@ -6761,7 +6761,7 @@
   description: kPropertyID_LotConfigNetworkTileId
 - name: FlammabilityMultiplierSummer
   id: 0xc9b40128
-  type: Float32
+  type: Float
   description: flammability multiplier during summer
   default: 1
 - name: SFXDefaultPlopSound
@@ -6770,29 +6770,29 @@
   description: GUID of sound played when building is plopped
 - name: MovingVanFrequency
   id: 0xc9c18eae
-  type: Float32
+  type: Float
   description: How often (0.0-1.0) a moving van will be created in response to a
     new residence
   default: 0.8
 - name: AttractionThreshold
   id: 0xc9da95d4
-  type: Float32
+  type: Float
   count: 2
   description: Magnitude of a repulsor or attractor at which peds will break their
     paths to get away from or closer to it
 - name: FloraBurntSweepInterval
   id: 0xc9dbdd00
-  type: Float32
+  type: Float
   description: Days between sweeps for burnt stumps (may be fractional)
   default: 1
 - name: FloraBurntSweepSize
   id: 0xc9dbdd01
-  type: Float32
+  type: Float
   description: Maximum number of burnt stumps removed per sweep (may be fractional)
   default: 1
 - name: FloraElevationScaleRange
   id: 0xc9dbdd02
-  type: Float32
+  type: Float
   description: Meters from sea level over which to distribute the 16 elevation rows
   default: 200
 - name: AuxiliaryModel2Key
@@ -6803,19 +6803,19 @@
     emerg. vehicles)
 - name: GradeMaxAngle
   id: 0xc9ee640a
-  type: Float32
+  type: Float
   description: Maximum angle (in degrees) of network grade that will change the
     speed of a vehicle
   default: 45
 - name: GradeSpeedMultiplier
   id: 0xc9ee640b
-  type: Float32
+  type: Float
   description: Percentage that will be added to/subtracted from a vehicle's speed
     when driving up/down a grade at max angle
   default: 0.5
 - name: FireCrewMaxStreamDist
   id: 0xc9ee640c
-  type: Float32
+  type: Float
   description: Max distance between fire and crew for the crew to aim its water stream at it
   default: 50
 - name: EmergencyVehicleClearRadius
@@ -6831,13 +6831,13 @@
   default: 25
 - name: EQResetPercent
   id: 0xca027325
-  type: Float32
+  type: Float
   description: When average age reaches life expectancy in a tract, the tract's EQ
     is multiplied by this value
   default: 70
 - name: HQResetPercent
   id: 0xca027328
-  type: Float32
+  type: Float
   description: When average age reaches life expectancy in a tract, the tract's HQ
     is multiplied by this value
   default: 70
@@ -6869,7 +6869,7 @@
   description: List of template IDs for each growth stage
 - name: ObsoleteDemandThresholdsList
   id: 0xca271782
-  type: Float32
+  type: Float
   count: -1
   description: List of demand thresholds for each growth stage. What this value
     refers to is zone type specific.
@@ -6887,7 +6887,7 @@
   description: List of trip capacities for each growth stage for airport or seaport
 - name: EfficiencyDistressThreshold
   id: 0xca480830
-  type: Float32
+  type: Float
   description: Efficiency value under which the lot begins to distress
   default: 25
 - name: StageUpgradeCost
@@ -6912,13 +6912,13 @@
   default: 6
 - name: HeightMap
   id: 0xca271800
-  type: Float32
+  type: Float
   count: -1
   description: Optional list of vertex altitude values corresponding to each cell
     in the lot for airport or seaport
 - name: AudioZoomDistances
   id: 0xca359f17
-  type: Float32
+  type: Float
   count: 5
   description: Distance above ground or sea for microphone position
 - name: IntelliScrollInnerRadiusPixels
@@ -6939,7 +6939,7 @@
   default: 150
 - name: ScrollGradient
   id: 0xca383ca7
-  type: Float32
+  type: Float
   description: "# of pixels per speed increase (higher is slower)."
   default: 1
 - name: WaterErosionIterations
@@ -6984,7 +6984,7 @@
   description: Range of opacity values for clouds (min,max; 0-255).
 - name: AudioDensity2FreshPlayCurve
   id: 0xca4132e9
-  type: Float32
+  type: Float
   count: -2
   description: Density to freshness play percentage curve
 - name: ItemDescriptionKey
@@ -7004,27 +7004,27 @@
   description: My sim default name resource key
 - name: NDa_MinTermToSustainSellDealCostMonths
   id: 0xca46931f
-  type: Float32
+  type: Float
   description: Min term required for the neighbor to be able to sustain sell deal cost
   default: 60
 - name: NDc_MaxDealProfitFactor
   id: 0xca469346
-  type: Float32
+  type: Float
   description: Max deal profit factor (1 + NDc_MinDealProfitFactor)
   default: 10
 - name: FreightTruckDensityCurve
   id: 0xca51189a
-  type: Float32
+  type: Float
   count: -2
   description: Maps city population to a multiplier (0.0-1.0) for freight truck density
 - name: MaxCommuteTrainsPerSecond
   id: 0xca511de6
-  type: Float32
+  type: Float
   description: Max number of commute trains to cross a tile per second
   default: 2
 - name: MaxFreightTrucksPerSecond
   id: 0xca511df2
-  type: Float32
+  type: Float
   description: Max number of freight trucks to cross a tile per second
   default: 2
 - name: VehicleBlurSpeedKPH
@@ -7039,13 +7039,13 @@
   description: Mayor Rating effect. Magnitude (-100 to +100), radius (in cells).
 - name: TransitSwitchEntryCostVsBudget
   id: 0xca5f7821
-  type: Float32
+  type: Float
   count: -4
   description: Maps the budget percent (0-100%) to a multiplier on the time cost
     of using a transit switch.
 - name: FundingPercentageToPipeDecayrepair
   id: 0xca7138c4
-  type: Float32
+  type: Float
   count: -4
   description: Converts a funding level (percentage) into a decay rate (negative
     numbers) or repair rate (positive numbers)
@@ -7056,7 +7056,7 @@
   description: Simulator MONTH (1-12) and DAY (1-31) to start this prop's date interval
 - name: TripLengthToMinutesDisplayMultiplier
   id: 0xca76013b
-  type: Float32
+  type: Float
   description: Multiply the trip length map values (0-255, 255 = Max Commute Time)
     by this value to get a time in minutes for display purposes
   default: 0.5
@@ -7066,12 +7066,12 @@
   description: Specifies the camera zoom level to use on disaster go to
 - name: UnusedMedicalProperty
   id: 0xca9b4ca8
-  type: Bool
+  type: Boolean
   description: Present in the Medical Clinic and Hospital. It is not used within
     the exe file though.
 - name: HoverQueryOnly
   id: 0xcaa9ab92
-  type: Bool
+  type: Boolean
   description: If present, the occupant will respond to hover queries but not to
     click-queries
 - name: SubjectiveFactorThresholdMinValue
@@ -7090,7 +7090,7 @@
   default: 20
 - name: TripStartingCostByTravelTypeForCarPref
   id: 0xcad64136
-  type: Float32
+  type: Float
   count: 9
   description: Starting overhead cost in time for each travel type for car preferred trips
 - name: RiotMaxInstances
@@ -7100,57 +7100,57 @@
   default: 3
 - name: SpawnRecallForStreets
   id: 0xcba5895b
-  type: Float32
+  type: Float
   count: 4
   description: a% (0.0-1.0) chance of adding/removing automaton from tile when
     actual auto count is b% (0.0-1.0) lower/higher than desired.
 - name: SpawnRecallForRoads
   id: 0xcba5895c
-  type: Float32
+  type: Float
   count: 4
   description: a% (0.0-1.0) chance of adding/removing automaton from tile when
     actual auto count is b% (0.0-1.0) lower/higher than desired.
 - name: SpawnRecallForAvenues
   id: 0xcba5895d
-  type: Float32
+  type: Float
   count: 4
   description: a% (0.0-1.0) chance of adding/removing automaton from tile when
     actual auto count is b% (0.0-1.0) lower/higher than desired.
 - name: SpawnRecallForHighway
   id: 0xcba5895e
-  type: Float32
+  type: Float
   count: 4
   description: a% (0.0-1.0) chance of adding/removing automaton from tile when
     actual auto count is b% (0.0-1.0) lower/higher than desired.
 - name: SpawnRecallForRail
   id: 0xcba5895f
-  type: Float32
+  type: Float
   count: 4
   description: a% (0.0-1.0) chance of adding/removing automaton from tile when
     actual auto count is b% (0.0-1.0) lower/higher than desired.
 - name: CongestionToCPSForStreets
   id: 0xcba58a5b
-  type: Float32
+  type: Float
   count: -4
   description: Response curve of congestion vs. expected automata per second on a tile
 - name: CongestionToCPSForRoads
   id: 0xcba58a5c
-  type: Float32
+  type: Float
   count: -4
   description: Response curve of congestion vs. expected automata per second on a tile
 - name: CongestionToCPSForAvenues
   id: 0xcba58a5d
-  type: Float32
+  type: Float
   count: -4
   description: Response curve of congestion vs. expected automata per second on a tile
 - name: CongestionToCPSForHighway
   id: 0xcba58a5e
-  type: Float32
+  type: Float
   count: -4
   description: Response curve of congestion vs. expected automata per second on a tile
 - name: CongestionToCPSForRail
   id: 0xcba58a5f
-  type: Float32
+  type: Float
   count: -4
   description: Response curve of congestion vs. expected automata per second on a tile
 - name: SoundBankID
@@ -7160,12 +7160,12 @@
   default: 2878692432
 - name: AudioAEMSMaxVolume
   id: 0xcbfb03fa
-  type: Float32
+  type: Float
   description: Max volume for AEMS systems
   default: 1
 - name: AudioAEMSMasterFxLevel
   id: 0xcbfb03ff
-  type: Float32
+  type: Float
   description: Master FX level
   default: 1
 - name: PoliceStationTotalCopterDispatches
@@ -7175,7 +7175,7 @@
   default: 1
 - name: PlayerdriveVehiclesPerSecond
   id: 0xcc101142
-  type: Float32
+  type: Float
   description: "Desired # of vehicles per second that will be generated on roads
     during player-drive"
   default: 0.0098
@@ -7195,7 +7195,7 @@
     Must use a valid prop ID as a property value. See SC4PropOccupant.h
 - name: KSC4BuildingModelRotationProperty
   id: 0xe83a081d
-  type: Bool
+  type: Boolean
   description: If property is present (regardless of value), then the model can be
     rotated and contains 'full geometry'.
 - name: CrimeUpdatePeriod
@@ -7205,27 +7205,27 @@
   default: 40
 - name: CrimePoliceFactor
   id: 0xe8ec2721
-  type: Float32
+  type: Float
   description: Crime Police Factor
   default: 0.25
 - name: WaterEffect
   id: 0xe8f79c8b
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinance has on water pollution
   default: 1
 - name: GarbageEffect
   id: 0xe8f79c90
-  type: Float32
+  type: Float
   description: Effect (multiplier) this ordinance has on garbage
   default: 1
 - name: KMaxCellAltitudeDeltaForFlatnessProperty
   id: 0xe900ea24
-  type: Float32
+  type: Float
   description: kMaxCellAltitudeDeltaForFlatnessProperty
   default: 1
 - name: KMaxSlopeForFlatnessProperty
   id: 0xe900ea25
-  type: Float32
+  type: Float
   description: kMaxSlopeForFlatnessProperty
   default: 1
 - name: KDefaultLotFoundationTypeProperty
@@ -7245,12 +7245,12 @@
   default: 1
 - name: KLotAutoLevelInternalAltitudeDeltaProperty
   id: 0xe900ea29
-  type: Float32
+  type: Float
   description: kLotAutoLevelInternalAltitudeDeltaProperty
   default: 20
 - name: MaxAreaSlopeAllowedForLevellingProperty
   id: 0xe900ea2a
-  type: Float32
+  type: Float
   description: MaxAreaSlopeAllowedForLevellingProperty
   default: 40
 - name: LotDeveloperNightUpdateInterval
@@ -7298,39 +7298,39 @@
     InsidetoOutside: 0x82
 - name: TransitSwitchEntryCost
   id: 0xe90e25a2
-  type: Float32
+  type: Float
   description: Cost in travel time to enter this transit switch. Once inside,
     travel time inside the building is zero.
   default: 6
 - name: TransitSwitchTrafficCapacity
   id: 0xe90e25a3
-  type: Float32
+  type: Float
   description: When traffic density rises above this capacity, it costs trips
     extra travel time.
   default: 20
 - name: PowerMaxAllowedFunding
   id: 0xe911e2d1
-  type: Float32
+  type: Float
   description: Maximum allowed funding percentage for utilities
   default: 120
 - name: PowerPlantMaxProductionRatio
   id: 0xe911e2fc
-  type: Float32
+  type: Float
   description: Maximum allowed percentage for power plant production
   default: 110
 - name: OBSHealthMinAcceptableFunding
   id: 0xe918946f
-  type: Float32
+  type: Float
   description: Minimum acceptable percentage for Health department funding
   default: 60
 - name: SchoolStrikeEfficiency
   id: 0xe91894b3
-  type: Float32
+  type: Float
   description: Efficiency of School buildings will drop to this % during a strike
   default: 50
 - name: BudgetTaxRateOccWeight_R$$
   id: 0xe918c920
-  type: Float32
+  type: Float
   description: Multiplier to tweak the relative weighting of the R$$ occupant type's taxes
   default: 1
 - name: BuildingValue
@@ -7339,18 +7339,18 @@
   description: Base value in simoleons of this building.
 - name: HealthQuotientBoostEffect
   id: 0xe91b3aee
-  type: Float32
+  type: Float
   description: Percentage (from 0 to 200%) by which this ordinance affects all HQ values
   default: 110
 - name: SchoolPopulationVsDistance
   id: 0xe921a936
-  type: Float32
+  type: Float
   count: -2
   description: Maps distance from a covered tract to a % of that tract's
     population that is actually served.
 - name: HealthEffectivenessVsAverageAgeEffect
   id: 0xe92d9db4
-  type: Float32
+  type: Float
   count: -2
   description: Maps average age of a tract to addional HQ boost %
 - name: KZM_mZoneMinCellSize
@@ -7394,7 +7394,7 @@
   default: 4294967295
 - name: ZoneMaxSlope
   id: 0xe94825b9
-  type: Float32
+  type: Float
   count: 16
   description: Meters per cell must be less than this value NRRRCCCIIIMASSLP
   default: 16
@@ -7410,7 +7410,7 @@
   description: Pairs of cell vertices connected by retaining walls / side flaps
 - name: PylonCornerXZs
   id: 0xe974eaa3
-  type: Float32
+  type: Float
   count: 8
   description: (x,z) corresponding to the 4 corners of the pylon w.r.t cell center
 - name: TunnelResourceIds
@@ -7425,7 +7425,7 @@
   description: Tunnel model rotations
 - name: TunnelModelHeights
   id: 0xe974eaa6
-  type: Float32
+  type: Float
   count: -1
   description: Tunnel piece model heights
 - name: SpecialPylonModelId
@@ -7441,12 +7441,12 @@
   description: RGBA color for watered buildings in pipe view
 - name: KSC4BuildingNoModelProperty
   id: 0xe9822d62
-  type: Bool
+  type: Boolean
   description: If present, then there are no building-style models for this
     building and if there are any, they should be ignored.
 - name: LotConfigPropertyMaxSlopeAllowed
   id: 0xe99b068c
-  type: Float32
+  type: Float
   description: The Max slope this lot will develop on
   default: 90
 - name: LotConfigPropertyDoConstruction
@@ -7456,13 +7456,13 @@
     will be fully constructed when plopped
 - name: PowerLineControlMaxHorizDistance
   id: 0xe9a18d3f
-  type: Float32
+  type: Float
   description: Max horizontal distance from the center of the line at which the
     control points are placed
   default: 16
 - name: PowerLineControlVertical
   id: 0xe9a1e8d4
-  type: Float32
+  type: Float
   description: Percent of line length at which to place control points, vertically
   default: 0.15
 - name: PropWealth
@@ -7477,7 +7477,7 @@
     HighWealth: 0x3
 - name: PowerLineScalingFactor
   id: 0xe9ac43e7
-  type: Float32
+  type: Float
   count: 5
   description: Array of scaling factors for the width of the power lines, one per
     zoom level.
@@ -7508,70 +7508,70 @@
     be created when building is constructed or plopped.
 - name: SpecialCaseOnly
   id: 0xe9d117c3
-  type: Bool
+  type: Boolean
   description: If set, occupant is never chosen based on user action or normal simulation.
 - name: Selfilluminated
   id: 0xe9f0fa86
-  type: Bool
+  type: Boolean
   description: If set to true, specifies that the prop should be treated as self-lit
 - name: AuraParkEffect
   id: 0xea023270
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraPollutionEffectAir
   id: 0xea023271
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraPollutionEffectWater
   id: 0xea023272
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraPollutionEffectGarbage
   id: 0xea023273
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraPollutionEffectRadiation
   id: 0xea023274
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraSchoolEffect
   id: 0xea023275
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraHospitalEffect
   id: 0xea023276
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraCrimeEffect
   id: 0xea023277
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraTripLength
   id: 0xea023278
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraTraffic
   id: 0xea023279
-  type: Float32
+  type: Float
   count: -2
   description: Maps grid data to aura effect
 - name: AuraLongTermDecayFactor
   id: 0xea02327a
-  type: Float32
+  type: Float
   description: (1.0 means no decay, 0.0 means full decay (no smoothing)
   default: 0.5
 - name: AuraShortTermDecayFactor
   id: 0xea02327b
-  type: Float32
+  type: Float
   description: (1.0 means no decay, 0.0 means full decay (no smoothing)
   default: 0.5
 - name: AuraBaseAuraLow
@@ -7588,32 +7588,32 @@
   description: Base aura for R$$$,Cs$$$,Co$$$ occupancy
 - name: AuraTaxRateChangeEffect
   id: 0xea02327f
-  type: Float32
+  type: Float
   count: -2
   description: Maps tax rate change (in percent) to aura effect
 - name: AuraValueWealthEffect
   id: 0xea023280
-  type: Float32
+  type: Float
   count: -2
   description: Maps (value_type-wealth_type) to aura effect
 - name: AuraTransientEffectFire
   id: 0xea023290
-  type: Float32
+  type: Float
   count: 2
   description: magnitude and radius in meters of transient aura effect
 - name: AuraTransientEffectFlora
   id: 0xea023291
-  type: Float32
+  type: Float
   count: 2
   description: magnitude and radius in meters of transient aura effect
 - name: AuraTransientEffectCivicPlop
   id: 0xea023292
-  type: Float32
+  type: Float
   count: 2
   description: magnitude and radius in meters of transient aura effect
 - name: AuraTransientEffectNetworkPlop
   id: 0xea023293
-  type: Float32
+  type: Float
   count: 2
   description: magnitude and radius in meters of transient aura effect
 - name: AuraHotspotSettings
@@ -7624,7 +7624,7 @@
     minimum weight"
 - name: AuraHotspotRiotProbability
   id: 0xea0232a1
-  type: Float32
+  type: Float
   count: -2
   description: maps hotspot weight (# of cells above threshold) to monthly fire
     probability (in percent 0-100)
@@ -7636,7 +7636,7 @@
     use. Otherwise, just use the default kGZCLSID_cS3DModelInstance.
 - name: AgeDegradationRate
   id: 0xea1cf220
-  type: Float32
+  type: Float
   description: How fast this building's condition decays over time. The "life
     expectancy" of the plant in months can be calculated roughly as the
     reciprocal of this number. Thus, a plant with a 50-year lifespan will have a
@@ -7644,21 +7644,21 @@
   default: 0.00319
 - name: SoftFailureThreshold
   id: 0xea1cf221
-  type: Float32
+  type: Float
   description: When a building's "Age Degradation" exceeds this level, the plant
     will begin to exhibit various kinds of "soft" failures (visual distress,
     sounds, frequent outages, etc.). This will typically be a number near 1.0.
   default: 1
 - name: HardFailureThreshold
   id: 0xea1cf222
-  type: Float32
+  type: Float
   description: When a building's "Age Degradation" exceeds this level, the plant
     will either become abandoned or will have a chance to undergo violent
     catastrophic failure (i.e., blow up). This will typically be 1.0 or higher.
   default: 1.1
 - name: WaterBuildingPumpingCost
   id: 0xea1e3c53
-  type: Float32
+  type: Float
   description: Cost to produce one unit of water, not including infrastructure maintenance.
   default: 4
 - name: LotResourceKey
@@ -7680,7 +7680,7 @@
   description: Specify default zodiac sign for My Sim.
 - name: MySimIsMale
   id: 0xea296f91
-  type: Bool
+  type: Boolean
   description: Specify My Sim gender (true=male, false=female)
 - name: CityExclusionGroup
   id: 0xea2e078b
@@ -7689,12 +7689,12 @@
     specified group can be built in a single city."
 - name: ConditionalBuilding
   id: 0xea3209f8
-  type: Bool
+  type: Boolean
   description: If true, building will appear ghosted in the menu until triggered
     by a script condition
 - name: NoShadows
   id: 0xea3209f9
-  type: Bool
+  type: Boolean
   description: If true, building will not draw shadows
 - name: CategoryGodValley
   id: 0xea33d694
@@ -7702,7 +7702,7 @@
   description: Brush belongs to god mode, valley category
 - name: KPropertyID_WaterFlora
   id: 0xea346888
-  type: Bool
+  type: Boolean
   description: If this property is present, then the given flora is a water flora
     and its elevation preference table entries are interpreted as depth below
     sea level instead of altitude above sea level
@@ -7743,13 +7743,13 @@
   description: Array of number of new leaders to spawn at each stage
 - name: RiotProtectionvsSuppression
   id: 0xea400624
-  type: Float32
+  type: Float
   count: -2
   description: Maps Police Protection value (0-255) to Riot Suppression( 0=none,
     1=riot progression halted, 2+=riot regresses
 - name: WaterDepartmentMaxFunding
   id: 0xea4025a9
-  type: Float32
+  type: Float
   description: Max funding percentage for the water department
   default: 120
 - name: FreightTrainLength
@@ -7759,105 +7759,105 @@
   description: Min/max length in cars, including engine, of freight trains
 - name: NDb_MinDealAmountPower
   id: 0xea46932c
-  type: Float32
+  type: Float
   description: Min deal amount for power deal
   default: 1000
 - name: NDd_MaxDealTermYears
   id: 0xea46934f
-  type: Float32
+  type: Float
   description: Max term a deal can be had before renewal.
   default: 10
 - name: AudioZoomDistanceCameraPull
   id: 0xea4a7c55
-  type: Float32
+  type: Float
   count: 5
   description: Amount of horz dist to camera to pull to camera
 - name: NDa_MaxOverDemandFactorForBuyer
   id: 0xea4ad2ff
-  type: Float32
+  type: Float
   description: buyer_demand * NDa_MaxOverDemandFactorForBuyer is the maximum
     amount the buyer can buy.
   default: 1.1
 - name: NDa_MinBudgetForBuyDeals
   id: 0xea4ae9ef
-  type: Float32
+  type: Float
   description: Budget level below which new buy deals become prohibited.
   default: 10000
 - name: GraphMinimumYValue
   id: 0xea4aedc6
-  type: Float32
+  type: Float
   description: Overrides the automatic minimum Y value.
 - name: VolcanoLavaCurveProductionRate
   id: 0xea4bc6e4
-  type: Float32
+  type: Float
   count: -4
   description: Production Rate for the Flow of VolcanoLava (Input Time in Fraction
     from [0, 1])
 - name: MaxFreightTrainsPerSecond
   id: 0xea511de0
-  type: Float32
+  type: Float
   description: Max number of freight trains to cross a tile per second
   default: 2
 - name: RequiresPowerToAnimate
   id: 0xea5393ed
-  type: Bool
+  type: Boolean
   description: Set this to true if the occupant requires power to animate
 - name: SchoolFundingToCoverageCurve
   id: 0xea53b30f
-  type: Float32
+  type: Float
   count: -2
   description: Maps difference between actual % funding and % ideal funding to % coverage
 - name: AvgAgeTo1_10AgeGroup
   id: 0xea540621
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 1-10 age group
 - name: AvgAgeTo11_20AgeGroup
   id: 0xea540622
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 11-20 age group
 - name: AvgAgeTo21_30AgeGroup
   id: 0xea540623
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 21-30 age group
 - name: AvgAgeTo31_40AgeGroup
   id: 0xea540624
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 31-40 age group
 - name: AvgAgeTo41_50AgeGroup
   id: 0xea540625
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 41-50 age group
 - name: AvgAgeTo51_60AgeGroup
   id: 0xea540626
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 51-60 age group
 - name: AvgAgeTo61_70AgeGroup
   id: 0xea540627
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 61-70 age group
 - name: AvgAgeTo71_80AgeGroup
   id: 0xea540628
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 71-80 age group
 - name: AvgAgeTo81_90AgeGroup
   id: 0xea540629
-  type: Float32
+  type: Float
   count: -2
   description: How average age translates to the distribution of population into
     the 81-90 age group
@@ -7918,78 +7918,78 @@
   description: Monthly cost(s) in Simoleans for this budget item.
 - name: JailJailbreakResponseCurve
   id: 0xea614f63
-  type: Float32
+  type: Float
   count: -2
   description: Maps REAL jail capacity to jailbreak chance
 - name: JailJailbreakEscapeePercentage
   id: 0xea614f64
-  type: Float32
+  type: Float
   count: 2
   description: Min/max percentage (0.0-100.0) of jail capacity that will escape
     during jailbreaks
 - name: JailEndJailbreakCapacity
   id: 0xea614f65
-  type: Float32
+  type: Float
   description: Stop any jailbreak in progress when REAL jail capacity percentage
     goes below this value
   default: 0.5
 - name: NoHighlight
   id: 0xea639fb1
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: GeneralOK
   id: 0xea639fb2
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: GeneralNotOK
   id: 0xea639fb3
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: CreateOK
   id: 0xea639fb4
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: CreateNotOK
   id: 0xea639fb5
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: DestroyOK
   id: 0xea639fb6
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: DestroyNotOK
   id: 0xea639fb7
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: QueryOK
   id: 0xea639fb8
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: QueryNotOK
   id: 0xea639fb9
-  type: Float32
+  type: Float
   count: 4
   description: "-"
   default: 1
 - name: MaxMassTransitStrategyTripLength
   id: 0xea7b5f06
-  type: Float32
+  type: Float
   description: Max time in raw trip length that the mass transit preferred
     strategy will go using mass transit
   default: 4
@@ -8000,7 +8000,7 @@
   default: 1
 - name: TripStartingCostByTravelTypeForMassTransit
   id: 0xea8c3cdb
-  type: Float32
+  type: Float
   count: 9
   description: Starting overhead cost in time for each travel type for mass
     transit preferred trips
@@ -8034,12 +8034,12 @@
   description: Relative sort ordering in the catalog
 - name: BudgetDifficultyTaxMultiplier
   id: 0xebff69e7
-  type: Float32
+  type: Float
   count: 3
   description: Multiplier for tax revenue by difficulty type
 - name: MayorLimoMoneyProperties
   id: 0xec15654a
-  type: Float32
+  type: Float
   count: 3
   description: Cost per second, desirability radius meters, desirability magnitude
 - name: AuxiliaryModel3Key

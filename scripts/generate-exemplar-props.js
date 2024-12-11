@@ -18,6 +18,8 @@ for (let prop of props) {
 	let standard = +prop.getAttribute('Default');
 	if (!id) continue;
 	let type = prop.getAttribute('Type') || 'Uint32';
+	if (type === 'Float32') type = 'Float';
+	if (type === 'Bool') type = 'Boolean';
 	let description = prop.querySelector('HELP')?.textContent.trim();
 	let options = [...prop.querySelectorAll('OPTION')].map(option => {
 		let value = option.getAttribute('Value');
