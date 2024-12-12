@@ -8,11 +8,12 @@ import { ExemplarProperty, kPropertyType } from './exemplar-properties.js';
 import { invertMap, hex, inspect } from 'sc4/utils';
 import { kFileType } from './symbols.js';
 import type { byte, float, sint32, sint64, TGIArray, uint16, uint32 } from 'sc4/types';
-import type {
-    Primitive,
-    Value,
-    Key,
-    NumberLike,
+import {
+	isKey,
+    type Primitive,
+    type Value,
+    type Key,
+    type NumberLike,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
@@ -38,6 +39,12 @@ export type PropertyOptions<K extends Key = Key> = {
 	type?: PropertyValueType;
 	value: Value<K>;
 	comment?: string;
+};
+
+type AddPropertyOptions<K extends Key = Key> = {
+	id: K;
+	value: Value<K>
+	type?: PropertyValueType;
 };
 
 const LotObjectRange = [
@@ -201,14 +208,25 @@ abstract class BaseExemplar {
 		let prop = this.prop(key);
 		if (!prop) return undefined;
 		let { value } = prop;
-		if (Array.isArray(value) && prop.name) {
-			let info = ExemplarProperty[
-				prop.name as keyof typeof ExemplarProperty
-			];
-			let canBeArray = Array.isArray(info[
+		if (prop.name && value !== undefined) {
+			let info = ExemplarProperty[prop.name as keyof typeof ExemplarProperty];
+			let shouldBeArray = typeof info !== 'number' && Array.isArray(info[
 				kPropertyType as keyof typeof info
 			]);
-			return canBeArray ? value : value.at(0) as Value<K>;
+
+			// Note: we use any below because TypeScript knows that somethings 
+			// wrong if this happens - which is indeed the case! However, there 
+			// is no runtime guarantee for this, so our runtime correction is 
+			// labeled as invalid by TypeScript. "any" to the rescue.
+			let isArray = Array.isArray(value);
+			if (shouldBeArray && !isArray) {
+				return [value] as any;
+			} else if (!shouldBeArray && isArray) {
+				return (value as any)[0];
+			} else {
+				return value;
+			}
+
 		} else {
 			return value;
 		}
@@ -246,18 +264,29 @@ abstract class BaseExemplar {
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 
 	// something specific.
+	addProperty<K extends Key>(idOrName: K, value: Value<K>, typeHint?: PropertyValueType): Property<K>;
+	addProperty<K extends Key>(propOptions: AddPropertyOptions<K>): Property<K>;
 	addProperty<K extends Key>(
-		idOrName: K,
-		value: Value<K>,
-		typeHint: PropertyValueType = Uint32,
-	) {
-		let id = normalizeId(idOrName);
-		let type = normalizeType(id, value, typeHint);
-		let prop = new Property<K>({
-			id,
-			type,
-			value,
-		});
+		idOrPropOptions: K | AddPropertyOptions<K>,
+		value?: Value<K>,
+		typeHint: PropertyValueType = Uint32Array,
+	): Property<K> {
+		let options: PropertyOptions<K>;
+		if (isKey(idOrPropOptions)) {
+			if (typeof value === 'undefined') {
+				throw new TypeError(`You must specify a value for a property!`);
+			}
+			let id = normalizeId(idOrPropOptions);
+			let type = normalizeType(id, value, typeHint);
+			options = { id, value, type };
+		} else {
+			let { id, ...rest } = idOrPropOptions as AddPropertyOptions<K>;
+			options = {
+				id: normalizeId(id),
+				...rest,
+			};
+		}
+		let prop = new Property<K>(options);
 		this.props.push(prop);
 		this.#table.set(prop.id, prop);
 		return prop;

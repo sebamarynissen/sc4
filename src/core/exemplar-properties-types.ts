@@ -45,3 +45,18 @@ export type Key = string | NumberLike;
 export type Value<K extends Key = number> = K extends NumberLike
 		? Map<ExtractNumber<K>, ValueType>
 		: Map<K, ValueType>;
+
+/**
+ * Determines whether the given key can serve as an exemplar property key.
+ * 
+ * @{param} key {unknown}
+ */
+export function isKey(key: unknown): key is Key {
+	if (typeof key === 'number' || typeof key === 'string') {
+		return true;
+	} else if (typeof key === 'object' && key !== null) {
+		return Symbol.toPrimitive in key;
+	} else {
+		return false;
+	}
+}

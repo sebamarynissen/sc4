@@ -133,6 +133,29 @@ describe('The Exemplar file', function() {
 
 	});
 
+	describe('#get()', function() {
+
+		it('automatically unwraps single-value arrays for non-array properties', function() {
+
+			let exemplar = new Exemplar();
+			exemplar.addProperty({
+				id: 'ExemplarType',
+				value: [0x1234567],
+			} as any);
+			expect(exemplar.get(0x10)).to.equal(0x1234567);
+
+		});
+
+		it('automatically wraps array-values in arrays when not in an array', function() {
+
+			let exemplar = new Exemplar();
+			exemplar.addProperty('ResourceKeyType4', 0x1234567 as any);
+			expect(exemplar.get('ResourceKeyType4')).to.eql([0x1234567]);
+
+		});
+
+	});
+
 	describe('#clone()', function() {
 
 		this.slow(200);
