@@ -233,7 +233,7 @@ export default class PluginIndex {
 					let exemplar = await entry.readAsync();
 					let families = this.getPropertyValue(exemplar, Family);
 					if (!families) return;
-					for (let family of [families].flat()) {
+					for (let family of families) {
 						if (family) {
 							let key = h(family as number);
 							this.families[key] ??= [];

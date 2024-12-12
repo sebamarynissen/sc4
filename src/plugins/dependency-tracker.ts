@@ -385,9 +385,9 @@ class DependencyTrackingContext {
 
 		// If we're dealing with a building, prop or flora, then it's possible 
 		// that the idd actually refers to a family id.
-		let tasks = [];
-		let entries;
-		let family;
+		let tasks: Promise<Dep.Dependency>[] = [];
+		let entries: Entry[] = [];
+		let family: number = 0;
 		switch (lotObject.type) {
 			case LotObjectType.Building:
 			case LotObjectType.Prop:
@@ -397,11 +397,11 @@ class DependencyTrackingContext {
 					family = iid;
 				}
 		}
-		if (!entries) {
+		if (entries.length === 0) {
 			entries = this.index.findAll({
 				type: getFileTypeByLotObject(lotObject),
 				instance: iid,
-			});
+			}) as Entry[];
 		}
 
 		// IMPORTANT! If we're reading the building of the lot, then our 
@@ -415,7 +415,7 @@ class DependencyTrackingContext {
 		// if a family already contains props from SimCity_1.dat, then the other 
 		// items in the family are actually optional! We need to reflect this 
 		// somehow.
-		if (family) {
+		if (family > 0) {
 			let core = entries.filter(entry => {
 				return entry.dbpf.file?.match(/SimCity_\d\.dat$/i);
 			});
@@ -444,7 +444,7 @@ class DependencyTrackingContext {
 		// Now wait for everything to be read in and then return the dep. Could 
 		// be a family as well by the way.
 		let result = await Promise.all(tasks);
-		if (family) {
+		if (family > 0) {
 			let dep = new Dep.Family(result, family);
 			return dep;
 		} else {
