@@ -40,9 +40,9 @@ for (let prop of props) {
 	let { name } = prop;
 	if (name.match(/^\d/)) name = `'${name}'`;
 	let value = hex(prop.id);
-	if (prop.options || prop.type !== 'Uint32' || (prop.count < 0 || prop.count > 1)) {
-		let { type, count } = prop;
-		if (count < 0 || count > 1) {
+	if (prop.options || prop.type !== 'Uint32' || isArray(prop)) {
+		let { type } = prop;
+		if (isArray(prop)) {
 			type = `[${type}]`;
 		}
 		let id = value;
@@ -74,8 +74,8 @@ export default ExemplarProperty;
 
 // Group all exemplar ids by type identifier.
 let grouped = Object.groupBy(props, prop => {
-	let { type, count } = prop;
-	if (Math.abs(+count) > 1) {
+	let { type } = prop;
+	if (isArray(prop)) {
 		return `${type.toLowerCase()}[]`;
 	} else {
 		return type.toLowerCase();
@@ -136,6 +136,11 @@ code += `${union};\n`;
 
 function hex(nr) {
 	return '0x'+nr.toString(16).padStart(8, '0');
+}
+
+function isArray(prop) {
+	let { count } = prop;
+	return count < 0 || count > 1;
 }
 
 fs.writeFileSync(

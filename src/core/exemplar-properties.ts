@@ -12636,7 +12636,6 @@ type StringKeys_00 =
 	| 'K24HourClockNightEndProperty'
 	| 'SFXAlarmSoundId'
 	| 'BudgetBondPaybackMonths'
-	| 'AudioORFilters'
 	| 'VolcanoLavaOrificeRadius'
 	| 'SFXAmbienceDecayedSound'
 	| 'SimsPerTrainCar'
@@ -12651,19 +12650,13 @@ type StringKeys_00 =
 	| 'PowerGenerated'
 	| 'PowerPlantType'
 	| 'PowerConsumed'
-	| 'BuildingpropFamily'
 	| 'ID'
 	| 'YearAvailable'
 	| 'AdvisorID'
 	| 'UtilityStrikeDuration'
 	| 'RadiationPollutionThreshold'
-	| 'HospitalTypeIDList'
-	| 'FieldLots'
 	| 'FloraClusterType'
 	| 'CategoryMayorMisc'
-	| 'AudioANDFilters'
-	| 'AudioNOTFilters'
-	| 'AudioAmbienceExemplarIds'
 	| 'QueryExemplarGUID'
 	| 'SFXAlarmAmbienceSound'
 	| 'CrimeType'
@@ -12672,18 +12665,12 @@ type StringKeys_00 =
 	| 'MySimWalkGender'
 	| 'FinalGroupId'
 	| 'ExemplarCategory'
-	| 'CapsDemand'
-	| 'Sums'
-	| 'LandValueDesirabilityIDs'
 	| 'ConstructionTypeSelectionBias'
 	| 'LotDeveloperStayNewTime'
-	| 'TractDeveloperAvailableStyles'
 	| 'NumEndPieces'
-	| 'EndPieceExemplars'
 	| 'RepeatPieceExemplar'
 	| 'SupportInterval'
 	| 'NumSupportPieces'
-	| 'SupportPieceExemplars'
 	| 'MinSpan'
 	| 'EndSupportInterval'
 	| 'MinPylons'
@@ -12730,14 +12717,12 @@ type StringKeys_00 =
 	| 'DataViewHighlightColor'
 	| 'DataViewLegendsHeader'
 	| 'DemandDaysOfTaxPenalty'
-	| 'NationDemandIDList'
 	| 'ConstructionCrewLeadVehicleInstance'
 	| 'ConstructionCrewFollowVehicleInstance'
 	| 'ConstructionCrewVehiclePathType'
 	| 'SimoleanCostPerTile'
 	| 'SFXActivateSound'
 	| 'PowerPolePlacementCost'
-	| 'DesirabilityEffectIDs'
 	| 'MaxGarbageOnValve'
 	| 'LandfillTileCapacity'
 	| 'LandfillTotalMaxGarbageMonthly'
@@ -12777,25 +12762,14 @@ type StringKeys_00 =
 	| 'GlobalEffectTrigger'
 	| 'AirPollutionDelta'
 	| 'HardFailureType'
-	| 'GraphPlotDataSource1'
-	| 'GraphPlotDataSource2'
-	| 'GraphPlotCombineOp'
-	| 'GraphPlotLabelKey'
-	| 'GraphPlotSeries'
 	| 'Obliterate_ClusterWindowWidth'
-	| 'TrendBarDataSource'
 	| 'ModelIsPrelit'
 	| 'PluginPackID'
-	| 'DataViewTravelTypes'
-	| 'SFXActiveSound'
 	| 'PlayerdriveVehicleMaxCount'
 	| 'MnMonthsBetweenCellCoverage'
 	| 'DemandSourceIndex'
 	| 'RecyclingCenterPercentReduction'
 	| 'WaterProduced'
-	| 'LotConfigPropertyFamily'
-	| 'LotConfigPropertyFenceDefinition'
-	| 'LotConfigPropertyRetainingWallTypes'
 	| 'BuildingFoundation'
 	| 'MaxRadiationPollutionValueForUI'
 	| 'HealthStrikeDuration'
@@ -12826,7 +12800,6 @@ type StringKeys_00 =
 	| 'ItemOrder'
 	| 'ItemSubmenu'
 	| 'ItemButtonID'
-	| 'PortTypeExemplarIDs'
 	| 'SimoleanCostPerBridgeTile'
 	| 'SimoleanCostPerTunnelTile'
 	| 'CategoryGodMisc'
@@ -12838,7 +12811,6 @@ type StringKeys_00 =
 	| 'AudioLayerPositionSmoothDelta'
 	| 'CrimeIncidentID'
 	| 'TravellersPerBus'
-	| 'OccupantTypes'
 	| 'MMoistureVariationScale'
 	| 'MMoistureDitherScale'
 	| 'IncineratorMonthlyCapacity'
@@ -12847,10 +12819,8 @@ type StringKeys_00 =
 	| 'AirPollutionThreshold'
 	| 'SchoolStrikeDuration'
 	| 'MaximumDistanceFromOriginToNetwork'
-	| 'SchoolTypeIDList'
 	| 'PropOccupantClassID'
 	| 'MaxAcceptablePumpedWaterPollutionLevel'
-	| 'OccupantGroups'
 	| 'SFXQuerySound'
 	| 'UIActiveCursorId'
 	| 'UIIdleCursorId'
@@ -12869,8 +12839,6 @@ type StringKeys_00 =
 	| 'SFXDefaultPlopSound'
 	| 'SFXAmbienceGoodSound'
 	| 'NumGrowthStages'
-	| 'LotStageTemplateIDs'
-	| 'TripCapacityList'
 	| 'IntelliScrollInnerRadiusPixels'
 	| 'HullHorizontal'
 	| 'HullVertical'
@@ -12882,7 +12850,6 @@ type StringKeys_00 =
 	| 'VehicleBlurSpeedKPH'
 	| 'RiotMaxInstances'
 	| 'SoundBankID'
-	| 'AutoloadAuxiliaryModels'
 	| 'PropType'
 	| 'CrimeUpdatePeriod'
 	| 'KDefaultLotFoundationTypeProperty'
@@ -12891,12 +12858,6 @@ type StringKeys_00 =
 	| 'LotDeveloperNightUpdateInterval'
 	| 'LotDeveloperNightUpdateCount'
 	| 'NetworkTextureId'
-	| 'TunnelResourceIds'
-	| 'TunnelModelRotations'
-	| 'SpecialPylonModelId'
-	| 'ResponseVehicleType'
-	| 'ResponsePedestrianType'
-	| 'kSC4BuildingModelClassProperty'
 	| 'LotResourceKey'
 	| 'MySimBitmapID'
 	| 'CityExclusionGroup'
@@ -12905,9 +12866,6 @@ type StringKeys_00 =
 	| 'RiotNumStages'
 	| 'RiotSecondsBetweenStages'
 	| 'RiotController2Stage'
-	| 'BudgetItemDepartment'
-	| 'BudgetItemLine'
-	| 'BudgetItemPurpose'
 	| 'SimoleanCostPerTileToDemolish'
 	| 'AudioAEMSMasterFxType'
 	| 'MySimWealthLevel'
@@ -12971,8 +12929,6 @@ type StringKeys_02 =
 	| 'RailDamageAccidentFactor'
 	| 'TransitSwitchFare'
 	| 'FillingDegree'
-	| 'DemandSatisfiedFloat'
-	| 'DemandCreatedFloat'
 	| 'MaxSlopeOnNetworkSide'
 	| 'MonthlyChance'
 	| 'MonthlyIncomeFactor'
@@ -13016,15 +12972,11 @@ type StringKeys_02 =
 	| 'DemandEffectIHT'
 	| 'AudioVolumeAttackLimit'
 	| 'MaximumHQBoost'
-	| 'LandValueDesirabilityFactors'
 	| 'ConstructionResourcesPerResident'
 	| 'TractDeveloperOverbuild'
 	| 'TractDeveloperRedevelopSizeThreshold'
 	| 'TractDeveloperOccupancyVariation'
 	| 'MinClearance'
-	| 'EndPieceSpanLocations'
-	| 'ColumnTopPosForSupportPieces'
-	| 'ColumnTopPosForEndPieces'
 	| 'MinHold'
 	| 'MinEndHold'
 	| 'PylonsHeight'
@@ -13165,12 +13117,10 @@ type StringKeys_02 =
 	| 'CrimeSimMultiplier'
 	| 'HealthEffectRadius'
 	| 'SimoleanCostPerMeterDisplaced'
-	| 'SFXAlarmTime'
 	| 'NDb_MinDealAmountWater'
 	| 'NDc_MinDealProfitFactor'
 	| 'GraphMaximumYValue'
 	| 'GraphYTickSpacing'
-	| 'GraphPlotScale'
 	| 'Obliterate_SmokeScreenFormationTime'
 	| 'CoverageRadiusSlopMultiplier'
 	| 'DeathsDoorHQ'
@@ -13218,7 +13168,6 @@ type StringKeys_02 =
 	| 'MaxBusesPerSecond'
 	| 'TrafficAirPollutionEffect'
 	| 'MonthlyCostPerPipe'
-	| 'CatalogMonthlyCostFloat'
 	| 'NDd_UnsuspensionPeriod'
 	| 'FerryFare'
 	| 'MfYearlyAmbientTemperature'
@@ -13292,9 +13241,7 @@ type StringKeys_02 =
 	| 'FireCrewMaxStreamDist'
 	| 'EQResetPercent'
 	| 'HQResetPercent'
-	| 'ObsoleteDemandThresholdsList'
 	| 'EfficiencyDistressThreshold'
-	| 'HeightMap'
 	| 'ScrollGradient'
 	| 'NDa_MinTermToSustainSellDealCostMonths'
 	| 'NDc_MaxDealProfitFactor'
@@ -13319,7 +13266,6 @@ type StringKeys_02 =
 	| 'SchoolStrikeEfficiency'
 	| 'BudgetTaxRateOccWeight_R$$'
 	| 'HealthQuotientBoostEffect'
-	| 'TunnelModelHeights'
 	| 'LotConfigPropertyMaxSlopeAllowed'
 	| 'PowerLineControlMaxHorizDistance'
 	| 'PowerLineControlVertical'
@@ -13367,6 +13313,8 @@ type StringKeys_03 =
 	| 'FundingToDamageAccelerationCurve'
 	| 'BudgetInitialTaxRate'
 	| 'OccupantSize'
+	| 'DemandSatisfiedFloat'
+	| 'DemandCreatedFloat'
 	| 'LandmarkEffect'
 	| 'ParkEffect'
 	| 'HealthFundingToEfficiencyCurve'
@@ -13384,6 +13332,7 @@ type StringKeys_03 =
 	| 'CommuteTrainDensityCurve'
 	| 'AudioListenerGranularity'
 	| 'LandValueAltitudeEffect'
+	| 'LandValueDesirabilityFactors'
 	| 'LandValueDesirabilityCurve'
 	| 'StagePopluationMultiplier'
 	| 'LotDeveloperOccupancyThresholds'
@@ -13391,6 +13340,9 @@ type StringKeys_03 =
 	| 'TractDeveloperDemolitionCosts'
 	| 'TractDeveloperNewLotCosts'
 	| 'TractDeveloperMinVacancyRange'
+	| 'EndPieceSpanLocations'
+	| 'ColumnTopPosForSupportPieces'
+	| 'ColumnTopPosForEndPieces'
 	| 'SupportColumnCorners'
 	| 'MainPylonCorners'
 	| 'CableStayedFrontAnchors'
@@ -13491,9 +13443,11 @@ type StringKeys_03 =
 	| 'GarbagePropRequestCurve'
 	| 'CrimeLayerClock'
 	| 'AudioZoomDistanceTweaks'
+	| 'SFXAlarmTime'
 	| 'WaterFundingToEfficiencyCurve'
 	| 'AudioDensity2FreshVolumeCurve'
 	| 'AudioDensity2LoopVolumeCurve'
+	| 'GraphPlotScale'
 	| 'Obliterate_NumClustersVsTime'
 	| 'TrendBarResponseCurve'
 	| 'MonthlyCostForNetworkTile'
@@ -13555,6 +13509,7 @@ type StringKeys_03 =
 	| 'AirEffectByZoneType'
 	| 'WaterEffectByZoneType'
 	| 'GarbageEffectByZoneType'
+	| 'CatalogMonthlyCostFloat'
 	| 'GarbageTransportVersusLandfillTiles'
 	| 'AudioAEMSZoomVolumes'
 	| 'HealthInitMaxAllowedFunding'
@@ -13584,6 +13539,8 @@ type StringKeys_03 =
 	| 'SchoolEffectivenessVsWealth'
 	| 'GarbagePollutionToHQDecayCurve'
 	| 'AttractionThreshold'
+	| 'ObsoleteDemandThresholdsList'
+	| 'HeightMap'
 	| 'AudioZoomDistances'
 	| 'AudioDensity2FreshPlayCurve'
 	| 'FreightTruckDensityCurve'
@@ -13604,6 +13561,7 @@ type StringKeys_03 =
 	| 'HealthEffectivenessVsAverageAgeEffect'
 	| 'ZoneMaxSlope'
 	| 'PylonCornerXZs'
+	| 'TunnelModelHeights'
 	| 'PowerLineScalingFactor'
 	| 'AuraParkEffect'
 	| 'AuraPollutionEffectAir'
@@ -13675,7 +13633,6 @@ type StringKeys_04 =
 	| 'JailOvercapacityCostPerPerson'
 	| 'MaximumCatalogCost'
 	| 'MaximumAltCatalogCost'
-	| 'CatalogMonthlyCost'
 	| 'DesirabilityThresholdDecline'
 	| 'DesirabilityThresholdGrowth'
 	| 'BaselineDesirability'
@@ -13700,10 +13657,7 @@ type StringKeys_05 =
 	| 'LandfillDefaultLandfillCellMaintenanceCost'
 	| 'BudgetMaxBondAmount'
 	| 'Worth'
-	| 'BudgetRequirementsList'
-	| 'StageUpgradeCost'
-	| 'BuildingValue'
-	| 'BudgetItemCost';
+	| 'BuildingValue';
 
 type StringKeys_06 =
 	| 'BudgetMaxBonds'
@@ -13718,19 +13672,14 @@ type StringKeys_06 =
 	| 'GrowthStage'
 	| 'Flammability'
 	| 'HighWealthEQ'
-	| 'WealthFilter'
 	| 'WaterMinAlpha'
 	| 'RegionUse'
 	| 'TractSize'
-	| 'EndPieceRotations'
 	| 'RepeatPieceRotation'
-	| 'SupportPieceRotations'
 	| 'AutoFlattenUponCreation'
 	| 'ShoreCliffsUponCreation'
 	| 'WaterSource'
 	| 'HighWealthHQ'
-	| 'ZonePurposeFilter'
-	| 'ActiveTravelTypes'
 	| 'VehicleMinZoomVisibility'
 	| 'PedestrianMinZoomVisibility'
 	| 'AircraftMinZoomVisibility'
@@ -13744,11 +13693,7 @@ type StringKeys_06 =
 	| 'LotConfigRequiredRoads'
 	| 'PropRandomChance'
 	| 'MediumWealthHQ'
-	| 'ZoneFilter'
 	| 'LavaMinAlpha'
-	| 'GraphPlotColor'
-	| 'GraphPlotSeriesFillColor'
-	| 'GraphPlotSeriesLineColor'
 	| 'ActiveLotState'
 	| 'AnimatedPropPlayMode'
 	| 'PathLookaheadTiles'
@@ -13771,12 +13716,9 @@ type StringKeys_06 =
 	| 'Comp4BaseTextureVal'
 	| 'RunwayEndNumber'
 	| 'MassTransitUsageChance'
-	| 'OccupantTripZoneFilter'
-	| 'OccupantTripPurposeFilter'
 	| 'MaxBeachWidth'
 	| 'CrimeGridValue'
 	| 'TriggerFire'
-	| 'LotConditionFilter'
 	| 'IndustrialBuildingType'
 	| 'AudioZoomLoopEnable'
 	| 'CraneHints'
@@ -13784,7 +13726,6 @@ type StringKeys_06 =
 	| 'LowWealthAverageAge'
 	| 'LowWealthEQ'
 	| 'LowWealthHQ'
-	| 'LayerFilter'
 	| 'EmergencyVehicleClearRadius'
 	| 'AverageAgeResetValue'
 	| 'PortSize'
@@ -13797,8 +13738,6 @@ type StringKeys_06 =
 	| 'ZoneDisplayAlpha'
 	| 'LotConfigPropertyDoConstruction'
 	| 'PropWealth'
-	| 'ResponseVehicleCount'
-	| 'ResponsePedestrianCount'
 	| 'MySimZodiacSign'
 	| 'MaxCSIs'
 	| 'KPropertyID_RotationsAllowed';
@@ -13806,20 +13745,29 @@ type StringKeys_06 =
 type StringKeys_07 =
 	| 'UnwateredTerrainColor'
 	| 'CrimeEffect'
+	| 'WealthFilter'
 	| 'LandValueIntrinsicMinMax'
 	| 'LandValueWealthBoundaries'
 	| 'LandValueWaterEffect'
+	| 'EndPieceRotations'
+	| 'SupportPieceRotations'
 	| 'RippleLandVertexAlpha'
 	| 'RippleWaterVertexAlpha'
 	| 'TravelStrategyPercentWealthNone'
 	| 'TravelStrategyPercentWealth$'
 	| 'TravelStrategyPercentWealth$$'
 	| 'TravelStrategyPercentWealth$$$'
+	| 'ZonePurposeFilter'
 	| 'UnwateredBuildingColor'
+	| 'ActiveTravelTypes'
 	| 'VehicleLifespanRange'
 	| 'PedLifespanRange'
 	| 'KPropertyID_NetworkPlacementPattern'
+	| 'ZoneFilter'
 	| 'SimPropAnimRange'
+	| 'GraphPlotColor'
+	| 'GraphPlotSeriesFillColor'
+	| 'GraphPlotSeriesLineColor'
 	| 'LandValueRange'
 	| 'LotConfigPropertySize'
 	| 'LotConfigPropertyZoneTypes'
@@ -13827,16 +13775,23 @@ type StringKeys_07 =
 	| 'LotConfigPropertyPurposeTypes'
 	| 'CommuteTrainLength'
 	| 'WateredTerrainColor'
+	| 'OccupantTripZoneFilter'
+	| 'OccupantTripPurposeFilter'
+	| 'LotConditionFilter'
+	| 'LayerFilter'
 	| 'RegionUICloudOpacityRange'
 	| 'SimulatorDateStart'
 	| 'TransitSwitchPoint'
 	| 'WateredBuildingColor'
+	| 'ResponseVehicleCount'
+	| 'ResponsePedestrianCount'
 	| 'FreightTrainLength'
 	| 'AnimLoopCountRange';
 
 type StringKeys_08 =
 	| 'ModelResourceKey'
 	| 'AuxiliaryModel1KeyHeadlights'
+	| 'AudioORFilters'
 	| 'MinLoadRadius'
 	| 'ResourceKeyType0'
 	| 'ResourceKeyType1'
@@ -13847,17 +13802,29 @@ type StringKeys_08 =
 	| 'CapacitySatisfied'
 	| 'DemandSatisfied'
 	| 'DemandCreated'
+	| 'BuildingpropFamily'
 	| 'ResourceKeyType1xm'
 	| 'ResourceKeyType2xm'
 	| 'ResourceKeyType3xm'
 	| 'ResourceKeyType4xm'
 	| 'ResourceKeyType5xm'
+	| 'HospitalTypeIDList'
 	| 'kSC4RetainingWallPropertyWallTextures'
 	| 'FlammabilityHotspotSettings'
+	| 'FieldLots'
+	| 'AudioANDFilters'
+	| 'AudioNOTFilters'
+	| 'AudioAmbienceExemplarIds'
 	| 'Drives'
 	| 'Satisfies'
 	| 'Contributes'
+	| 'CapsDemand'
+	| 'Sums'
+	| 'LandValueDesirabilityIDs'
 	| 'ConstructionResourcesMinMax'
+	| 'TractDeveloperAvailableStyles'
+	| 'EndPieceExemplars'
+	| 'SupportPieceExemplars'
 	| 'BridgeImageKey'
 	| 'BridgeCosts'
 	| 'BridgeNameKey'
@@ -13869,14 +13836,27 @@ type StringKeys_08 =
 	| 'DataViewColorRamp'
 	| 'DataViewLegendsColor'
 	| 'DataViewLegendsGUIDS'
+	| 'NationDemandIDList'
+	| 'DesirabilityEffectIDs'
 	| 'MapViewUnsignedColors'
 	| 'MapViewSignedColors'
 	| 'kSC4FoundationPropertySideTextures'
 	| 'kSC4FoundationPropertyTopTextures'
 	| 'NameKey'
 	| 'TrainMinMaxKPH'
+	| 'GraphPlotDataSource1'
+	| 'GraphPlotDataSource2'
+	| 'GraphPlotCombineOp'
+	| 'GraphPlotLabelKey'
+	| 'GraphPlotSeries'
+	| 'TrendBarDataSource'
 	| 'MiniMapWaterRamp'
+	| 'DataViewTravelTypes'
+	| 'SFXActiveSound'
 	| 'StylePercentages'
+	| 'LotConfigPropertyFamily'
+	| 'LotConfigPropertyFenceDefinition'
+	| 'LotConfigPropertyRetainingWallTypes'
 	| 'LotConfigPropertyLotObject'
 	| 'SimulatorSpeeds'
 	| 'TextureRandomizationGridSize'
@@ -13884,6 +13864,7 @@ type StringKeys_08 =
 	| 'Comp2IDOfEffectToPlace'
 	| 'Comp3IDOfEffectToPlace'
 	| 'Comp4IDOfEffectToPlace'
+	| 'PortTypeExemplarIDs'
 	| 'UserVisibleNameKey'
 	| 'AudioMusicPlaylistEntry1'
 	| 'AudioMusicPlaylistEntry2'
@@ -13908,12 +13889,15 @@ type StringKeys_08 =
 	| 'AudioMusicPlaylistEntry21'
 	| 'MinForPurposeFundingPercentageToAnimate'
 	| 'AverageSalaryForDemographic'
+	| 'OccupantTypes'
 	| 'kSC4FloraFamilyProperty'
 	| 'ShimmerQuadDensity'
+	| 'SchoolTypeIDList'
 	| 'StageTime'
 	| 'SpreadTime'
 	| 'SpreadRadius'
 	| 'IconResourceKey'
+	| 'OccupantGroups'
 	| 'UIActiveEffectID'
 	| 'UIIdleEffectID'
 	| 'UIActiveIconID'
@@ -13924,15 +13908,27 @@ type StringKeys_08 =
 	| 'HospitalCapacityChunkSize'
 	| 'NumCellsBetweenAnchorPtFreeze'
 	| 'AuxiliaryModel2Key'
+	| 'LotStageTemplateIDs'
+	| 'TripCapacityList'
 	| 'ItemDescriptionKey'
 	| 'DescriptionKey'
 	| 'MySimNameResKey'
+	| 'AutoloadAuxiliaryModels'
 	| 'KZM_mZoneTextureResourceInstanceArray'
 	| 'ZoneDragColor'
 	| 'ConnectedVerts'
+	| 'TunnelResourceIds'
+	| 'TunnelModelRotations'
+	| 'SpecialPylonModelId'
+	| 'ResponseVehicleType'
+	| 'ResponsePedestrianType'
+	| 'kSC4BuildingModelClassProperty'
 	| 'MiniMapTerrainRamp'
 	| 'AudioFreshScoreKey'
 	| 'RiotSpawnArray'
+	| 'BudgetItemDepartment'
+	| 'BudgetItemLine'
+	| 'BudgetItemPurpose'
 	| 'AuxiliaryModel3Key'
 	| 'SchoolCapacityChunkSize'
 	| 'ExemplarPatchTargets';
@@ -14002,6 +13998,7 @@ type StringKeys_09 =
 
 type StringKeys_10 =
 	| 'PollutionAtCenter'
+	| 'CatalogMonthlyCost'
 	| 'TravelStrategyModifier'
 	| 'PollutionAtOuterEdgeOfCircle'
 	| 'MayorRatingEffect'
@@ -14013,8 +14010,11 @@ type StringKeys_10 =
 
 type StringKeys_11 =
 	| 'BudgetInitialFunds'
+	| 'BudgetRequirementsList'
+	| 'StageUpgradeCost'
 	| 'KZM_mZoneCreationCostArray'
-	| 'KZM_mZoneDestructionCostArray';
+	| 'KZM_mZoneDestructionCostArray'
+	| 'BudgetItemCost';
 
 type StringKeys_12 =
 	| 'TravelTypeGeneratesTraffic'
@@ -14042,7 +14042,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x09b73422
 		| 0x0a36afa2
 		| 0x0a3fb9a8
-		| 0x0a410ba0
 		| 0x0a4bc752
 		| 0x0a4c13cb
 		| 0x0a53fd32
@@ -14057,19 +14056,13 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x27812852
 		| 0x27812853
 		| 0x27812854
-		| 0x27812870
 		| 0x28ebbc30
 		| 0x28ebbc35
 		| 0x28ebbc3b
 		| 0x2912202e
 		| 0x291351b5
-		| 0x292d8f9b
-		| 0x29b55f73
 		| 0x2a0348ba
 		| 0x2a3143d7
-		| 0x2a3fbde1
-		| 0x2a3fbde5
-		| 0x2a3ff8cd
 		| 0x2a499f85
 		| 0x2a53be13
 		| 0x2a62d9f3
@@ -14078,18 +14071,12 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x2c0c922e
 		| 0x2c23a3a1
 		| 0x2c8f8746
-		| 0x47bb3f41
-		| 0x47bb3f50
-		| 0x47e2c330
 		| 0x47e2c382
 		| 0x47e2c400
-		| 0x47e2c550
 		| 0x482cb442
-		| 0x482cb443
 		| 0x482cb445
 		| 0x482cb447
 		| 0x482cb448
-		| 0x482cb449
 		| 0x482cb458
 		| 0x482cb459
 		| 0x482cb45a
@@ -14136,14 +14123,12 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4a0b47ef
 		| 0x4a0b47f4
 		| 0x4a1f38b7
-		| 0x4a1f629f
 		| 0x4a271248
 		| 0x4a27124f
 		| 0x4a275748
 		| 0x4a2d49b9
 		| 0x4a4c132e
 		| 0x4a5f5953
-		| 0x4a5f7c4b
 		| 0x4a652679
 		| 0x4a65267a
 		| 0x4a677e5b
@@ -14183,25 +14168,14 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6a3fcc37
 		| 0x6a406201
 		| 0x6a43150f
-		| 0x6a4aee40
-		| 0x6a4aee5f
-		| 0x6a4aee68
-		| 0x6a4aeedc
-		| 0x6a4aeee3
 		| 0x6a5a6700
-		| 0x6a6564f4
 		| 0x6a845768
 		| 0x6a871b82
-		| 0x6b7c5cdd
-		| 0x6c044bb5
 		| 0x6c200139
 		| 0x8761abd0
 		| 0x87cd6301
 		| 0x88ed1059
 		| 0x88ed3303
-		| 0x88edc791
-		| 0x88edc797
-		| 0x88edc798
 		| 0x88fcd877
 		| 0x89135044
 		| 0x8918948b
@@ -14232,7 +14206,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a2602b9
 		| 0x8a2602ba
 		| 0x8a2602bb
-		| 0x8a270fc3
 		| 0x8a2d49ea
 		| 0x8a2d49f0
 		| 0x8a3143b7
@@ -14244,7 +14217,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8aa039b7
 		| 0x8aa864d5
 		| 0x8c3e8185
-		| 0x8cb3511f
 		| 0xa7607d80
 		| 0xa7607d81
 		| 0xa8ebcf0c
@@ -14253,10 +14225,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xa91351a6
 		| 0xa91894bc
 		| 0xa92356b8
-		| 0xa92d8e40
 		| 0xa977a86b
 		| 0xaa161f81
-		| 0xaa1dd396
 		| 0xaa1dd397
 		| 0xaa2ed804
 		| 0xaa2ed805
@@ -14275,8 +14245,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xc9b93a56
 		| 0xca19d7ca
 		| 0xca271780
-		| 0xca271781
-		| 0xca271784
 		| 0xe90f5de4
 		| 0xca383ca5
 		| 0xca383ca6
@@ -14288,7 +14256,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xca5545ea
 		| 0xcadb6b3e
 		| 0xcbbba52f
-		| 0xcc21420d
 		| 0xe82b68eb
 		| 0xe8ec2720
 		| 0xe900ea26
@@ -14297,12 +14264,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe900ea2b
 		| 0xe900ea2c
 		| 0xe974eaa1
-		| 0xe974eaa4
-		| 0xe974eaa5
-		| 0xe974eaa7
-		| 0xe9aee3da
-		| 0xe9aee3dc
-		| 0xea123cef
 		| 0xea260589
 		| 0xea296f8d
 		| 0xea2e078b
@@ -14311,9 +14272,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xea400620
 		| 0xea400621
 		| 0xea400622
-		| 0xea54d283
-		| 0xea54d284
-		| 0xea54d285
 		| 0xea86e3b5
 		| 0xebfb0404
 		| 0xebfc5e26
@@ -14379,8 +14337,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x0bd86fd5
 		| 0x0bfc0a4c
 		| 0x27812811
-		| 0x27812842
-		| 0x27812843
 		| 0x279d1707
 		| 0x28ebbc36
 		| 0x28ebbc3a
@@ -14424,15 +14380,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x2a654400
 		| 0x2a9590de
 		| 0x2aa84164
-		| 0x47e2c331
 		| 0x47e2c381
 		| 0x47e2c500
 		| 0x47e2c502
 		| 0x47e2c530
 		| 0x482cb441
-		| 0x482cb44b
-		| 0x482cb44c
-		| 0x482cb44d
 		| 0x482cb455
 		| 0x482cb456
 		| 0x482cb457
@@ -14573,12 +14525,10 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6a09f62f
 		| 0x6a19f6b5
 		| 0x6a2d49f4
-		| 0x6a36afab
 		| 0x6a469337
 		| 0x6a469342
 		| 0x6a4aeded
 		| 0x6a4aedef
-		| 0x6a4aeee2
 		| 0x6a5a6702
 		| 0x6a9f6edd
 		| 0x6ab70da7
@@ -14626,7 +14576,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a511dd1
 		| 0x8a67e378
 		| 0x8a84778f
-		| 0x8a94eee0
 		| 0x8b58c59e
 		| 0x8c3caef5
 		| 0xa7607d73
@@ -14700,9 +14649,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xc9ee640c
 		| 0xca027325
 		| 0xca027328
-		| 0xca271782
 		| 0xca480830
-		| 0xca271800
 		| 0xca383ca7
 		| 0xca46931f
 		| 0xca469346
@@ -14727,7 +14674,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe91894b3
 		| 0xe918c920
 		| 0xe91b3aee
-		| 0xe974eaa6
 		| 0xe99b068c
 		| 0xe9a18d3f
 		| 0xe9a1e8d4
@@ -14776,6 +14722,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x0bd86fd4
 		| 0x0c032488
 		| 0x27812810
+		| 0x27812842
+		| 0x27812843
 		| 0x87cd6399
 		| 0x87cd6341
 		| 0x2918949e
@@ -14793,6 +14741,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x2a511893
 		| 0x2aa40ccc
 		| 0x47e2c320
+		| 0x47e2c331
 		| 0x47e2c332
 		| 0x47e2c383
 		| 0x47e2c401
@@ -14800,6 +14749,9 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x47e2c510
 		| 0x47e2c511
 		| 0x47e2c531
+		| 0x482cb44b
+		| 0x482cb44c
+		| 0x482cb44d
 		| 0x482cb44e
 		| 0x482cb45e
 		| 0x482cb469
@@ -14900,9 +14852,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x69a437f6
 		| 0x6a09f631
 		| 0x6a359f22
+		| 0x6a36afab
 		| 0x6a410bf2
 		| 0x6a4132f3
 		| 0x6a4132f6
+		| 0x6a4aeee2
 		| 0x6a5a6701
 		| 0x6a6564f6
 		| 0x6a84493e
@@ -14964,6 +14918,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a67e373
 		| 0x8a67e374
 		| 0x8a67e376
+		| 0x8a94eee0
 		| 0x8c19c3e9
 		| 0x8c376d4f
 		| 0xa9189479
@@ -14993,6 +14948,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xc92d7ec0
 		| 0xc941b02e
 		| 0xc9da95d4
+		| 0xca271782
+		| 0xca271800
 		| 0xca359f17
 		| 0xca4132e9
 		| 0xca51189a
@@ -15013,6 +14970,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe92d9db4
 		| 0xe94825b9
 		| 0xe974eaa3
+		| 0xe974eaa6
 		| 0xe9ac43e7
 		| 0xea023270
 		| 0xea023271
@@ -15085,7 +15043,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x48d71ee4
 		| 0x4aa60ebe
 		| 0x4aa60ec2
-		| 0x6ad54804
 		| 0x87cd6354
 		| 0x87cd6355
 		| 0x87cd6357
@@ -15111,10 +15068,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4a677e5f
 		| 0x890e0ab4
 		| 0x8a1c3e72
-		| 0xca271783
-		| 0xca271786
 		| 0xe91a0b5f
-		| 0xea54d286
 		| StringKeys_05
 		? sint64 :
 	T extends
@@ -15130,19 +15084,14 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x27812837
 		| 0x29244db5
 		| 0x2929cc6b
-		| 0xaa12fcb3
 		| 0x29ab15c1
 		| 0x47bb3f60
 		| 0x87cd6310
-		| 0x482cb444
 		| 0x482cb446
-		| 0x482cb44a
 		| 0x48cd7b80
 		| 0x48cd7b81
 		| 0x48f23a7e
 		| 0x4929cc97
-		| 0xaa12fcb4
-		| 0x4998c89d
 		| 0x4998c918
 		| 0x4998c919
 		| 0x4998c91a
@@ -15156,11 +15105,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4a4a88f0
 		| 0x4a751ad5
 		| 0x6929cc92
-		| 0xaa12fcb2
 		| 0x69987e64
-		| 0x6a4aeedf
-		| 0x6a4aeee4
-		| 0x6a4aeee5
 		| 0x6a5e0727
 		| 0x6a9edd07
 		| 0x6bac0b3e
@@ -15183,12 +15128,9 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a020504
 		| 0x8bfb1072
 		| 0xa92356b2
-		| 0xa9af1e54
-		| 0xa9af1e55
 		| 0xa9c283d0
 		| 0xaa12fcb5
 		| 0xaa12fcb6
-		| 0xaa12fcb7
 		| 0xaa230baf
 		| 0xaa3fbdde
 		| 0xaa83558f
@@ -15196,7 +15138,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xc929c652
 		| 0xc929cc58
 		| 0xc929cc8d
-		| 0xc973c9aa
 		| 0xc9ee640d
 		| 0xca027307
 		| 0xca271787
@@ -15209,8 +15150,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe94825b7
 		| 0xe99b068d
 		| 0xe9a316eb
-		| 0xe9aee3db
-		| 0xe9aee3dd
 		| 0xea296f90
 		| 0xebfb4a0a
 		| 0xec3bd470
@@ -15219,20 +15158,29 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 	T extends
 		| 0x097f4c4e
 		| 0xca5b9306
+		| 0xaa12fcb3
 		| 0x47e2c300
 		| 0x47e2c301
 		| 0x47e2c310
+		| 0x482cb444
+		| 0x482cb44a
 		| 0x491c9c08
 		| 0x491c9c09
 		| 0x4953e8a3
 		| 0x4953e8a4
 		| 0x4953e8a5
 		| 0x4953e8a6
+		| 0xaa12fcb4
 		| 0x497f42a4
+		| 0x4998c89d
 		| 0x4998c902
 		| 0x4998c909
 		| 0x49d55951
+		| 0xaa12fcb2
 		| 0x6a09f630
+		| 0x6a4aeedf
+		| 0x6a4aeee4
+		| 0x6a4aeee5
 		| 0x87cd6333
 		| 0x88edc790
 		| 0x88edc793
@@ -15240,10 +15188,16 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x88edc796
 		| 0x8a441c9c
 		| 0xa97f42ce
+		| 0xa9af1e54
+		| 0xa9af1e55
+		| 0xaa12fcb7
+		| 0xc973c9aa
 		| 0xca383cb1
 		| 0xca7515cc
 		| 0xe90e25a1
 		| 0xe97f42b0
+		| 0xe9aee3db
+		| 0xe9aee3dd
 		| 0xea441c97
 		| 0xea958845
 		| StringKeys_07
@@ -15251,6 +15205,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 	T extends
 		| 0x09c80416
 		| 0x09c80417
+		| 0x0a410ba0
 		| 0x0b579c28
 		| 0x27812820
 		| 0x27812821
@@ -15261,17 +15216,29 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x27812834
 		| 0x27812840
 		| 0x27812841
+		| 0x27812870
 		| 0x27812921
 		| 0x27812922
 		| 0x27812923
 		| 0x27812924
 		| 0x27812925
+		| 0x292d8f9b
 		| 0x295961f2
 		| 0x29b4013c
+		| 0x29b55f73
+		| 0x2a3fbde1
+		| 0x2a3fbde5
+		| 0x2a3ff8cd
 		| 0x47bb3f30
 		| 0x47bb3f31
 		| 0x47bb3f32
+		| 0x47bb3f41
+		| 0x47bb3f50
+		| 0x47e2c330
 		| 0x47e2c380
+		| 0x47e2c550
+		| 0x482cb443
+		| 0x482cb449
 		| 0x482cb46f
 		| 0x482cb470
 		| 0x482cd466
@@ -15283,14 +15250,27 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4a0b47e4
 		| 0x4a0b47f2
 		| 0x4a0b47f3
+		| 0x4a1f629f
+		| 0x4a5f7c4b
 		| 0x68f26014
 		| 0x68f26015
 		| 0x68fcff37
 		| 0x68fcff38
 		| 0x6a416b21
 		| 0x6a440d40
+		| 0x6a4aee40
+		| 0x6a4aee5f
+		| 0x6a4aee68
+		| 0x6a4aeedc
+		| 0x6a4aeee3
+		| 0x6a6564f4
 		| 0x6b733233
+		| 0x6b7c5cdd
+		| 0x6c044bb5
 		| 0x87cd63a0
+		| 0x88edc791
+		| 0x88edc797
+		| 0x88edc798
 		| 0x88edc900
 		| 0x89590e6d
 		| 0x89a312c2
@@ -15298,6 +15278,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a020309
 		| 0x8a020409
 		| 0x8a020509
+		| 0x8a270fc3
 		| 0x8a416a99
 		| 0x8a5e7b50
 		| 0x8a5e7b51
@@ -15322,12 +15303,15 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a5e7b64
 		| 0x8a5f88e3
 		| 0x8a63f2a1
+		| 0x8cb3511f
 		| 0xa8f149c5
 		| 0xa91cbe02
+		| 0xa92d8e40
 		| 0xa9b6ecd3
 		| 0xa9b6ecd4
 		| 0xa9b6ecd5
 		| 0xaa12fcb1
+		| 0xaa1dd396
 		| 0xaa2ed800
 		| 0xaa2ed801
 		| 0xaa2ed802
@@ -15338,15 +15322,27 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xac43826d
 		| 0xc804dd92
 		| 0xc9e69af6
+		| 0xca271781
+		| 0xca271784
 		| 0xca416ab5
 		| 0xca416b2a
 		| 0xca416b3f
+		| 0xcc21420d
 		| 0xe94825b6
 		| 0xe94825b8
 		| 0xe974eaa2
+		| 0xe974eaa4
+		| 0xe974eaa5
+		| 0xe974eaa7
+		| 0xe9aee3da
+		| 0xe9aee3dc
+		| 0xea123cef
 		| 0xea3573af
 		| 0xea3fbdd7
 		| 0xea400623
+		| 0xea54d283
+		| 0xea54d284
+		| 0xea54d285
 		| 0xec214180
 		| 0xec43826b
 		| 0x0062e78a
@@ -15418,6 +15414,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		? boolean :
 	T extends
 		| 0x27812851
+		| 0x6ad54804
 		| 0x8a612fee
 		| 0xaa5832f3
 		| 0xca5b9305
@@ -15430,8 +15427,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		? sint32[] :
 	T extends
 		| 0x6a9c7718
+		| 0xca271783
+		| 0xca271786
 		| 0xe94825b4
 		| 0xe94825b5
+		| 0xea54d286
 		| StringKeys_11
 		? sint64[] :
 	T extends
