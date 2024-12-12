@@ -33,3 +33,7 @@ export type {
 	DecodedFileTypeName,
 	SimGridFileType,
 } from './types.js';
+
+export type {
+	Key as ExemplarPropertyKey,
+} from './exemplar-properties-types.js';

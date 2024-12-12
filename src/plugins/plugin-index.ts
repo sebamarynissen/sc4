@@ -12,6 +12,7 @@ import type {
 	EntryJSON,
 	DecodedFileTypeId,
 	TypeIdToEntry,
+	ExemplarPropertyKey as Key,
 } from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
@@ -334,7 +335,7 @@ export default class PluginIndex {
 	// This function accepts a parsed exemplar file and looks up the property 
 	// with the given key. If the property doesn't exist, then tries to look 
 	// it up in the parent cohort and so on all the way up.
-	getProperty(exemplar: Exemplar, key: number) {
+	getProperty<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = exemplar.prop(key);
 		while (!prop && exemplar.parent[0]) {
 			let { parent } = exemplar;
@@ -368,17 +369,9 @@ export default class PluginIndex {
 	// ## getPropertyValue(exemplar, key)
 	// Directly returns the value for the given property in the exemplar. If 
 	// it doesn't exist, looks it up in the parent cohort.
-	getPropertyValue(exemplar: Exemplar, key: number) {
+	getPropertyValue<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = this.getProperty(exemplar, key);
-		return prop ? prop.value : undefined;
-	}
-
-	// ## getScalarPropertyValue(exemplar, key)
-	// Same as getPropertyValue, but unwraps the value if it is an array of a 
-	// single value.
-	getScalarPropertyValue(exemplar: Exemplar, key: number) {
-		let value = this.getPropertyValue(exemplar, key);
-		return Array.isArray(value) ? value[0] : value;
+		return prop ? prop.getSafeValue() : undefined;
 	}
 
 	// ## toJSON()

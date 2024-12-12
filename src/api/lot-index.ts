@@ -1,12 +1,14 @@
-// # lot-index.js
+// # lot-index.ts
 import bsearch from 'binary-search-bounds';
-import { FileType } from 'sc4/core';
+import {
+    Exemplar,
+    ExemplarProperty as Property,
+	FileType,
+	type Entry,
+    type ExemplarPropertyKey as Key,
+} from 'sc4/core';
+import type { PluginIndex } from 'sc4/plugins';
 import { hex } from 'sc4/utils';
-
-// Exemplar properties we'll be using.
-const LotConfigPropertySize = 0x88edc790;
-const OccupantSize = 0x27812810;
-const OccupantGroups = 0xaa1dd396;
 
 // # LotIndex
 // A helper class that we use to index lots by a few important properties. 
@@ -14,18 +16,20 @@ const OccupantGroups = 0xaa1dd396;
 // when filtering, you can rest assured that they remain sorted by height as 
 // well!
 export default class LotIndex {
+	fileIndex: PluginIndex;
+	lots: LotIndexEntry[] = [];
+	height: IndexedArray<LotIndexEntry>[];
 
 	// ## constructor(index)
 	// Creates the lot index from the given file index.
-	constructor(index) {
+	constructor(index: PluginIndex) {
 
 		// Store the file index, we'll still need it.
 		this.fileIndex = index;
-		this.lots = [];
 
 		// Loop every exemplar. If it's a lot configurations exemplar, then 
 		// read it so that we can find the building that appears on the lot.
-		for (let entry of index.exemplars) {
+		for (let entry of index.findAll({ type: FileType.Exemplar })) {
 			let file = entry.read();
 			if (this.getPropertyValue(file, 0x10) !== 0x10) {
 				continue;
@@ -39,7 +43,7 @@ export default class LotIndex {
 		// Now it's time to set up all our indices. For now we'll only index 
 		// by height though.
 		this.height = IndexedArray.create({
-			compare: (a, b) => a.height - b.height,
+			compare: (a: LotIndexEntry, b: LotIndexEntry) => a.height - b.height,
 			entries: this.lots,
 		});
 
@@ -48,14 +52,14 @@ export default class LotIndex {
 	// ## add(entry)
 	// Adds the given lot exemplar to the index. Note that we create a 
 	// LotIndexEntry for *every* building the lot cna be constructed with!
-	add(entry) {
+	add(entry: Entry) {
 
 		// Find all buildings that can appear on this lot, which might happen 
 		// because they're part of a building family.
-		let lot = entry.read();
+		let lot = entry.read() as Exemplar;
 		let { lotObjects } = lot;
-		let { IID } = lotObjects.find(({ type }) => type === 0x00);
-		let buildings = this.getBuildings(IID);
+		let { IID } = lotObjects.find(({ type }) => type === 0x00)!;
+		let buildings = this.getBuildings(IID!);
 
 		// Then loop all those buildings and create LotIndexEntries for it.
 		for (let building of buildings) {
@@ -70,9 +74,9 @@ export default class LotIndex {
 	// Returns an array of all buildings exemplars idenfitied by the given 
 	// IID. If it's a single building, we'll return an array containing 1 
 	// building, if it's a family, we return all buildings from the family.
-	getBuildings(IID) {
+	getBuildings(IID: number) {
 		let buildings = this.fileIndex
-			.findAllTI(FileType.Exemplar, IID)
+			.findAll({ type: FileType.Exemplar, instance: IID })
 			.filter(entry => {
 				let file = entry.read();
 				let type = this.getPropertyValue(file, 0x10);
@@ -85,22 +89,22 @@ export default class LotIndex {
 		// No buildings found? Don't worry, check the families.
 		let family = this.fileIndex.family(IID);
 		if (!family) {
-			throw new Error([
+			throw new Error(
 				`No building found with IID ${ hex(IID) }!`,
-			]);
+			);
 		}
 		return family;
 	}
 
 	// ## getBuilding(IID)
-	getBuilding(IID) {
+	getBuilding(IID: number) {
 		let [building] = this.getBuildings(IID);
 		return building;
 	}
 
 	// ## getPropertyValue(file, prop)
 	// Helper function for quickly reading property values.
-	getPropertyValue(file, prop) {
+	getPropertyValue(file: Exemplar, prop: Key) {
 		return this.fileIndex.getPropertyValue(file, prop);
 	}
 
@@ -113,17 +117,21 @@ export default class LotIndex {
 // the building! Hence we'll create an entry for each (lot, building) 
 // combination!
 class LotIndexEntry {
-	
+	#fileIndex: PluginIndex;
+	lot: Entry;
+	building: Entry;
+
 	// ## constructor(fileIndex, lot, building)
-	constructor(fileIndex, lot, building) {
+	constructor(
+		fileIndex: PluginIndex,
+		lot: Entry,
+		building: Entry,
+	) {
 
 		// We have to keep a reference to the file index - though we'll "hide" 
 		// it on the IndexEntry - so that we're able to properly use 
 		// inheritance when reading stuff from the exemplars.
-		Object.defineProperty(this, 'fileIndex', {
-			value: fileIndex,
-			enumerable: false,
-		});
+		this.#fileIndex = fileIndex;
 
 		// Store the lot and building exemplars.
 		this.lot = lot;
@@ -133,13 +141,13 @@ class LotIndexEntry {
 
 	// ## get size()
 	get size() {
-		let [x, z] = this.getLotPropertyValue(LotConfigPropertySize);
+		let [x, z] = this.getLotPropertyValue(Property.LotConfigPropertySize)!;
 		return Object.assign([x, z], { x, z });
 	}
 
 	// ## get buildingSize()
 	get buildingSize() {
-		let [x, y, z] = this.getBuildingPropertyValue(OccupantSize);
+		let [x, y, z] = this.getBuildingPropertyValue(Property.OccupantSize)!;
 		return Object.assign([x, y, z], { x, y, z });
 	}
 
@@ -150,33 +158,33 @@ class LotIndexEntry {
 
 	// ## get growthStage()
 	get growthStage() {
-		return this.getLotPropertyValue(0x27812837);
+		return this.getLotPropertyValue(Property.GrowthStage)!;
 	}
 
 	// ## get zoneTypes()
 	get zoneTypes() {
-		return this.getLotPropertyValue(0x88edc793);
+		return this.getLotPropertyValue(Property.LotConfigPropertyZoneTypes)!;
 	}
 
 	// ## get occupantGroups()
 	get occupantGroups() {
-		return this.getBuildingPropertyValue(OccupantGroups);
-	}
-
-	// ## getPropertyValue(...args)
-	// Helper function for getting a certain exemplar property value.
-	getPropertyValue(...args) {
-		return this.fileIndex.getPropertyValue(...args);
+		return this.getBuildingPropertyValue(Property.OccupantGroups)!;
 	}
 
 	// ## getLotPropertyValue(prop)
-	getLotPropertyValue(prop) {
-		return this.getPropertyValue(this.lot.read(), prop);
+	getLotPropertyValue<K extends Key = Key>(key: K) {
+		return this.#fileIndex.getPropertyValue(
+			this.lot.read() as Exemplar,
+			key,
+		);
 	}
 
 	// ## getBuildingPropertyValue(prop)
-	getBuildingPropertyValue(prop) {
-		return this.getPropertyValue(this.building.read(), prop);
+	getBuildingPropertyValue<K extends Key = Key>(key: K) {
+		return this.#fileIndex.getPropertyValue(
+			this.building.read() as Exemplar,
+			key,
+		);
 	}
 
 }
@@ -185,17 +193,21 @@ class LotIndexEntry {
 // An extension of an array that takes into account that the array is sorted 
 // using a certain comparator - which is to be specified by *extending* the 
 // IndexedArray. Very useful to perform efficient range queries.
-class IndexedArray extends Array {
+type IndexedArrayOptions<T> = {
+	compare(a: T, b: T): number;
+	entries: LotIndexEntry[];
+};
+class IndexedArray<T> extends Array<T> {
 
 	// ## static extend(compare)
-	static extend(compare) {
-		const Child = class IndexedArray extends this {};
+	static extend(compare: any) {
+		const Child = class IndexedArray extends this<T> {} as any;
 		Child.prototype.compare = compare;
 		return Child;
 	}
 
 	// ## static create(opts)
-	static create(opts) {
+	static create(opts: IndexedArrayOptions) {
 		let { compare, entries = [] } = opts;
 		const Child = this.extend(compare);
 		let index = new Child(...entries);
@@ -215,7 +227,7 @@ class IndexedArray extends Array {
 	// Filters down the subselection to only include the given height range.
 	// Note: perhaps that we should find a way to change the index criterion 
 	// easily, that's for later on though.
-	range(min, max) {
+	range(min: number, max: number) {
 		let [first, last] = this.getRangeIndices(min, max);
 		return this.slice(first, last);
 	}
@@ -274,8 +286,7 @@ class IndexedArray extends Array {
 
 // ## compare(a, b)
 // The function we use to sort all lots by height.
-// eslint-disable-next-line no-unused-vars
-function compare(a, b) {
+function compare(a: LotIndexEntry, b: LotIndexEntry) {
 	return a.height - b.height;
 }
 
@@ -283,7 +294,7 @@ function compare(a, b) {
 // Helper function for checking if the given array includes *one* of the 
 // elements in the given iterator.
 // eslint-disable-next-line no-unused-vars
-function contains(arr, it) {
+function contains(arr: any[], it: Iterable<any>) {
 	for (let el of it) {
 		if (arr.includes(el)) {
 			return true;

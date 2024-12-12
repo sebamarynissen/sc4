@@ -207,29 +207,7 @@ abstract class BaseExemplar {
 	value<K extends Key>(key: K): Value<K> | undefined {
 		let prop = this.prop(key);
 		if (!prop) return undefined;
-		let { value } = prop;
-		if (prop.name && value !== undefined) {
-			let info = ExemplarProperty[prop.name as keyof typeof ExemplarProperty];
-			let shouldBeArray = typeof info !== 'number' && Array.isArray(info[
-				kPropertyType as keyof typeof info
-			]);
-
-			// Note: we use any below because TypeScript knows that somethings 
-			// wrong if this happens - which is indeed the case! However, there 
-			// is no runtime guarantee for this, so our runtime correction is 
-			// labeled as invalid by TypeScript. "any" to the rescue.
-			let isArray = Array.isArray(value);
-			if (shouldBeArray && !isArray) {
-				return [value] as any;
-			} else if (!shouldBeArray && isArray) {
-				return (value as any)[0];
-			} else {
-				return value;
-			}
-
-		} else {
-			return value;
-		}
+		return prop.getSafeValue();
 	}
 
 	// ## get(key)
@@ -457,6 +435,39 @@ class Property<K extends Key = Key> {
 		this.id = +id;
 		this.type = type;
 		this.value = isClone ? structuredClone(value) : value;
+	}
+
+	// ## getSafeValue()
+	// This function handles the fact that sometimes a property can be stored as 
+	// an array, while the schema as defined in new_properties.xml actually 
+	// defines the property as a single-value property and vice versa. This can
+	// lead to runtime errors, so it is advised to use `getSafeValue()` instead 
+	// as this performs the required checks. Also note that TypeScript can't 
+	// really help us here: it's a runtime issue!
+	getSafeValue(): Value<K> | undefined {
+		let { name, value } = this;
+		if (name && value !== undefined) {
+			let info = ExemplarProperty[name as keyof typeof ExemplarProperty];
+			let shouldBeArray = typeof info !== 'number' && Array.isArray(
+				info[kPropertyType as keyof typeof info],
+			);
+
+			// Note: we use any below because TypeScript knows that somethings 
+			// wrong if this happens - which is indeed the case! However, there 
+			// is no runtime guarantee for this, so our runtime correction is 
+			// labeled as invalid by TypeScript. "any" to the rescue.
+			let isArray = Array.isArray(value);
+			if (shouldBeArray && !isArray) {
+				return [value] as Value<K>;
+			} else if (!shouldBeArray && isArray) {
+				return (value as any)[0] as Value<K>;
+			} else {
+				return value;
+			}
+
+		} else {
+			return value;
+		}
 	}
 
 	// ## get name()

@@ -644,7 +644,7 @@ export default class CityManager {
 		let family = index.family(IID);
 		const filter = entry => {
 			let file = entry.read();
-			return index.getScalarPropertyValue(file, 0x10) === type;
+			return index.getPropertyValue(file, 0x10) === type;
 		};
 		if (family) {
 			let exemplars = family.filter(filter);
