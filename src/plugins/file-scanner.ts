@@ -2,7 +2,7 @@
 import path from 'node:path';
 import { Glob, type GlobOptions } from 'glob';
 
-type FileScannerOptions = GlobOptions & {
+export type FileScannerOptions = GlobOptions & {
 	recursive?: boolean;
 	extensions?: string[];
 };

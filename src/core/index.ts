@@ -19,8 +19,7 @@ export { default as Pointer } from './pointer.js';
 export type { DBPFOptions, DBPFSaveOptions, DBPFJSON } from './dbpf.js';
 export type {
 	default as Entry,
-	EntryWithReadResult,
-	TypeIdToEntry,
+		EntryFromType,
 	EntryJSON,
 } from './dbpf-entry.js';
 export type {
@@ -33,3 +32,7 @@ export type {
 	DecodedFileTypeName,
 	SimGridFileType,
 } from './types.js';
+
+export type {
+	Key as ExemplarPropertyKey,
+} from './exemplar-properties-types.js';

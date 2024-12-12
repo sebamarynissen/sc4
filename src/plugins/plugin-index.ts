@@ -9,9 +9,10 @@ import WorkerPool from './worker-pool.js';
 import type {
 	DBPFJSON,
 	Entry,
+	EntryFromType,
 	EntryJSON,
 	DecodedFileTypeId,
-	TypeIdToEntry,
+	ExemplarPropertyKey as Key,
 } from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
@@ -47,8 +48,9 @@ type CacheJSON = {
 	families: { [id: string]: number[] };
 };
 
+type ExemplarEntry = Entry<Exemplar>;
 type FamilyIndex = {
-	[id: string]: Entry[];
+	[id: string]: ExemplarEntry[];
 };
 
 // # PluginIndex
@@ -231,7 +233,7 @@ export default class PluginIndex {
 					let exemplar = await entry.readAsync();
 					let families = this.getPropertyValue(exemplar, Family);
 					if (!families) return;
-					for (let family of [families].flat()) {
+					for (let family of families) {
 						if (family) {
 							let key = h(family as number);
 							this.families[key] ??= [];
@@ -285,7 +287,13 @@ export default class PluginIndex {
 		this.families = Object.create(null);
 		for (let key of Object.keys(families)) {
 			let pointers = families[key];
-			this.families[key] = pointers.map(ptr => this.entries[ptr]);
+			this.families[key] = pointers.map(ptr => {
+
+				// TypeScript can't infer that families are always found in 
+				// Exemplar enries, but we can obviously, so we use as here.
+				return this.entries[ptr] as ExemplarEntry;
+
+			});
 		}
 		return this;
 
@@ -304,9 +312,9 @@ export default class PluginIndex {
 
 	// ## find(type, group, instance)
 	// Finds the record identified by the given tgi.
-	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T> | undefined;
-	find<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T> | undefined;
-	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIArray<T>): EntryFromType<T> | undefined;
+	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T> | undefined;
 	find(...params: TGIFindParameters<Entry>): Entry | undefined;
 	find(...args: TGIFindParameters<Entry>) {
 		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
@@ -314,9 +322,9 @@ export default class PluginIndex {
 
 	// ## findAll(query)
 	// Finds all records that satisfy the given query.
-	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): TypeIdToEntry<T>[];
-	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): TypeIdToEntry<T>[];
-	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): TypeIdToEntry<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): EntryFromType<T>[];
+	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T>[];
 	findAll(...params: TGIFindParameters<Entry>): Entry[]
 	findAll(...args: TGIFindParameters<Entry>): Entry[] {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
@@ -334,7 +342,7 @@ export default class PluginIndex {
 	// This function accepts a parsed exemplar file and looks up the property 
 	// with the given key. If the property doesn't exist, then tries to look 
 	// it up in the parent cohort and so on all the way up.
-	getProperty(exemplar: Exemplar, key: number) {
+	getProperty<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = exemplar.prop(key);
 		while (!prop && exemplar.parent[0]) {
 			let { parent } = exemplar;
@@ -368,17 +376,9 @@ export default class PluginIndex {
 	// ## getPropertyValue(exemplar, key)
 	// Directly returns the value for the given property in the exemplar. If 
 	// it doesn't exist, looks it up in the parent cohort.
-	getPropertyValue(exemplar: Exemplar, key: number) {
+	getPropertyValue<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = this.getProperty(exemplar, key);
-		return prop ? prop.value : undefined;
-	}
-
-	// ## getScalarPropertyValue(exemplar, key)
-	// Same as getPropertyValue, but unwraps the value if it is an array of a 
-	// single value.
-	getScalarPropertyValue(exemplar: Exemplar, key: number) {
-		let value = this.getPropertyValue(exemplar, key);
-		return Array.isArray(value) ? value[0] : value;
+		return prop ? prop.getSafeValue() : undefined;
 	}
 
 	// ## toJSON()

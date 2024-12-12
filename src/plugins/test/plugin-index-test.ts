@@ -19,7 +19,7 @@ describe('The plugin index', function() {
 		// be read in parallel while parsing.
 		await index.build();
 
-		let record = index.find(0x6534284a, 0xa8fbd372, 0xe001a291);
+		let record = index.find(0x6534284a, 0xa8fbd372, 0xe001a291)!;
 		expect(record.fileSize).to.equal(2378);
 		expect(record.compressedSize).to.equal(2378);
 		expect(record.compressed).to.be.false;
@@ -29,7 +29,7 @@ describe('The plugin index', function() {
 		expect(file.fileType).to.equal(FileType.Exemplar);
 		expect(file.prop(0x88EDC900)).to.be.ok;
 
-		let building = file.lotObjects.find(x => x.type === 0x00);
+		let building = file.lotObjects.find(x => x.type === 0x00)!;
 		expect(building.x).to.equal(1);
 		expect(building.y).to.equal(0);
 		expect(building.z).to.equal(1.5);
@@ -44,7 +44,7 @@ describe('The plugin index', function() {
 			core: false,
 		});
 		await index.build();
-		let entry = index.find(0x6534284a, 0xcb730fac, 0x54589520);
+		let entry = index.find(0x6534284a, 0xcb730fac, 0x54589520)!;
 		let exemplar = entry.read();
 		let value = index.getProperty(exemplar, 0x27812870);
 		expect(value).to.be.undefined;
@@ -101,7 +101,7 @@ describe('The plugin index', function() {
 		expect(clone.entries.index).to.eql(index.entries.index);
 
 		for (let entry of index) {
-			let eq = clone.find(entry.type, entry.group, entry.instance);
+			let eq = clone.find(entry.type, entry.group, entry.instance)!;
 			expect(eq.type).to.equal(entry.type);
 			expect(eq.group).to.equal(entry.group);
 			expect(eq.instance).to.equal(entry.instance);

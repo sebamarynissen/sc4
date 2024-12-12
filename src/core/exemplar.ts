@@ -2,13 +2,19 @@
 import { isUint8Array } from 'uint8array-extras';
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
-import NAMES from './exemplar-props.js';
 import FileType from './file-types.js';
 import LotObject, { type LotObjectArray } from './lot-object.js';
-import { ExemplarProperty } from './enums.js';
+import { ExemplarProperty, kPropertyType } from './exemplar-properties.js';
 import { invertMap, hex, inspect } from 'sc4/utils';
 import { kFileType } from './symbols.js';
-import type { byte, float, sint32, sint64, TGIArray, uint16, uint32, uint8 } from 'sc4/types';
+import type { byte, float, sint32, sint64, TGIArray, uint16, uint32 } from 'sc4/types';
+import {
+	isKey,
+    type Primitive,
+    type Value,
+    type Key,
+    type NumberLike,
+} from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
 
@@ -23,25 +29,35 @@ type PropertyValueType =
  	| typeof Boolean
  	| typeof String;
 
-type PropertyPrimitive = uint8 | uint16 | uint32 | sint32 | float | boolean;
-export type PropertyValue = string | PropertyPrimitive | PropertyPrimitive[];
-
 export type ExemplarOptions = {
 	id?: ExemplarId;
 	parent?: TGIArray;
 	props?: Property[] | PropertyOptions[];
 };
-export type PropertyOptions = {
+export type PropertyOptions<K extends Key = Key> = {
 	id: number;
 	type?: PropertyValueType;
-	value: PropertyValue;
+	value: Value<K>;
 	comment?: string;
 };
 
+type AddPropertyOptions<K extends Key = Key> = {
+	id: K;
+	value: Value<K>
+	type?: PropertyValueType;
+};
+
 const LotObjectRange = [
-	ExemplarProperty.LotConfigPropertyLotObject,
-	ExemplarProperty.LotConfigPropertyLotObject+1279,
+	+ExemplarProperty.LotConfigPropertyLotObject,
+	+ExemplarProperty.LotConfigPropertyLotObject+1279,
 ];
+
+// Invert the exemplar properties so that we can find the name by id easily.
+const idToName: Map<number, string> = new Map(
+	Object.entries(ExemplarProperty).map(([name, object]) => {
+		return [+(object as NumberLike), name as string];
+	}),
+);
 
 // We no longer use an enum for indicating the type of an exemplar property. 
 // Instead we use the native built-in JavaScript typed arrays to indicate the 
@@ -158,7 +174,7 @@ abstract class BaseExemplar {
 	get lotObjects() {
 		if (this.#lotObjects) return this.#lotObjects;
 		const table = this.#table;
-		let i = ExemplarProperty.LotConfigPropertyLotObject;
+		let i = +ExemplarProperty.LotConfigPropertyLotObject;
 		let out = [];
 		let entry = table.get(i);
 		while (entry) {
@@ -177,26 +193,32 @@ abstract class BaseExemplar {
 
 	// ## prop(key)
 	// Helper function for accessing a property.
-	prop(key: number): Property | undefined {
-		return this.#table.get(key);
+	prop<K extends Key>(key: K): Property<K> | undefined {
+		let id = normalizeId(key);
+		return this.#table.get(id);
 	}
 
 	// ## value(key)
-	// Helper function for directly accessing the value of a property.
-	value(key: number) {
+	// Helper function for directly accessing the value of a property. We also 
+	// provide some syntactic sugar here over getting the *raw* property. If the 
+	// property is an array, but it was not stored like that in the exemplar 
+	// properties, then we'll automatically unwrap so that we always work with 
+	// the correct data format when using known values!
+	value<K extends Key>(key: K): Value<K> | undefined {
 		let prop = this.prop(key);
-		return prop ? prop.value : undefined;
+		if (!prop) return undefined;
+		return prop.getSafeValue();
 	}
 
 	// ## get(key)
 	// Alias for `value(key)`
-	get(key: number) {
+	get<K extends Key>(key: K): Value<K> | undefined {
 		return this.value(key);
 	}
 
 	// ## set(key, value)
 	// Updates the value of a rop by key.
-	set(key: number, value: PropertyValue) {
+	set<K extends Key>(key: K, value: Value<K>): this {
 		let prop = this.prop(key);
 		if (prop) {
 			prop.value = value;
@@ -204,41 +226,36 @@ abstract class BaseExemplar {
 		return this;
 	}
 
-	// ## singleValue(key)
-	// Ensures that the value return is never an array. This is to handle cases 
-	// where properties that normally shouldn't be arrays, are still stored as 
-	// 1-element arrays in an examplar,
-	singleValue(key: number): string | PropertyPrimitive | undefined {
-		let value = this.value(key);
-		return Array.isArray(value) ? value[0] : value;
-	}
-
 	// ## addProperty(id, value, typeHint)
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 
 	// something specific.
-	addProperty(
-		id: number,
-		value: PropertyValue,
-		typeHint: PropertyValueType = Uint32,
-	) {
-		let type;
-		if (typeof value === 'string') {
-			type = String;
-		} else if (typeof value === 'bigint') {
-			type = BigInt64Array;
-		} else if (typeof value === 'boolean') {
-			type = Boolean;
+	addProperty<K extends Key>(idOrName: K, value: Value<K>, typeHint?: PropertyValueType): Property<K>;
+	addProperty<K extends Key>(propOptions: AddPropertyOptions<K>): Property<K>;
+	addProperty<K extends Key>(
+		idOrPropOptions: K | AddPropertyOptions<K>,
+		value?: Value<K>,
+		typeHint: PropertyValueType = Uint32Array,
+	): Property<K> {
+		let options: PropertyOptions<K>;
+		if (isKey(idOrPropOptions)) {
+			if (typeof value === 'undefined') {
+				throw new TypeError(`You must specify a value for a property!`);
+			}
+			let id = normalizeId(idOrPropOptions);
+			let type = normalizeType(id, value, typeHint);
+			options = { id, value, type };
 		} else {
-			type = typeHint;
+			let { id, ...rest } = idOrPropOptions as AddPropertyOptions<K>;
+			options = {
+				id: normalizeId(id),
+				...rest,
+			};
 		}
-		let prop = new Property({
-			id,
-			type,
-			value,
-		});
+		let prop = new Property<K>(options);
 		this.props.push(prop);
 		this.#table.set(prop.id, prop);
+		return prop;
 	}
 
 	// ## parse(bufferOrStream)
@@ -328,7 +345,7 @@ abstract class BaseExemplar {
 			props = props.filter(prop => {
 				return !(min <= prop.id && prop.id <= max);
 			});
-			let i = ExemplarProperty.LotConfigPropertyLotObject;
+			let i = +ExemplarProperty.LotConfigPropertyLotObject;
 			for (let lotObject of this.#lotObjects) {
 				let prop = new Property({
 					id: i++,
@@ -344,6 +361,48 @@ abstract class BaseExemplar {
 		return buffer.toUint8Array();
 
 	}
+
+}
+
+// # normalaizeId(idOrName)
+// Looks up the *numeric* property id, but also allows looking up by name.
+function normalizeId(idOrName: NumberLike | string): number {
+	if (typeof idOrName === 'string') {
+		if (idOrName in ExemplarProperty) {
+			return +ExemplarProperty[idOrName as keyof typeof ExemplarProperty];
+		} else {
+			throw new Error(`Unknown exemplar property name ${idOrName}!`);
+		}
+	} else {
+		return +idOrName;
+	}
+}
+
+// # normalizeType(id, value, typeHint)
+// Tries to figure out the type of this property in an intelligent way. We first 
+// check whether the id is a known id. If that's the case, then we know the type 
+// right away. Otherwise we try to derive it from the value, and as a last 
+// resort we rely on the type hint, which defaults to uint32.
+function normalizeType(
+	id: number,
+	value: Value,
+	typeHint: PropertyValueType = Uint32Array,
+): PropertyValueType {
+	let name = idToName.get(id);
+	if (name && name in ExemplarProperty) {
+		let object = ExemplarProperty[name as keyof typeof ExemplarProperty];
+		if (typeof object === 'number') return Uint32Array;
+		let [type] = [object[kPropertyType]].flat();
+		return type;
+	}
+
+	// The property is not a known property, so we're in uncharted territory. 
+	// Now check if we can figure out the type from the value itself.
+	if (typeof value === 'string') return String;
+	let [first] = [value].flat();
+	if (typeof first === 'boolean') return Boolean;
+	else if (typeof first === 'bigint') return BigInt64Array;
+	else return typeHint;
 
 }
 
@@ -363,14 +422,14 @@ export class Cohort extends BaseExemplar {
 
 // # Property()
 // Wrapper class around an Exemplar property.
-class Property {
+class Property<K extends Key = Key> {
 	id = 0x00000000;
 	type: PropertyValueType = Uint32Array;
-	value: PropertyValue | undefined;
+	value: Value<K> | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data?: PropertyOptions | Property) {
+	constructor(data?: PropertyOptions<K> | Property<K>) {
 		let isClone = data instanceof Property;
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
@@ -378,9 +437,42 @@ class Property {
 		this.value = isClone ? structuredClone(value) : value;
 	}
 
+	// ## getSafeValue()
+	// This function handles the fact that sometimes a property can be stored as 
+	// an array, while the schema as defined in new_properties.xml actually 
+	// defines the property as a single-value property and vice versa. This can
+	// lead to runtime errors, so it is advised to use `getSafeValue()` instead 
+	// as this performs the required checks. Also note that TypeScript can't 
+	// really help us here: it's a runtime issue!
+	getSafeValue(): Value<K> | undefined {
+		let { name, value } = this;
+		if (name && value !== undefined) {
+			let info = ExemplarProperty[name as keyof typeof ExemplarProperty];
+			let shouldBeArray = typeof info !== 'number' && Array.isArray(
+				info[kPropertyType as keyof typeof info],
+			);
+
+			// Note: we use any below because TypeScript knows that somethings 
+			// wrong if this happens - which is indeed the case! However, there 
+			// is no runtime guarantee for this, so our runtime correction is 
+			// labeled as invalid by TypeScript. "any" to the rescue.
+			let isArray = Array.isArray(value);
+			if (shouldBeArray && !isArray) {
+				return [value] as Value<K>;
+			} else if (!shouldBeArray && isArray) {
+				return (value as any)[0] as Value<K>;
+			} else {
+				return value;
+			}
+
+		} else {
+			return value;
+		}
+	}
+
 	// ## get name()
 	get name() {
-		return NAMES[this.id] ?? '';
+		return idToName.get(this.id) ?? '';
 	}
 
 	// ## [Symbol.toPrimitive]()
@@ -421,7 +513,7 @@ class Property {
 	get byteLength() {
 		let { type, value } = this;
 		let bytes = getByteLengthFromType(type);
-		return this.multiple ? (4 + (value as PropertyValue[]).length * bytes) : bytes;
+		return this.multiple ? (4 + (value as any[]).length * bytes) : bytes;
 	}
 
 	// ## parse(rs)
@@ -448,13 +540,19 @@ class Property {
 			// If we're dealing with a string, read the string. Otherwise 
 			// read the values using the repetitions. Note that this means 
 			// that strings can't be repeated!
+			// Note: the "as Value<K>" expressions are needed because TypeScript 
+			// doesn't have access to runtime information. This means that it 
+			// can't guarantee us that Value<K> can hold a string at runtime 
+			// because it might just as well evaluate to int32[] or something. 
+			// Hence using "as" is justified here.
 			if (type === String) {
-				this.value = rs.string(reps);
+				this.value = rs.string(reps) as Value<K>;
 			} else {
-				let values = this.value = new Array(reps);
+				let values: Primitive[] = [];
 				for (let i = 0; i < reps; i++) {
-					values[i] = reader!(rs) as PropertyPrimitive;
+					values.push(reader!(rs) as Primitive);
 				}
+				this.value = values as Value<K>;
 			}
 		}
 

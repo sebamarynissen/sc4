@@ -4,10 +4,6 @@ import { uint8ArrayToHex } from 'uint8array-extras';
 import { expect } from 'chai';
 import { resource } from '#test/files.js';
 import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
-const Props = {
-	Family: 0x27812870,
-	kSC4BuildingModelRotationProperty: 0xE83A081D,
-};
 
 describe('The Exemplar file', function() {
 
@@ -80,7 +76,7 @@ describe('The Exemplar file', function() {
 
 		let entry = dbpf.find(0x6534284a, 0x0e274fb2, 0x30d11119);
 		let exemplar = entry!.read();
-		let value = exemplar.value(Props.Family);
+		let value = exemplar.value(ExemplarProperty.BuildingpropFamily);
 		expect(value).to.be.undefined;
 
 	});
@@ -91,7 +87,7 @@ describe('The Exemplar file', function() {
 		let entry = dbpf.find(0x6534284a, 0x348c219a, 0xd52e756e);
 		let exemplar = entry!.read();
 
-		let value = exemplar.value(Props.kSC4BuildingModelRotationProperty);
+		let value = exemplar.value(ExemplarProperty.kSC4BuildingModelRotationProperty);
 		expect(value).to.be.undefined;
 
 	});
@@ -134,6 +130,29 @@ describe('The Exemplar file', function() {
 		let clone = new Exemplar(exemplar.toBuffer());
 		expect(clone.get(ExemplarProperty.LotConfigPropertyLotObject)).to.be.undefined;
 		expect(clone.lotObjects).to.have.length(0);
+
+	});
+
+	describe('#get()', function() {
+
+		it('automatically unwraps single-value arrays for non-array properties', function() {
+
+			let exemplar = new Exemplar();
+			exemplar.addProperty({
+				id: 'ExemplarType',
+				value: [0x1234567],
+			} as any);
+			expect(exemplar.get(0x10)).to.equal(0x1234567);
+
+		});
+
+		it('automatically wraps array-values in arrays when not in an array', function() {
+
+			let exemplar = new Exemplar();
+			exemplar.addProperty('ResourceKeyType4', 0x1234567 as any);
+			expect(exemplar.get('ResourceKeyType4')).to.eql([0x1234567]);
+
+		});
 
 	});
 

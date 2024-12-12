@@ -7,10 +7,10 @@ import {
 	FileType,
 	DBPF,
 	cClass,
+    ExemplarProperty,
 } from 'sc4/core';
 import crc32 from '../crc.js';
 import { SmartBuffer } from 'smart-arraybuffer';
-import type Entry from '../dbpf-entry.js';
 
 describe('A DBPF file', function() {
 
@@ -192,6 +192,31 @@ describe('A DBPF file', function() {
 			}
 
 		});
+
+		it('automatically figures out the return type of `.read()', function() {
+
+			let dbpf = new DBPF(resource('cement.sc4lot'));
+			let entry = dbpf.find({
+				type: FileType.Exemplar,
+				group: 0x7cc07882
+			})!;
+			let exemplar = entry.read();
+			let type = exemplar.get('ExemplarType');
+			expect(type).to.equal(ExemplarProperty.ExemplarType.Buildings);
+
+		});
+
+		it('automatically figures out the return type of `.read()` for arrays', function() {
+
+			let dbpf = new DBPF(resource('City - Historical Town.sc4'));
+			let entry = dbpf.find({ type: FileType.Prop })!;
+			let props = entry.read();
+			expect(props).to.be.an('array');
+			for (let prop of props) {
+				expect(prop.appearance).to.equal(0x05);
+			}
+
+		}); 
 
 	});
 

@@ -4,7 +4,10 @@ import type { TGIQuery, TGILiteral, uint32, TGIArray } from 'sc4/types';
 export type { TGIQuery, TGILiteral };
 export type SingleResult<T> = T | undefined;
 export type ArrayResult<T> = T[];
-export type TGIPredicate<T> = (entry: T, index?: number, ctx?: T[]) => entry is T;
+type Predicate<T, S extends T = T> = 
+	| ((entry: T, index?: number, ctx?: T[]) => unknown)
+	| ((entry: T, index?: number, ctx?: T[]) => entry is S);
+export type TGIPredicate<T, S extends T = T> = Predicate<T, S>;
 
 export type FindParameters<T> =
 	| [type: uint32, group: uint32, instance: uint32]
@@ -49,7 +52,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	find(type: number, group: number, instance: number): SingleResult<T>;
 	find(query: TGIQuery): SingleResult<T>;
 	find(query: TGIArray): SingleResult<T>;
-	find(predicate: TGIPredicate<T>, thisArg?: any): SingleResult<T>;
+	find<S extends T = T>(predicate: TGIPredicate<T, S>, thisArg?: any): SingleResult<S>;
 	find(...args: FindParameters<T>): SingleResult<T> {
 		let result = this.findAll(...args as Parameters<TGIIndex<T>['findAll']>);
 		return result.at(-1);
@@ -63,7 +66,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	findAll(type: number, group: number, instance: number): ArrayResult<T>;
 	findAll(query: TGIQuery): ArrayResult<T>;
 	findAll(query: TGIArray): ArrayResult<T>;
-	findAll(predicate: TGIPredicate<T>, thisArg?: any): ArrayResult<T>;
+	findAll<S extends T = T>(predicate: TGIPredicate<T, S>, thisArg?: any): ArrayResult<S>;
 	findAll(query: FindParameters<T>[0], group?: number | any, instance?: number): ArrayResult<T> {
 
 		// If the query is specified as a function, use it as such.
@@ -282,9 +285,9 @@ function createFilter<T extends TGILiteral>({ type, group, instance }: TGIQuery)
 
 // # filterInPlace(array, condition)
 // The in-place equivalent of Array.prototype.filter
-function filterInPlace<T>(
+function filterInPlace<T, S extends T = T>(
 	array: T[],
-	condition: (value: T, index?: number, thisArg?: T[]) => boolean,
+	condition: Predicate<T, S>,
 ) {
 	let out = [];
 	let i = 0, j = 0;

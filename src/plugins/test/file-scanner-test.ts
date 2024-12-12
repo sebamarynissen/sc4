@@ -2,7 +2,8 @@
 import { expect } from 'chai';
 import { createFsFromVolume, Volume } from 'memfs';
 import path from 'node:path';
-import FileScanner from '../file-scanner.js';
+import FileScanner, { type FileScannerOptions } from '../file-scanner.js';
+import type { FSOption } from 'glob';
 
 describe('The FileScanner', function() {
 
@@ -19,8 +20,8 @@ describe('The FileScanner', function() {
 			'SimCity 4/Plugins/200-residential/aaron-graham.wellington.dark.1.sc4pac/NYBT/lot.SC4Lot': '',
 			'SimCity 4/Plugins/200-residential/aaron-graham.wellington.dark.1.sc4pac/NYBT/model.SC4Model': '',
 		}, '/');
-		const fs = (this as any).test.ctx.fs = createFsFromVolume(vol);
-		(this as any).test.ctx.scan = function(patterns = this.test.title, opts) {
+		const fs = (this as any).test.ctx.fs = createFsFromVolume(vol) as unknown as FSOption;
+		(this as any).test.ctx.scan = function(patterns = this.test.title, opts: FileScannerOptions) {
 			return new FileScanner(patterns, {
 				fs,
 				cwd: '/SimCity 4/Plugins',

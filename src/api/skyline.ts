@@ -1,17 +1,19 @@
 // # skyline.js
 import LotIndex from './lot-index.js';
-const Props = {
-	LotConfigPropertySize: 0x88edc790,
-	OccupantSize: 0x27812810,
-	OccupantGroups: 0xaa1dd396,
-};
+import type CityManager from './city-manager.js';
+import { ExemplarProperty as Property } from 'sc4/core';
 
 // # skyline(opts)
 // Just for fun: plop a random skyline.
-export default function skyline(opts) {
+type SkylineOptions = {
+	city: CityManager;
+	center?: [number, number];
+	radius: number;
+};
+export default function skyline(opts: SkylineOptions) {
 	let {
 		city,
-		center = [],
+		center,
 		radius,
 	} = opts;
 
@@ -40,7 +42,7 @@ export default function skyline(opts) {
 			
 			// Calculate the filling degree.
 			if (x*z > 2) {
-				let [width, height, depth] = entry.building;
+				let [width, height, depth] = entry.buildingSize;
 				let fill = (width*depth) / (x*z*16*16);
 				if (fill < 0.5 + 0.5*height/400) {
 					return false;
@@ -62,7 +64,7 @@ export default function skyline(opts) {
 		center,
 		radius,
 	});
-	let fn = (x, z) => Math.max(10, cluster(x, z));
+	let fn = (x: number, z: number) => Math.max(10, cluster(x, z));
 	// let f = 2;
 	// let a = makeSkylineFunction({
 	// 	center: [64-f*10, 64-f*5],
@@ -109,7 +111,7 @@ export default function skyline(opts) {
 			// Now pick a random lot from the suitable lots. We will favor 
 			// higher lots more to create a nicer effect.
 			let index = Math.floor(db.length * Math.random()**0.75);
-			let { lot } = db[index];
+			let { lot } = db.at(index)!;
 
 			// Cool, an appropriate lot was found, but we're not done yet. 
 			// It's possible if there's no space to plop the lot, we're not 
@@ -117,7 +119,7 @@ export default function skyline(opts) {
 			// Note: we'll still have to take into account the rotation as 
 			// well here!
 			let orientation = Math.random()*4 | 0;
-			let [width, depth] = lot.read().value(Props.LotConfigPropertySize);
+			let [width, depth] = lot.read().get(Property.LotConfigPropertySize)!;
 			if (orientation % 2 === 1) {
 				[width, depth] = [depth, width];
 			}
@@ -159,16 +161,21 @@ export default function skyline(opts) {
 // ## makeSkylineFunction(opts)
 // Factory for the skyline function that returns an appropriate height for the 
 // given (x, z) tile.
-function makeSkylineFunction(opts) {
+type MakeSkylineFunctionOptions = {
+	center?: [number, number];
+	max?: number;
+	radius?: number;
+};
+function makeSkylineFunction(opts: MakeSkylineFunctionOptions) {
 	let {
 		center: [
 			cx = 32,
 			cz = 32,
-		],
+		] = [],
 		max = 400,
 		radius = 32,
 	} = opts;
-	return function(x, z) {
+	return function(x: number, z: number) {
 		let t = Math.sqrt((cx-x)**2 + (cz-z)**2) / radius;
 		return max*Math.exp(-((2*t)**2));
 	};
