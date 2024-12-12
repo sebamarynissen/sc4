@@ -758,7 +758,12 @@ export const ExemplarProperty = {
 	/**
 	 * Filter GUIDs any of which must be satisfied
 	 */
-	AudioORFilters: 0x0a410ba0,
+	AudioORFilters: {
+		[kToPrimitive]: () => 0x0a410ba0,
+		[kPropertyId]: 0x0a410ba0,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Size of glob for grouping single layer, or occupant
 	 */
@@ -1250,7 +1255,7 @@ export const ExemplarProperty = {
 	DemandSatisfiedFloat: {
 		[kToPrimitive]: () => 0x27812842,
 		[kPropertyId]: 0x27812842,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -1260,7 +1265,7 @@ export const ExemplarProperty = {
 	DemandCreatedFloat: {
 		[kToPrimitive]: () => 0x27812843,
 		[kPropertyId]: 0x27812843,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -1335,7 +1340,12 @@ export const ExemplarProperty = {
 	/**
 	 * The family that this building or prop is a member of.
 	 */
-	BuildingpropFamily: 0x27812870,
+	BuildingpropFamily: {
+		[kToPrimitive]: () => 0x27812870,
+		[kPropertyId]: 0x27812870,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Specifies 1 model key for each Z/R
 	 */
@@ -1757,7 +1767,12 @@ export const ExemplarProperty = {
 	/**
 	 * Variable length list of type IDs for this hospital
 	 */
-	HospitalTypeIDList: 0x292d8f9b,
+	HospitalTypeIDList: {
+		[kToPrimitive]: () => 0x292d8f9b,
+		[kPropertyId]: 0x292d8f9b,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Texture IDs for each zoom level.
 	 */
@@ -1783,7 +1798,7 @@ export const ExemplarProperty = {
 	WealthFilter: {
 		[kToPrimitive]: () => 0xaa12fcb3,
 		[kPropertyId]: 0xaa12fcb3,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -1922,7 +1937,7 @@ export const ExemplarProperty = {
 	FieldLots: {
 		[kToPrimitive]: () => 0x29b55f73,
 		[kPropertyId]: 0x29b55f73,
-		[kPropertyType]: Uint32,
+		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 		FurrowsWithSprinkler: 0x2a6e4309,
 		DirtWithSprinkler: 0x2a6e431d,
@@ -2008,15 +2023,30 @@ export const ExemplarProperty = {
 	/**
 	 * Filter GUIDs that MUST be satisfied
 	 */
-	AudioANDFilters: 0x2a3fbde1,
+	AudioANDFilters: {
+		[kToPrimitive]: () => 0x2a3fbde1,
+		[kPropertyId]: 0x2a3fbde1,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Filter GUIDs that must NOT be satisfied
 	 */
-	AudioNOTFilters: 0x2a3fbde5,
+	AudioNOTFilters: {
+		[kToPrimitive]: () => 0x2a3fbde5,
+		[kPropertyId]: 0x2a3fbde5,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Array of exemplars to load
 	 */
-	AudioAmbienceExemplarIds: 0x2a3ff8cd,
+	AudioAmbienceExemplarIds: {
+		[kToPrimitive]: () => 0x2a3ff8cd,
+		[kPropertyId]: 0x2a3ff8cd,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * GUID for this building's Query exemplar
 	 */
@@ -2301,11 +2331,21 @@ export const ExemplarProperty = {
 	/**
 	 * Demand IDs capped by this resource, based on % depleted
 	 */
-	CapsDemand: 0x47bb3f41,
+	CapsDemand: {
+		[kToPrimitive]: () => 0x47bb3f41,
+		[kPropertyId]: 0x47bb3f41,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * List of demand IDs summed by this one
 	 */
-	Sums: 0x47bb3f50,
+	Sums: {
+		[kToPrimitive]: () => 0x47bb3f50,
+		[kPropertyId]: 0x47bb3f50,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Which part of the regional index is added to the local index
 	 */
@@ -2366,14 +2406,19 @@ export const ExemplarProperty = {
 	/**
 	 * Growth Developer IDs (see Effects)
 	 */
-	LandValueDesirabilityIDs: 0x47e2c330,
+	LandValueDesirabilityIDs: {
+		[kToPrimitive]: () => 0x47e2c330,
+		[kPropertyId]: 0x47e2c330,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Size of effects (see IDs)
 	 */
 	LandValueDesirabilityFactors: {
 		[kToPrimitive]: () => 0x47e2c331,
 		[kPropertyId]: 0x47e2c331,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -2507,7 +2552,12 @@ export const ExemplarProperty = {
 	/**
 	 * List of available (R and C) building styles
 	 */
-	TractDeveloperAvailableStyles: 0x47e2c550,
+	TractDeveloperAvailableStyles: {
+		[kToPrimitive]: () => 0x47e2c550,
+		[kPropertyId]: 0x47e2c550,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * How often to change (R and C) building styles
 	 */
@@ -2533,14 +2583,19 @@ export const ExemplarProperty = {
 	/**
 	 * Exemplar ids for end pieces(in order)
 	 */
-	EndPieceExemplars: 0x482cb443,
+	EndPieceExemplars: {
+		[kToPrimitive]: () => 0x482cb443,
+		[kPropertyId]: 0x482cb443,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Model rotations for end pieces
 	 */
 	EndPieceRotations: {
 		[kToPrimitive]: () => 0x482cb444,
 		[kPropertyId]: 0x482cb444,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -2567,14 +2622,19 @@ export const ExemplarProperty = {
 	/**
 	 * Exemplar ids for support pieces(start at pillar)
 	 */
-	SupportPieceExemplars: 0x482cb449,
+	SupportPieceExemplars: {
+		[kToPrimitive]: () => 0x482cb449,
+		[kPropertyId]: 0x482cb449,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Model rotations for support pieces
 	 */
 	SupportPieceRotations: {
 		[kToPrimitive]: () => 0x482cb44a,
 		[kPropertyId]: 0x482cb44a,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -2583,7 +2643,7 @@ export const ExemplarProperty = {
 	EndPieceSpanLocations: {
 		[kToPrimitive]: () => 0x482cb44b,
 		[kPropertyId]: 0x482cb44b,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -2592,7 +2652,7 @@ export const ExemplarProperty = {
 	ColumnTopPosForSupportPieces: {
 		[kToPrimitive]: () => 0x482cb44c,
 		[kPropertyId]: 0x482cb44c,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -2601,7 +2661,7 @@ export const ExemplarProperty = {
 	ColumnTopPosForEndPieces: {
 		[kToPrimitive]: () => 0x482cb44d,
 		[kPropertyId]: 0x482cb44d,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -3666,7 +3726,7 @@ export const ExemplarProperty = {
 	ZonePurposeFilter: {
 		[kToPrimitive]: () => 0xaa12fcb4,
 		[kPropertyId]: 0xaa12fcb4,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -3714,7 +3774,7 @@ export const ExemplarProperty = {
 	ActiveTravelTypes: {
 		[kToPrimitive]: () => 0x4998c89d,
 		[kPropertyId]: 0x4998c89d,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 		None: 0x00000000,
 		Commute: 0x00000001,
@@ -4463,7 +4523,12 @@ export const ExemplarProperty = {
 	/**
 	 * List of IDs corresponding to Demand Modifiers
 	 */
-	NationDemandIDList: 0x4a1f629f,
+	NationDemandIDList: {
+		[kToPrimitive]: () => 0x4a1f629f,
+		[kPropertyId]: 0x4a1f629f,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Demand boost over time
 	 */
@@ -4716,7 +4781,12 @@ export const ExemplarProperty = {
 	/**
 	 * Growth Developer IDs to go with next property
 	 */
-	DesirabilityEffectIDs: 0x4a5f7c4b,
+	DesirabilityEffectIDs: {
+		[kToPrimitive]: () => 0x4a5f7c4b,
+		[kPropertyId]: 0x4a5f7c4b,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Maximum amount of garbage units the valve can hold
 	 */
@@ -5681,7 +5751,7 @@ export const ExemplarProperty = {
 	ZoneFilter: {
 		[kToPrimitive]: () => 0xaa12fcb2,
 		[kPropertyId]: 0xaa12fcb2,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6004,7 +6074,7 @@ export const ExemplarProperty = {
 	SFXAlarmTime: {
 		[kToPrimitive]: () => 0x6a36afab,
 		[kPropertyId]: 0x6a36afab,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6139,22 +6209,42 @@ export const ExemplarProperty = {
 	/**
 	 * Array of GUIDs, one per plot, each representing a data source.
 	 */
-	GraphPlotDataSource1: 0x6a4aee40,
+	GraphPlotDataSource1: {
+		[kToPrimitive]: () => 0x6a4aee40,
+		[kPropertyId]: 0x6a4aee40,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * (Line only) Array of GUIDs, one per plot, each representing a data
 	 * source.
 	 */
-	GraphPlotDataSource2: 0x6a4aee5f,
+	GraphPlotDataSource2: {
+		[kToPrimitive]: () => 0x6a4aee5f,
+		[kPropertyId]: 0x6a4aee5f,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * (Line only) Array of ints, one per plot, each representing how data
 	 * sources 1 and 2 are combined (none, +, -, *, /).
 	 */
-	GraphPlotCombineOp: 0x6a4aee68,
+	GraphPlotCombineOp: {
+		[kToPrimitive]: () => 0x6a4aee68,
+		[kPropertyId]: 0x6a4aee68,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Array of ints, one per plot, each representing a localized string key for
 	 * the label.
 	 */
-	GraphPlotLabelKey: 0x6a4aeedc,
+	GraphPlotLabelKey: {
+		[kToPrimitive]: () => 0x6a4aeedc,
+		[kPropertyId]: 0x6a4aeedc,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Array of RGB triplets, 3 integers per plot, each representing a line
 	 * color.
@@ -6162,7 +6252,7 @@ export const ExemplarProperty = {
 	GraphPlotColor: {
 		[kToPrimitive]: () => 0x6a4aeedf,
 		[kPropertyId]: 0x6a4aeedf,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6171,14 +6261,19 @@ export const ExemplarProperty = {
 	GraphPlotScale: {
 		[kToPrimitive]: () => 0x6a4aeee2,
 		[kPropertyId]: 0x6a4aeee2,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
 	 * (Bar only) Array of ints, one per plot, each representing which series
 	 * that plot should be in.
 	 */
-	GraphPlotSeries: 0x6a4aeee3,
+	GraphPlotSeries: {
+		[kToPrimitive]: () => 0x6a4aeee3,
+		[kPropertyId]: 0x6a4aeee3,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * (Bar only) Array of RGB triplets, 3 integers per series, each
 	 * representing a fill color for a whole series.
@@ -6186,7 +6281,7 @@ export const ExemplarProperty = {
 	GraphPlotSeriesFillColor: {
 		[kToPrimitive]: () => 0x6a4aeee4,
 		[kPropertyId]: 0x6a4aeee4,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6196,7 +6291,7 @@ export const ExemplarProperty = {
 	GraphPlotSeriesLineColor: {
 		[kToPrimitive]: () => 0x6a4aeee5,
 		[kPropertyId]: 0x6a4aeee5,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6251,7 +6346,12 @@ export const ExemplarProperty = {
 	/**
 	 * History data source for this trend bar
 	 */
-	TrendBarDataSource: 0x6a6564f4,
+	TrendBarDataSource: {
+		[kToPrimitive]: () => 0x6a6564f4,
+		[kPropertyId]: 0x6a6564f4,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Converts from input data source range to {0,1}
 	 */
@@ -6363,7 +6463,7 @@ export const ExemplarProperty = {
 	CatalogMonthlyCost: {
 		[kToPrimitive]: () => 0x6ad54804,
 		[kPropertyId]: 0x6ad54804,
-		[kPropertyType]: Sint32,
+		[kPropertyType]: [Sint32],
 		[kInspect]: inspector,
 	},
 	/**
@@ -6397,7 +6497,12 @@ export const ExemplarProperty = {
 	/**
 	 * List of travel types
 	 */
-	DataViewTravelTypes: 0x6b7c5cdd,
+	DataViewTravelTypes: {
+		[kToPrimitive]: () => 0x6b7c5cdd,
+		[kPropertyId]: 0x6b7c5cdd,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * How many tiles traffic autos should look ahead when determining paths
 	 */
@@ -6410,7 +6515,12 @@ export const ExemplarProperty = {
 	/**
 	 * GUID array of sounds to play (per zoom) when occupant is 'active'
 	 */
-	SFXActiveSound: 0x6c044bb5,
+	SFXActiveSound: {
+		[kToPrimitive]: () => 0x6c044bb5,
+		[kPropertyId]: 0x6c044bb5,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Desired maximum # of vehicles in the world during player-drive
 	 */
@@ -6908,7 +7018,12 @@ export const ExemplarProperty = {
 	/**
 	 * LotConfigPropertyFamily
 	 */
-	LotConfigPropertyFamily: 0x88edc791,
+	LotConfigPropertyFamily: {
+		[kToPrimitive]: () => 0x88edc791,
+		[kPropertyId]: 0x88edc791,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * The slope at which it switches to using a Lot foundation
 	 */
@@ -6977,11 +7092,21 @@ export const ExemplarProperty = {
 	/**
 	 * LotConfigPropertyFenceDefinition
 	 */
-	LotConfigPropertyFenceDefinition: 0x88edc797,
+	LotConfigPropertyFenceDefinition: {
+		[kToPrimitive]: () => 0x88edc797,
+		[kPropertyId]: 0x88edc797,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * LotConfigPropertyRetainingWallTypes
 	 */
-	LotConfigPropertyRetainingWallTypes: 0x88edc798,
+	LotConfigPropertyRetainingWallTypes: {
+		[kToPrimitive]: () => 0x88edc798,
+		[kPropertyId]: 0x88edc798,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * LotConfigPropertyLotObject
 	 */
@@ -7822,7 +7947,12 @@ export const ExemplarProperty = {
 	 * List of instance IDs for exemplars containing the properties for each
 	 * distinct airport/seaport type
 	 */
-	PortTypeExemplarIDs: 0x8a270fc3,
+	PortTypeExemplarIDs: {
+		[kToPrimitive]: () => 0x8a270fc3,
+		[kPropertyId]: 0x8a270fc3,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Cost to create a bridge tile of network using this tool
 	 */
@@ -8215,7 +8345,7 @@ export const ExemplarProperty = {
 	CatalogMonthlyCostFloat: {
 		[kToPrimitive]: () => 0x8a94eee0,
 		[kPropertyId]: 0x8a94eee0,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -8293,7 +8423,7 @@ export const ExemplarProperty = {
 	OccupantTypes: {
 		[kToPrimitive]: () => 0x8cb3511f,
 		[kPropertyId]: 0x8cb3511f,
-		[kPropertyType]: Uint32,
+		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 		R$: 0x00001010,
 		R$$: 0x00001020,
@@ -8797,7 +8927,12 @@ export const ExemplarProperty = {
 	/**
 	 * Variable length list of type IDs for this school
 	 */
-	SchoolTypeIDList: 0xa92d8e40,
+	SchoolTypeIDList: {
+		[kToPrimitive]: () => 0xa92d8e40,
+		[kPropertyId]: 0xa92d8e40,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Percentage (from 0 to 200%) by which this ordinance affects all EQ values
 	 */
@@ -8865,7 +9000,7 @@ export const ExemplarProperty = {
 	OccupantTripZoneFilter: {
 		[kToPrimitive]: () => 0xa9af1e54,
 		[kPropertyId]: 0xa9af1e54,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -8874,7 +9009,7 @@ export const ExemplarProperty = {
 	OccupantTripPurposeFilter: {
 		[kToPrimitive]: () => 0xa9af1e55,
 		[kPropertyId]: 0xa9af1e55,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -9054,7 +9189,7 @@ export const ExemplarProperty = {
 	LotConditionFilter: {
 		[kToPrimitive]: () => 0xaa12fcb7,
 		[kPropertyId]: 0xaa12fcb7,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -9089,7 +9224,7 @@ export const ExemplarProperty = {
 	OccupantGroups: {
 		[kToPrimitive]: () => 0xaa1dd396,
 		[kPropertyId]: 0xaa1dd396,
-		[kPropertyType]: Uint32,
+		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 		BuildingResidential: 0x00001000,
 		BuildingCommercial: 0x00001001,
@@ -10321,7 +10456,7 @@ export const ExemplarProperty = {
 	LayerFilter: {
 		[kToPrimitive]: () => 0xc973c9aa,
 		[kPropertyId]: 0xc973c9aa,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -10511,7 +10646,12 @@ export const ExemplarProperty = {
 	/**
 	 * List of template IDs for each growth stage
 	 */
-	LotStageTemplateIDs: 0xca271781,
+	LotStageTemplateIDs: {
+		[kToPrimitive]: () => 0xca271781,
+		[kPropertyId]: 0xca271781,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * List of demand thresholds for each growth stage. What this value refers
 	 * to is zone type specific.
@@ -10519,7 +10659,7 @@ export const ExemplarProperty = {
 	ObsoleteDemandThresholdsList: {
 		[kToPrimitive]: () => 0xca271782,
 		[kPropertyId]: 0xca271782,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -10528,13 +10668,18 @@ export const ExemplarProperty = {
 	BudgetRequirementsList: {
 		[kToPrimitive]: () => 0xca271783,
 		[kPropertyId]: 0xca271783,
-		[kPropertyType]: Sint64,
+		[kPropertyType]: [Sint64],
 		[kInspect]: inspector,
 	},
 	/**
 	 * List of trip capacities for each growth stage for airport or seaport
 	 */
-	TripCapacityList: 0xca271784,
+	TripCapacityList: {
+		[kToPrimitive]: () => 0xca271784,
+		[kPropertyId]: 0xca271784,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Efficiency value under which the lot begins to distress
 	 */
@@ -10550,7 +10695,7 @@ export const ExemplarProperty = {
 	StageUpgradeCost: {
 		[kToPrimitive]: () => 0xca271786,
 		[kPropertyId]: 0xca271786,
-		[kPropertyType]: Sint64,
+		[kPropertyType]: [Sint64],
 		[kInspect]: inspector,
 	},
 	/**
@@ -10587,7 +10732,7 @@ export const ExemplarProperty = {
 	HeightMap: {
 		[kToPrimitive]: () => 0xca271800,
 		[kPropertyId]: 0xca271800,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
@@ -11003,7 +11148,12 @@ export const ExemplarProperty = {
 	/**
 	 * Index (1,2,3,etc.) of auxiliary model to load automatically on Init
 	 */
-	AutoloadAuxiliaryModels: 0xcc21420d,
+	AutoloadAuxiliaryModels: {
+		[kToPrimitive]: () => 0xcc21420d,
+		[kPropertyId]: 0xcc21420d,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * kPropertyID_FlipsAllowed
 	 */
@@ -11351,25 +11501,40 @@ export const ExemplarProperty = {
 	/**
 	 * Model resource id(s) for tunnel piece(s)
 	 */
-	TunnelResourceIds: 0xe974eaa4,
+	TunnelResourceIds: {
+		[kToPrimitive]: () => 0xe974eaa4,
+		[kPropertyId]: 0xe974eaa4,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Tunnel model rotations
 	 */
-	TunnelModelRotations: 0xe974eaa5,
+	TunnelModelRotations: {
+		[kToPrimitive]: () => 0xe974eaa5,
+		[kPropertyId]: 0xe974eaa5,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * Tunnel piece model heights
 	 */
 	TunnelModelHeights: {
 		[kToPrimitive]: () => 0xe974eaa6,
 		[kPropertyId]: 0xe974eaa6,
-		[kPropertyType]: Float,
+		[kPropertyType]: [Float],
 		[kInspect]: inspector,
 	},
 	/**
 	 * Pylon model exemplar instance used by some networks (can be single
 	 * instance or one per zoom)
 	 */
-	SpecialPylonModelId: 0xe974eaa7,
+	SpecialPylonModelId: {
+		[kToPrimitive]: () => 0xe974eaa7,
+		[kPropertyId]: 0xe974eaa7,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * RGBA color for watered buildings in pipe view
 	 */
@@ -11455,7 +11620,12 @@ export const ExemplarProperty = {
 	 * Group(s) of vehicle automata that will be created when this building is
 	 * constructed or plopped.
 	 */
-	ResponseVehicleType: 0xe9aee3da,
+	ResponseVehicleType: {
+		[kToPrimitive]: () => 0xe9aee3da,
+		[kPropertyId]: 0xe9aee3da,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * How many of each type will be created when building is constructed or
 	 * plopped.
@@ -11463,14 +11633,19 @@ export const ExemplarProperty = {
 	ResponseVehicleCount: {
 		[kToPrimitive]: () => 0xe9aee3db,
 		[kPropertyId]: 0xe9aee3db,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
 	 * Group(s) of pedestrian automata that will be created when this building
 	 * is constructed or plopped.
 	 */
-	ResponsePedestrianType: 0xe9aee3dc,
+	ResponsePedestrianType: {
+		[kToPrimitive]: () => 0xe9aee3dc,
+		[kPropertyId]: 0xe9aee3dc,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * How many of each type (in Response Pedestrian Type property) will be
 	 * created when building is constructed or plopped.
@@ -11478,7 +11653,7 @@ export const ExemplarProperty = {
 	ResponsePedestrianCount: {
 		[kToPrimitive]: () => 0xe9aee3dd,
 		[kPropertyId]: 0xe9aee3dd,
-		[kPropertyType]: Uint8,
+		[kPropertyType]: [Uint8],
 		[kInspect]: inspector,
 	},
 	/**
@@ -11713,7 +11888,12 @@ export const ExemplarProperty = {
 	 * If present, specifies a GZCLSID (class id) for the model class to use.
 	 * Otherwise, just use the default kGZCLSID_cS3DModelInstance.
 	 */
-	kSC4BuildingModelClassProperty: 0xea123cef,
+	kSC4BuildingModelClassProperty: {
+		[kToPrimitive]: () => 0xea123cef,
+		[kPropertyId]: 0xea123cef,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * How fast this building's condition decays over time. The "life
 	 * expectancy" of the plant in months can be calculated roughly as the
@@ -12094,7 +12274,7 @@ export const ExemplarProperty = {
 	BudgetItemDepartment: {
 		[kToPrimitive]: () => 0xea54d283,
 		[kPropertyId]: 0xea54d283,
-		[kPropertyType]: Uint32,
+		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 		MassTransit: 0xc921ceeb,
 		HealthStaff: 0x09188f42,
@@ -12118,14 +12298,19 @@ export const ExemplarProperty = {
 	/**
 	 * GUID(s) of line item ID for this budget item.
 	 */
-	BudgetItemLine: 0xea54d284,
+	BudgetItemLine: {
+		[kToPrimitive]: () => 0xea54d284,
+		[kPropertyId]: 0xea54d284,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
 	/**
 	 * GUID(s) of purpose ID for this budget item.
 	 */
 	BudgetItemPurpose: {
 		[kToPrimitive]: () => 0xea54d285,
 		[kPropertyId]: 0xea54d285,
-		[kPropertyType]: Uint32,
+		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 		MassTransitSwitch: 0xca550301,
 		HospitalStaff: 0xca565486,
@@ -12149,7 +12334,7 @@ export const ExemplarProperty = {
 	BudgetItemCost: {
 		[kToPrimitive]: () => 0xea54d286,
 		[kPropertyId]: 0xea54d286,
-		[kPropertyType]: Sint64,
+		[kPropertyType]: [Sint64],
 		[kInspect]: inspector,
 	},
 	/**

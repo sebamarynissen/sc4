@@ -40,9 +40,9 @@ for (let prop of props) {
 	let { name } = prop;
 	if (name.match(/^\d/)) name = `'${name}'`;
 	let value = hex(prop.id);
-	if (prop.options || prop.type !== 'Uint32' || Math.abs(prop.count) > 1) {
+	if (prop.options || prop.type !== 'Uint32' || (prop.count < 0 || prop.count > 1)) {
 		let { type, count } = prop;
-		if (Math.abs(count) > 1) {
+		if (count < 0 || count > 1) {
 			type = `[${type}]`;
 		}
 		let id = value;
