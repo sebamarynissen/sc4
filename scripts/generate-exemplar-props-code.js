@@ -75,7 +75,7 @@ export default ExemplarProperty;
 // Group all exemplar ids by type identifier.
 let grouped = Object.groupBy(props, prop => {
 	let { type, count } = prop;
-	if (+count > 1) {
+	if (Math.abs(+count) > 1) {
 		return `${type.toLowerCase()}[]`;
 	} else {
 		return type.toLowerCase();

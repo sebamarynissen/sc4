@@ -12464,15 +12464,10 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x0b579c21
 		| 0x0b579c22
 		| 0x0b579c23
-		| 0x27812824
-		| 0x27812834
-		| 0x27812840
-		| 0x27812841
 		| 0x27812852
 		| 0x27812853
 		| 0x27812854
 		| 0x27812870
-		| 0x27812924
 		| 0x28ebbc30
 		| 0x28ebbc35
 		| 0x28ebbc3b
@@ -12493,9 +12488,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x2c0c922e
 		| 0x2c23a3a1
 		| 0x2c8f8746
-		| 0x47bb3f30
-		| 0x47bb3f31
-		| 0x47bb3f32
 		| 0x47bb3f41
 		| 0x47bb3f50
 		| 0x47e2c330
@@ -12543,7 +12535,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x49a1e05a
 		| 0x4a08c508
 		| 0x4a08c701
-		| 0x4a0b47e0
 		| 0x4a0b47e3
 		| 0x4a0b47e5
 		| 0x4a0b47e8
@@ -12616,7 +12607,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6c200139
 		| 0x8761abd0
 		| 0x87cd6301
-		| 0x87cd63a0
 		| 0x88ed1059
 		| 0x88ed3303
 		| 0x88edc791
@@ -12668,7 +12658,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xa7607d80
 		| 0xa7607d81
 		| 0xa8ebcf0c
-		| 0xa8f149c5
 		| 0xca383ca3
 		| 0xa911e2f1
 		| 0xa91351a6
@@ -12676,9 +12665,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xa92356b8
 		| 0xa92d8e40
 		| 0xa977a86b
-		| 0xa9b6ecd3
-		| 0xa9b6ecd4
-		| 0xa9b6ecd5
 		| 0xaa161f81
 		| 0xaa1dd396
 		| 0xaa1dd397
@@ -12721,7 +12707,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe900ea2b
 		| 0xe900ea2c
 		| 0xe974eaa1
-		| 0xe974eaa2
 		| 0xe974eaa4
 		| 0xe974eaa5
 		| 0xe974eaa7
@@ -12736,7 +12721,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xea400620
 		| 0xea400621
 		| 0xea400622
-		| 0xea400623
 		| 0xea54d283
 		| 0xea54d284
 		| 0xea54d285
@@ -12746,7 +12730,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xebfc5e5e
 		| 0x8a2602ca
 		| 0x8a2602cc
-		| 0x0062e78a
 		| 'ExemplarType'
 		| 'ExemplarInterfaceID'
 		| 'ExemplarClassID'
@@ -12778,15 +12761,10 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MicroSecsPerTimeSlice'
 		| 'SleepMicroSecsAfterTimeSlice'
 		| 'ProcessCellsMaxTimeSliceMicroSecs'
-		| 'ResourceKeyType4'
-		| 'CapacitySatisfied'
-		| 'DemandSatisfied'
-		| 'DemandCreated'
 		| 'PowerGenerated'
 		| 'PowerPlantType'
 		| 'PowerConsumed'
 		| 'BuildingpropFamily'
-		| 'ResourceKeyType4xm'
 		| 'ID'
 		| 'YearAvailable'
 		| 'AdvisorID'
@@ -12807,9 +12785,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MySimWalkGender'
 		| 'FinalGroupId'
 		| 'ExemplarCategory'
-		| 'Drives'
-		| 'Satisfies'
-		| 'Contributes'
 		| 'CapsDemand'
 		| 'Sums'
 		| 'LandValueDesirabilityIDs'
@@ -12857,7 +12832,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'RequesterSatisfaction'
 		| 'QuakeMicroSecsBetweenShakeEffects'
 		| 'ManagerID'
-		| 'DataViewTypeFilter'
 		| 'DataViewViewLevel'
 		| 'DataViewDataSource'
 		| 'DataViewQuantizeLots'
@@ -12930,7 +12904,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'PlayerdriveVehicleMaxCount'
 		| 'MnMonthsBetweenCellCoverage'
 		| 'DemandSourceIndex'
-		| 'StylePercentages'
 		| 'RecyclingCenterPercentReduction'
 		| 'WaterProduced'
 		| 'LotConfigPropertyFamily'
@@ -12982,7 +12955,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MMoistureVariationScale'
 		| 'MMoistureDitherScale'
 		| 'IncineratorMonthlyCapacity'
-		| 'KSC4FloraFamilyProperty'
 		| 'IntelliScrollOuterRadiusPixels'
 		| 'PowerRadiationRadius'
 		| 'AirPollutionThreshold'
@@ -12990,9 +12962,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MaximumDistanceFromOriginToNetwork'
 		| 'SchoolTypeIDList'
 		| 'PropOccupantClassID'
-		| 'StageTime'
-		| 'SpreadTime'
-		| 'SpreadRadius'
 		| 'MaxAcceptablePumpedWaterPollutionLevel'
 		| 'OccupantGroups'
 		| 'SFXQuerySound'
@@ -13035,7 +13004,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'LotDeveloperNightUpdateInterval'
 		| 'LotDeveloperNightUpdateCount'
 		| 'NetworkTextureId'
-		| 'ConnectedVerts'
 		| 'TunnelResourceIds'
 		| 'TunnelModelRotations'
 		| 'SpecialPylonModelId'
@@ -13050,7 +13018,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'RiotNumStages'
 		| 'RiotSecondsBetweenStages'
 		| 'RiotController2Stage'
-		| 'RiotSpawnArray'
 		| 'BudgetItemDepartment'
 		| 'BudgetItemLine'
 		| 'BudgetItemPurpose'
@@ -13060,7 +13027,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MySimIconImage'
 		| 'ItemSubmenuParentId'
 		| 'ItemButtonClass'
-		| 'ExemplarPatchTargets'
 		? uint32 :
 	T extends
 		| 0x00000020
@@ -13101,10 +13067,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x08f55dc2
 		| 0x08f79b8e
 		| 0x0911e117
-		| 0x0911e2e6
-		| 0x0911e2e7
-		| 0x0911e2e8
-		| 0x0911e2e9
 		| 0x09122027
 		| 0x09135482
 		| 0x091b42a2
@@ -13121,44 +13083,27 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x09b00b31
 		| 0x09b00b32
 		| 0x09b00b33
-		| 0x09b00b35
 		| 0x09c2aef0
-		| 0x09c2aef3
-		| 0x09c2aef4
-		| 0x09c2aef5
-		| 0x09c2aef6
-		| 0x09c2aef7
-		| 0x0a10c772
-		| 0x0a10c773
-		| 0x0a10c774
-		| 0x0a10c775
 		| 0x0a2eced8
 		| 0x0a4168e1
-		| 0x0a469353
 		| 0x0a4bc742
-		| 0x0a51188a
-		| 0x0a53b2f9
 		| 0x0a56212a
 		| 0x0a5f596b
 		| 0x0a9599bf
 		| 0x0b579c24
 		| 0x0b579c25
 		| 0x0b579c26
-		| 0x0bd86fd4
 		| 0x0bd86fd5
 		| 0x0bfc0a4c
 		| 0x27812811
 		| 0x27812842
 		| 0x27812843
-		| 0x87cd6399
-		| 0x87cd6341
 		| 0x279d1707
 		| 0x28ebbc36
 		| 0x28ebbc3a
 		| 0x28f42aa0
 		| 0x29121e8b
 		| 0x29136788
-		| 0x2918949e
 		| 0x29189beb
 		| 0x29189bee
 		| 0x29189bf1
@@ -13167,28 +13112,21 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x29189bf5
 		| 0x29189bf6
 		| 0x29189bf7
-		| 0x2921a9cc
-		| 0x29233e8d
 		| 0x29233e8f
 		| 0x29233e94
 		| 0x29233e96
-		| 0x29233e98
 		| 0x29233e9c
 		| 0x295961f3
 		| 0x29ab15c0
 		| 0x29ab15c2
-		| 0x29ab15c6
 		| 0x29ab15c7
 		| 0x29b40134
 		| 0x29b4013b
-		| 0x29b4013d
 		| 0x29b4013e
 		| 0x2a0348bb
 		| 0x2a0348bc
-		| 0x2a2d7824
 		| 0x2a35a25f
 		| 0x2a36e3cb
-		| 0x2a511893
 		| 0x2a511cbc
 		| 0x2a633000
 		| 0x2a634000
@@ -13203,9 +13141,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x2a654400
 		| 0x2a9590de
 		| 0x2aa84164
-		| 0x47e2c320
 		| 0x47e2c331
-		| 0x47e2c332
 		| 0x47e2c381
 		| 0x47e2c500
 		| 0x47e2c502
@@ -13246,7 +13182,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x48cd7b71
 		| 0x48cd7b72
 		| 0x48cd7b73
-		| 0x48cd7c00
 		| 0x48cd7c02
 		| 0x48d71ed2
 		| 0x48d71edb
@@ -13258,19 +13193,10 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4918c93a
 		| 0x491b3ad5
 		| 0x491c9c03
-		| 0x4941a92b
 		| 0x496e564c
 		| 0xca383ca2
-		| 0x4998c89c
 		| 0x4998c89e
-		| 0x4998c901
 		| 0x4998c903
-		| 0x4998c90c
-		| 0x4998c90d
-		| 0x4998c90e
-		| 0x4998c90f
-		| 0x4998c910
-		| 0x4998c911
 		| 0x4998c912
 		| 0x4998c913
 		| 0x4998c914
@@ -13279,12 +13205,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x49a195c0
 		| 0x49a1e8c4
 		| 0x49a2e8be
-		| 0x49a34301
 		| 0x49e5522f
-		| 0x4a08c500
-		| 0x4a08c501
-		| 0x4a08c502
-		| 0x4a08c503
 		| 0x4a08c504
 		| 0x4a08c505
 		| 0x4a08c506
@@ -13292,47 +13213,23 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x4a08c509
 		| 0x4a08c600
 		| 0x4a08c601
-		| 0x4a1f38b5
-		| 0x4a1f38b6
 		| 0x4a1f38c6
 		| 0x4a1f38c7
 		| 0x4a1f38c8
 		| 0x4a1f38c9
 		| 0x4a1f38ca
-		| 0x4a1f62a0
-		| 0x4a1f62a1
-		| 0x4a1f62a2
-		| 0x4a1f62a3
-		| 0x4a1f62a4
-		| 0x4a1f62a5
-		| 0x4a1f62a6
-		| 0x4a1f62a7
-		| 0x4a1f62a8
-		| 0x4a1f62a9
-		| 0x4a1f62b0
-		| 0x4a1f62b1
-		| 0x4a1f62b2
 		| 0x4a270db0
 		| 0x4a270e94
 		| 0x4a280510
 		| 0x4a280513
-		| 0x4a4bc714
-		| 0x4a511873
-		| 0x4a5f7315
-		| 0x4a6676ad
 		| 0x4a678060
 		| 0x4aa84161
 		| 0x4ab70dac
 		| 0x4ab71659
-		| 0x4ac519b8
-		| 0x4b61ffc9
 		| 0x4bae8fe1
 		| 0x4bae8fe2
-		| 0x4be09ec9
-		| 0x4be09eca
 		| 0x4be09ecb
 		| 0x4be09ecc
-		| 0x4bfdd955
 		| 0x66fbf7a9
 		| 0x66fbf7aa
 		| 0x66fbf7ab
@@ -13345,17 +13242,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x66fbf7be
 		| 0x66fbf7bf
 		| 0x68ddae92
-		| 0x68ddae93
 		| 0x68ddae95
 		| 0x68ddae97
 		| 0x68ddae9a
 		| 0x68ddae9c
-		| 0x68ddae9e
-		| 0x68ddaea0
-		| 0x6911e2df
-		| 0x691894a4
 		| 0x691894c0
-		| 0x691894c6
 		| 0x691b42b3
 		| 0x692ef65a
 		| 0x6932dc00
@@ -13372,8 +13263,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6932dc0d
 		| 0x6932dc13
 		| 0x6932dc14
-		| 0x6941a67f
-		| 0x6941b022
 		| 0x69501944
 		| 0x69987e60
 		| 0x69987e61
@@ -13390,7 +13279,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x69987e6f
 		| 0x699b08a4
 		| 0x69a36e40
-		| 0x69a437f6
 		| 0x69ac5640
 		| 0x69ac5641
 		| 0x69b425db
@@ -13400,58 +13288,20 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x69db8d04
 		| 0x69db8d05
 		| 0x6a09f62f
-		| 0x6a09f631
 		| 0x6a19f6b5
 		| 0x6a2d49f4
 		| 0x6a36afab
-		| 0x6a410bf2
-		| 0x6a4132f3
-		| 0x6a4132f6
 		| 0x6a469337
 		| 0x6a469342
 		| 0x6a4aeded
 		| 0x6a4aedef
 		| 0x6a4aeee2
-		| 0x6a5a6701
 		| 0x6a5a6702
-		| 0x6a6564f6
-		| 0x6a946a50
 		| 0x6a9f6edd
 		| 0x6ab70da7
 		| 0x6ab71654
 		| 0x6b588fad
 		| 0x879d12e7
-		| 0x87cd6340
-		| 0x87cd6343
-		| 0x87cd6344
-		| 0x87cd6345
-		| 0x87cd6346
-		| 0x87cd6347
-		| 0x87cd6348
-		| 0x87cd6349
-		| 0x87cd634b
-		| 0x87cd634c
-		| 0x87cd634d
-		| 0x87cd634e
-		| 0x87cd6361
-		| 0x87cd6362
-		| 0x87cd6363
-		| 0x87cd6364
-		| 0x87cd6365
-		| 0x87cd6366
-		| 0x87cd6367
-		| 0x87cd6368
-		| 0x87cd6369
-		| 0x87cd636a
-		| 0x87cd636b
-		| 0x87cd636c
-		| 0x87cd636d
-		| 0x87cd636e
-		| 0x87cd636f
-		| 0x87cd6391
-		| 0x87cd6392
-		| 0x87cd6397
-		| 0x87cd6398
 		| 0x88edc792
 		| 0x88fcc3e3
 		| 0x890e0a99
@@ -13459,7 +13309,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x89189495
 		| 0x8918c937
 		| 0x8918c93e
-		| 0x891b3ae6
 		| 0x892d9d02
 		| 0x897e709f
 		| 0x8989ec22
@@ -13484,17 +13333,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a020407
 		| 0x8a020507
 		| 0x8a0cbaa3
-		| 0x8a0cbaa4
-		| 0x8a0cbaa5
-		| 0x8a0cbaa6
-		| 0x8a0cbaa7
-		| 0x8a0cbaa8
-		| 0x8a0cbaa9
-		| 0x8a0cbaaa
-		| 0x8a0cbaab
 		| 0x8a0cbaac
 		| 0x8a0cbaad
-		| 0x8a1e07ee
 		| 0x8a235c56
 		| 0x8a3fb98d
 		| 0x8a3fc5dd
@@ -13505,7 +13345,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a84778f
 		| 0x8a94eee0
 		| 0x8b58c59e
-		| 0x8c19c3e9
 		| 0x8c3caef5
 		| 0xa7607d73
 		| 0xa7607d74
@@ -13529,26 +13368,16 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xa918c929
 		| 0xa918c942
 		| 0xa91b3af4
-		| 0xa91b3afa
 		| 0xa92356ae
 		| 0xa92356af
 		| 0xa92356b0
-		| 0xa92356b9
 		| 0xa92356ba
-		| 0xa92356bb
 		| 0xa92356bd
-		| 0xa92ae3bd
 		| 0xa92ae446
 		| 0xa92d9d7a
-		| 0xa92d9fcd
-		| 0xa941b028
 		| 0xa96e5641
 		| 0xa9a36e47
 		| 0xa9b6ecd6
-		| 0xa9b6ecd7
-		| 0xa9b6ecd8
-		| 0xa9b6ecd9
-		| 0xa9b6ecda
 		| 0xa9c283d1
 		| 0xa9e581fb
 		| 0xaa120972
@@ -13560,8 +13389,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xaa4bc72a
 		| 0xaa5c04c5
 		| 0xaa5c04c8
-		| 0xaa60e745
-		| 0xaa713782
 		| 0xc7b36ca4
 		| 0xc7b36ca5
 		| 0xc804dd86
@@ -13577,14 +13404,9 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xc911eda0
 		| 0xc911eda1
 		| 0xc91894a8
-		| 0xc91894cb
-		| 0xc91b3b02
 		| 0xc9299659
-		| 0xc9299662
 		| 0xc929c433
-		| 0xc92d7ec0
 		| 0xc92d9c7a
-		| 0xc941b02e
 		| 0xc9b40128
 		| 0xc9c18eae
 		| 0xc9dbdd00
@@ -13599,20 +13421,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xca480830
 		| 0xca271800
 		| 0xca383ca7
-		| 0xca4132e9
 		| 0xca46931f
 		| 0xca469346
-		| 0xca51189a
 		| 0xca511de6
 		| 0xca511df2
-		| 0xca5f7821
-		| 0xca7138c4
 		| 0xca76013b
-		| 0xcba58a5b
-		| 0xcba58a5c
-		| 0xcba58a5d
-		| 0xcba58a5e
-		| 0xcba58a5f
 		| 0xcbfb03fa
 		| 0xcbfb03ff
 		| 0xcc101142
@@ -13631,51 +13444,23 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xe91894b3
 		| 0xe918c920
 		| 0xe91b3aee
-		| 0xe921a936
-		| 0xe92d9db4
 		| 0xe974eaa6
 		| 0xe99b068c
 		| 0xe9a18d3f
 		| 0xe9a1e8d4
-		| 0xea023270
-		| 0xea023271
-		| 0xea023272
-		| 0xea023273
-		| 0xea023274
-		| 0xea023275
-		| 0xea023276
-		| 0xea023277
-		| 0xea023278
-		| 0xea023279
 		| 0xea02327a
 		| 0xea02327b
-		| 0xea02327f
-		| 0xea023280
-		| 0xea0232a1
 		| 0xea1cf220
 		| 0xea1cf221
 		| 0xea1cf222
 		| 0xea1e3c53
-		| 0xea400624
 		| 0xea4025a9
 		| 0xea46932c
 		| 0xea46934f
 		| 0xea4ad2ff
 		| 0xea4ae9ef
 		| 0xea4aedc6
-		| 0xea4bc6e4
 		| 0xea511de0
-		| 0xea53b30f
-		| 0xea540621
-		| 0xea540622
-		| 0xea540623
-		| 0xea540624
-		| 0xea540625
-		| 0xea540626
-		| 0xea540627
-		| 0xea540628
-		| 0xea540629
-		| 0xea614f63
 		| 0xea614f65
 		| 0xea7b5f06
 		| 'MaxNetworkSlopeChange'
@@ -13690,10 +13475,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'FireStationRadius'
 		| 'AirEffect'
 		| 'PowerReductionEffect'
-		| 'UtilityStrikeResponseCurve'
-		| 'AgeToMaintenanceCostMultiplierResponseCurve'
-		| 'FundingPercentageToDecayRateMultiplierResponseCurve'
-		| 'UsagePercentageToDecayRateMultiplierResponseCurve'
 		| 'UtilityStrikeEfficiency'
 		| 'GarbageUIScalingFactor'
 		| 'HospitalCoverageRadius'
@@ -13710,44 +13491,27 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MaxOpacity'
 		| 'FadeinTime'
 		| 'FadeoutTime'
-		| 'FogRateByHour'
 		| 'TextureBlendStrength'
-		| 'Z0_TextureSpreadCurve'
-		| 'Z1_TextureSpreadCurve'
-		| 'Z2_TextureSpreadCurve'
-		| 'Z3_TextureSpreadCurve'
-		| 'Z4_TextureSpreadCurve'
-		| 'WaterPollutionEffectStrengthCurve'
-		| 'AirPollutionEffectStrengthCurve'
-		| 'RadiationPollutionEffectStrengthCurve'
-		| 'GarbagePollutionEffectStrengthCurve'
 		| 'PowerPoleDemolitionCost'
 		| 'AudioOccupantGroupRadius'
-		| 'NDe_ProfitResponseCurve'
 		| 'VolcanoLavaTotalLavaTimeInSecs'
-		| 'FreightTrainDensityCurve'
-		| 'HealthFundingToCoverageCurve'
 		| 'AudioCellGroupRadius'
 		| 'PowerLinePlacementCost'
 		| 'AudioVolumeDecayLimit'
 		| 'MOperationQuantaForOccupiedCell'
 		| 'MOperationQuantaForEmptyCell'
 		| 'MOperationQuantaBeforeTimerCall'
-		| 'FundingToDamageAccelerationCurve'
 		| 'RailDamageAccidentFactor'
 		| 'TransitSwitchFare'
 		| 'FillingDegree'
 		| 'DemandSatisfiedFloat'
 		| 'DemandCreatedFloat'
-		| 'LandmarkEffect'
-		| 'ParkEffect'
 		| 'MaxSlopeOnNetworkSide'
 		| 'MonthlyChance'
 		| 'MonthlyIncomeFactor'
 		| 'FlammabilityEffect'
 		| 'PowerMinAcceptableFunding'
 		| 'MonthlyTrafficDensityReduction'
-		| 'HealthFundingToEfficiencyCurve'
 		| 'TextureFloor'
 		| 'TerrainShadowAmount'
 		| 'FloraTerrainShadowAmount'
@@ -13756,28 +13520,21 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'AtmosphericScattering'
 		| 'LightingUpdateDelta'
 		| 'NightThreshold'
-		| 'HospitalPopulationVsDistance'
-		| 'FireProtectionSimFundingEfficiencyCurve'
 		| 'FireProtectionSimMaxAllowedFunding'
 		| 'FireProtectionSimStrikeEfficiencyMultiplier'
 		| 'FireProtectionSimMinFundingToEndStrikes'
-		| 'FireProtectionSimStrikeResponseCurve'
 		| 'FireStationDispatchRadius'
 		| 'KSC4RetainingWallPropertyWallTextureSize'
 		| 'WaterDepthForMaxAlpha'
 		| 'WaterDepthToColorGradientFactor'
-		| 'CityEdgeLayerHeights'
 		| 'CityEdgeBrightnessKludgeFactor'
 		| 'FlammabilityMultiplierAbandonment'
 		| 'FlammabilityMultiplierNoWater'
-		| 'FlammabilityHotspotFireProbability'
 		| 'FlammabilityRandomFireProbability'
 		| 'FloraClusterMaxRadius'
 		| 'FloraClusterMaxHeight'
-		| 'LotDeveloperCostMultiplierVsLotSlope'
 		| 'AudioZoomScaleFactor'
 		| 'AudioListenerRolloffFactor'
-		| 'CommuteTrainDensityCurve'
 		| 'CurveSpeedMultiplier'
 		| 'CommercialDemandEffect'
 		| 'IndustrialDemandEffect'
@@ -13792,9 +13549,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'DemandEffectIHT'
 		| 'AudioVolumeAttackLimit'
 		| 'MaximumHQBoost'
-		| 'LandValueAltitudeEffect'
 		| 'LandValueDesirabilityFactors'
-		| 'LandValueDesirabilityCurve'
 		| 'ConstructionResourcesPerResident'
 		| 'TractDeveloperOverbuild'
 		| 'TractDeveloperRedevelopSizeThreshold'
@@ -13835,7 +13590,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MaxSeaLevel'
 		| 'SeaRaiseLowerAmount'
 		| 'TerrainRaiseLowerAmount'
-		| 'EdgeReconcilliationSmoothingRadiusVsHeightDiff'
 		| 'EdgeReconcilliationHtDifferenceThreshold'
 		| 'PoliceStationRadius'
 		| 'PoliceStationDispatchRadius'
@@ -13847,19 +13601,10 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'BudgetTaxRateOccWeight_Co$$$'
 		| 'HealthCoverageRadiusEffect'
 		| 'RippleLandVertexHtAboveSeaLevel'
-		| 'LifeExpectancyToWorkforceCurve'
 		| 'UndergroundPieceDepth'
 		| 'ScrollingDeceleration'
-		| 'VehicleDensityCurve'
 		| 'MaxVehiclesPerSecond'
-		| 'PedDensityCurve'
 		| 'MaxPedsPerSecond'
-		| 'CommuteClock'
-		| 'BusClock'
-		| 'FreightTrainClock'
-		| 'CommuteTrainClock'
-		| 'OccupantTripClock'
-		| 'FreightTruckClock'
 		| 'StopSignDelay'
 		| 'StreetGoTime'
 		| 'RoadGoTime'
@@ -13868,12 +13613,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'PowerLineCurveDistanceBetweenPoints'
 		| 'PowerLineControlHoriz'
 		| 'FreightTrafficScalingFactor'
-		| 'CrimePropRequestCurve'
 		| 'AutoScrollSpeed'
-		| 'QuakeBrushStrengthAtEpicenterVsQuakeIntensity'
-		| 'QuakeBrushWidthAtEpicenterVsQuakeIntensity'
-		| 'QuakeBrushStrengthVsDistance'
-		| 'QuakeBrushWidthVsDistance'
 		| 'QuakeDistBetweenEffects'
 		| 'QuakeFaultLineCurviness'
 		| 'QuakeMaxFaultLineSlopeVariation'
@@ -13881,47 +13621,23 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'QuakeDistBetweenAutomataRepulsors'
 		| 'PipeBurstMinLeakTimeBeforeBurst'
 		| 'PipeBurstMaxLeakTimeBeforeBurst'
-		| 'DemandNeutralTaxRateVsPopulation'
-		| 'DemandTaxModifierVsRateVariance'
 		| 'DemandCommercicalCapReliefForAirports'
 		| 'DemandCommercicalCapReliefForSeaports'
 		| 'DemandIndustrialCapReliefForTrips'
 		| 'DemandIndustrialCapReliefForAirports'
 		| 'DemandIndustrialCapReliefForSeaports'
-		| 'NationDefaultDemandModifierVsMonth'
-		| 'NationDemandModifier1VsMonth'
-		| 'NationDemandModifier2VsMonth'
-		| 'NationDemandModifier3VsMonth'
-		| 'NationDemandModifier4VsMonth'
-		| 'NationDemandModifier5VsMonth'
-		| 'NationDemandModifier6VsMonth'
-		| 'NationDemandModifier7VsMonth'
-		| 'NationDemandModifier8VsMonth'
-		| 'NationDemandModifier9VsMonth'
-		| 'NationDemandModifier10VsMonth'
-		| 'NationDemandModifier11VsMonth'
-		| 'NationDemandModifier12VsMonth'
 		| 'ConstructionCrewTime'
 		| 'ConstructionCrewVehicleSpeed'
 		| 'LandfillGarbageDecayRate'
 		| 'LandfillLevelToleranceThreshold'
-		| 'VolcanoLavaCurveSolidifcationRate'
-		| 'BusDensityCurve'
-		| 'DesirabilityEffectValues'
-		| 'ZooEscapeChanceCurve'
 		| 'NearestDestinationAttractiveness'
 		| 'MaximumEQBoost'
 		| 'DeathsDoorEffectChance'
 		| 'DeathsDoorEffectHeightDelta'
-		| 'BudgetLandValueToSimoleans'
-		| 'NDe_MaxUnitCostForGarbageDealsRCurve'
 		| 'LaneSwitchCost'
 		| 'LaneSwitchMaxDistance'
-		| 'CongestionToAccidentProbability'
-		| 'CapacityToAccidentProbability'
 		| 'AccidentDuration'
 		| 'AccidentCheckPeriod'
-		| 'AudioAEMSVolumeCurve'
 		| 'MtnCloudsHeight'
 		| 'MtnCloudsFormHeight'
 		| 'MtnCloudsFadeInHeight'
@@ -13934,17 +13650,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MtnCloudsParticleMaxAge'
 		| 'MtnCloudsParticleGenRate'
 		| 'PoliceMaxJailOvercrowdingPercentage'
-		| 'PoliceFundingToEfficiencyResponseCurve'
 		| 'PoliceMaxAllowedFundingPercentage'
 		| 'PoliceMonthlyCriminalRehabilitationPercent'
 		| 'PoliceStrikeEfficiency'
 		| 'PoliceMinFundingToEndStrikes'
-		| 'PoliceStrikeResponseCurve'
-		| 'JailFundingToEfficiencyResponseCurve'
-		| 'PowerFundingToEfficiencyCurve'
-		| 'HealthStrikeResponseCurve'
 		| 'SchoolMinGradeToEndStrike'
-		| 'SchoolFundingToEfficiencyCurve'
 		| 'SchoolCoverageRadius'
 		| 'SchoolEQDecayEffect'
 		| 'DistFromShoreToWaveStartLocation'
@@ -13961,8 +13671,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'WaveMaxExpandSpeed'
 		| 'InterWaveGap'
 		| 'WaveMaxOrientationDifference'
-		| 'HealthQuotientToLifeExpectancyCurve'
-		| 'AirPollutionToHQDecayCurve'
 		| 'TrafficAirPollutionFactor'
 		| 'LavaColorGradientMapFactor'
 		| 'LavaMaxFlowRate'
@@ -13979,7 +13687,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'LavaScorchDecalFadeOutTime'
 		| 'LotConfigPropertyMinSlopeAllowed'
 		| 'BudgetTaxRateOccWeight_IResource'
-		| 'GarbagePropRequestCurve'
 		| 'MinWaterDepthForDeepSeaBedTexture'
 		| 'MaxWaterDepthForDeepSeaBedTexture'
 		| 'FireProtectionSimStationNoRoadMultiplier'
@@ -13989,27 +13696,651 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'ModKey2WidthMultiplier'
 		| 'ApplicationTimeIntervalForFullBrushStrength'
 		| 'CrimeSimMultiplier'
-		| 'CrimeLayerClock'
 		| 'HealthEffectRadius'
 		| 'SimoleanCostPerMeterDisplaced'
 		| 'SFXAlarmTime'
-		| 'WaterFundingToEfficiencyCurve'
-		| 'AudioDensity2FreshVolumeCurve'
-		| 'AudioDensity2LoopVolumeCurve'
 		| 'NDb_MinDealAmountWater'
 		| 'NDc_MinDealProfitFactor'
 		| 'GraphMaximumYValue'
 		| 'GraphYTickSpacing'
 		| 'GraphPlotScale'
-		| 'Obliterate_NumClustersVsTime'
 		| 'Obliterate_SmokeScreenFormationTime'
-		| 'TrendBarResponseCurve'
-		| 'AudioVolumeLimitingCurve'
 		| 'CoverageRadiusSlopMultiplier'
 		| 'DeathsDoorHQ'
 		| 'DeathsDoorEffectHeight'
 		| 'NDd_SuspensionPeriod'
 		| 'MaxSlopeAlongNetwork'
+		| 'LotConfigPropertyMaxSlopeBeforeLotFoundation'
+		| 'KSC4FoundationPropertyMaxHeight'
+		| 'BudgetMaxTaxRate'
+		| 'HealthStrikeEfficiency'
+		| 'HealthMinGradeToEndStrike'
+		| 'BudgetTaxRateOccWeight_Co$$'
+		| 'BudgetTaxRateOccWeight_IManufacturing'
+		| 'SchoolCapacityEffect'
+		| '24HourClockSpeedTimeMagnification'
+		| 'SegmentHeight'
+		| 'PostWidth'
+		| 'ScaffoldGap'
+		| 'PlankWidth'
+		| 'PlankTextureScale'
+		| 'ScaffoldTextureScale'
+		| 'GirdersTextureScale'
+		| 'ScaffoldGrowthRate'
+		| 'ScaffoldRemovalRate'
+		| 'CranePostWidth'
+		| 'CranePostGap'
+		| 'CraneHeightAboveScaffold'
+		| 'CraneRotationTime'
+		| 'PowerLineControlMaxVerticalDistance'
+		| 'TerrainTexTilingFactor'
+		| 'EmergencyVehicleIdleTime'
+		| 'BrushWiggleAmount'
+		| 'Comp1MaxDecalRotation'
+		| 'Comp2MaxDecalRotation'
+		| 'Comp3MaxDecalRotation'
+		| 'Comp4MaxDecalRotation'
+		| 'CrimeJoblessIndicatorSmoothingFactor'
+		| 'CrimeCrimeGridDecayFactor'
+		| 'CrimeCriminalGridDecayFactor'
+		| 'PipeBurstProbability'
+		| 'BudgetBondInterestRate'
+		| 'AudioLayerWeight'
+		| 'NDb_MinDealAmountGarbage'
+		| 'VehicleSkid'
+		| 'MaxBusesPerSecond'
+		| 'TrafficAirPollutionEffect'
+		| 'MonthlyCostPerPipe'
+		| 'CatalogMonthlyCostFloat'
+		| 'NDd_UnsuspensionPeriod'
+		| 'FerryFare'
+		| 'MfYearlyAmbientTemperature'
+		| 'MfYearlyAmbientTemperatureVariation'
+		| 'MfYearlyAmbientTemperatureVariationFactor'
+		| 'MfSeaModerationFactor'
+		| 'MfAltitudeTemperatureFactor'
+		| 'MfWindChillTemperatureFactor'
+		| 'MfYearlyAmbientMoisture'
+		| 'MfYearlyAmbientMoistureVariation'
+		| 'MfYearlyAmbientMoistureVariationFactor'
+		| 'MfMoistureHillFactor'
+		| 'MfValleyMoistureBoost'
+		| 'MfMoistureValleySlopeThreshold'
+		| 'MfYearlyAmbientWindSpeed'
+		| 'MfYearlyAmbientWindDirection0'
+		| 'MfYearlyAmbientWindDirection1'
+		| 'MfWindPerturbationRange'
+		| 'WaterUseReduction'
+		| 'PowerLineMonthlyUpkeep'
+		| 'BudgetTaxRateOccWeight_R$'
+		| 'BudgetTaxRateOccWeight_Cs$'
+		| 'BudgetTaxRateOccWeight_IDirty'
+		| 'SchoolCoverageRadiusEffect'
+		| 'MaxRoadsFundingPercent'
+		| 'MaxMassTransitFundingPercent'
+		| 'DamagedRoadExtraStepCost'
+		| 'CommuteTripMaxTime'
+		| 'JobScalingConstant'
+		| 'SchoolEQBoost'
+		| 'SchoolEQBoostEffect'
+		| 'UndergroundTrenchFloorDepth'
+		| 'BudgetTaxRateOccWeight_IHighTech'
+		| 'WindScalar'
+		| 'MaxBeachAltitude'
+		| 'KeyboardScrollSpeed'
+		| 'NetworkLotConfigPropertyMaxSlopeAllowed'
+		| 'NetworkLotConfigPropertyMinSlopeAllowed'
+		| 'RelativeOccurrance'
+		| 'HealthEffectStrength'
+		| 'GarbageServiceCostPerUnitOfGarbage'
+		| 'NDd_MinDealTermYears'
+		| 'VolcanoLavaScaleIntensityOfProduction'
+		| 'RadiationSpewIntensity'
+		| 'RadiationSpewRadius'
+		| 'MaxTerrainHtIncrease'
+		| 'MaxTerrainHtDecrease'
+		| 'MaxNetworkHtAdjustment'
+		| 'MinTerrainSlopeForTunnelStart'
+		| 'MaxTunnelSlope'
+		| 'MaxDisplacementBeyondRefPlane'
+		| 'MaxDistFromTerrain'
+		| 'MaxRetainingWallHt'
+		| 'MaxPylonHt'
+		| 'MaxHtDiffBetweenLandBridgeEnds'
+		| 'NetworkHtChangeThatRequiresFixing'
+		| 'PowerPlantEnergyConversionCost'
+		| 'KSC4FoundationPropertySideTextureSize'
+		| 'KSC4FoundationPropertyTopTextureSize'
+		| 'OBSSchoolMinAcceptableFunding'
+		| 'HospitalHQBoost'
+		| 'EQDecay'
+		| 'HealthQuotientDecayEffect'
+		| 'FlammabilityMultiplierSummer'
+		| 'MovingVanFrequency'
+		| 'FloraBurntSweepInterval'
+		| 'FloraBurntSweepSize'
+		| 'FloraElevationScaleRange'
+		| 'GradeMaxAngle'
+		| 'GradeSpeedMultiplier'
+		| 'FireCrewMaxStreamDist'
+		| 'EQResetPercent'
+		| 'HQResetPercent'
+		| 'ObsoleteDemandThresholdsList'
+		| 'EfficiencyDistressThreshold'
+		| 'HeightMap'
+		| 'ScrollGradient'
+		| 'NDa_MinTermToSustainSellDealCostMonths'
+		| 'NDc_MaxDealProfitFactor'
+		| 'MaxCommuteTrainsPerSecond'
+		| 'MaxFreightTrucksPerSecond'
+		| 'TripLengthToMinutesDisplayMultiplier'
+		| 'AudioAEMSMaxVolume'
+		| 'AudioAEMSMasterFxLevel'
+		| 'PlayerdriveVehiclesPerSecond'
+		| 'CrimePoliceFactor'
+		| 'WaterEffect'
+		| 'GarbageEffect'
+		| 'KMaxCellAltitudeDeltaForFlatnessProperty'
+		| 'KMaxSlopeForFlatnessProperty'
+		| 'KLotAutoLevelInternalAltitudeDeltaProperty'
+		| 'MaxAreaSlopeAllowedForLevellingProperty'
+		| 'TransitSwitchEntryCost'
+		| 'TransitSwitchTrafficCapacity'
+		| 'PowerMaxAllowedFunding'
+		| 'PowerPlantMaxProductionRatio'
+		| 'OBSHealthMinAcceptableFunding'
+		| 'SchoolStrikeEfficiency'
+		| 'BudgetTaxRateOccWeight_R$$'
+		| 'HealthQuotientBoostEffect'
+		| 'TunnelModelHeights'
+		| 'LotConfigPropertyMaxSlopeAllowed'
+		| 'PowerLineControlMaxHorizDistance'
+		| 'PowerLineControlVertical'
+		| 'AuraLongTermDecayFactor'
+		| 'AuraShortTermDecayFactor'
+		| 'AgeDegradationRate'
+		| 'SoftFailureThreshold'
+		| 'HardFailureThreshold'
+		| 'WaterBuildingPumpingCost'
+		| 'WaterDepartmentMaxFunding'
+		| 'NDb_MinDealAmountPower'
+		| 'NDd_MaxDealTermYears'
+		| 'NDa_MaxOverDemandFactorForBuyer'
+		| 'NDa_MinBudgetForBuyDeals'
+		| 'GraphMinimumYValue'
+		| 'MaxFreightTrainsPerSecond'
+		| 'JailEndJailbreakCapacity'
+		| 'MaxMassTransitStrategyTripLength'
+		? float :
+	T extends
+		| 0x083dc35b
+		| 0x083dc487
+		| 0x085489c9
+		| 0x085489cb
+		| 0x0911e2e6
+		| 0x0911e2e7
+		| 0x0911e2e8
+		| 0x0911e2e9
+		| 0x09b00b35
+		| 0x09b6d6ae
+		| 0x09c2aef3
+		| 0x09c2aef4
+		| 0x09c2aef5
+		| 0x09c2aef6
+		| 0x09c2aef7
+		| 0x0a10c772
+		| 0x0a10c773
+		| 0x0a10c774
+		| 0x0a10c775
+		| 0x0a36f410
+		| 0x0a469353
+		| 0x0a51188a
+		| 0x0a53b2f9
+		| 0x0b579c29
+		| 0x0bd86fd4
+		| 0x0c032488
+		| 0x27812810
+		| 0x87cd6399
+		| 0x87cd6341
+		| 0x2918949e
+		| 0x29189bf0
+		| 0x29189bf4
+		| 0x2921a9cc
+		| 0x29233e8d
+		| 0x29233e98
+		| 0x29ab15c5
+		| 0x29ab15c6
+		| 0x29b4013d
+		| 0x29dd40c1
+		| 0x29dd40c2
+		| 0x2a2d7824
+		| 0x2a511893
+		| 0x2aa40ccc
+		| 0x47e2c320
+		| 0x47e2c332
+		| 0x47e2c383
+		| 0x47e2c401
+		| 0x47e2c501
+		| 0x47e2c510
+		| 0x47e2c511
+		| 0x47e2c531
+		| 0x482cb44e
+		| 0x482cb45e
+		| 0x482cb469
+		| 0x482cb46a
+		| 0x4835c6a4
+		| 0x4835c6a5
+		| 0x48cd7b20
+		| 0x48cd7b22
+		| 0x48cd7b23
+		| 0x48cd7b24
+		| 0x48cd7b25
+		| 0x48cd7b43
+		| 0x48cd7ba0
+		| 0x48cd7c00
+		| 0x491332e7
+		| 0x491332e8
+		| 0x491332e9
+		| 0x491332ea
+		| 0x491332eb
+		| 0x491332ec
+		| 0x491332ed
+		| 0x491332ee
+		| 0x491332ef
+		| 0x491c9c02
+		| 0x491c9c04
+		| 0x491c9c05
+		| 0x491c9c06
+		| 0x491c9c0a
+		| 0x491c9c0b
+		| 0x4941a92b
+		| 0x4998c89c
+		| 0x4998c901
+		| 0x4998c90a
+		| 0x4998c90c
+		| 0x4998c90d
+		| 0x4998c90e
+		| 0x4998c90f
+		| 0x4998c910
+		| 0x4998c911
+		| 0x49a34301
+		| 0x4a08c500
+		| 0x4a08c501
+		| 0x4a08c502
+		| 0x4a08c503
+		| 0x4a149631
+		| 0x4a1f38b5
+		| 0x4a1f38b6
+		| 0x4a1f38c5
+		| 0x4a1f62a0
+		| 0x4a1f62a1
+		| 0x4a1f62a2
+		| 0x4a1f62a3
+		| 0x4a1f62a4
+		| 0x4a1f62a5
+		| 0x4a1f62a6
+		| 0x4a1f62a7
+		| 0x4a1f62a8
+		| 0x4a1f62a9
+		| 0x4a1f62b0
+		| 0x4a1f62b1
+		| 0x4a1f62b2
+		| 0x4a1f6300
+		| 0x4a4bc714
+		| 0x4a511873
+		| 0x4a5f7315
+		| 0x4a6676ad
+		| 0x4ac519b8
+		| 0x4b61ffc9
+		| 0x4bae8fe0
+		| 0x4be09ec9
+		| 0x4be09eca
+		| 0x4bfdd955
+		| 0x66fbf7b0
+		| 0x66fbf7b1
+		| 0x66fbf7b2
+		| 0x66fbf7b3
+		| 0x66fbf7b4
+		| 0x66fbf7b5
+		| 0x66fbf7b6
+		| 0x66fbf7ba
+		| 0x66fbf7bb
+		| 0x66fbf7c1
+		| 0x68ddae93
+		| 0x68ddae9e
+		| 0x68ddaea0
+		| 0x68ee9764
+		| 0x6911e2df
+		| 0x691894a4
+		| 0x691894c6
+		| 0x6932dc06
+		| 0x6932dc07
+		| 0x6932dc0e
+		| 0x6932dc0f
+		| 0x6932dc10
+		| 0x6932dc11
+		| 0x6941a67f
+		| 0x6941b022
+		| 0x69a437f6
+		| 0x6a09f631
+		| 0x6a359f22
+		| 0x6a410bf2
+		| 0x6a4132f3
+		| 0x6a4132f6
+		| 0x6a5a6701
+		| 0x6a6564f6
+		| 0x6a84493e
+		| 0x6a946a50
+		| 0x6b42922c
+		| 0x87cd6340
+		| 0x87cd6343
+		| 0x87cd6344
+		| 0x87cd6345
+		| 0x87cd6346
+		| 0x87cd6347
+		| 0x87cd6348
+		| 0x87cd6349
+		| 0x87cd634b
+		| 0x87cd634c
+		| 0x87cd634d
+		| 0x87cd634e
+		| 0x87cd6361
+		| 0x87cd6362
+		| 0x87cd6363
+		| 0x87cd6364
+		| 0x87cd6365
+		| 0x87cd6366
+		| 0x87cd6367
+		| 0x87cd6368
+		| 0x87cd6369
+		| 0x87cd636a
+		| 0x87cd636b
+		| 0x87cd636c
+		| 0x87cd636d
+		| 0x87cd636e
+		| 0x87cd636f
+		| 0x87cd6391
+		| 0x87cd6392
+		| 0x87cd6397
+		| 0x87cd6398
+		| 0x891894ad
+		| 0x891b3ae6
+		| 0x89590e6e
+		| 0x8a020101
+		| 0x8a020202
+		| 0x8a020203
+		| 0x8a020302
+		| 0x8a020303
+		| 0x8a020402
+		| 0x8a020403
+		| 0x8a020502
+		| 0x8a020503
+		| 0x8a0cbaa4
+		| 0x8a0cbaa5
+		| 0x8a0cbaa6
+		| 0x8a0cbaa7
+		| 0x8a0cbaa8
+		| 0x8a0cbaa9
+		| 0x8a0cbaaa
+		| 0x8a0cbaab
+		| 0x8a1e07ee
+		| 0x8a480df7
+		| 0x8a67e373
+		| 0x8a67e374
+		| 0x8a67e376
+		| 0x8c19c3e9
+		| 0x8c376d4f
+		| 0xa9189479
+		| 0xa91b3afa
+		| 0xa91cbe00
+		| 0xa91cbe01
+		| 0xa92356b1
+		| 0xa92356b3
+		| 0xa92356b9
+		| 0xa92356bb
+		| 0xa92356bc
+		| 0xa92356be
+		| 0xa92ae3bd
+		| 0xa92d9fcd
+		| 0xa941b028
+		| 0xa9b6ecd7
+		| 0xa9b6ecd8
+		| 0xa9b6ecd9
+		| 0xa9b6ecda
+		| 0xa9d6cc17
+		| 0xa9d6cc18
+		| 0xaa60e745
+		| 0xaa713782
+		| 0xc91894cb
+		| 0xc91b3b02
+		| 0xc9299662
+		| 0xc92d7ec0
+		| 0xc941b02e
+		| 0xc9da95d4
+		| 0xca359f17
+		| 0xca4132e9
+		| 0xca51189a
+		| 0xca5f7821
+		| 0xca7138c4
+		| 0xcad64136
+		| 0xcba5895b
+		| 0xcba5895c
+		| 0xcba5895d
+		| 0xcba5895e
+		| 0xcba5895f
+		| 0xcba58a5b
+		| 0xcba58a5c
+		| 0xcba58a5d
+		| 0xcba58a5e
+		| 0xcba58a5f
+		| 0xe921a936
+		| 0xe92d9db4
+		| 0xe94825b9
+		| 0xe974eaa3
+		| 0xe9ac43e7
+		| 0xea023270
+		| 0xea023271
+		| 0xea023272
+		| 0xea023273
+		| 0xea023274
+		| 0xea023275
+		| 0xea023276
+		| 0xea023277
+		| 0xea023278
+		| 0xea023279
+		| 0xea02327f
+		| 0xea023280
+		| 0xea023290
+		| 0xea023291
+		| 0xea023292
+		| 0xea023293
+		| 0xea0232a1
+		| 0xea400624
+		| 0xea4a7c55
+		| 0xea4bc6e4
+		| 0xea53b30f
+		| 0xea540621
+		| 0xea540622
+		| 0xea540623
+		| 0xea540624
+		| 0xea540625
+		| 0xea540626
+		| 0xea540627
+		| 0xea540628
+		| 0xea540629
+		| 0xea614f63
+		| 0xea614f64
+		| 0xea639fb1
+		| 0xea639fb2
+		| 0xea639fb3
+		| 0xea639fb4
+		| 0xea639fb5
+		| 0xea639fb6
+		| 0xea639fb7
+		| 0xea639fb8
+		| 0xea639fb9
+		| 0xea8c3cdb
+		| 0xebff69e7
+		| 0xec15654a
+		| 'KSC4FloraParametersProperty'
+		| 'KSC4FloraPreferencesProperty'
+		| 'ShadowOffset'
+		| 'ShadowColor'
+		| 'UtilityStrikeResponseCurve'
+		| 'AgeToMaintenanceCostMultiplierResponseCurve'
+		| 'FundingPercentageToDecayRateMultiplierResponseCurve'
+		| 'UsagePercentageToDecayRateMultiplierResponseCurve'
+		| 'FogRateByHour'
+		| 'NighttimeGlobalColor'
+		| 'Z0_TextureSpreadCurve'
+		| 'Z1_TextureSpreadCurve'
+		| 'Z2_TextureSpreadCurve'
+		| 'Z3_TextureSpreadCurve'
+		| 'Z4_TextureSpreadCurve'
+		| 'WaterPollutionEffectStrengthCurve'
+		| 'AirPollutionEffectStrengthCurve'
+		| 'RadiationPollutionEffectStrengthCurve'
+		| 'GarbagePollutionEffectStrengthCurve'
+		| 'AudioAmbienceAttentionSpanRadii'
+		| 'NDe_ProfitResponseCurve'
+		| 'FreightTrainDensityCurve'
+		| 'HealthFundingToCoverageCurve'
+		| 'ExtraLoadRadiusPerMeg'
+		| 'FundingToDamageAccelerationCurve'
+		| 'BudgetInitialTaxRate'
+		| 'OccupantSize'
+		| 'LandmarkEffect'
+		| 'ParkEffect'
+		| 'HealthFundingToEfficiencyCurve'
+		| 'DaytimeGlobalColor'
+		| 'AtmosphericScatteringColour'
+		| 'HospitalPopulationVsDistance'
+		| 'FireProtectionSimFundingEfficiencyCurve'
+		| 'FireProtectionSimStrikeResponseCurve'
+		| 'WaterNightColorAdjustment'
+		| 'CityEdgeLayerHeights'
+		| 'FlammabilityHotspotFireProbability'
+		| 'PathOffsetRangeForPeds'
+		| 'PathOffsetRangeForVehicles'
+		| 'LotDeveloperCostMultiplierVsLotSlope'
+		| 'CommuteTrainDensityCurve'
+		| 'AudioListenerGranularity'
+		| 'LandValueAltitudeEffect'
+		| 'LandValueDesirabilityCurve'
+		| 'StagePopluationMultiplier'
+		| 'LotDeveloperOccupancyThresholds'
+		| 'TractDeveloperReoccupyThresholds'
+		| 'TractDeveloperDemolitionCosts'
+		| 'TractDeveloperNewLotCosts'
+		| 'TractDeveloperMinVacancyRange'
+		| 'SupportColumnCorners'
+		| 'MainPylonCorners'
+		| 'CableStayedFrontAnchors'
+		| 'CableStayedRearAnchors'
+		| 'PivotPointPosition'
+		| 'BoundingBox'
+		| 'MaxNormalTerrainHeight'
+		| 'MinRegularHtFactor'
+		| 'MaxRegularHtFactor'
+		| 'MinMountainHtFactor'
+		| 'MaxMountainHtFactor'
+		| 'SeaLevelChangeDueToWaterSlider'
+		| 'TypicalBrushAngleIncrement'
+		| 'EdgeReconcilliationSmoothingRadiusVsHeightDiff'
+		| 'MaxSpeedByNetworkForWalking'
+		| 'MaxSpeedByNetworkForDriving'
+		| 'MaxSpeedByNetworkForABus'
+		| 'MaxSpeedByNetworkForATrain'
+		| 'MaxSpeedByNetworkForATruck'
+		| 'MaxSpeedByNetworkForAFrtTrain'
+		| 'MaxSpeedByNetworkForSubways'
+		| 'MaxSpeedByNetworkForElTrain'
+		| 'MaxSpeedByNetworkForMonorail'
+		| 'RippleQuadWidth'
+		| 'RippleTextureUIncrementPerQuad'
+		| 'RippleWaterSideRibbonWidth'
+		| 'RippleLandSideRibbonWidth'
+		| 'RippleWaterSideRibbonWidthVariation'
+		| 'RippleConcavityThresholdAngle'
+		| 'LifeExpectancyToWorkforceCurve'
+		| 'VehicleDensityCurve'
+		| 'PedDensityCurve'
+		| 'OccupantTripNoiseRange'
+		| 'CommuteClock'
+		| 'BusClock'
+		| 'FreightTrainClock'
+		| 'CommuteTrainClock'
+		| 'OccupantTripClock'
+		| 'FreightTruckClock'
+		| 'CrimePropRequestCurve'
+		| 'QuakeBrushStrengthAtEpicenterVsQuakeIntensity'
+		| 'QuakeBrushWidthAtEpicenterVsQuakeIntensity'
+		| 'QuakeBrushStrengthVsDistance'
+		| 'QuakeBrushWidthVsDistance'
+		| 'PropTimeOfDay'
+		| 'DemandNeutralTaxRateVsPopulation'
+		| 'DemandTaxModifierVsRateVariance'
+		| 'DemandCommercicalCapReliefForConnections'
+		| 'NationDefaultDemandModifierVsMonth'
+		| 'NationDemandModifier1VsMonth'
+		| 'NationDemandModifier2VsMonth'
+		| 'NationDemandModifier3VsMonth'
+		| 'NationDemandModifier4VsMonth'
+		| 'NationDemandModifier5VsMonth'
+		| 'NationDemandModifier6VsMonth'
+		| 'NationDemandModifier7VsMonth'
+		| 'NationDemandModifier8VsMonth'
+		| 'NationDemandModifier9VsMonth'
+		| 'NationDemandModifier10VsMonth'
+		| 'NationDemandModifier11VsMonth'
+		| 'NationDemandModifier12VsMonth'
+		| 'NationDifficultyDemandModifier'
+		| 'VolcanoLavaCurveSolidifcationRate'
+		| 'BusDensityCurve'
+		| 'DesirabilityEffectValues'
+		| 'ZooEscapeChanceCurve'
+		| 'BudgetLandValueToSimoleans'
+		| 'NDe_MaxUnitCostForGarbageDealsRCurve'
+		| 'SpeedMultiplierByNetwork'
+		| 'CongestionToAccidentProbability'
+		| 'CapacityToAccidentProbability'
+		| 'AudioAEMSVolumeCurve'
+		| 'MtnCloudsSizeRange'
+		| 'MtnCloudsAspectRange'
+		| 'MtnCloudsOpacityRange'
+		| 'MtnCloudsIntensityRange'
+		| 'MtnCloudsSpeedRange'
+		| 'MtnCloudsShadeOffsetRange'
+		| 'MtnCloudsCursorHideRange'
+		| 'MtnCloudsSimSpeedFactor'
+		| 'MtnCloudsShadeOffsetDir'
+		| 'MtnCloudsZoomFade'
+		| 'PoliceFundingToEfficiencyResponseCurve'
+		| 'PoliceStrikeResponseCurve'
+		| 'JailFundingToEfficiencyResponseCurve'
+		| 'PollutionRadii'
+		| 'PowerFundingToEfficiencyCurve'
+		| 'HealthStrikeResponseCurve'
+		| 'SchoolFundingToEfficiencyCurve'
+		| 'WaveMinTimeInState'
+		| 'WaveMaxTimeInState'
+		| 'WaveMinExpandAcceleration'
+		| 'WaveMaxExpandAcceleration'
+		| 'WaveMinMoveAcceleration'
+		| 'WaveMaxMoveAcceleration'
+		| 'HealthQuotientToLifeExpectancyCurve'
+		| 'AirPollutionToHQDecayCurve'
+		| 'GarbagePropRequestCurve'
+		| 'CrimeLayerClock'
+		| 'AudioZoomDistanceTweaks'
+		| 'WaterFundingToEfficiencyCurve'
+		| 'AudioDensity2FreshVolumeCurve'
+		| 'AudioDensity2LoopVolumeCurve'
+		| 'Obliterate_NumClustersVsTime'
+		| 'TrendBarResponseCurve'
+		| 'MonthlyCostForNetworkTile'
+		| 'AudioVolumeLimitingCurve'
+		| 'SimulationSpeedMultiplier'
 		| 'LandValueEffect'
 		| 'R$ProximityEffect'
 		| 'R$$ProximityEffect'
@@ -14041,38 +14372,18 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'Co$$$ProximityEffect'
 		| 'TransientAuraEffect'
 		| 'SlopeEffect'
-		| 'LotConfigPropertyMaxSlopeBeforeLotFoundation'
-		| 'KSC4FoundationPropertyMaxHeight'
-		| 'BudgetMaxTaxRate'
-		| 'HealthStrikeEfficiency'
-		| 'HealthMinGradeToEndStrike'
-		| 'BudgetTaxRateOccWeight_Co$$'
-		| 'BudgetTaxRateOccWeight_IManufacturing'
+		| 'SchoolInitMaxAllowedFunding'
 		| 'HealthEffectivenessVsDistanceEffect'
-		| 'SchoolCapacityEffect'
-		| '24HourClockSpeedTimeMagnification'
-		| 'SegmentHeight'
-		| 'PostWidth'
-		| 'ScaffoldGap'
-		| 'PlankWidth'
-		| 'PlankTextureScale'
-		| 'ScaffoldTextureScale'
-		| 'GirdersTextureScale'
-		| 'ScaffoldGrowthRate'
-		| 'ScaffoldRemovalRate'
-		| 'CranePostWidth'
-		| 'CranePostGap'
-		| 'CraneHeightAboveScaffold'
-		| 'CraneRotationTime'
-		| 'PowerLineControlMaxVerticalDistance'
-		| 'TerrainTexTilingFactor'
-		| 'EmergencyVehicleIdleTime'
-		| 'BrushWiggleAmount'
-		| 'Comp1MaxDecalRotation'
-		| 'Comp2MaxDecalRotation'
-		| 'Comp3MaxDecalRotation'
-		| 'Comp4MaxDecalRotation'
-		| 'CrimeJoblessIndicatorSmoothingFactor'
+		| 'KAnimationTimeDilationProperty'
+		| 'BrushCost'
+		| 'Comp1Width'
+		| 'Comp1Strength'
+		| 'Comp2Width'
+		| 'Comp2Strength'
+		| 'Comp3Width'
+		| 'Comp3Strength'
+		| 'Comp4Width'
+		| 'Comp4Strength'
 		| 'CrimeR$EQBaseCriminalityCurve'
 		| 'CrimeR$$EQBaseCriminalityCurve'
 		| 'CrimeR$$$EQBaseCriminalityCurve'
@@ -14081,151 +14392,61 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'CrimeR$$$JoblessRatioCriminalityCurve'
 		| 'CrimeCriminalityCrimesCurve'
 		| 'CrimePoliceProtectionCrimeAttenuation'
-		| 'CrimeCrimeGridDecayFactor'
-		| 'CrimeCriminalGridDecayFactor'
 		| 'AgeToOutputLevelResponseCurve'
-		| 'PipeBurstProbability'
-		| 'BudgetBondInterestRate'
-		| 'AudioLayerWeight'
-		| 'NDb_MinDealAmountGarbage'
-		| 'VehicleSkid'
-		| 'MaxBusesPerSecond'
-		| 'TrafficAirPollutionEffect'
-		| 'MonthlyCostPerPipe'
-		| 'CatalogMonthlyCostFloat'
-		| 'NDd_UnsuspensionPeriod'
+		| 'BudgetWaningWealthPropertyTaxMultiplier'
+		| 'AirEffectByZoneType'
+		| 'WaterEffectByZoneType'
+		| 'GarbageEffectByZoneType'
 		| 'GarbageTransportVersusLandfillTiles'
-		| 'FerryFare'
-		| 'MfYearlyAmbientTemperature'
-		| 'MfYearlyAmbientTemperatureVariation'
-		| 'MfYearlyAmbientTemperatureVariationFactor'
-		| 'MfSeaModerationFactor'
-		| 'MfAltitudeTemperatureFactor'
-		| 'MfWindChillTemperatureFactor'
-		| 'MfYearlyAmbientMoisture'
-		| 'MfYearlyAmbientMoistureVariation'
-		| 'MfYearlyAmbientMoistureVariationFactor'
-		| 'MfMoistureHillFactor'
-		| 'MfValleyMoistureBoost'
-		| 'MfMoistureValleySlopeThreshold'
-		| 'MfYearlyAmbientWindSpeed'
-		| 'MfYearlyAmbientWindDirection0'
-		| 'MfYearlyAmbientWindDirection1'
-		| 'MfWindPerturbationRange'
-		| 'WaterUseReduction'
-		| 'PowerLineMonthlyUpkeep'
-		| 'BudgetTaxRateOccWeight_R$'
-		| 'BudgetTaxRateOccWeight_Cs$'
-		| 'BudgetTaxRateOccWeight_IDirty'
-		| 'SchoolCoverageRadiusEffect'
+		| 'AudioAEMSZoomVolumes'
+		| 'HealthInitMaxAllowedFunding'
 		| 'SchoolEffectivenessVsDistanceEffect'
-		| 'MaxRoadsFundingPercent'
-		| 'MaxMassTransitFundingPercent'
-		| 'DamagedRoadExtraStepCost'
+		| 'ShimmerMinQuadWidth'
+		| 'ShimmerMaxQuadWidth'
+		| 'IncomePerTileByTravelType'
+		| 'NetworkTrafficCapacity'
 		| 'CongestionVsSpeed'
-		| 'CommuteTripMaxTime'
 		| 'IntersectionAndTurnCapacityEffect'
-		| 'JobScalingConstant'
+		| 'TripStartingCostByTravelType'
+		| 'PopulationBackgroundTraffic'
 		| 'HospitalEffectivenessVsAverageAge'
-		| 'SchoolEQBoost'
-		| 'SchoolEQBoostEffect'
 		| 'HospitalEffectivenessVsWealth'
 		| 'WaterPollutionToHQDecayCurve'
-		| 'UndergroundTrenchFloorDepth'
-		| 'BudgetTaxRateOccWeight_IHighTech'
-		| 'WindScalar'
 		| 'FiresAreaTop'
 		| 'FiresAreaSide'
 		| 'ExtinguishRateVsProtection'
 		| 'PercentFireStartVsFlammability'
-		| 'MaxBeachAltitude'
-		| 'KeyboardScrollSpeed'
-		| 'NetworkLotConfigPropertyMaxSlopeAllowed'
-		| 'NetworkLotConfigPropertyMinSlopeAllowed'
-		| 'RelativeOccurrance'
-		| 'HealthEffectStrength'
-		| 'GarbageServiceCostPerUnitOfGarbage'
-		| 'NDd_MinDealTermYears'
-		| 'VolcanoLavaScaleIntensityOfProduction'
-		| 'RadiationSpewIntensity'
-		| 'RadiationSpewRadius'
+		| 'FireCrewOffsets'
+		| 'FireCrewCompetencePct'
 		| 'GoofyStatResponseCurve'
 		| 'FundingPercentageToPowerPoleDecayrepair'
-		| 'MaxTerrainHtIncrease'
-		| 'MaxTerrainHtDecrease'
-		| 'MaxNetworkHtAdjustment'
-		| 'MinTerrainSlopeForTunnelStart'
-		| 'MaxTunnelSlope'
-		| 'MaxDisplacementBeyondRefPlane'
-		| 'MaxDistFromTerrain'
-		| 'MaxRetainingWallHt'
-		| 'MaxPylonHt'
-		| 'MaxHtDiffBetweenLandBridgeEnds'
-		| 'NetworkHtChangeThatRequiresFixing'
-		| 'PowerPlantEnergyConversionCost'
-		| 'KSC4FoundationPropertySideTextureSize'
-		| 'KSC4FoundationPropertyTopTextureSize'
-		| 'OBSSchoolMinAcceptableFunding'
 		| 'SchoolStrikeResponseCurve'
 		| 'SchoolEffectivenessVsAverageAgeEffect'
-		| 'HospitalHQBoost'
 		| 'SchoolEffectivenessVsAverageAge'
-		| 'EQDecay'
 		| 'SchoolEffectivenessVsWealth'
-		| 'HealthQuotientDecayEffect'
 		| 'GarbagePollutionToHQDecayCurve'
-		| 'FlammabilityMultiplierSummer'
-		| 'MovingVanFrequency'
-		| 'FloraBurntSweepInterval'
-		| 'FloraBurntSweepSize'
-		| 'FloraElevationScaleRange'
-		| 'GradeMaxAngle'
-		| 'GradeSpeedMultiplier'
-		| 'FireCrewMaxStreamDist'
-		| 'EQResetPercent'
-		| 'HQResetPercent'
-		| 'ObsoleteDemandThresholdsList'
-		| 'EfficiencyDistressThreshold'
-		| 'HeightMap'
-		| 'ScrollGradient'
+		| 'AttractionThreshold'
+		| 'AudioZoomDistances'
 		| 'AudioDensity2FreshPlayCurve'
-		| 'NDa_MinTermToSustainSellDealCostMonths'
-		| 'NDc_MaxDealProfitFactor'
 		| 'FreightTruckDensityCurve'
-		| 'MaxCommuteTrainsPerSecond'
-		| 'MaxFreightTrucksPerSecond'
 		| 'TransitSwitchEntryCostVsBudget'
 		| 'FundingPercentageToPipeDecayrepair'
-		| 'TripLengthToMinutesDisplayMultiplier'
+		| 'TripStartingCostByTravelTypeForCarPref'
+		| 'SpawnRecallForStreets'
+		| 'SpawnRecallForRoads'
+		| 'SpawnRecallForAvenues'
+		| 'SpawnRecallForHighway'
+		| 'SpawnRecallForRail'
 		| 'CongestionToCPSForStreets'
 		| 'CongestionToCPSForRoads'
 		| 'CongestionToCPSForAvenues'
 		| 'CongestionToCPSForHighway'
 		| 'CongestionToCPSForRail'
-		| 'AudioAEMSMaxVolume'
-		| 'AudioAEMSMasterFxLevel'
-		| 'PlayerdriveVehiclesPerSecond'
-		| 'CrimePoliceFactor'
-		| 'WaterEffect'
-		| 'GarbageEffect'
-		| 'KMaxCellAltitudeDeltaForFlatnessProperty'
-		| 'KMaxSlopeForFlatnessProperty'
-		| 'KLotAutoLevelInternalAltitudeDeltaProperty'
-		| 'MaxAreaSlopeAllowedForLevellingProperty'
-		| 'TransitSwitchEntryCost'
-		| 'TransitSwitchTrafficCapacity'
-		| 'PowerMaxAllowedFunding'
-		| 'PowerPlantMaxProductionRatio'
-		| 'OBSHealthMinAcceptableFunding'
-		| 'SchoolStrikeEfficiency'
-		| 'BudgetTaxRateOccWeight_R$$'
-		| 'HealthQuotientBoostEffect'
 		| 'SchoolPopulationVsDistance'
 		| 'HealthEffectivenessVsAverageAgeEffect'
-		| 'TunnelModelHeights'
-		| 'LotConfigPropertyMaxSlopeAllowed'
-		| 'PowerLineControlMaxHorizDistance'
-		| 'PowerLineControlVertical'
+		| 'ZoneMaxSlope'
+		| 'PylonCornerXZs'
+		| 'PowerLineScalingFactor'
 		| 'AuraParkEffect'
 		| 'AuraPollutionEffectAir'
 		| 'AuraPollutionEffectWater'
@@ -14236,24 +14457,16 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'AuraCrimeEffect'
 		| 'AuraTripLength'
 		| 'AuraTraffic'
-		| 'AuraLongTermDecayFactor'
-		| 'AuraShortTermDecayFactor'
 		| 'AuraTaxRateChangeEffect'
 		| 'AuraValueWealthEffect'
+		| 'AuraTransientEffectFire'
+		| 'AuraTransientEffectFlora'
+		| 'AuraTransientEffectCivicPlop'
+		| 'AuraTransientEffectNetworkPlop'
 		| 'AuraHotspotRiotProbability'
-		| 'AgeDegradationRate'
-		| 'SoftFailureThreshold'
-		| 'HardFailureThreshold'
-		| 'WaterBuildingPumpingCost'
 		| 'RiotProtectionvsSuppression'
-		| 'WaterDepartmentMaxFunding'
-		| 'NDb_MinDealAmountPower'
-		| 'NDd_MaxDealTermYears'
-		| 'NDa_MaxOverDemandFactorForBuyer'
-		| 'NDa_MinBudgetForBuyDeals'
-		| 'GraphMinimumYValue'
+		| 'AudioZoomDistanceCameraPull'
 		| 'VolcanoLavaCurveProductionRate'
-		| 'MaxFreightTrainsPerSecond'
 		| 'SchoolFundingToCoverageCurve'
 		| 'AvgAgeTo1_10AgeGroup'
 		| 'AvgAgeTo11_20AgeGroup'
@@ -14265,253 +14478,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'AvgAgeTo71_80AgeGroup'
 		| 'AvgAgeTo81_90AgeGroup'
 		| 'JailJailbreakResponseCurve'
-		| 'JailEndJailbreakCapacity'
-		| 'MaxMassTransitStrategyTripLength'
-		? float :
-	T extends
-		| 0x083dc35b
-		| 0x083dc487
-		| 0x085489c9
-		| 0x085489cb
-		| 0x09b6d6ae
-		| 0x0a36f410
-		| 0x0b579c29
-		| 0x0c032488
-		| 0x27812810
-		| 0x29189bf0
-		| 0x29189bf4
-		| 0x29ab15c5
-		| 0x29dd40c1
-		| 0x29dd40c2
-		| 0x2aa40ccc
-		| 0x47e2c383
-		| 0x47e2c401
-		| 0x47e2c501
-		| 0x47e2c510
-		| 0x47e2c511
-		| 0x47e2c531
-		| 0x482cb44e
-		| 0x482cb45e
-		| 0x482cb469
-		| 0x482cb46a
-		| 0x4835c6a4
-		| 0x4835c6a5
-		| 0x48cd7b20
-		| 0x48cd7b22
-		| 0x48cd7b23
-		| 0x48cd7b24
-		| 0x48cd7b25
-		| 0x48cd7b43
-		| 0x48cd7ba0
-		| 0x491332e7
-		| 0x491332e8
-		| 0x491332e9
-		| 0x491332ea
-		| 0x491332eb
-		| 0x491332ec
-		| 0x491332ed
-		| 0x491332ee
-		| 0x491332ef
-		| 0x491c9c02
-		| 0x491c9c04
-		| 0x491c9c05
-		| 0x491c9c06
-		| 0x491c9c0a
-		| 0x491c9c0b
-		| 0x4998c90a
-		| 0x4a149631
-		| 0x4a1f38c5
-		| 0x4a1f6300
-		| 0x4bae8fe0
-		| 0x66fbf7b0
-		| 0x66fbf7b1
-		| 0x66fbf7b2
-		| 0x66fbf7b3
-		| 0x66fbf7b4
-		| 0x66fbf7b5
-		| 0x66fbf7b6
-		| 0x66fbf7ba
-		| 0x66fbf7bb
-		| 0x66fbf7c1
-		| 0x68ee9764
-		| 0x6932dc06
-		| 0x6932dc07
-		| 0x6932dc0e
-		| 0x6932dc0f
-		| 0x6932dc10
-		| 0x6932dc11
-		| 0x6a359f22
-		| 0x6a84493e
-		| 0x6b42922c
-		| 0x891894ad
-		| 0x89590e6e
-		| 0x8a020101
-		| 0x8a020202
-		| 0x8a020203
-		| 0x8a020302
-		| 0x8a020303
-		| 0x8a020402
-		| 0x8a020403
-		| 0x8a020502
-		| 0x8a020503
-		| 0x8a480df7
-		| 0x8a67e373
-		| 0x8a67e374
-		| 0x8a67e376
-		| 0x8c376d4f
-		| 0xa9189479
-		| 0xa91cbe00
-		| 0xa91cbe01
-		| 0xa92356b1
-		| 0xa92356b3
-		| 0xa92356bc
-		| 0xa92356be
-		| 0xa9d6cc17
-		| 0xa9d6cc18
-		| 0xc9da95d4
-		| 0xca359f17
-		| 0xcad64136
-		| 0xcba5895b
-		| 0xcba5895c
-		| 0xcba5895d
-		| 0xcba5895e
-		| 0xcba5895f
-		| 0xe94825b9
-		| 0xe974eaa3
-		| 0xe9ac43e7
-		| 0xea023290
-		| 0xea023291
-		| 0xea023292
-		| 0xea023293
-		| 0xea4a7c55
-		| 0xea614f64
-		| 0xea639fb1
-		| 0xea639fb2
-		| 0xea639fb3
-		| 0xea639fb4
-		| 0xea639fb5
-		| 0xea639fb6
-		| 0xea639fb7
-		| 0xea639fb8
-		| 0xea639fb9
-		| 0xea8c3cdb
-		| 0xebff69e7
-		| 0xec15654a
-		| 'KSC4FloraParametersProperty'
-		| 'KSC4FloraPreferencesProperty'
-		| 'ShadowOffset'
-		| 'ShadowColor'
-		| 'NighttimeGlobalColor'
-		| 'AudioAmbienceAttentionSpanRadii'
-		| 'ExtraLoadRadiusPerMeg'
-		| 'BudgetInitialTaxRate'
-		| 'OccupantSize'
-		| 'DaytimeGlobalColor'
-		| 'AtmosphericScatteringColour'
-		| 'WaterNightColorAdjustment'
-		| 'PathOffsetRangeForPeds'
-		| 'PathOffsetRangeForVehicles'
-		| 'AudioListenerGranularity'
-		| 'StagePopluationMultiplier'
-		| 'LotDeveloperOccupancyThresholds'
-		| 'TractDeveloperReoccupyThresholds'
-		| 'TractDeveloperDemolitionCosts'
-		| 'TractDeveloperNewLotCosts'
-		| 'TractDeveloperMinVacancyRange'
-		| 'SupportColumnCorners'
-		| 'MainPylonCorners'
-		| 'CableStayedFrontAnchors'
-		| 'CableStayedRearAnchors'
-		| 'PivotPointPosition'
-		| 'BoundingBox'
-		| 'MaxNormalTerrainHeight'
-		| 'MinRegularHtFactor'
-		| 'MaxRegularHtFactor'
-		| 'MinMountainHtFactor'
-		| 'MaxMountainHtFactor'
-		| 'SeaLevelChangeDueToWaterSlider'
-		| 'TypicalBrushAngleIncrement'
-		| 'MaxSpeedByNetworkForWalking'
-		| 'MaxSpeedByNetworkForDriving'
-		| 'MaxSpeedByNetworkForABus'
-		| 'MaxSpeedByNetworkForATrain'
-		| 'MaxSpeedByNetworkForATruck'
-		| 'MaxSpeedByNetworkForAFrtTrain'
-		| 'MaxSpeedByNetworkForSubways'
-		| 'MaxSpeedByNetworkForElTrain'
-		| 'MaxSpeedByNetworkForMonorail'
-		| 'RippleQuadWidth'
-		| 'RippleTextureUIncrementPerQuad'
-		| 'RippleWaterSideRibbonWidth'
-		| 'RippleLandSideRibbonWidth'
-		| 'RippleWaterSideRibbonWidthVariation'
-		| 'RippleConcavityThresholdAngle'
-		| 'OccupantTripNoiseRange'
-		| 'PropTimeOfDay'
-		| 'DemandCommercicalCapReliefForConnections'
-		| 'NationDifficultyDemandModifier'
-		| 'SpeedMultiplierByNetwork'
-		| 'MtnCloudsSizeRange'
-		| 'MtnCloudsAspectRange'
-		| 'MtnCloudsOpacityRange'
-		| 'MtnCloudsIntensityRange'
-		| 'MtnCloudsSpeedRange'
-		| 'MtnCloudsShadeOffsetRange'
-		| 'MtnCloudsCursorHideRange'
-		| 'MtnCloudsSimSpeedFactor'
-		| 'MtnCloudsShadeOffsetDir'
-		| 'MtnCloudsZoomFade'
-		| 'PollutionRadii'
-		| 'WaveMinTimeInState'
-		| 'WaveMaxTimeInState'
-		| 'WaveMinExpandAcceleration'
-		| 'WaveMaxExpandAcceleration'
-		| 'WaveMinMoveAcceleration'
-		| 'WaveMaxMoveAcceleration'
-		| 'AudioZoomDistanceTweaks'
-		| 'MonthlyCostForNetworkTile'
-		| 'SimulationSpeedMultiplier'
-		| 'SchoolInitMaxAllowedFunding'
-		| 'KAnimationTimeDilationProperty'
-		| 'BrushCost'
-		| 'Comp1Width'
-		| 'Comp1Strength'
-		| 'Comp2Width'
-		| 'Comp2Strength'
-		| 'Comp3Width'
-		| 'Comp3Strength'
-		| 'Comp4Width'
-		| 'Comp4Strength'
-		| 'BudgetWaningWealthPropertyTaxMultiplier'
-		| 'AirEffectByZoneType'
-		| 'WaterEffectByZoneType'
-		| 'GarbageEffectByZoneType'
-		| 'AudioAEMSZoomVolumes'
-		| 'HealthInitMaxAllowedFunding'
-		| 'ShimmerMinQuadWidth'
-		| 'ShimmerMaxQuadWidth'
-		| 'IncomePerTileByTravelType'
-		| 'NetworkTrafficCapacity'
-		| 'TripStartingCostByTravelType'
-		| 'PopulationBackgroundTraffic'
-		| 'FireCrewOffsets'
-		| 'FireCrewCompetencePct'
-		| 'AttractionThreshold'
-		| 'AudioZoomDistances'
-		| 'TripStartingCostByTravelTypeForCarPref'
-		| 'SpawnRecallForStreets'
-		| 'SpawnRecallForRoads'
-		| 'SpawnRecallForAvenues'
-		| 'SpawnRecallForHighway'
-		| 'SpawnRecallForRail'
-		| 'ZoneMaxSlope'
-		| 'PylonCornerXZs'
-		| 'PowerLineScalingFactor'
-		| 'AuraTransientEffectFire'
-		| 'AuraTransientEffectFlora'
-		| 'AuraTransientEffectCivicPlop'
-		| 'AuraTransientEffectNetworkPlop'
-		| 'AudioZoomDistanceCameraPull'
 		| 'JailJailbreakEscapeePercentage'
 		| 'NoHighlight'
 		| 'GeneralOK'
@@ -14689,9 +14655,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x87cd6373
 		| 0x87cd6381
 		| 0x88edc789
-		| 0x88edc793
-		| 0x88edc795
-		| 0x88edc796
 		| 0x89136440
 		| 0x89aec88c
 		| 0x89aec88d
@@ -14724,7 +14687,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xca383cae
 		| 0xca821b8c
 		| 0xcc3e4755
-		| 0xe90e25a1
 		| 0xe94825b7
 		| 0xe99b068d
 		| 0xe9a316eb
@@ -14789,9 +14751,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'PowerSupplyCap'
 		| 'UseMonopolyPieces'
 		| 'LotConfigPropertyVersion'
-		| 'LotConfigPropertyZoneTypes'
-		| 'LotConfigPropertyWealthTypes'
-		| 'LotConfigPropertyPurposeTypes'
 		| 'LotConfigPropertyWaterCompatibility'
 		| 'EmergencyVehicleMaxCellDistance'
 		| 'EmergencyVehicleRepathAttempts'
@@ -14824,7 +14783,6 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'RegionUIWaterMapLevel'
 		| 'GoToZoomLevel'
 		| 'KPropertyID_FlipsAllowed'
-		| 'TransitSwitchPoint'
 		| 'ZoneDisplayAlpha'
 		| 'LotConfigPropertyDoConstruction'
 		| 'PropWealth'
@@ -14853,10 +14811,14 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6a09f630
 		| 0x87cd6333
 		| 0x88edc790
+		| 0x88edc793
+		| 0x88edc795
+		| 0x88edc796
 		| 0x8a441c9c
 		| 0xa97f42ce
 		| 0xca383cb1
 		| 0xca7515cc
+		| 0xe90e25a1
 		| 0xe97f42b0
 		| 0xea441c97
 		| 0xea958845
@@ -14878,10 +14840,14 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'SimPropAnimRange'
 		| 'LandValueRange'
 		| 'LotConfigPropertySize'
+		| 'LotConfigPropertyZoneTypes'
+		| 'LotConfigPropertyWealthTypes'
+		| 'LotConfigPropertyPurposeTypes'
 		| 'CommuteTrainLength'
 		| 'WateredTerrainColor'
 		| 'RegionUICloudOpacityRange'
 		| 'SimulatorDateStart'
+		| 'TransitSwitchPoint'
 		| 'WateredBuildingColor'
 		| 'FreightTrainLength'
 		| 'AnimLoopCountRange'
@@ -14894,13 +14860,21 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x27812821
 		| 0x27812822
 		| 0x27812823
+		| 0x27812824
 		| 0x27812825
+		| 0x27812834
+		| 0x27812840
+		| 0x27812841
 		| 0x27812921
 		| 0x27812922
 		| 0x27812923
+		| 0x27812924
 		| 0x27812925
 		| 0x295961f2
 		| 0x29b4013c
+		| 0x47bb3f30
+		| 0x47bb3f31
+		| 0x47bb3f32
 		| 0x47e2c380
 		| 0x482cb46f
 		| 0x482cb470
@@ -14909,6 +14883,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x48cd7bf1
 		| 0x4998c900
 		| 0x4998c905
+		| 0x4a0b47e0
 		| 0x4a0b47e4
 		| 0x4a0b47f2
 		| 0x4a0b47f3
@@ -14919,6 +14894,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x6a416b21
 		| 0x6a440d40
 		| 0x6b733233
+		| 0x87cd63a0
 		| 0x88edc900
 		| 0x89590e6d
 		| 0x89a312c2
@@ -14950,7 +14926,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0x8a5e7b64
 		| 0x8a5f88e3
 		| 0x8a63f2a1
+		| 0xa8f149c5
 		| 0xa91cbe02
+		| 0xa9b6ecd3
+		| 0xa9b6ecd4
+		| 0xa9b6ecd5
 		| 0xaa12fcb1
 		| 0xaa2ed800
 		| 0xaa2ed801
@@ -14967,10 +14947,13 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xca416b3f
 		| 0xe94825b6
 		| 0xe94825b8
+		| 0xe974eaa2
 		| 0xea3573af
 		| 0xea3fbdd7
+		| 0xea400623
 		| 0xec214180
 		| 0xec43826b
+		| 0x0062e78a
 		| 'ModelResourceKey'
 		| 'AuxiliaryModel1KeyHeadlights'
 		| 'MinLoadRadius'
@@ -14978,13 +14961,21 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'ResourceKeyType1'
 		| 'ResourceKeyType2'
 		| 'ResourceKeyType3'
+		| 'ResourceKeyType4'
 		| 'ResourceKeyType5'
+		| 'CapacitySatisfied'
+		| 'DemandSatisfied'
+		| 'DemandCreated'
 		| 'ResourceKeyType1xm'
 		| 'ResourceKeyType2xm'
 		| 'ResourceKeyType3xm'
+		| 'ResourceKeyType4xm'
 		| 'ResourceKeyType5xm'
 		| 'KSC4RetainingWallPropertyWallTextures'
 		| 'FlammabilityHotspotSettings'
+		| 'Drives'
+		| 'Satisfies'
+		| 'Contributes'
 		| 'ConstructionResourcesMinMax'
 		| 'BridgeImageKey'
 		| 'BridgeCosts'
@@ -14993,6 +14984,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'NumFlowStepsPerWaterErosionBrushApplication'
 		| 'VehicleMinMaxKPH'
 		| 'PedMinMaxKPH'
+		| 'DataViewTypeFilter'
 		| 'DataViewColorRamp'
 		| 'DataViewLegendsColor'
 		| 'DataViewLegendsGUIDS'
@@ -15003,6 +14995,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'NameKey'
 		| 'TrainMinMaxKPH'
 		| 'MiniMapWaterRamp'
+		| 'StylePercentages'
 		| 'LotConfigPropertyLotObject'
 		| 'SimulatorSpeeds'
 		| 'TextureRandomizationGridSize'
@@ -15034,7 +15027,11 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'AudioMusicPlaylistEntry21'
 		| 'MinForPurposeFundingPercentageToAnimate'
 		| 'AverageSalaryForDemographic'
+		| 'KSC4FloraFamilyProperty'
 		| 'ShimmerQuadDensity'
+		| 'StageTime'
+		| 'SpreadTime'
+		| 'SpreadRadius'
 		| 'IconResourceKey'
 		| 'UIActiveEffectID'
 		| 'UIIdleEffectID'
@@ -15051,10 +15048,13 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MySimNameResKey'
 		| 'KZM_mZoneTextureResourceInstanceArray'
 		| 'ZoneDragColor'
+		| 'ConnectedVerts'
 		| 'MiniMapTerrainRamp'
 		| 'AudioFreshScoreKey'
+		| 'RiotSpawnArray'
 		| 'AuxiliaryModel3Key'
 		| 'SchoolCapacityChunkSize'
+		| 'ExemplarPatchTargets'
 		? uint32[] :
 	T extends
 		| 0x09f00e59

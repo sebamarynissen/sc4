@@ -111,7 +111,7 @@ function normalizeName(str) {
 		.replaceAll(/:/g, ' ')
 		.replaceAll(/§/g, '$')
 		.trim()
-		.replaceAll(/[^\w$ ]/g, '')
+		.replaceAll(/[^\w$ ]/g, '');
 	return toPascalCase(normalized);
 }
 
