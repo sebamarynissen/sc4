@@ -15,7 +15,15 @@ import type {
 	DecodedFileTypeId,
     DecodedFileClass,
 } from './types.js';
-import type { ReadResult } from './dbpf-entry-types.js';
+import type { ReadResult, TypeIdToFile } from './dbpf-entry-types.js';
+
+/**
+ * Returns a DBPF Entry type where the file type pointed to by the entry is 
+ * inferred from the type id.
+ * 
+ * @param A file type id.
+ */
+export type EntryFromType<T extends DecodedFileTypeId> = Entry<TypeIdToFile<T>>;
 
 export type EntryJSON = {
 	type: uint32;
@@ -89,7 +97,7 @@ export default class Entry<T = unknown> {
 	// but set type: DecodedFileTypeId instead, then the predicate returns 
 	// Exemplar | Lot[] | Prop[] ... By using a *generic* type, we narrow this 
 	// down properly! This is a bit subtle to grasp, I know!
-	isType<T extends DecodedFileTypeId>(type: T): this is Entry<T> {
+	isType<T extends DecodedFileTypeId>(type: T): this is EntryFromType<T> {
 		return this.type === type;
 	}
 

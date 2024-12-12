@@ -2,7 +2,7 @@
 import { compress } from 'qfs-compression';
 import { concatUint8Arrays, isUint8Array, uint8ArrayToHex } from 'uint8array-extras';
 import Header, { type HeaderJSON, type HeaderOptions } from './dbpf-header.js';
-import Entry, { type EntryJSON } from './dbpf-entry.js';
+import Entry, { type EntryJSON, type EntryFromType } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
@@ -109,8 +109,8 @@ export default class DBPF {
 
 	// ## find(...args)
 	// Proxies to entries.find().
-	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): Entry<T> | undefined;
-	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): Entry<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T> | undefined;
+	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T> | undefined;
 	find(...params: FindParameters<Entry>): Entry | undefined;
 	find(...args: FindParameters<Entry>) {
 		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
@@ -118,8 +118,8 @@ export default class DBPF {
 
 	// ## findAll(...args)
 	// Proxies to entries.findAll()
-	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): Entry<T>[];
-	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): Entry<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T>[];
+	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T>[];
 	findAll(...params: FindParameters<Entry>): Entry[]
 	findAll(...args: FindParameters<Entry>): Entry[] {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
@@ -127,7 +127,7 @@ export default class DBPF {
 
 	// ## add(tgi, file)
 	// Adds the given file to the DBPF with the specified tgi.
-	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): Entry<T>;
+	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): EntryFromType<T>;
 	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
 		let entry = new Entry({ dbpf: this });

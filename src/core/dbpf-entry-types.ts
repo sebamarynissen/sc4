@@ -12,14 +12,7 @@ import type {
  * We automatically figure out whether the type is a (1) decoded type and (2) 
  * is an array Type.
  */
-export type ReadResult<T> = T extends number
-	? T extends DecodedFileTypeId
-		? ReadResultHelper<TypeIdToFile<T>>
-		: unknown
-	: ReadResultHelper<T>;
-
-// Helper type for the ReadResult generic type so that we can call it as a function.
-type ReadResultHelper<T> = T extends DecodedFile
+export type ReadResult<T> = T extends DecodedFile
 	? T extends ArrayFile
 	? T[]
 	: T
