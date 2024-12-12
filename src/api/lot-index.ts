@@ -1,14 +1,18 @@
 // # lot-index.ts
 import bsearch from 'binary-search-bounds';
 import {
+	Cohort,
     Exemplar,
     ExemplarProperty as Property,
 	FileType,
 	type Entry,
     type ExemplarPropertyKey as Key,
+    LotObject,
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import { hex } from 'sc4/utils';
+
+type ExemplarEntry = Entry<Exemplar | Cohort>;
 
 // # LotIndex
 // A helper class that we use to index lots by a few important properties. 
@@ -18,7 +22,7 @@ import { hex } from 'sc4/utils';
 export default class LotIndex {
 	fileIndex: PluginIndex;
 	lots: LotIndexEntry[] = [];
-	height: IndexedArray<LotIndexEntry>[];
+	height: IndexedArray<LotIndexEntry>;
 
 	// ## constructor(index)
 	// Creates the lot index from the given file index.
@@ -42,7 +46,7 @@ export default class LotIndex {
 
 		// Now it's time to set up all our indices. For now we'll only index 
 		// by height though.
-		this.height = IndexedArray.create({
+		this.height = new IndexedArray({
 			compare: (a: LotIndexEntry, b: LotIndexEntry) => a.height - b.height,
 			entries: this.lots,
 		});
@@ -52,13 +56,13 @@ export default class LotIndex {
 	// ## add(entry)
 	// Adds the given lot exemplar to the index. Note that we create a 
 	// LotIndexEntry for *every* building the lot cna be constructed with!
-	add(entry: Entry) {
+	add(entry: ExemplarEntry) {
 
 		// Find all buildings that can appear on this lot, which might happen 
 		// because they're part of a building family.
-		let lot = entry.read() as Exemplar;
+		let lot = entry.read();
 		let { lotObjects } = lot;
-		let { IID } = lotObjects.find(({ type }) => type === 0x00)!;
+		let { IID } = lotObjects.find(({ type }) => type === LotObject.Building)!;
 		let buildings = this.getBuildings(IID!);
 
 		// Then loop all those buildings and create LotIndexEntries for it.
@@ -74,7 +78,7 @@ export default class LotIndex {
 	// Returns an array of all buildings exemplars idenfitied by the given 
 	// IID. If it's a single building, we'll return an array containing 1 
 	// building, if it's a family, we return all buildings from the family.
-	getBuildings(IID: number) {
+	getBuildings(IID: number): ExemplarEntry[] {
 		let buildings = this.fileIndex
 			.findAll({ type: FileType.Exemplar, instance: IID })
 			.filter(entry => {
@@ -83,7 +87,7 @@ export default class LotIndex {
 				return type === 0x02;
 			});
 		if (buildings.length > 0) {
-			return [buildings[buildings.length-1]];
+			return [buildings.at(-1)!];
 		}
 
 		// No buildings found? Don't worry, check the families.
@@ -104,8 +108,8 @@ export default class LotIndex {
 
 	// ## getPropertyValue(file, prop)
 	// Helper function for quickly reading property values.
-	getPropertyValue(file: Exemplar, prop: Key) {
-		return this.fileIndex.getPropertyValue(file, prop);
+	getPropertyValue<K extends Key>(file: Exemplar, key: K) {
+		return this.fileIndex.getPropertyValue(file, key);
 	}
 
 }
@@ -118,14 +122,14 @@ export default class LotIndex {
 // combination!
 class LotIndexEntry {
 	#fileIndex: PluginIndex;
-	lot: Entry;
-	building: Entry;
+	lot: ExemplarEntry;
+	building: ExemplarEntry;
 
 	// ## constructor(fileIndex, lot, building)
 	constructor(
 		fileIndex: PluginIndex,
-		lot: Entry,
-		building: Entry,
+		lot: ExemplarEntry,
+		building: ExemplarEntry,
 	) {
 
 		// We have to keep a reference to the file index - though we'll "hide" 
@@ -195,31 +199,55 @@ class LotIndexEntry {
 // IndexedArray. Very useful to perform efficient range queries.
 type IndexedArrayOptions<T> = {
 	compare(a: T, b: T): number;
-	entries: LotIndexEntry[];
+	entries: T[];
+	sorted?: boolean;
 };
-class IndexedArray<T> extends Array<T> {
+type ElementType<T> = T extends (infer U)[] ? U : never;
+type RawElement<T> = T extends any[] ? ElementType<T> : T;
+type MaybeArray<T> = T | T[];
+type IndexedArrayQuery<T> = Partial<{
+	[K in keyof T]: MaybeArray<RawElement<T[K]>>;
+}>;
+class IndexedArray<T> {
+	entries: T[];
+	compare: (a: T, b: T) => number;
 
-	// ## static extend(compare)
-	static extend(compare: any) {
-		const Child = class IndexedArray extends this<T> {} as any;
-		Child.prototype.compare = compare;
-		return Child;
+	// ## constructor(opts)
+	constructor(opts: IndexedArrayOptions<T>) {
+		let { entries, compare, sorted = false } = opts;
+		this.entries = entries;
+		this.compare = compare;
+		if (!sorted) this.entries.sort(compare);
 	}
 
-	// ## static create(opts)
-	static create(opts: IndexedArrayOptions) {
-		let { compare, entries = [] } = opts;
-		const Child = this.extend(compare);
-		let index = new Child(...entries);
-		index.sort();
-		return index;
+	// ## get length()
+	get length() {
+		return this.entries.length;
+	}
+
+	// ## at(index)
+	at(index: number) {
+		return this.entries.at(index);
+	}
+
+	// ## clone(entries)
+	// Helper function for creating a clone of this indexed array, but with 
+	// possibly narrowed entries. This is why extending from a true array is 
+	// actually usefull because then we derive all the filter methods 
+	// automatically, but we have to limit subclassing arrays.
+	clone(entries: T[]) {
+		return new IndexedArray({
+			entries,
+			compare: this.compare,
+			sorted: true,
+		});
 	}
 
 	// ## getRangeIndices(min, max)
-	getRangeIndices(min, max) {
+	getRangeIndices(min: Partial<T>, max: Partial<T>) {
 		const { compare } = this;
-		let first = bsearch.le(this, min, compare)+1;
-		let last = bsearch.ge(this, max, compare);
+		let first = bsearch.le(this.entries, min, compare)+1;
+		let last = bsearch.ge(this.entries, max, compare);
 		return [first, last];
 	}
 
@@ -227,17 +255,21 @@ class IndexedArray<T> extends Array<T> {
 	// Filters down the subselection to only include the given height range.
 	// Note: perhaps that we should find a way to change the index criterion 
 	// easily, that's for later on though.
-	range(min: number, max: number) {
+	range(min: Partial<T>, max: Partial<T>) {
 		let [first, last] = this.getRangeIndices(min, max);
-		return this.slice(first, last);
+		return new IndexedArray({
+			entries: this.entries.slice(first, last),
+			compare: this.compare,
+			sorted: true,
+		});
 	}
 
 	// ## *it(min, max)
 	// Helper function which allows a range to be used as an iterator.
-	*it(min, max) {
+	*it(min: T, max: T) {
 		let [first, last] = this.getRangeIndices(min, max);
 		for (let i = first; i < last; i++) {
-			yield this[i];
+			yield this.entries[i];
 		}
 	}
 
@@ -246,12 +278,12 @@ class IndexedArray<T> extends Array<T> {
 	// method. Only exact queries are possible for the moment, no range 
 	// queries though that should be possible as well - see MongoDB for 
 	// example.
-	query(query) {
+	query(query: IndexedArrayQuery<T>) {
 
 		// First of all we'll build the query. Building the query means that 
 		// we're creating an array of functions which *all* need to pass in 
 		// order to evaluate to true. This means an "and" condition.
-		let filters = [];
+		let filters: ((element: T) => boolean)[] = [];
 		for (let key in query) {
 			let def = query[key];
 
@@ -264,8 +296,7 @@ class IndexedArray<T> extends Array<T> {
 			}
 
 		}
-
-		return this.filter(function(entry) {
+		let entries = this.entries.filter((entry) => {
 			for (let fn of filters) {
 				if (!fn(entry)) {
 					return false;
@@ -273,39 +304,29 @@ class IndexedArray<T> extends Array<T> {
 			}
 			return true;
 		});
+		return this.clone(entries);
 	}
 
-	// ## sort()
-	// Sorts the indexed array. Normally this shouldn't be necessary to call 
-	// manually by the way, but we need call this once upon creation!
-	sort() {
-		return super.sort(this.compare);
+	// ## filter()
+	filter(fn: (element: T, index: number, thisArg?: any) => boolean) {
+		return new IndexedArray<T>({
+			entries: this.entries.filter(fn),
+			compare: this.compare,
+			sorted: true,
+		});
 	}
 
-}
-
-// ## compare(a, b)
-// The function we use to sort all lots by height.
-function compare(a: LotIndexEntry, b: LotIndexEntry) {
-	return a.height - b.height;
-}
-
-// ## contains(arr, it)
-// Helper function for checking if the given array includes *one* of the 
-// elements in the given iterator.
-// eslint-disable-next-line no-unused-vars
-function contains(arr: any[], it: Iterable<any>) {
-	for (let el of it) {
-		if (arr.includes(el)) {
-			return true;
-		}
+	// *[Symbol.iterator]()
+	// Allows iterating over the index as we would with normal arrays.
+	*[Symbol.iterator]() {
+		yield* this.entries;
 	}
-	return false;
+
 }
 
 // ## $equals(key, value)
-function $equals(key, value) {
-	return function(entry) {
+function $equals<T>(key: keyof T, value: any) {
+	return function(entry: T) {
 		let x = entry[key];
 		if (Array.isArray(x)) {
 			return x.includes(value);
@@ -316,8 +337,8 @@ function $equals(key, value) {
 }
 
 // ## $oneOf(key, arr)
-function $oneOf(key, arr) {
-	return function(entry) {
+function $oneOf<T>(key: keyof T, arr: any []) {
+	return function(entry: T) {
 		let x = entry[key];
 		if (Array.isArray(x)) {
 			for (let el of x) {

@@ -48,8 +48,9 @@ type CacheJSON = {
 	families: { [id: string]: number[] };
 };
 
+type ExemplarEntry = Entry<Exemplar>;
 type FamilyIndex = {
-	[id: string]: Entry[];
+	[id: string]: ExemplarEntry[];
 };
 
 // # PluginIndex
@@ -286,7 +287,13 @@ export default class PluginIndex {
 		this.families = Object.create(null);
 		for (let key of Object.keys(families)) {
 			let pointers = families[key];
-			this.families[key] = pointers.map(ptr => this.entries[ptr]);
+			this.families[key] = pointers.map(ptr => {
+
+				// TypeScript can't infer that families are always found in 
+				// Exemplar enries, but we can obviously, so we use as here.
+				return this.entries[ptr] as ExemplarEntry;
+
+			});
 		}
 		return this;
 
