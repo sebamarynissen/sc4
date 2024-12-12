@@ -2,65 +2,28 @@
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
 import type { uint32, TGILiteral, TGIArray } from 'sc4/types';
-import type { Class, Constructor } from 'type-fest';
+import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import { getConstructorByType, hasConstructorByType } from './file-classes-helpers.js';
 import type DBPF from './dbpf.js';
-import FileClasses from './file-classes.js';
-import FileType from './file-types.js';
 import { kFileTypeArray } from './symbols.js';
 import type {
 	DBPFFile as File,
 	DecodedFileTypeId,
-    ArrayFileTypeId
+    DecodedFileClass,
 } from './types.js';
-type FileConstructor = Class<File>;
+import type { ReadResult, TypeIdToFile } from './dbpf-entry-types.js';
 
-// A serializable file must implement a `.toBuffer()` method. Note that it's 
-// possible that for read-only files no `.toBuffer()` method is implemented. In 
-// that case we just return the raw buffer as was read when serializing a DBPF.
-type SerializableFile = File & {
-	toBuffer(...args: any): Uint8Array,
-};
-
-// Create a mapped type that contains all the allowed *values* of the known file 
-// types and maps them to the corresopnding keys where they can be found in the 
-// FileClasses map.
-type TypeIdToStringKey = {
-	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
-};
-
-// In order to figure out what the result will be of a call to `entry.read()`, 
-export type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
-type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<TypeIdToFileConstructor<T>>;
-export type TypeIdToReadResult<T extends DecodedFileTypeId> = T extends ArrayFileTypeId
-	? Array<TypeIdToFile<T>>
-	: TypeIdToFile<T>;
-
-// Generic type that we use to narrow down the entry to indicate that we know 
-// the file type, but we don't know yet whether it is an array or not.
-interface EntryOfPossibleArrayType<T extends File> extends Entry {
-	read(): T | T[];
-	readAsync(): Promise<T | T[]>;
-	file: T | T[] | null;
-	fileConstructor: FileConstructor;
-}
-
-// The interface where the magic happens of narrowing down the return type of 
-// the read() function.
-export interface EntryWithReadResult<T extends File | File[]> extends Entry {
-	read(): T;
-	readAsync(): Promise<T>;
-	file: T | null;
-}
-
-// Export a type that can be used by our dbpf class in the find() methods to 
-// automatically infer the return type of an entry.
-export type TypeIdToEntry<T extends DecodedFileTypeId> =
-	EntryWithReadResult<TypeIdToReadResult<T>>;
+/**
+ * Returns a DBPF Entry type where the file type pointed to by the entry is 
+ * inferred from the type id.
+ * 
+ * @param A file type id.
+ */
+export type EntryFromType<T extends DecodedFileTypeId> = Entry<TypeIdToFile<T>>;
 
 export type EntryJSON = {
 	type: uint32;
@@ -79,15 +42,13 @@ type EntryParseOptions = {
     minor?: number;
     buffer?: Uint8Array | null;
 };
-type EntryFile = File | File[];
-type ReadResult = EntryFile | Uint8Array;
 
 // # Entry
 // A class representing an entry in the DBPF file. An entry is a descriptor of 
 // a file in a DBPF, but not the file itself yet. In order to actually get the 
 // file, you will need to call entry.read(). If the entry is of a known type, 
 // it will be parsed appropriately.
-export default class Entry {
+export default class Entry<T = unknown> {
 	type: uint32;
 	group: uint32 = 0;
 	instance: uint32 = 0;
@@ -115,7 +76,7 @@ export default class Entry {
 	//    DBPF as this means you don't have to work with the raw binary data.
 	raw: Uint8Array | null = null;
 	buffer: Uint8Array | null = null;
-	file: File | File[] | null = null;
+	file: ReadResult<T> | null = null;
 
 	// ## constructor(opts)
 	constructor(opts: EntryConstructorOptions = {}) {
@@ -136,9 +97,7 @@ export default class Entry {
 	// but set type: DecodedFileTypeId instead, then the predicate returns 
 	// Exemplar | Lot[] | Prop[] ... By using a *generic* type, we narrow this 
 	// down properly! This is a bit subtle to grasp, I know!
-	isType<T extends DecodedFileTypeId>(type: T):
-		this is EntryWithReadResult<TypeIdToReadResult<T>>
-	{
+	isType<T extends DecodedFileTypeId>(type: T): this is EntryFromType<T> {
 		return this.type === type;
 	}
 
@@ -147,7 +106,7 @@ export default class Entry {
 	// meaning we'll automatically handle the array deserialization without the 
 	// need for the file class itself to support this. Just implement a class 
 	// for every item in the array.
-	isArrayType(): this is EntryWithReadResult<File[]> {
+	isArrayType() {
 		if (!this.fileConstructor) return false;
 		return kFileTypeArray in this.fileConstructor;
 	}
@@ -189,14 +148,14 @@ export default class Entry {
 	// ## get fileConstructor()
 	// Returns the class to use for this file type, regardless of whether this 
 	// is an array type or not.
-	get fileConstructor(): FileConstructor | undefined {
+	get fileConstructor() {
 		return getConstructorByType(this.type);
 	}
 
 	// ## get isKnownType()
 	// Returns whether the type of this entry is a known file type, meaning that 
 	// a class has been registered for it that can properly parse the buffer.
-	isKnownType(): this is EntryOfPossibleArrayType<File> {
+	isKnownType(): this is Entry<DecodedFileClass> {
 		return hasConstructorByType(this.type);
 	}
 
@@ -216,7 +175,7 @@ export default class Entry {
 			minor = 0,
 			buffer = null,
 		} = opts;
-		this.type = rs.uint32() as DecodedFileTypeId;
+		this.type = rs.uint32();
 		this.group = rs.uint32();
 		this.instance = rs.uint32();
 		if (minor > 0) {
@@ -257,7 +216,7 @@ export default class Entry {
 	// Tries to convert the raw buffer of the entry into a known file type. If 
 	// this fails, we'll simply return the raw buffer, but decompressed if the 
 	// entry was compressed.
-	read(): ReadResult {
+	read(): ReadResult<T> {
 		return dual.read.sync.call(this, () => this.decompress());
 	}
 
@@ -276,7 +235,7 @@ export default class Entry {
 
 	// ## readAsync()
 	// Same as read, but in an async way.
-	async readAsync(): Promise<ReadResult> {
+	async readAsync(): Promise<ReadResult<T>> {
 		return dual.read.async.call(this, () => this.decompressAsync());
 	}
 
@@ -362,13 +321,15 @@ export default class Entry {
 
 }
 
-type reader<T> = () => T | Promise<T>;
+
+// Typing the code below is extremely hard, lol. It shouldn't be, so we 
+// shamelessly use "any". It's internal code anyway.
 const dual = {
 
 	// # decompress()
 	// Decompressing an entry can be done in both a sync and asynchronous way, 
 	// so we use the async duplicator function.
-	decompress: duplicateAsync(function*(this: Entry, readRaw: reader<Uint8Array>) {
+	decompress: duplicateAsync(function*(readRaw: any) {
 
 		// If we've already decompressed, just return the buffer as is.
 		if (this.buffer) return this.buffer;
@@ -392,7 +353,7 @@ const dual = {
 
 	// # read()
 	// Same for actually reading an entry. Can be done both sync and async.
-	read: duplicateAsync(function*(this: Entry, decompress: reader<Uint8Array>) {
+	read: duplicateAsync(function*(decompress: any) {
 
 		// If the entry was already read, don't read it again. Note that it's 
 		// possible to dispose the entry to free up some memory if required.
@@ -417,7 +378,7 @@ const dual = {
 		// code might still know how to interpret the buffer.
 		if (this.isArrayType()) {
 			const Constructor = this.fileConstructor;
-			this.file = readArrayFile(Constructor, this.buffer!);
+			this.file = readArrayFile(Constructor, this.buffer);
 		} else {
 			const Constructor = this.fileConstructor;
 			let file = this.file = new Constructor();
@@ -434,18 +395,19 @@ const dual = {
 // it's possible that a certain file type did not implement a `.toBuffer()` 
 // method yet, which is fine, we'll re-use the original buffer then, meaning 
 // that we can't make any changes - hence "readonly".
-function isSerializableFile(file: File): file is SerializableFile {
+type SerializableFile = { toBuffer(): Uint8Array };
+function isSerializableFile(file: object): file is SerializableFile {
 	return 'toBuffer' in file;
 }
 
 // # readArrayFile()
 // Reads in a subfile of the DBPF that has an array structure. Typicaly examples 
 // are the lot and prop subfiles.
-function readArrayFile<T extends Constructor<File>>(
+function readArrayFile<T extends Class<any>>(
 	Constructor: T,
 	buffer: Uint8Array
 ) {
-	let array: File[] = [];
+	let array: InstanceType<T>[] = [];
 	let rs = new Stream(buffer);
 	while (rs.remaining() > 0) {
 

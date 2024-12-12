@@ -1,8 +1,7 @@
 import FileClasses from './file-classes.js';
 import { FileType } from './enums.js';
 import type { Class } from 'type-fest';
-import type { DBPFFile, DecodedFileTypeId } from './types.js';
-import type { TypeIdToFileConstructor } from './dbpf-entry.js';
+import type { DecodedFileClass, DecodedFileTypeId, TypeIdToFileConstructor } from './types.js';
 
 // Invert the file types so that we can easily access a constructor by its 
 // numeric id.
@@ -12,11 +11,11 @@ const map = new Map(
 		let constructor = FileClasses[key];
 		return [id, constructor];
 	}),
-) as Map<number, Class<DBPFFile>>;
+) as Map<number, DecodedFileClass>;
 
 export function getConstructorByType<T extends DecodedFileTypeId>(type: T): TypeIdToFileConstructor<T>;
-export function getConstructorByType(type: number): Class<DBPFFile> | undefined;
-export function getConstructorByType(type: number): Class<DBPFFile> | undefined {
+export function getConstructorByType(type: number): Class<unknown> | undefined;
+export function getConstructorByType(type: number): Class<unknown> | undefined {
 	return map.get(type);
 }
 

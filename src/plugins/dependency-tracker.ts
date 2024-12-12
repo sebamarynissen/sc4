@@ -9,7 +9,7 @@ import PluginIndex from './plugin-index.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
-import type { Entry, EntryWithReadResult } from 'sc4/core';
+import type { Entry } from 'sc4/core';
 import type { Logger, TGIQuery } from 'sc4/types';
 
 // Constants
@@ -42,7 +42,7 @@ type PackageIndex = {
 	[pkg: string]: folder;
 };
 type ExemplarLike = Exemplar | Cohort;
-type ExemplarEntry = EntryWithReadResult<ExemplarLike>;
+type ExemplarEntry = Entry<ExemplarLike>;
 
 // # DependencyTracker
 // Small helper class that allows us to easily pass context around without 
@@ -309,7 +309,7 @@ class DependencyTrackingContext {
 
 	// ## readLotExemplar(exemplar, entry)
 	// Traverses all objects on the given lot exemplar and starts tracking them.
-	async readLotExemplar<T extends ExemplarLike>(exemplar: T, entry: EntryWithReadResult<T>) {
+	async readLotExemplar<T extends ExemplarLike>(exemplar: T, entry: Entry<T>) {
 		const lot = new Dep.Lot({
 			entry,
 			name: exemplar.get(ExemplarProperty.ExemplarName) ?? '',

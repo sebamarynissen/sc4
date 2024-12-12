@@ -41,6 +41,12 @@ export type DecodedFileTypeId = (typeof FileType)[
 	keyof typeof FileClasses & keyof typeof FileType
 ];
 
+// Contains the *constructors* of all the decoded file classes.
+export type DecodedFileClass = ValueOf<typeof FileClasses>;
+export type DecodedFile = InstanceType<DecodedFileClass>;
+type ArraySignature = { [kFileTypeArray]: any; };
+export type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
+
 // A literal type containing the type ids of the simgrids.
 export type SimGridFileType = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
@@ -50,7 +56,7 @@ export type SimGridFileType = (typeof SimGridFileType)[keyof typeof SimGridFileT
 type TypeIdToStringKey = {
 	[K in keyof typeof FileClasses & keyof typeof FileType as typeof FileType[K]]: K;
 };
-type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
+export type TypeIdToFileConstructor<T extends DecodedFileTypeId> = typeof FileClasses[TypeIdToStringKey[T]];
 export type ArrayFileTypeId = ValueOf<{
 	[K in DecodedFileTypeId]: TypeIdToFileConstructor<K> extends {
 		[kFileTypeArray]: any

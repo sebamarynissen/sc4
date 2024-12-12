@@ -1,7 +1,6 @@
 // # savegame.js
 import DBPF from './dbpf.js';
 import FileType from './file-types.js';
-import type { TypeIdToEntry, TypeIdToReadResult } from './dbpf-entry.js';
 import type { DecodedFileTypeId, SimGridFileType } from './types.js';
 import type TerrainMap from './terrain-map.js';
 import { kFileTypeArray } from './symbols.js';
@@ -15,6 +14,7 @@ import type {
 	SimGridUint32,
 	SimGridUint8,
 } from './sim-grid-file.js';
+import type { EntryFromType } from './dbpf-entry.js';
 
 type SimGrid =
 	| SimGridUint8
@@ -23,6 +23,10 @@ type SimGrid =
 	| SimGridSint16
 	| SimGridUint32
 	| SimGridFloat32;
+
+// Generic type that knows what the result of entry.read() is based on a file's 
+// type id.
+type Result<T extends DecodedFileTypeId> = ReturnType<EntryFromType<T>['read']>;
 
 // # Savegame()
 // A class specifically designed for some Savegame functionality. Obviously 
@@ -109,7 +113,7 @@ export default class Savegame extends DBPF {
 	// # getByType(type)
 	// This method returns an entry in the savegame by type. If it doesn't 
 	// exist yet, it is created.
-	getByType<T extends DecodedFileTypeId>(type: T): TypeIdToEntry<T> {
+	getByType<T extends DecodedFileTypeId>(type: T): EntryFromType<T> {
 		let entry = this.find({ type });
 		if (!entry) {
 			const Constructor = getConstructorByType(type);
@@ -126,7 +130,7 @@ export default class Savegame extends DBPF {
 
 	// ## readByType(type)
 	// Helper function that reads an entry when it can be returned.
-	readByType<T extends DecodedFileTypeId>(type: T): TypeIdToReadResult<T> {
+	readByType<T extends DecodedFileTypeId>(type: T): Result<T> {
 		return this.getByType(type).read();
 	}
 

@@ -1,12 +1,11 @@
 // # dbpf-entry-types.ts
-import type { ValueOf } from 'type-fest';
+import type FileType from './file-types.js';
 import type FileClasses from './file-classes.js';
-import type { kFileTypeArray } from './symbols.js';
-
-type DecodedFileClass = ValueOf<typeof FileClasses>;
-type DecodedFile = InstanceType<DecodedFileClass>;
-type ArraySignature = { [kFileTypeArray]: any; };
-type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
+import type {
+	ArrayFile,
+	DecodedFile,
+	DecodedFileTypeId,
+} from './types.js';
 
 /**
  * Figures out the return type of an Entry's read() and readAsync() functions. 
@@ -17,4 +16,16 @@ export type ReadResult<T> = T extends DecodedFile
 	? T extends ArrayFile
 	? T[]
 	: T
-	: Uint8Array;
+	: unknown;
+
+type TypeIdToStringKey = {
+	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
+};
+
+/**
+ * Returns the decoded file as a *type* - i.e. "Lot", "Exemplar", ... based on 
+ * its numerical Type ID.
+ */
+export type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
+	typeof FileClasses[TypeIdToStringKey[T]]
+>;
