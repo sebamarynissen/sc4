@@ -121,7 +121,7 @@ export const ExemplarProperty = {
 	/**
 	 * kSC4FloraParametersProperty
 	 */
-	KSC4FloraParametersProperty: {
+	kSC4FloraParametersProperty: {
 		[kToPrimitive]: () => 0x083dc35b,
 		[kPropertyId]: 0x083dc35b,
 		[kPropertyType]: [Float],
@@ -130,7 +130,7 @@ export const ExemplarProperty = {
 	/**
 	 * kSC4FloraPreferencesProperty
 	 */
-	KSC4FloraPreferencesProperty: {
+	kSC4FloraPreferencesProperty: {
 		[kToPrimitive]: () => 0x083dc487,
 		[kPropertyId]: 0x083dc487,
 		[kPropertyType]: [Float],
@@ -139,7 +139,7 @@ export const ExemplarProperty = {
 	/**
 	 * kSC4FloraCursorProperty
 	 */
-	KSC4FloraCursorProperty: 0x083de16f,
+	kSC4FloraCursorProperty: 0x083de16f,
 	/**
 	 * mnRandomSeedingCellsPerMonth
 	 */
@@ -1761,7 +1761,7 @@ export const ExemplarProperty = {
 	/**
 	 * Texture IDs for each zoom level.
 	 */
-	KSC4RetainingWallPropertyWallTextures: {
+	kSC4RetainingWallPropertyWallTextures: {
 		[kToPrimitive]: () => 0x295961f2,
 		[kPropertyId]: 0x295961f2,
 		[kPropertyType]: [Uint32],
@@ -1770,7 +1770,7 @@ export const ExemplarProperty = {
 	/**
 	 * Size of a texture in meters. Defaults to standard city cell size.
 	 */
-	KSC4RetainingWallPropertyWallTextureSize: {
+	kSC4RetainingWallPropertyWallTextureSize: {
 		[kToPrimitive]: () => 0x295961f3,
 		[kPropertyId]: 0x295961f3,
 		[kPropertyType]: Float,
@@ -5376,7 +5376,7 @@ export const ExemplarProperty = {
 	 * Texture IDs for each zoom level. Mutally exclusive with building model
 	 * properties.
 	 */
-	KSC4FoundationPropertySideTextures: {
+	kSC4FoundationPropertySideTextures: {
 		[kToPrimitive]: () => 0x68fcff37,
 		[kPropertyId]: 0x68fcff37,
 		[kPropertyType]: [Uint32],
@@ -5386,7 +5386,7 @@ export const ExemplarProperty = {
 	 * Texture IDs for each zoom level. Mutally exclusive with building model
 	 * properties.
 	 */
-	KSC4FoundationPropertyTopTextures: {
+	kSC4FoundationPropertyTopTextures: {
 		[kToPrimitive]: () => 0x68fcff38,
 		[kPropertyId]: 0x68fcff38,
 		[kPropertyType]: [Uint32],
@@ -6994,7 +6994,7 @@ export const ExemplarProperty = {
 	/**
 	 * The height a foundation can lift an occupant (usually a building or lot).
 	 */
-	KSC4FoundationPropertyMaxHeight: {
+	kSC4FoundationPropertyMaxHeight: {
 		[kToPrimitive]: () => 0x88fcc3e3,
 		[kPropertyId]: 0x88fcc3e3,
 		[kPropertyType]: Float,
@@ -8507,7 +8507,7 @@ export const ExemplarProperty = {
 	/**
 	 * kSC4FloraFamilyProperty
 	 */
-	KSC4FloraFamilyProperty: {
+	kSC4FloraFamilyProperty: {
 		[kToPrimitive]: () => 0xa8f149c5,
 		[kPropertyId]: 0xa8f149c5,
 		[kPropertyType]: [Uint32],
@@ -10177,7 +10177,7 @@ export const ExemplarProperty = {
 	/**
 	 * Size of a texture in meters. Defaults to standard city cell size.
 	 */
-	KSC4FoundationPropertySideTextureSize: {
+	kSC4FoundationPropertySideTextureSize: {
 		[kToPrimitive]: () => 0xc911eda0,
 		[kPropertyId]: 0xc911eda0,
 		[kPropertyType]: Float,
@@ -10186,7 +10186,7 @@ export const ExemplarProperty = {
 	/**
 	 * Size of a texture in meters. Defaults to standard city cell size.
 	 */
-	KSC4FoundationPropertyTopTextureSize: {
+	kSC4FoundationPropertyTopTextureSize: {
 		[kToPrimitive]: () => 0xc911eda1,
 		[kPropertyId]: 0xc911eda1,
 		[kPropertyType]: Float,
@@ -11022,7 +11022,7 @@ export const ExemplarProperty = {
 	 * If property is present (regardless of value), then the model can be
 	 * rotated and contains 'full geometry'.
 	 */
-	KSC4BuildingModelRotationProperty: {
+	kSC4BuildingModelRotationProperty: {
 		[kToPrimitive]: () => 0xe83a081d,
 		[kPropertyId]: 0xe83a081d,
 		[kPropertyType]: Boolean,
@@ -11383,7 +11383,7 @@ export const ExemplarProperty = {
 	 * If present, then there are no building-style models for this building and
 	 * if there are any, they should be ignored.
 	 */
-	KSC4BuildingNoModelProperty: {
+	kSC4BuildingNoModelProperty: {
 		[kToPrimitive]: () => 0xe9822d62,
 		[kPropertyId]: 0xe9822d62,
 		[kPropertyType]: Boolean,
@@ -11713,7 +11713,7 @@ export const ExemplarProperty = {
 	 * If present, specifies a GZCLSID (class id) for the model class to use.
 	 * Otherwise, just use the default kGZCLSID_cS3DModelInstance.
 	 */
-	KSC4BuildingModelClassProperty: 0xea123cef,
+	kSC4BuildingModelClassProperty: 0xea123cef,
 	/**
 	 * How fast this building's condition decays over time. The "life
 	 * expectancy" of the plant in months can be calculated roughly as the
@@ -12736,7 +12736,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'CustomLot'
 		| 'ExemplarID'
 		| 'ResManRegisteredGroups'
-		| 'KSC4FloraCursorProperty'
+		| 'kSC4FloraCursorProperty'
 		| 'MnRandomSeedingCellsPerMonth'
 		| 'ShadowTextureID'
 		| 'MaxWaterPollutionValueForUI'
@@ -13009,7 +13009,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'SpecialPylonModelId'
 		| 'ResponseVehicleType'
 		| 'ResponsePedestrianType'
-		| 'KSC4BuildingModelClassProperty'
+		| 'kSC4BuildingModelClassProperty'
 		| 'LotResourceKey'
 		| 'MySimBitmapID'
 		| 'CityExclusionGroup'
@@ -13524,7 +13524,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'FireProtectionSimStrikeEfficiencyMultiplier'
 		| 'FireProtectionSimMinFundingToEndStrikes'
 		| 'FireStationDispatchRadius'
-		| 'KSC4RetainingWallPropertyWallTextureSize'
+		| 'kSC4RetainingWallPropertyWallTextureSize'
 		| 'WaterDepthForMaxAlpha'
 		| 'WaterDepthToColorGradientFactor'
 		| 'CityEdgeBrightnessKludgeFactor'
@@ -13711,7 +13711,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'NDd_SuspensionPeriod'
 		| 'MaxSlopeAlongNetwork'
 		| 'LotConfigPropertyMaxSlopeBeforeLotFoundation'
-		| 'KSC4FoundationPropertyMaxHeight'
+		| 'kSC4FoundationPropertyMaxHeight'
 		| 'BudgetMaxTaxRate'
 		| 'HealthStrikeEfficiency'
 		| 'HealthMinGradeToEndStrike'
@@ -13809,8 +13809,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'MaxHtDiffBetweenLandBridgeEnds'
 		| 'NetworkHtChangeThatRequiresFixing'
 		| 'PowerPlantEnergyConversionCost'
-		| 'KSC4FoundationPropertySideTextureSize'
-		| 'KSC4FoundationPropertyTopTextureSize'
+		| 'kSC4FoundationPropertySideTextureSize'
+		| 'kSC4FoundationPropertyTopTextureSize'
 		| 'OBSSchoolMinAcceptableFunding'
 		| 'HospitalHQBoost'
 		| 'EQDecay'
@@ -14182,8 +14182,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xea8c3cdb
 		| 0xebff69e7
 		| 0xec15654a
-		| 'KSC4FloraParametersProperty'
-		| 'KSC4FloraPreferencesProperty'
+		| 'kSC4FloraParametersProperty'
+		| 'kSC4FloraPreferencesProperty'
 		| 'ShadowOffset'
 		| 'ShadowColor'
 		| 'UtilityStrikeResponseCurve'
@@ -14971,7 +14971,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'ResourceKeyType3xm'
 		| 'ResourceKeyType4xm'
 		| 'ResourceKeyType5xm'
-		| 'KSC4RetainingWallPropertyWallTextures'
+		| 'kSC4RetainingWallPropertyWallTextures'
 		| 'FlammabilityHotspotSettings'
 		| 'Drives'
 		| 'Satisfies'
@@ -14990,8 +14990,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'DataViewLegendsGUIDS'
 		| 'MapViewUnsignedColors'
 		| 'MapViewSignedColors'
-		| 'KSC4FoundationPropertySideTextures'
-		| 'KSC4FoundationPropertyTopTextures'
+		| 'kSC4FoundationPropertySideTextures'
+		| 'kSC4FoundationPropertyTopTextures'
 		| 'NameKey'
 		| 'TrainMinMaxKPH'
 		| 'MiniMapWaterRamp'
@@ -15027,7 +15027,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'AudioMusicPlaylistEntry21'
 		| 'MinForPurposeFundingPercentageToAnimate'
 		| 'AverageSalaryForDemographic'
-		| 'KSC4FloraFamilyProperty'
+		| 'kSC4FloraFamilyProperty'
 		| 'ShimmerQuadDensity'
 		| 'StageTime'
 		| 'SpreadTime'
@@ -15170,8 +15170,8 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 'SmoothenOnlyConnectedTiles'
 		| 'UnusedMedicalProperty'
 		| 'HoverQueryOnly'
-		| 'KSC4BuildingModelRotationProperty'
-		| 'KSC4BuildingNoModelProperty'
+		| 'kSC4BuildingModelRotationProperty'
+		| 'kSC4BuildingNoModelProperty'
 		| 'SpecialCaseOnly'
 		| 'Selfilluminated'
 		| 'MySimIsMale'

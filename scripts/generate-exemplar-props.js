@@ -112,7 +112,7 @@ function normalizeName(str) {
 		.replaceAll(/§/g, '$')
 		.trim()
 		.replaceAll(/[^\w$ ]/g, '');
-	return toPascalCase(normalized);
+	return toPascalCase(normalized).replace(/^KSC4/g, 'kSC4');
 }
 
 function toPascalCase(text) {

@@ -71,17 +71,17 @@
   type: Float
   description: "Range: [0.0 - 90.0]"
   default: 6
-- name: KSC4FloraParametersProperty
+- name: kSC4FloraParametersProperty
   id: 0x83dc35b
   type: Float
   count: 14
   description: kSC4FloraParametersProperty
-- name: KSC4FloraPreferencesProperty
+- name: kSC4FloraPreferencesProperty
   id: 0x83dc487
   type: Float
   count: 256
   description: kSC4FloraPreferencesProperty
-- name: KSC4FloraCursorProperty
+- name: kSC4FloraCursorProperty
   id: 0x83de16f
   type: Uint32
   description: kSC4FloraCursorProperty
@@ -1109,12 +1109,12 @@
   type: Uint32
   count: -1
   description: Variable length list of type IDs for this hospital
-- name: KSC4RetainingWallPropertyWallTextures
+- name: kSC4RetainingWallPropertyWallTextures
   id: 0x295961f2
   type: Uint32
   count: 5
   description: Texture IDs for each zoom level.
-- name: KSC4RetainingWallPropertyWallTextureSize
+- name: kSC4RetainingWallPropertyWallTextureSize
   id: 0x295961f3
   type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
@@ -3399,13 +3399,13 @@
   description: Percentace by which water production is reduced when not within
     range of fresh water source
   default: 20
-- name: KSC4FoundationPropertySideTextures
+- name: kSC4FoundationPropertySideTextures
   id: 0x68fcff37
   type: Uint32
   count: 5
   description: Texture IDs for each zoom level. Mutally exclusive with building
     model properties.
-- name: KSC4FoundationPropertyTopTextures
+- name: kSC4FoundationPropertyTopTextures
   id: 0x68fcff38
   type: Uint32
   count: 5
@@ -4409,7 +4409,7 @@
   type: Uint32
   count: 12
   description: LotConfigPropertyLotObject
-- name: KSC4FoundationPropertyMaxHeight
+- name: kSC4FoundationPropertyMaxHeight
   id: 0x88fcc3e3
   type: Float
   description: The height a foundation can lift an occupant (usually a building or lot).
@@ -5373,7 +5373,7 @@
   id: 0xa8ebcf0c
   type: Uint32
   description: Amount of trash burned per month
-- name: KSC4FloraFamilyProperty
+- name: kSC4FloraFamilyProperty
   id: 0xa8f149c5
   type: Uint32
   count: -2
@@ -6656,12 +6656,12 @@
   description: Cost to produce one unit of electricity, not including
     infrastructure maintenance
   default: 4
-- name: KSC4FoundationPropertySideTextureSize
+- name: kSC4FoundationPropertySideTextureSize
   id: 0xc911eda0
   type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
   default: 16
-- name: KSC4FoundationPropertyTopTextureSize
+- name: kSC4FoundationPropertyTopTextureSize
   id: 0xc911eda1
   type: Float
   description: Size of a texture in meters. Defaults to standard city cell size.
@@ -7193,7 +7193,7 @@
   type: Uint32
   description: If assigned to an occupant, this property denotes it as a prop.
     Must use a valid prop ID as a property value. See SC4PropOccupant.h
-- name: KSC4BuildingModelRotationProperty
+- name: kSC4BuildingModelRotationProperty
   id: 0xe83a081d
   type: Boolean
   description: If property is present (regardless of value), then the model can be
@@ -7439,7 +7439,7 @@
   type: Uint8
   count: 4
   description: RGBA color for watered buildings in pipe view
-- name: KSC4BuildingNoModelProperty
+- name: kSC4BuildingNoModelProperty
   id: 0xe9822d62
   type: Boolean
   description: If present, then there are no building-style models for this
@@ -7628,7 +7628,7 @@
   count: -2
   description: maps hotspot weight (# of cells above threshold) to monthly fire
     probability (in percent 0-100)
-- name: KSC4BuildingModelClassProperty
+- name: kSC4BuildingModelClassProperty
   id: 0xea123cef
   type: Uint32
   count: -1
