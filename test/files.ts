@@ -12,7 +12,7 @@ if (!fs.existsSync(outputDir)) {
 // # resource(file)
 // Helper function that easily gets the path of a given test file in the test 
 // folder.
-export function resource(file) {
+export function resource(file: string) {
 	return path.resolve(
 		import.meta.dirname,
 		'./files',
@@ -23,6 +23,6 @@ export function resource(file) {
 // # output(file)
 // Returns the path to the output folder for our tests. This has to be added to 
 // .gitignore obviously.
-export function output(file) {
+export function output(file: string) {
 	return path.resolve(outputDir, file);
 }

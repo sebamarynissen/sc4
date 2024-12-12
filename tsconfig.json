@@ -1,7 +1,5 @@
 {
 	"compilerOptions": {
-		"rootDir": "src",
-		"outDir": "lib",
 		"baseUrl": "./",
 		"paths": {
 			"sc4/core": ["src/core/index.ts"],

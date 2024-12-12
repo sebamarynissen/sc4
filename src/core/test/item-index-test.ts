@@ -10,7 +10,7 @@ describe('An item index subfile', function() {
 
 	it('accepts a tract size in its constructor', function() {
 
-		let index = new ItemIndex(64/4);
+		let index = new ItemIndex(16);
 		expect(index.width).to.equal(1024);
 		expect(index.depth).to.equal(1024);
 		expect(index.tractWidth).to.equal(16);
@@ -23,7 +23,7 @@ describe('An item index subfile', function() {
 
 	it('intializes all cells', function() {
 
-		let index = new ItemIndex(256/4);
+		let index = new ItemIndex(64);
 		expect(index.width).to.equal(4096);
 		expect(index.depth).to.equal(4096);
 		expect(index.tractWidth).to.equal(64);
@@ -42,11 +42,12 @@ describe('An item index subfile', function() {
 
 	it('rebuilds the index from a subfile', function() {
 
-		const type = 0xabcd;
+		const type = FileType.Prop;
 		let index = new ItemIndex().fill();
 		let arr = [
 			{
 				[Symbol.for('sc4.type')]: type,
+				parse() {},
 				mem: 0xffffffff,
 				xMinTract: 0x40,
 				xMaxTract: 0x42,
@@ -59,7 +60,7 @@ describe('An item index subfile', function() {
 		index.add(arr[0]);
 		for (let x = 0x40; x <= 0x42; x++) {
 			for (let z = 0x44; z <= 0x45; z++) {
-				let cell = index.get(x, z);
+				let cell = index.get(x, z)!;
 				expect(cell).to.have.length(1);
 				expect(+cell[0]).to.equal(arr[0].mem);
 				expect(cell[0].type).to.equal(type);
@@ -70,7 +71,7 @@ describe('An item index subfile', function() {
 		index.rebuild(type, arr);
 		for (let x = 0x40; x <= 0x42; x++) {
 			for (let z = 0x44; z <= 0x45; z++) {
-				let cell = index.get(x, z);
+				let cell = index.get(x, z)!;
 				expect(cell).to.have.length(1);
 				expect(+cell[0]).to.equal(arr[0].mem);
 				expect(cell[0].type).to.equal(type);
@@ -85,7 +86,7 @@ describe('An item index subfile', function() {
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
-		let entry = dbpf.entries.find({ type: FileType.ItemIndex });
+		let entry = dbpf.find({ type: FileType.ItemIndex })!;
 		let indexFile = entry.read();
 
 		expect(indexFile.width).to.equal(1024);
@@ -120,10 +121,10 @@ describe('An item index subfile', function() {
 		for (let cell of cells) {
 			all.push(...cell);
 		}
-		let types = {};
-		for (let item of all) {
-			types[hex(item.type)] = true;
-		}
+		// let types = {};
+		// for (let item of all) {
+		// 	types[hex(item.type)] = true;
+		// }
 		// console.log(...Object.keys(types).map(x => x.slice(2)));
 		// let coords = cells.map(cell => [cell.x, cell.z]);
 		// console.log(Math.max(...coords.map(x => x[0])));

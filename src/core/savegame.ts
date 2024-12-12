@@ -62,7 +62,7 @@ export default class Savegame extends DBPF {
 	// The terrain is a bit special because there are multiple instances of - 
 	// probably used for the neighbour connections.
 	get terrain(): TerrainMap | null {
-		let entry = this.entries.find({
+		let entry = this.find({
 			type: FileType.TerrainMap,
 			instance: 0x01,
 		});

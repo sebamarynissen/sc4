@@ -1,6 +1,7 @@
 // # tgi-index-test.js
 import { expect } from 'chai';
-import Index from '../tgi-index.js';
+import Index, { type TGILiteral } from '../tgi-index.js';
+import { assertEqual } from '#test/types.js';
 
 class TGI {
 	type = 0;
@@ -101,10 +102,44 @@ const fn = (create: (arr: any[]) => Index) => () => {
 				new TGI(1, 2, 3),
 			];
 			let index = create(values);
-			let result = index.findAll(tgi => tgi.type === 1);
+			let result = index.findAll((tgi: TGILiteral) => tgi.type === 1 as any);
 			expect(result).to.have.length(1);
 			expect(result[0]).to.equal(values[1]);
 			expect(index.find(() => false)).to.be.undefined;
+
+		});
+
+		it('properly narrows types', function() {
+
+			type One = TGILiteral & { type: 1 };
+			function isOne(tgi: TGILiteral): tgi is One {
+				return tgi.type === 1;
+			}
+
+			let values = [
+				new TGI(4, 5, 6),
+				new TGI(1, 2, 3),
+			];
+			let index = create(values);
+			let result = index.find(isOne)!;
+			assertEqual<typeof result, One>(true);
+
+		});
+
+		it('properly narrows types with findAll()', function() {
+
+			type One = TGILiteral & { type: 1 };
+			function isOne(tgi: TGILiteral): tgi is One {
+				return tgi.type === 1;
+			}
+
+			let values = [
+				new TGI(4, 5, 6),
+				new TGI(1, 2, 3),
+			];
+			let index = create(values);
+			let result = index.findAll(isOne);
+			assertEqual<typeof result, One[]>(true);
 
 		});
 

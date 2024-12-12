@@ -11,7 +11,7 @@ import { uint8ArrayToString } from 'uint8array-extras';
 function logUsage(pool: WorkerPool) {
 	return pool.getUsage().map(n => {
 		let color = ['gray', 'cyan', 'green', 'yellow', 'red', 'magentaBright'][n] || 'magenta';
-		return chalk[color](n);
+		return (chalk as any)[color](n);
 	}).join(' ');
 	// console.log(usage);
 }
