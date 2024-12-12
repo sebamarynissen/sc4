@@ -276,7 +276,7 @@ class DependencyTrackingContext {
 	async readExemplar(entry: ExemplarEntry) {
 		let exemplar = await entry.readAsync();
 		this.touch(entry);
-		let [type] = [exemplar.singleValue(0x10) as number].flat();
+		let [type] = [exemplar.get(0x10)].flat();
 		let tasks = [];
 		if (type === LotConfigurations) {
 			tasks.push(this.readLotExemplar(exemplar, entry));
@@ -312,7 +312,7 @@ class DependencyTrackingContext {
 	async readLotExemplar<T extends ExemplarLike>(exemplar: T, entry: EntryWithReadResult<T>) {
 		const lot = new Dep.Lot({
 			entry,
-			name: exemplar.singleValue(ExemplarProperty.ExemplarName) as string,
+			name: exemplar.get(ExemplarProperty.ExemplarName) ?? '',
 		});
 		const tasks: Promise<any>[] = exemplar.lotObjects.map(async lotObject => {
 			const { type } = lotObject;
@@ -323,7 +323,7 @@ class DependencyTrackingContext {
 		});
 
 		// Lots can also have a foundation exemplar. Read this as well.
-		const fid = exemplar.singleValue(ExemplarProperty.BuildingFoundation) as number;
+		const fid = exemplar.get(ExemplarProperty.BuildingFoundation);
 		if (fid) {
 			let entry = this.index.find({ instance: fid });
 			if (entry) {
@@ -474,8 +474,8 @@ class DependencyTrackingContext {
 	async readRktExemplar(exemplar: ExemplarLike, entry: ExemplarEntry) {
 		let dep = new Dep.Exemplar({
 			entry,
-			name: exemplar.singleValue(ExemplarProperty.ExemplarName) as string ?? '',
-			exemplarType: exemplar.singleValue(ExemplarProperty.ExemplarType) as number ?? 0,
+			name: exemplar.singleValue(ExemplarProperty.ExemplarName) ?? '',
+			exemplarType: exemplar.singleValue(ExemplarProperty.ExemplarType) ?? 0,
 		});
 		let models = [];
 		for (let key of RKT) {
@@ -530,7 +530,7 @@ class DependencyTrackingContext {
 			QueryExemplarGUID: {},
 			SFXQuerySound: { type: 0x0b8d821a },
 			SFXDefaultPlopSound: { type: 0x0b8d821a },
-			SFXAmbientGoodSound: { type: 0x0b8d821a },
+			SFXAmbienceGoodSound: { type: 0x0b8d821a },
 			SFXActivateSound: { type: 0x4A4C132E },
 		};
 		for (let prop of Object.keys(props)) {

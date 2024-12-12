@@ -192,10 +192,26 @@ abstract class BaseExemplar {
 	}
 
 	// ## value(key)
-	// Helper function for directly accessing the value of a property.
+	// Helper function for directly accessing the value of a property. We also 
+	// provide some syntactic sugar here over getting the *raw* property. If the 
+	// property is an array, but it was not stored like that in the exemplar 
+	// properties, then we'll automatically unwrap so that we always work with 
+	// the correct data format when using known values!
 	value<K extends Key>(key: K): Value<K> | undefined {
 		let prop = this.prop(key);
-		return prop ? prop.value : undefined;
+		if (!prop) return undefined;
+		let { value } = prop;
+		if (Array.isArray(value) && prop.name) {
+			let info = ExemplarProperty[
+				prop.name as keyof typeof ExemplarProperty
+			];
+			let canBeArray = Array.isArray(info[
+				kPropertyType as keyof typeof info
+			]);
+			return canBeArray ? value : value.at(0) as Value<K>;
+		} else {
+			return value;
+		}
 	}
 
 	// ## get(key)
@@ -217,8 +233,11 @@ abstract class BaseExemplar {
 	// ## singleValue(key)
 	// Ensures that the value return is never an array. This is to handle cases 
 	// where properties that normally shouldn't be arrays, are still stored as 
-	// 1-element arrays in an examplar,
-	singleValue(key: number): string | Primitive | undefined {
+	// 1-element arrays in an examplar. Note however that this should no longer 
+	// be a problem because known properties should get automatically unwrapped!
+	singleValue<K extends Key>(key: K): Value<K> | undefined;
+	singleValue(key: Key): string | Primitive | undefined;
+	singleValue(key: Key): string | Primitive | undefined {
 		let value = this.value(key);
 		return Array.isArray(value) ? value[0] : value;
 	}
