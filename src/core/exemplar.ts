@@ -520,10 +520,11 @@ class Property<K extends Key = Key> {
 			if (type === String) {
 				this.value = rs.string(reps) as Value<K>;
 			} else {
-				let values = new Array<Value<K>>(reps);
+				let values: Primitive[] = [];
 				for (let i = 0; i < reps; i++) {
-					values[i] = reader!(rs) as Value<K>;
+					values.push(reader!(rs) as Primitive);
 				}
+				this.value = values as Value<K>;
 			}
 		}
 
