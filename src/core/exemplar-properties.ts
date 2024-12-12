@@ -12431,7 +12431,7 @@ export default ExemplarProperty;
 // because TypeScript is noticeably slower due to the massive amount of types it 
 // has to recalculate all the time. That's why we dump as much information as 
 // possible about the types!
-type ExemplarPropertyLikeToType<T> =
+export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 	T extends
 		| 0x00000010
 		| 0x00000011
@@ -15216,4 +15216,4 @@ type ExemplarPropertyLikeToType<T> =
 		| 'TravelTypeCanReachDestination'
 		| 'TravelTypeAffectedByTraffic'
 		? boolean[] :
-	never;
+	R;

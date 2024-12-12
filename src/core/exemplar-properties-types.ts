@@ -2,15 +2,21 @@
 // This file contains the type wizardry to automatically figure out the types 
 // when reading exemplar properties. The exemplar-properties object is what does 
 // the magic for us.
-import type { ValueOf } from 'type-fest';
 import type { uint32, uint16, uint8, sint32, sint64, float } from 'sc4/types';
 import type {
-	ExemplarProperty,
-	kPropertyId,
+	ExemplarPropertyIdLikeToValueType as Map,
 	kPropertyType,
+	kPropertyId,
 } from './exemplar-properties.js';
+export type { kPropertyType, kPropertyId };
 
-export type ExemplarPropertyPrimitive = 
+export type NumberLike<T extends number = number> =
+	| T
+	| { [kPropertyId]: T; }
+	| { [Symbol.toPrimitive](...args: any[]): T; };
+export type ExtractNumber<N> = N extends NumberLike<infer T> ? T : N;
+
+export type Primitive = 
 	| uint8
 	| uint16
 	| uint32
@@ -18,82 +24,24 @@ export type ExemplarPropertyPrimitive =
 	| sint64
 	| float
 	| boolean;
-export type ExemplarPropertyValue =
+export type ValueType =
 	| string
-	| ExemplarPropertyPrimitive
-	| ExemplarPropertyPrimitive[];
+	| Primitive
+	| Primitive[];
 
-type P = typeof ExemplarProperty;
-export type NumberLike<T extends number = number> =
-	| T
-	| { [kPropertyId]: T; }
-	| { [Symbol.toPrimitive](...args: any[]): T; };
+/**
+ * Either a string, a number or an object that can be converted to a number 
+ * which identifies a certain property.
+ */
+export type Key = string | NumberLike;
 
-export type ExtractNumberLike<N> = N extends NumberLike<infer T> ? T : never;
-export type ExemplarPropertyName = keyof P;
-export type ExemplarPropertyId = ValueOf<{
-	[K in keyof typeof ExemplarProperty]: ExtractNumberLike<typeof ExemplarProperty[K]>
-}>;
-export type ExemplarPropertyIdLike = ExemplarPropertyName | ExemplarPropertyId;
-
-// This generic type accepts both a numeric id or a string and ensures we return 
-// a proper *numeric id*.
-export type ExemplarPropertyIdLikeToId<T extends ExemplarPropertyIdLike> =
-	T extends ExemplarPropertyId
-		? T
-		: T extends ExemplarPropertyName
-		? ExtractNumberLike<typeof ExemplarProperty[T]>
-		: never;
-
-// Invert the exemplar properties so that we can easily find information basde 
-// on *numeric id*.
-export type ExemplarPropertyIdToName<T extends ExemplarPropertyId> = {
-	[K in keyof P as ExtractNumberLike<P[K]>]: K;
-}[T];
-
-export type ExemplarPropertyIdLikeToValue<T extends ExemplarPropertyIdLike> =
-	T extends ExemplarPropertyName
-		? P[T]
-		: T extends ExemplarPropertyId
-		? P[ExemplarPropertyIdToName<T>]
-		: never;
-
-type Unwrap<T> = T extends readonly (infer U)[] ? U : T;
-
-type ExtractPrimitiveType<T> = T extends typeof Uint32Array
-	? uint32
-	: T extends typeof Uint16Array
-	? uint16
-	: T extends typeof Uint8Array
-	? uint8
-	: T extends typeof Int32Array
-	? sint32
-	: T extends typeof Float32Array
-	? float
-	: T extends typeof BigInt64Array
-	? sint64
-	: T extends Boolean
-	? boolean
-	: ExemplarPropertyValue;
-
-type HasTypeKey = { [kPropertyType]: any };
-type ExtractTypeSymbol<T extends HasTypeKey> = T[typeof kPropertyType];
-
-type ExtractType<T extends number | HasTypeKey> =
-	T extends number
-		? uint32
-		: T extends HasTypeKey
-		? (
-			ExtractTypeSymbol<T> extends typeof String
-			? string
-			: ExtractTypeSymbol<T> extends readonly any[]
-			? ExtractPrimitiveType<Unwrap<ExtractTypeSymbol<T>>>[]
-			: ExtractPrimitiveType<ExtractTypeSymbol<T>>
-		) : ExemplarPropertyValue;
-
-export type ExemplarPropertyIdLikeToType<T extends string | number> =
-	T extends ExemplarPropertyIdLike
-		? ExtractType<ExemplarPropertyIdLikeToValue<T>>
-		: ExemplarPropertyValue;
-
-let foo: ExemplarPropertyIdLikeToType<'Euhm wat'> = {};
+// This is what it's all about: it returns the type of the value a property 
+// holds based on its numerical or string id. Using a map is far, far easier 
+// than TypeScript gymnastics.
+/**
+ * A generic type that figures out the type of a property's value in case it is 
+ * a known value.
+ */
+export type Value<K extends Key = number> = K extends NumberLike
+		? Map<ExtractNumber<K>, ValueType>
+		: Map<K, ValueType>;

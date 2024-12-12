@@ -9,14 +9,10 @@ import { invertMap, hex, inspect } from 'sc4/utils';
 import { kFileType } from './symbols.js';
 import type { byte, float, sint32, sint64, TGIArray, uint16, uint32 } from 'sc4/types';
 import type {
-	NumberLike,
-	ExemplarPropertyId,
-	ExemplarPropertyIdLike,
-	ExemplarPropertyIdLikeToId,
-    ExemplarPropertyIdLikeToValue,
-    ExemplarPropertyPrimitive,
-    ExemplarPropertyValue,
-    ExemplarPropertyIdLikeToType,
+    Primitive,
+    Value,
+    Key,
+    NumberLike,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
@@ -37,24 +33,12 @@ export type ExemplarOptions = {
 	parent?: TGIArray;
 	props?: Property[] | PropertyOptions[];
 };
-export type PropertyOptions<T extends number = number> = {
+export type PropertyOptions<K extends Key = Key> = {
 	id: number;
 	type?: PropertyValueType;
-	value: ExemplarPropertyIdLikeToType<T>;
+	value: Value<K>;
 	comment?: string;
 };
-
-// Small helper generic type for easily converting a string | number property 
-// accessor into a property of known type.
-type PropertyByAccessor<T extends ExemplarPropertyIdLike> = Property<
-	ExemplarPropertyIdLikeToId<T>
->;
-
-/**
- * Either a string, a number or an object that can be converted to a number 
- * which identifies a certain property.
- */
-export type PropertyAccessor = string | NumberLike;
 
 const LotObjectRange = [
 	+ExemplarProperty.LotConfigPropertyLotObject,
@@ -64,7 +48,7 @@ const LotObjectRange = [
 // Invert the exemplar properties so that we can find the name by id easily.
 const idToName: Map<number, string> = new Map(
 	Object.entries(ExemplarProperty).map(([name, object]) => {
-		return [+(object as NumberLike<ExemplarPropertyId>), name as string];
+		return [+(object as NumberLike), name as string];
 	}),
 );
 
@@ -202,36 +186,27 @@ abstract class BaseExemplar {
 
 	// ## prop(key)
 	// Helper function for accessing a property.
-	// prop(key: number | string): Property | undefined {
-	prop<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T> | undefined;
-	prop(key: PropertyAccessor): Property | undefined;
-	prop(key: PropertyAccessor): Property | undefined {
+	prop<K extends Key>(key: K): Property<K> | undefined {
 		let id = normalizeId(key);
 		return this.#table.get(id);
 	}
 
 	// ## value(key)
 	// Helper function for directly accessing the value of a property.
-	value<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T>['value'] | undefined;
-	value(key: PropertyAccessor): ExemplarPropertyValue | undefined;
-	value(key: PropertyAccessor): ExemplarPropertyValue | undefined {
+	value<K extends Key>(key: K): Value<K> | undefined {
 		let prop = this.prop(key);
 		return prop ? prop.value : undefined;
 	}
 
 	// ## get(key)
 	// Alias for `value(key)`
-	// get<T extends ExemplarPropertyIdLike>(key: T): PropertyByAccessor<T>['value'] | undefined;
-	// get(key: PropertyAccessor): ExemplarPropertyValue | undefined;
-	get(key: PropertyAccessor): ExemplarPropertyValue | undefined {
+	get<K extends Key>(key: K): Value<K> | undefined {
 		return this.value(key);
 	}
 
 	// ## set(key, value)
 	// Updates the value of a rop by key.
-	// set<T extends ExemplarPropertyIdLike>(key: T, value: PropertyByAccessor<T>['value']): this;
-	// set(key: PropertyAccessor, value: ExemplarPropertyValue): this;
-	set(key: PropertyAccessor, value: ExemplarPropertyValue): this {
+	set<K extends Key>(key: K, value: Value<K>): this {
 		let prop = this.prop(key);
 		if (prop) {
 			prop.value = value;
@@ -243,7 +218,7 @@ abstract class BaseExemplar {
 	// Ensures that the value return is never an array. This is to handle cases 
 	// where properties that normally shouldn't be arrays, are still stored as 
 	// 1-element arrays in an examplar,
-	singleValue(key: number): string | ExemplarPropertyPrimitive | undefined {
+	singleValue(key: number): string | Primitive | undefined {
 		let value = this.value(key);
 		return Array.isArray(value) ? value[0] : value;
 	}
@@ -252,23 +227,14 @@ abstract class BaseExemplar {
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 
 	// something specific.
-	addProperty<T extends ExemplarPropertyIdLike>(
-		idOrName: T,
-		value: ExemplarPropertyIdLikeToValue<T>,
-	): PropertyByAccessor<T>;
-	addProperty(
-		idOrName: number | string,
-		value: ExemplarPropertyValue,
-		typeHint?: PropertyValueType,
-	): Property;
-	addProperty(
-		idOrName: number | string,
-		value: ExemplarPropertyValue,
+	addProperty<K extends Key>(
+		idOrName: K,
+		value: Value<K>,
 		typeHint: PropertyValueType = Uint32,
 	) {
 		let id = normalizeId(idOrName);
 		let type = normalizeType(id, value, typeHint);
-		let prop = new Property({
+		let prop = new Property<K>({
 			id,
 			type,
 			value,
@@ -405,7 +371,7 @@ function normalizeId(idOrName: NumberLike | string): number {
 // resort we rely on the type hint, which defaults to uint32.
 function normalizeType(
 	id: number,
-	value: ExemplarPropertyValue,
+	value: Value,
 	typeHint: PropertyValueType = Uint32Array,
 ): PropertyValueType {
 	let name = idToName.get(id);
@@ -442,14 +408,14 @@ export class Cohort extends BaseExemplar {
 
 // # Property()
 // Wrapper class around an Exemplar property.
-class Property<T extends number = number> {
+class Property<K extends Key = Key> {
 	id = 0x00000000;
 	type: PropertyValueType = Uint32Array;
-	value: ExemplarPropertyIdLikeToType<T> | undefined;
+	value: Value<K> | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
-	constructor(data?: PropertyOptions<T> | Property<T>) {
+	constructor(data?: PropertyOptions<K> | Property<K>) {
 		let isClone = data instanceof Property;
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
@@ -500,7 +466,7 @@ class Property<T extends number = number> {
 	get byteLength() {
 		let { type, value } = this;
 		let bytes = getByteLengthFromType(type);
-		return this.multiple ? (4 + (value as ExemplarPropertyValue[]).length * bytes) : bytes;
+		return this.multiple ? (4 + (value as any[]).length * bytes) : bytes;
 	}
 
 	// ## parse(rs)
@@ -527,12 +493,17 @@ class Property<T extends number = number> {
 			// If we're dealing with a string, read the string. Otherwise 
 			// read the values using the repetitions. Note that this means 
 			// that strings can't be repeated!
+			// Note: the "as Value<K>" expressions are needed because TypeScript 
+			// doesn't have access to runtime information. This means that it 
+			// can't guarantee us that Value<K> can hold a string at runtime 
+			// because it might just as well evaluate to int32[] or something. 
+			// Hence using "as" is justified here.
 			if (type === String) {
-				this.value = rs.string(reps);
+				this.value = rs.string(reps) as Value<K>;
 			} else {
-				let values = this.value = new Array(reps);
+				let values = new Array<Value<K>>(reps);
 				for (let i = 0; i < reps; i++) {
-					values[i] = reader!(rs) as ExemplarPropertyPrimitive;
+					values[i] = reader!(rs) as Value<K>;
 				}
 			}
 		}
