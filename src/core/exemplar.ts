@@ -248,18 +248,6 @@ abstract class BaseExemplar {
 		return this;
 	}
 
-	// ## singleValue(key)
-	// Ensures that the value return is never an array. This is to handle cases 
-	// where properties that normally shouldn't be arrays, are still stored as 
-	// 1-element arrays in an examplar. Note however that this should no longer 
-	// be a problem because known properties should get automatically unwrapped!
-	singleValue<K extends Key>(key: K): Value<K> | undefined;
-	singleValue(key: Key): string | Primitive | undefined;
-	singleValue(key: Key): string | Primitive | undefined {
-		let value = this.value(key);
-		return Array.isArray(value) ? value[0] : value;
-	}
-
 	// ## addProperty(id, value, typeHint)
 	// Adds a property to the exemplar file. Note that we automatically use 
 	// Uint32 as a default for numbers, but this can obviously be set to 

@@ -474,8 +474,8 @@ class DependencyTrackingContext {
 	async readRktExemplar(exemplar: ExemplarLike, entry: ExemplarEntry) {
 		let dep = new Dep.Exemplar({
 			entry,
-			name: exemplar.singleValue(ExemplarProperty.ExemplarName) ?? '',
-			exemplarType: exemplar.singleValue(ExemplarProperty.ExemplarType) ?? 0,
+			name: exemplar.get(ExemplarProperty.ExemplarName) ?? '',
+			exemplarType: exemplar.get(ExemplarProperty.ExemplarType) ?? 0,
 		});
 		let models = [];
 		for (let key of RKT) {

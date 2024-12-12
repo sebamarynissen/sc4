@@ -7,6 +7,7 @@ import type {
 	ExemplarPropertyIdLikeToValueType as Map,
 	kPropertyType,
 	kPropertyId,
+	StringKey,
 } from './exemplar-properties.js';
 export type { kPropertyType, kPropertyId };
 
@@ -33,7 +34,7 @@ export type ValueType =
  * Either a string, a number or an object that can be converted to a number 
  * which identifies a certain property.
  */
-export type Key = string | NumberLike;
+export type Key = StringKey | NumberLike;
 
 // This is what it's all about: it returns the type of the value a property 
 // holds based on its numerical or string id. Using a map is far, far easier 

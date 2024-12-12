@@ -96,20 +96,43 @@ for (let array of Object.values(sorted)) {
 		}
 	});
 }
+
+// Explicitly include all known string keys per type so that we can re-use them 
+// later on. Makes the files a bit smaller because we don't include all the 
+// strings twice.
+let stringKeyMap = new Map();
+for (let [type, literals] of Object.entries(sorted)) {
+	let strings = literals
+		.filter(value => typeof value === 'string')
+		.map(name => `\t| '${name}'`)
+		.join('\n');
+	if (strings.length === 0) continue;
+	let typeName = `StringKeys_${String(stringKeyMap.size).padStart(2, '0')}`;
+	stringKeyMap.set(type, typeName);
+	code += `type ${typeName} =\n${strings};\n\n`;
+}
+
 code += `export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =\n`;
 for (let [type, literals] of Object.entries(sorted)) {
-	let union = literals.map(value => {
-		if (typeof value === 'number') {
-			return '0x'+value.toString(16).padStart(8, '0');
-		} else {
-			return `'${value}'`;
-		}
-	}).map(x => `\t\t| ${x}`).join('\n');
+	let union = literals
+		.filter(value => typeof value === 'number')
+		.map(value => '0x'+value.toString(16).padStart(8, '0'))
+		.map(x => `\t\t| ${x}`)
+		.join('\n');
 	code += `\tT extends\n`;
 	code += `${union}\n`;
+	let name = stringKeyMap.get(type);
+	if (name) {
+		code += `\t\t| ${name}\n`;
+	}
 	code += `\t\t? ${type} :\n`;
 }
-code += `\tR;\n`;
+code += `\tR;\n\n`;
+
+// At last we'll glue all string keys together as well.
+code += `export type StringKey =\n`;
+let union = [...stringKeyMap.values()].map(x => `\t| ${x}`).join('\n');
+code += `${union};\n`;
 
 function hex(nr) {
 	return '0x'+nr.toString(16).padStart(8, '0');
