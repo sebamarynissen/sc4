@@ -9,7 +9,6 @@ import WorkerPool from './worker-pool.js';
 import type {
 	DBPFJSON,
 	Entry,
-	EntryFromType,
 	EntryJSON,
 	DecodedFileTypeId,
 	ExemplarPropertyKey as Key,
@@ -305,9 +304,9 @@ export default class PluginIndex {
 
 	// ## find(type, group, instance)
 	// Finds the record identified by the given tgi.
-	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T> | undefined;
-	find<T extends DecodedFileTypeId>(query: TGIArray<T>): EntryFromType<T> | undefined;
-	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): Entry<T> | undefined;
+	find<T extends DecodedFileTypeId>(query: TGIArray<T>): Entry<T> | undefined;
+	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): Entry<T> | undefined;
 	find(...params: TGIFindParameters<Entry>): Entry | undefined;
 	find(...args: TGIFindParameters<Entry>) {
 		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
@@ -315,9 +314,9 @@ export default class PluginIndex {
 
 	// ## findAll(query)
 	// Finds all records that satisfy the given query.
-	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T>[];
-	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): EntryFromType<T>[];
-	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): Entry<T>[];
+	findAll<T extends DecodedFileTypeId>(query: TGIArray<T>): Entry<T>[];
+	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): Entry<T>[];
 	findAll(...params: TGIFindParameters<Entry>): Entry[]
 	findAll(...args: TGIFindParameters<Entry>): Entry[] {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
