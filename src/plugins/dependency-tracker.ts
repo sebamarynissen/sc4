@@ -169,7 +169,7 @@ export default class DependencyTracker {
 	// ## track(patterns)
 	// Performs the actual dependency tracking. Returns an array of filenames 
 	// that are needed by the source files.
-	async track(patterns = []) {
+	async track(patterns: string | string[] = []) {
 
 		// If the index hasn't been built yet, we'll do this first. The index is 
 		// stored per instance so that we can track dependencies multiple times 
@@ -392,8 +392,9 @@ class DependencyTrackingContext {
 			case LotObjectType.Building:
 			case LotObjectType.Prop:
 			case LotObjectType.Flora:
-				entries = this.index.family(iid);
-				if (entries) {
+				let familyEntries = this.index.family(iid);
+				if (familyEntries) {
+					entries = familyEntries;
 					family = iid;
 				}
 		}

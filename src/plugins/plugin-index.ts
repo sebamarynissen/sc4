@@ -333,7 +333,7 @@ export default class PluginIndex {
 	// ## family(id)
 	// Checks if the a prop or building family exists with the given IID and 
 	// if so returns the family array.
-	family(id: uint32) {
+	family(id: uint32): ExemplarEntry[] | null {
 		let arr = this.families[h(id)];
 		return arr || null;
 	}
