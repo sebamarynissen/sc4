@@ -3,7 +3,15 @@ import chalk from 'chalk';
 import { Glob } from 'glob';
 import path from 'node:path';
 import fs from 'node:fs';
-import { DBPF, FileType, LotObjectType, ExemplarProperty, Exemplar, LotObject, Cohort } from 'sc4/core';
+import {
+	Cohort,
+	DBPF,
+	FileType,
+	Exemplar,
+	ExemplarProperty,
+	LotObjectType,
+	LotObject,
+} from 'sc4/core';
 import { hex } from 'sc4/utils';
 import PluginIndex from './plugin-index.js';
 import FileScanner from './file-scanner.js';
@@ -14,7 +22,6 @@ import type { Logger, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
 
 // Constants
-const LotConfigurations = 0x00000010;
 const RKT = [
 	0x27812820,
 	0x27812821,
@@ -295,7 +302,7 @@ class DependencyTrackingContext {
 		this.touch(entry);
 		let [type] = [exemplar.get(0x10)].flat();
 		let tasks = [];
-		if (type === LotConfigurations) {
+		if (type === ExemplarProperty.ExemplarType.LotConfigurations) {
 			tasks.push(this.readLotExemplar(exemplar, entry));
 		} else {
 			tasks.push(this.readRktExemplar(exemplar, entry));
