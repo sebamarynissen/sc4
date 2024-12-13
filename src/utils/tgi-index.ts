@@ -77,6 +77,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		// If we have no index, then we have no choice but to loop everything 
 		// manually.
 		let q = normalize(query, group, instance);
+		if (!q) return [];
 		if (!this.index) {
 			return super.filter(createFilter(q));
 		}
@@ -130,8 +131,9 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		if (typeof query === 'function') {
 			removed = filterInPlace<T>(this, query);
 		} else {
-			let fn = createFilter(normalize(query, g, i));
-			removed = filterInPlace<T>(this, fn);
+			let normalizedQuery = normalize(query, g, i);
+			if (!normalizedQuery) return 0;
+			removed = filterInPlace<T>(this, createFilter(normalizedQuery));
 		}
 		if (this.index) {
 			this.dirty = true;
@@ -256,8 +258,10 @@ function normalize(
 	query: TGIQuery | number[] | number,
 	g?: number,
 	i?: number,
-): TGIQuery {
-	let type, group, instance;
+): TGIQuery | null{
+	let type: number | undefined;
+	let group: number | undefined;
+	let instance: number | undefined;
 	if (typeof query === 'number') {
 		type = query;
 		group = g;
@@ -267,7 +271,21 @@ function normalize(
 	} else {
 		({ type, group, instance } = query);
 	}
-	return { type, group, instance };
+	if (
+		type === undefined &&
+		group === undefined &&
+		instance === undefined
+	) {
+		if (process.env.NODE_ENV !== 'test') {
+			console.warn('You provided an empty TGI query. Please verify if this is intentional! To avoid performance problems, this returns an empty result instead of all entries.');
+		}
+		return null;
+	}
+	let result: any = {};
+	if (type !== undefined) result.type = type;
+	if (group !== undefined) result.group = group;
+	if (instance !== undefined) result.instance = instance;
+	return result as TGIQuery;
 }
 
 // # createFilter(query)

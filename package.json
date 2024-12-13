@@ -27,7 +27,8 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "test": "npm run typecheck && mocha src/**/*-test.js src/**/*-test.ts",
+    "test": "npm run typecheck && npm run test:mocha",
+    "test:mocha": "cross-env NODE_ENV=test mocha src/**/*-test.js src/**/*-test.ts --reporter progress",
     "prebuild": "rimraf lib",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && copyfiles -u 1 src/cli/assets/* lib",
@@ -70,6 +71,7 @@
     "chai": "^5.1.2",
     "chai-spies": "^1.0.0",
     "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
     "esbuild": "^0.24.0",
     "eslint": "^9.14.0",
     "hilbert-curve": "^2.0.5",

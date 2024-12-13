@@ -143,6 +143,18 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 		});
 
+		it('returns nothing if the query is empty', function() {
+
+			let values = [
+				new TGI(4, 5, 6),
+				new TGI(1, 2, 3),
+			];
+			let index = create(values);
+			let result = index.findAll({} as TGILiteral);
+			expect(result).to.have.length(0);
+
+		});
+
 	});
 
 	describe('#add()', function() {

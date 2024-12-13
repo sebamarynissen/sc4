@@ -1,4 +1,4 @@
-import type { ConditionalKeys } from 'type-fest';
+import type { ConditionalKeys, RequireAtLeastOne } from 'type-fest';
 
 export type byte = number;
 export type uint8 = number;
@@ -23,7 +23,7 @@ export type TGIQuery<
 	T extends uint32 = uint32,
 	G extends uint32 = uint32,
 	I extends uint32 = uint32
-> = Partial<TGILiteral<T, G, I>>;
+> = RequireAtLeastOne<TGILiteral<T, G, I>>;
 export type TGIArray<
 	T extends uint32 = uint32,
 	G extends uint32 = uint32,
