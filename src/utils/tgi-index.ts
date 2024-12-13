@@ -276,7 +276,9 @@ function normalize(
 		group === undefined &&
 		instance === undefined
 	) {
-		console.warn('You provided an empty TGI query. Please verify if this is intentional! To avoid performance problems, this returns an empty result instead of all entries.');
+		if (process.env.NODE_ENV !== 'test') {
+			console.warn('You provided an empty TGI query. Please verify if this is intentional! To avoid performance problems, this returns an empty result instead of all entries.');
+		}
 		return null;
 	}
 	let result: any = {};
