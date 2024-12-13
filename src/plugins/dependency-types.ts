@@ -258,7 +258,7 @@ export class Model extends Dependency {
 	kind = 'model';
 
 	// ## toLines()
-	toLines({ width = DEFAULT_WIDTH, level = 0 } = {}) {
+	toLines({ width = DEFAULT_WIDTH, level = 0 }: ToLinesOptions = {}) {
 		let { entry } = this;
 		let lines = [];
 		lines.push($(
@@ -342,7 +342,7 @@ export class Exemplar extends Dependency {
 	}
 
 	// ## toLines(opts)
-	toLines({ width = DEFAULT_WIDTH, level = 0, root = true } = {}) {
+	toLines({ width = DEFAULT_WIDTH, level = 0, root = true }: ToLinesOptions = {}) {
 		let lines = [];
 		let { name, entry } = this;
 		if (root) {
@@ -417,14 +417,20 @@ export class Missing extends Dependency {
 	constructor(entry: EntryLike) {
 		super({ entry });
 	}
-	toLines({ level = 0 } = {}) {
+	toLines({ width = DEFAULT_WIDTH, level = 0 }: ToLinesOptions = {}) {
 		const { type, group, instance } = this.entry;
-		let prefix = `${' '.repeat(2*level)} ${chalk.red('MISSING')}`;
+		let prefix = `${' '.repeat(2*level)}`;
 		if (!type) {
-			return [`${prefix}${chalk.yellow(prefix)}`];
+			return [$(
+				width,
+				`${prefix}${chalk.yellow(hex(instance))}`,
+			)];
 		} else if (instance && group) {
 			let tgi = [type, group, instance].map(x => chalk.yellow(hex(x)));
-			return [`${prefix} ${tgi}`];
+			return [$(
+				width,
+				`${prefix}${tgi}`,
+			)];
 		} else {
 			return [];
 		}
@@ -452,7 +458,7 @@ function entryToString({ type, group, instance }: EntryLike) {
 	}
 }
 
-function $(width: number, line: string, file: string | null | undefined) {
+function $(width: number, line: string, file?: string | null | undefined) {
 	// eslint-disable-next-line no-control-regex
 	let filtered = line.replaceAll(/\x1B\[\d+m/g, '');
 	let basename = file ? path.basename(file) : 'Not found';

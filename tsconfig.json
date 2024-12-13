@@ -10,6 +10,7 @@
 			"sc4/api": ["src/api/api.js"],
 			"sc4/api/*": ["src/api/*"],
 			"sc4/types": ["src/types/types.ts"],
+			"#cli/*": ["src/cli/*"],
 		},
 		"lib": ["es2022"],
 		"target": "es2022",

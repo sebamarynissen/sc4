@@ -11,6 +11,7 @@ import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
 import type { Entry } from 'sc4/core';
 import type { Logger, TGIQuery } from 'sc4/types';
+import PQueue from 'p-queue';
 
 // Constants
 const LotConfigurations = 0x00000010;
@@ -208,19 +209,31 @@ class DependencyTrackingContext {
 	entries: Map<string, MaybePromise<Dep.Dependency>> = new Map();
 	touched: Set<string> = new Set();
 	missing: object[] = [];
+	queue: PQueue;
 
 	// ## constructor(tracker, files)
 	constructor(tracker: DependencyTracker, files: string[]) {
 		this.tracker = tracker;
 		this.index = tracker.index;
 		this.files = files;
+
+		// Setup up a promise queue so that we're able to easily throttle the 
+		// amount of read operations, and even make it possible to do it all 
+		// sequentially with no parallelization - which is useful for debugging 
+		// purposes as it guaranteeds deterministic read order!
+		this.queue = new PQueue({
+			concurrency: 500,
+		});
+
 	}
 
 	// ## track()
 	// Starts the tracking operation. For now we perform it *sequentially*, but 
 	// in the future we might want to do this in parallel!
 	async track() {
-		let tasks = this.files.map(file => this.read(file));
+		let tasks = this.files
+			.filter(file => file.endsWith('.SC4Lot'))
+			.map(file => this.read(file));
 		await Promise.all(tasks);
 		return new DependencyTrackingResult(this);
 	}
@@ -260,9 +273,13 @@ class DependencyTrackingContext {
 			switch (entry.type) {
 				case FileType.Exemplar:
 				case FileType.Cohort:
-					return await this.readExemplar(entry as ExemplarEntry);
+					return await this.queue.add(() => {
+						return this.readExemplar(entry as ExemplarEntry);
+					}) as Dep.Dependency;
 				case FileType.FSH:
-					return await this.readTexture(entry);
+					return await this.queue.add(() => {
+						return this.readTexture(entry);
+					}) as Dep.Dependency;
 				default:
 					return new Dep.Raw({ entry });
 			}
@@ -402,7 +419,7 @@ class DependencyTrackingContext {
 			entries = this.index.findAll({
 				type: getFileTypeByLotObject(lotObject),
 				instance: iid,
-			}) as Entry[];
+			});
 		}
 
 		// IMPORTANT! If we're reading the building of the lot, then our 
@@ -459,12 +476,20 @@ class DependencyTrackingContext {
 	async readLotObjectNetwork(lotObject: LotObject, _entry: Entry) {
 		let tasks = [];
 		if (lotObject.type === LotObject.Network) {
+
+			// IMPORTANT! Not all network nodes have an IID set, and even if, it 
+			// might be set to 0x00000000! We need to filter out those cases, 
+			// otherwise we pass in a "select all" query to findAll, which we 
+			// really want to avoid because then you'll suddenly be tracking 
+			// dependencies for your **entire plugin folder**. That gets so 
+			// worse that you get an out of memory error for JavaScript!
 			let instance = lotObject.IID;
-			if (instance === 0x00) return;
+			if (!instance) return;
 			let entries = this.index.findAll({ instance });
 			for (let entry of entries) {
 				tasks.push(this.readResource(entry));
 			}
+
 		}
 		await Promise.all(tasks);
 	}
