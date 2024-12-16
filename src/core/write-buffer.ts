@@ -19,6 +19,7 @@ import type {
 	word,
     qword,
 } from 'sc4/types';
+import type Box3 from './box3.js';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -127,6 +128,12 @@ export default class WriteBuffer extends SmartBuffer {
 	// Writes a vertex data structure to the buffer.
 	vertex(vertex: Vertex) {
 		vertex.write(this);
+	}
+
+	// ## bbox(bbox)
+	// Writes a bbox data structure to the buffer.
+	bbox(bbox: Box3) {
+		bbox.write(this);
 	}
 
 	// ## seal()

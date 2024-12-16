@@ -71,7 +71,7 @@ export default class ItemIndex {
 	// ## rebuild(type, file)
 	// Rebuilds the index so that it puts all entries of the given file in 
 	// their correct tracts.
-	rebuild(type: SavegameTypeId, file: SavegameObject[]) {
+	rebuild(type: number, file: SavegameObject[]) {
 
 		// From now on we need a specific file type because certain arrays might 
 		// be empty, in which case we don't know what type of values the array 

@@ -2,6 +2,7 @@
 import Color from './color.js';
 import type WriteBuffer from './write-buffer.js';
 import type Stream from './stream.js';
+import type { meters } from 'sc4/types';
 
 // # Vertex
 // In quite a lot of subfiles often the sequence x, y, z, u, v, r, g, b, a 
@@ -10,12 +11,11 @@ import type Stream from './stream.js';
 // order to make it easier to work with this, we've put them inside a separate 
 // class.
 export default class Vertex {
-
-	x = 0;
-	y = 0;
-	z = 0;
-	u = 0;
-	v = 0;
+	x: meters = 0;
+	y: meters = 0;
+	z: meters = 0;
+	u: number = 0;
+	v: number = 0;
 	color = new Color();
 
 	// ## parse(rs)

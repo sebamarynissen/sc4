@@ -22,6 +22,7 @@ import type {
 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
+import Box3 from './box3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -136,6 +137,14 @@ export default class Stream extends SmartBuffer {
 		let vertex = new Vertex();
 		vertex.parse(this);
 		return vertex;
+	}
+
+	// ## bbox()
+	// Reads in a bounding box from the stream.
+	bbox() {
+		let bbox = new Box3();
+		bbox.parse(this);
+		return bbox;
 	}
 
 	// Helper function for reading in an array. We first read in the length 

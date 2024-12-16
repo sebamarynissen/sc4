@@ -30,6 +30,14 @@ export type TGIArray<
 	I extends uint32 = uint32
 > = [type: T, group: G, instance: I];
 
+// It's not always clear what units are being used, as you can have meters (1 
+// tile = 16 meters), tiles, or tracts - where 1 tract is dependent on the 
+// stored tract size, which is always 0x02 though. To make this more explicit, 
+// we'll alias the "number" type properly.
+export type meters = float;
+export type tiles = byte;
+export type tracts = byte;
+
 // A type that we often use to allow all non-function keys of a class to be 
 // specified as options.
 export type ConstructorOptions<T> = Omit<
