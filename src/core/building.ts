@@ -125,7 +125,7 @@ export default class Building {
 		ws.dword(this.IID);
 		ws.dword(this.IID1);
 		ws.byte(this.unknown2);
-		this.bbox.write(ws);
+		ws.bbox(this.bbox);
 		ws.byte(this.orientation);
 		ws.float(this.scaffold);
 

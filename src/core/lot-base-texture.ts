@@ -4,6 +4,7 @@ import { FileType } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
+import Box3 from './box3.js';
 
 // # LotBaseTexture
 export default class LotBaseTexture {
@@ -28,12 +29,7 @@ export default class LotBaseTexture {
 	u7 = 0x00000000;
 	u8 = 0x00000000;
 	u9 = 0x00000000;
-	minX = 0;
-	minY = 0;
-	minZ = 0;
-	maxX = 0;
-	maxY = 0
-	maxZ = 0;
+	bbox = new Box3();
 	u10 = 0x02;
 	textures: Texture[] = [];
 	constructor(opts?: ConstructorOptions<LotBaseTexture>) {
@@ -45,18 +41,15 @@ export default class LotBaseTexture {
 		if (Array.isArray(dx)) {
 			[dx, dz] = dx;
 		}
-		dx = dx || 0;
-		dz = dz || 0;
-		this.minX += 16*dx;
-		this.maxX += 16*dx;
-		this.minZ += 16*dz;
-		this.maxZ += 16*dz;
+		dx = dx ?? 0;
+		dz = dz ?? 0;
+		this.bbox.move(dx, 0, dz);
 
 		// Recalculate the tracts. A tract is a 4x4 tile, so 4x16m in length.
-		this.xMinTract = 0x40 + Math.floor(this.minX / 64);
-		this.xMaxTract = 0x40 + Math.floor(this.maxX / 64);
-		this.zMinTract = 0x40 + Math.floor(this.minZ / 64);
-		this.zMaxTract = 0x40 + Math.floor(this.maxZ / 64);
+		this.xMinTract = 0x40 + Math.floor(this.bbox.minX / 64);
+		this.xMaxTract = 0x40 + Math.floor(this.bbox.maxX / 64);
+		this.zMinTract = 0x40 + Math.floor(this.bbox.minZ / 64);
+		this.zMaxTract = 0x40 + Math.floor(this.bbox.maxZ / 64);
 
 		// Move the actual textures.
 		for (let texture of this.textures) {
@@ -88,12 +81,7 @@ export default class LotBaseTexture {
 		this.u7 = rs.dword();
 		this.u8 = rs.dword();
 		this.u9 = rs.dword();
-		this.minX = rs.float();
-		this.minY = rs.float();
-		this.minZ = rs.float();
-		this.maxX = rs.float();
-		this.maxY = rs.float();
-		this.maxZ = rs.float();
+		this.bbox = new Box3().parse(rs);
 		this.u10 = rs.byte();
 
 		// Now read the tiles.
@@ -130,12 +118,7 @@ export default class LotBaseTexture {
 		ws.dword(this.u7);
 		ws.dword(this.u8);
 		ws.dword(this.u9);
-		ws.float(this.minX);
-		ws.float(this.minY);
-		ws.float(this.minZ);
-		ws.float(this.maxX);
-		ws.float(this.maxY);
-		ws.float(this.maxZ);
+		ws.bbox(this.bbox);
 		ws.byte(this.u10);
 		ws.array(this.textures);
 		return ws.seal();

@@ -8,6 +8,7 @@ import type { byte, dword, float, word } from 'sc4/types';
 import type Stream from './stream.js';
 import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
+import Box3 from './box3.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -48,12 +49,7 @@ export default class Network {
 	southConnection: byte = 0x00;
 	crossing: byte = 0;
 	crossingBytes: Uint8Array = new Uint8Array();
-	xMin: float = 0;
-	xMax: float = 0;
-	yMin: float = 0;
-	yMax: float = 0;
-	zMin: float = 0;
-	zMax: float = 0;
+	bbox = new Box3();
 	u = new Unknown();
 
 	constructor(opts: ConstructorOptions<Network> = {}) {
@@ -117,12 +113,7 @@ export default class Network {
 			this.crossingBytes = rs.read(5);
 		}
 		unknown.bytes(3);
-		this.xMin = rs.float();
-		this.xMax = rs.float();
-		this.yMin = rs.float();
-		this.yMax = rs.float();
-		this.zMin = rs.float();
-		this.zMax = rs.float();
+		this.bbox = new Box3().parse(rs);
 		unknown.bytes(4);
 		repeat(4, () => unknown.dword());
 		unknown.dword();
@@ -170,12 +161,7 @@ export default class Network {
 			ws.write(this.crossingBytes);
 		}
 		unknown.bytes();
-		ws.float(this.xMin);
-		ws.float(this.xMax);
-		ws.float(this.yMin);
-		ws.float(this.yMax);
-		ws.float(this.zMin);
-		ws.float(this.zMax);
+		ws.bbox(this.bbox);
 		unknown.bytes();
 		repeat(4, () => unknown.dword());
 		unknown.dword();

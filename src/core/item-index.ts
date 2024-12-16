@@ -4,7 +4,7 @@ import Pointer from './pointer.js';
 import { FileType } from './enums.js';
 import { getClassType } from './helpers.js';
 import { kFileType } from './symbols.js';
-import type { SavegameObject, SavegameTypeId } from './types.js';
+import type { SavegameObject } from './types.js';
 import type Stream from './stream.js';
 
 const SIZE = 192;

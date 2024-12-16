@@ -10,6 +10,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type { byte, dword, float, word } from 'sc4/types';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
+import Box3 from './box3.js';
 
 // # Pipe
 // Pipe tiles are suprisingly large data structures (usually about 700 bytes). 
@@ -50,12 +51,7 @@ export default class Pipe {
 	northConnection: byte = 0x00;
 	eastConnection: byte = 0x00;
 	southConnection: byte = 0x00;
-	xMin: float = 0;
-	xMax: float = 0;
-	yMin: float = 0;
-	yMax: float = 0;
-	zMin: float = 0;
-	zMax: float = 0;
+	bbox = new Box3();
 	blocks: dword = 0x00000000;
 	sideTextures: SideTextures = new SideTextures();
 	matrix: Matrix = new Matrix();
@@ -138,12 +134,7 @@ export default class Pipe {
 		this.eastConnection = rs.byte();
 		this.southConnection = rs.byte();
 		unknown.dword();
-		this.xMin = rs.float();
-		this.xMax = rs.float();
-		this.yMin = rs.float();
-		this.yMax = rs.float();
-		this.zMin = rs.float();
-		this.zMax = rs.float();
+		this.bbox = new Box3().parse(rs);
 		unknown.bytes(3);
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());
@@ -215,12 +206,7 @@ export default class Pipe {
 		ws.byte(this.eastConnection);
 		ws.byte(this.southConnection);
 		unknown.dword();
-		ws.float(this.xMin);
-		ws.float(this.xMax);
-		ws.float(this.yMin);
-		ws.float(this.yMax);
-		ws.float(this.zMin);
-		ws.float(this.zMax);
+		ws.bbox(this.bbox);
 		unknown.bytes();
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());

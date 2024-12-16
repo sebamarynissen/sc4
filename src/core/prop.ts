@@ -5,6 +5,7 @@ import { FileType } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
+import Box3 from './box3.js';
 
 type Timing = {
 	interval: number;
@@ -37,12 +38,7 @@ export default class Prop {
 	TID = 0x00000000;
 	IID = 0x00000000;
 	IID1 = 0x00000000;
-	minX = 0;
-	minY = 0;
-	minZ = 0;
-	maxX = 0;
-	maxY = 0;
-	maxZ = 0;
+	bbox = new Box3();
 	orientation = 0x00;
 	state = 0x00;
 	start = 0x00
@@ -81,12 +77,7 @@ export default class Prop {
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		this.IID1 = rs.dword();
-		this.minX = rs.float();
-		this.minY = rs.float();
-		this.minZ = rs.float();
-		this.maxX = rs.float();
-		this.maxY = rs.float();
-		this.maxZ = rs.float();
+		this.bbox = new Box3().parse(rs);
 		this.orientation = rs.byte();
 		this.state = rs.byte();
 		this.start = rs.byte();
@@ -135,12 +126,7 @@ export default class Prop {
 		ws.dword(this.TID);
 		ws.dword(this.IID);
 		ws.dword(this.IID1);
-		ws.float(this.minX);
-		ws.float(this.minY);
-		ws.float(this.minZ);
-		ws.float(this.maxX);
-		ws.float(this.maxY);
-		ws.float(this.maxZ);
+		ws.bbox(this.bbox);
 		ws.byte(this.orientation);
 		ws.byte(this.state);
 		ws.byte(this.start);
