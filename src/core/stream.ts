@@ -24,6 +24,7 @@ import type {
 import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
 import Box3 from './box3.js';
+import Vector3 from './vector-3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -119,6 +120,14 @@ export default class Stream extends SmartBuffer {
 		if (address === 0x00000000) return null;
 		let type = this.dword();
 		return new Pointer(type, address);
+	}
+
+	// ## vector3()
+	// Helper function for reading in a 3D vector object.
+	vector3() {
+		let v = new Vector3();
+		v.parse(this);
+		return v;
 	}
 
 	// # color()

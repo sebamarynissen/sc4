@@ -7,6 +7,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
 import TractInfo from './tract-info.js';
+import Vector3 from './vector-3.js';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
@@ -28,9 +29,7 @@ export default class Flora {
 	TID = 0x00000000;
 	IID = 0x00000000;
 	IID1 = 0x00000000;
-	x = 0;
-	y = 0;
-	z = 0;
+	position = new Vector3();
 	cycleDate = new Date();
 	appearanceDate = new Date();
 	state = 0x00;
@@ -58,9 +57,7 @@ export default class Flora {
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		this.IID1 = rs.dword();
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.cycleDate.setTime(getUnixFromJulian(rs.dword()));
 		this.appearanceDate.setTime(getUnixFromJulian(rs.dword()));
 		this.state = rs.byte();
@@ -85,9 +82,7 @@ export default class Flora {
 		ws.dword(this.TID);
 		ws.dword(this.IID);
 		ws.dword(this.IID1);
-		ws.float(this.x);
-		ws.float(this.y);
-		ws.float(this.z);
+		ws.vector3(this.position);
 		ws.dword(getJulianFromUnix(this.cycleDate));
 		ws.dword(getJulianFromUnix(this.appearanceDate));
 		ws.byte(this.state);

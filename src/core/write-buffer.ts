@@ -21,6 +21,7 @@ import type {
 } from 'sc4/types';
 import type Box3 from './box3.js';
 import type TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -114,6 +115,14 @@ export default class WriteBuffer extends SmartBuffer {
 		if (address > 0) {
 			this.dword(ptr.type);
 		}
+	}
+
+	// ## vector3()
+	// Writes away a 3D vector.
+	vector3(vector: Vector3Like) {
+		this.float(vector[0]);
+		this.float(vector[1]);
+		this.float(vector[2]);
 	}
 
 	// ## color(color)
