@@ -6,12 +6,13 @@ import { getUnixFromJulian, getJulianFromUnix } from 'sc4/utils';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
+import TractInfo from './tract-info.js';
+import { Vector3, type Vector3Like } from './vector-3.js';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
 // **Flora.Array** as file for the DBPF files, not the flora class itself!
 export default class Flora {
-
 	static [kFileType] = FileType.Flora;
 	static [kFileTypeArray] = true;
 	crc = 0x00000000;
@@ -22,20 +23,13 @@ export default class Flora {
 	u1 = 0x00;
 	appearance = 0b00001101;
 	u2 = 0x74758926;
-	xMinTract = 0x00;
-	zMinTract = 0x00;
-	xMaxTract = 0x00;
-	zMaxTract = 0x00;
-	xTractSize = 0x0002;
-	zTractSize = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID = 0x00000000;
 	TID = 0x00000000;
 	IID = 0x00000000;
 	IID1 = 0x00000000;
-	x = 0;
-	y = 0;
-	z = 0;
+	position = new Vector3();
 	cycleDate = new Date();
 	appearanceDate = new Date();
 	state = 0x00;
@@ -46,9 +40,15 @@ export default class Flora {
 		Object.assign(this, opts);
 	}
 
+	// ## move()
+	move(offset: Vector3Like) {
+		this.position = this.position.add(offset);
+		this.tract.update(this.position);
+		return this;
+	}
+
 	// ## parse(rs)
 	parse(rs: Stream) {
-
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -58,37 +58,19 @@ export default class Flora {
 		this.u1 = rs.byte();
 		this.appearance = rs.byte();
 		this.u2 = rs.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
-
-		// Read properties.
-		const count = this.sgprops.length = rs.dword();
-		for (let i = 0; i < count; i++) {
-			let prop = this.sgprops[i] = new SGProp();
-			prop.parse(rs);
-		}
-
-		// Read group ids.
+		this.tract = rs.tract();
+		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		this.IID1 = rs.dword();
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.cycleDate.setTime(getUnixFromJulian(rs.dword()));
 		this.appearanceDate.setTime(getUnixFromJulian(rs.dword()));
 		this.state = rs.byte();
 		this.orientation = rs.byte();
 		this.objectId = rs.dword();
-
-		// Done
 		return this;
-
 	}
 
 	// ## toBuffer()
@@ -101,20 +83,13 @@ export default class Flora {
 		ws.byte(this.u1);
 		ws.byte(this.appearance);
 		ws.dword(this.u2);
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);
 		ws.dword(this.IID);
 		ws.dword(this.IID1);
-		ws.float(this.x);
-		ws.float(this.y);
-		ws.float(this.z);
+		ws.vector3(this.position);
 		ws.dword(getJulianFromUnix(this.cycleDate));
 		ws.dword(getJulianFromUnix(this.appearanceDate));
 		ws.byte(this.state);

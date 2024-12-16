@@ -2,9 +2,9 @@
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { DBPF, FileType, ItemIndex } from 'sc4/core';
-import { hex } from 'sc4/utils';
 import { resource } from '#test/files.js';
 import { compareUint8Arrays } from 'uint8array-extras';
+import TractInfo from '../tract-info.js';
 
 describe('An item index subfile', function() {
 
@@ -49,10 +49,7 @@ describe('An item index subfile', function() {
 				[Symbol.for('sc4.type')]: type,
 				parse() {},
 				mem: 0xffffffff,
-				xMinTract: 0x40,
-				xMaxTract: 0x42,
-				zMinTract: 0x44,
-				zMaxTract: 0x45,
+				tract: new TractInfo([0x40, 0x44], [0x42, 0x45]),
 			},
 		];
 

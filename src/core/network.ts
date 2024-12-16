@@ -8,6 +8,9 @@ import type { byte, dword, float, word } from 'sc4/types';
 import type Stream from './stream.js';
 import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
+import Box3 from './box-3.js';
+import TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -20,12 +23,7 @@ export default class Network {
 	minor: word = 0x0004;
 	zot: word = 0x0000;
 	appearance: byte = 0x05;
-	xMinTract: byte = 0x00;
-	zMinTract: byte = 0x00;
-	xMaxTract: byte = 0x00;
-	zMaxTract: byte = 0x00;
-	xTractSize: word = 0x0002;
-	zTractSize: word = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID: dword = 0x00000000;
 	TID: dword = 0x00000000;
@@ -48,12 +46,7 @@ export default class Network {
 	southConnection: byte = 0x00;
 	crossing: byte = 0;
 	crossingBytes: Uint8Array = new Uint8Array();
-	xMin: float = 0;
-	xMax: float = 0;
-	yMin: float = 0;
-	yMax: float = 0;
-	zMin: float = 0;
-	zMax: float = 0;
+	bbox = new Box3();
 	u = new Unknown();
 
 	constructor(opts: ConstructorOptions<Network> = {}) {
@@ -71,6 +64,12 @@ export default class Network {
 		Object.assign(this, opts);
 	}
 
+	// ## move()
+	move(offset: Vector3Like) {
+		this.bbox = this.bbox.translate(offset);
+		this.tract.update(this);
+	}
+
 	parse(rs: Stream): this {
 		this.u = new Unknown();
 		const unknown = this.u.reader(rs);
@@ -83,12 +82,7 @@ export default class Network {
 		unknown.byte();
 		this.appearance = rs.byte();
 		unknown.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
@@ -117,12 +111,7 @@ export default class Network {
 			this.crossingBytes = rs.read(5);
 		}
 		unknown.bytes(3);
-		this.xMin = rs.float();
-		this.xMax = rs.float();
-		this.yMin = rs.float();
-		this.yMax = rs.float();
-		this.zMin = rs.float();
-		this.zMax = rs.float();
+		this.bbox = new Box3().parse(rs);
 		unknown.bytes(4);
 		repeat(4, () => unknown.dword());
 		unknown.dword();
@@ -141,12 +130,7 @@ export default class Network {
 		unknown.byte();
 		ws.byte(this.appearance);
 		unknown.dword();
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);
@@ -170,12 +154,7 @@ export default class Network {
 			ws.write(this.crossingBytes);
 		}
 		unknown.bytes();
-		ws.float(this.xMin);
-		ws.float(this.xMax);
-		ws.float(this.yMin);
-		ws.float(this.yMax);
-		ws.float(this.zMin);
-		ws.float(this.zMax);
+		ws.bbox(this.bbox);
 		unknown.bytes();
 		repeat(4, () => unknown.dword());
 		unknown.dword();

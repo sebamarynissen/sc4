@@ -1,6 +1,6 @@
 // # matrix-3.ts
-import type Stream from "./stream.js";
-import type WriteBuffer from "./write-buffer.js";
+import type Stream from './stream.js';
+import type WriteBuffer from './write-buffer.js';
 
 // # Matrix3
 // Class for representing a 2D transformation matrix.

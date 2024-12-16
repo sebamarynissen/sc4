@@ -1,4 +1,4 @@
-// # pipe-tile.js
+// # pipe.ts
 import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import WriteBuffer from './write-buffer.js';
@@ -6,10 +6,12 @@ import SGProp from './sgprop.js';
 import Matrix from './matrix.js';
 import Matrix3 from './matrix-3.js';
 import Vertex from './vertex.js';
+import Box3 from './box-3.js';
+import TractInfo from './tract-info.js';
+import Vector3 from './vector-3.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type { byte, dword, float, word } from 'sc4/types';
+import type { byte, dword, float, word, ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
-import type { ConstructorOptions } from 'sc4/types';
 
 // # Pipe
 // Pipe tiles are suprisingly large data structures (usually about 700 bytes). 
@@ -23,20 +25,13 @@ export default class Pipe {
 	minor: word = 0x0003;
 	zot: word = 0x0008;
 	appearance: byte = 0x05;
-	xMinTract: byte = 0x00;
-	zMinTract: byte = 0x00;
-	xMaxTract: byte = 0x00;
-	zMaxTract: byte = 0x00;
-	xTractSize: word = 0x0002;
-	zTractSize: word = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID: dword = 0x00000000;
 	TID: dword = 0x00000000;
 	IID: dword = 0x00000000;
 	matrix3: Matrix3 = new Matrix3();
-	x: float = 0;
-	y: float = 0;
-	z: float = 0;
+	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
 		new Vertex(),
 		new Vertex(),
@@ -50,12 +45,7 @@ export default class Pipe {
 	northConnection: byte = 0x00;
 	eastConnection: byte = 0x00;
 	southConnection: byte = 0x00;
-	xMin: float = 0;
-	xMax: float = 0;
-	yMin: float = 0;
-	yMax: float = 0;
-	zMin: float = 0;
-	zMax: float = 0;
+	bbox = new Box3();
 	blocks: dword = 0x00000000;
 	sideTextures: SideTextures = new SideTextures();
 	matrix: Matrix = new Matrix();
@@ -107,21 +97,14 @@ export default class Pipe {
 		unknown.dword();
 		this.appearance = rs.byte();
 		unknown.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		unknown.byte();
 		this.matrix3 = rs.struct(Matrix3);
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.vertices = [
 			rs.vertex(),
 			rs.vertex(),
@@ -138,12 +121,7 @@ export default class Pipe {
 		this.eastConnection = rs.byte();
 		this.southConnection = rs.byte();
 		unknown.dword();
-		this.xMin = rs.float();
-		this.xMax = rs.float();
-		this.yMin = rs.float();
-		this.yMax = rs.float();
-		this.zMin = rs.float();
-		this.zMax = rs.float();
+		this.bbox = new Box3().parse(rs);
 		unknown.bytes(3);
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());
@@ -187,21 +165,14 @@ export default class Pipe {
 		unknown.dword();
 		ws.byte(this.appearance);
 		unknown.dword();
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);
 		ws.dword(this.IID);
 		unknown.byte();
 		ws.write(this.matrix3);
-		ws.float(this.x);
-		ws.float(this.y);
-		ws.float(this.z);
+		ws.vector3(this.position);
 		this.vertices.forEach(v => ws.vertex(v));
 
 		// Reading model starts below.
@@ -215,12 +186,7 @@ export default class Pipe {
 		ws.byte(this.eastConnection);
 		ws.byte(this.southConnection);
 		unknown.dword();
-		ws.float(this.xMin);
-		ws.float(this.xMax);
-		ws.float(this.yMin);
-		ws.float(this.yMax);
-		ws.float(this.zMin);
-		ws.float(this.zMax);
+		ws.bbox(this.bbox);
 		unknown.bytes();
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());

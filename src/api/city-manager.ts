@@ -1,4 +1,4 @@
-// # city-manager.js
+// # city-manager.ts
 import { path, fs, hex } from 'sc4/utils';
 import {
 	Savegame,
@@ -9,38 +9,77 @@ import {
 	Pointer,
 	FileType,
 	SimGrid,
+	ExemplarProperty as Property,
+	Box3,
+	type Exemplar,
+    type ExemplarPropertyKey as Key,
+    type Entry,
+    type LotObject,
+    type SavegameObject,
+    type ArrayFileTypeId,
+    type SavegameFileTypeId,
 } from 'sc4/core';
+import type { PluginIndex } from 'sc4/plugins';
+import type { TGIArray, TGIQuery } from 'sc4/types';
 
-// Hex constants to make the code more readable.
-const ExemplarType = 0x10;
-const Buildings = 0x02;
-const OccupantSize = 0x27812810;
-const LotConfigurations = 0x10;
-const LotResourceKey = 0xea260589;
-const LotConfigPropertySize = 0x88edc790;
-const LotConfigPropertyZoneTypes = 0x88edc793;
-const Wealth = 0x27812832;
 const INSET = 0.1;
+
+type CityManagerOptions = {
+	dbpf?: Savegame;
+	index?: PluginIndex;
+};
+
+type Orientation = number;
+type PlopOptions = {
+	tgi?: TGIQuery | TGIArray;
+	building?: Entry<Exemplar>;
+	x: number;
+	z: number;
+	orientation?: Orientation;
+};
+
+type GrowOptions = {
+	tgi?: TGIQuery | TGIArray;
+	lot?: Entry<Exemplar>;
+	building?: Entry<Exemplar>;
+	x: number;
+	z: number;
+	orientation?: Orientation;
+};
+
+type BuildOptions = {
+	lot: Entry<Exemplar>;
+	building: Entry<Exemplar>;
+	x: number;
+	z: number;
+	orientation?: Orientation;
+};
+
+type ZoneOptions = {
+	x: number;
+	z: number;
+	width?: number;
+	depth?: number;
+	orientation?: Orientation;
+	zoneType?: number;
+};
 
 // # CityManager
 // A class for performing operations on a certain city, such as plopping 
 // arbitrary lots etc. Have a look at https://sc4devotion.com/forums/
 // index.php?topic=5656.0, contains a lot of relevant info.
 export default class CityManager {
+	dbpf: Savegame;
+	index: PluginIndex;
+	memRefs: Set<number> = new Set();
+	#mem = 1;
 
 	// ## constructor(opts)
 	// Sets up the city manager.
-	constructor(opts = {}) {
-		
-		// Pre-initialize the "private" fields that cannot be modified by the 
-		// options.
-		this.memRefs = null;
-		this.$mem = 1;
-
-		// Setup the "public" fields.
-		this.dbpf = opts.dbpf || null;
-		this.index = opts.index || null;
-
+	constructor(opts: CityManagerOptions = {}) {
+		let { dbpf, index } = opts;
+		if (dbpf) this.dbpf = dbpf;
+		if (index) this.index = index;
 	}
 
 	// ## get city()
@@ -53,13 +92,13 @@ export default class CityManager {
 	// Stores the file index to be used for looking up TGI's etc. That's 
 	// required if you want to plop lot's etc. because in that case we need to 
 	// know where to look for the resources!
-	setFileIndex(index) {
+	setFileIndex(index: PluginIndex) {
 		this.index = index;
 	}
 
 	// ## load(file)
 	// Loads the given savegame into the city manager.
-	load(file) {
+	load(file: string) {
 
 		// No extension given? Add .sc4
 		let full = path.resolve(process.env.SC4_REGIONS ?? process.cwd(), file);
@@ -95,7 +134,7 @@ export default class CityManager {
 
 	// ## save(opts)
 	// Saves the city to the given file.
-	save(opts) {
+	save(opts: Parameters<Savegame['save']>[0]) {
 		return this.dbpf.save(opts);
 	}
 
@@ -106,9 +145,9 @@ export default class CityManager {
 	mem() {
 
 		// Create a new memory reference, but make sure it doesn't exist yet.
-		let ref = this.$mem++;
+		let ref = this.#mem++;
 		while (this.memRefs.has(ref)) {
-			ref = this.$mem++;
+			ref = this.#mem++;
 		}
 		this.memRefs.add(ref);
 		return ref;
@@ -119,13 +158,13 @@ export default class CityManager {
 	// Helper function for getting a property from an exemplar, taking into
 	// account the inheritance chain. It's the index that is actually 
 	// responsible for this though.
-	getProperty(file, key) {
+	getProperty<K extends Key>(file: Exemplar, key: K) {
 		return this.index.getProperty(file, key);
 	}
 
 	// ## getPropertyValue(file, prop)
 	// Returns the direct value for the given property.
-	getPropertyValue(file, key) {
+	getPropertyValue<K extends Key>(file: Exemplar, key: K) {
 		return this.index.getPropertyValue(file, key);
 	}
 
@@ -135,14 +174,14 @@ export default class CityManager {
 	// exemplar, which means it only works for *ploppable* buildings. For 
 	// growable buildings the process is different, in that case you have to 
 	// use the "grow" method.
-	plop(opts = {}) {
+	plop(opts: PlopOptions) {
 
 		// (1) First of all we need to find the T10 exemplar file with the 
 		// information to plop the lot. Most of the time this resides in an 
 		// .sc4lot file, but it doesn't have to.
 		let { tgi, building } = opts;
 		if (!building && tgi) {
-			building = this.index.find(tgi);
+			building = this.index.find(tgi as any) as Entry<Exemplar>;
 			if (!building) {
 				throw new Error(
 					`Exemplar ${ JSON.stringify(tgi) } not found!`,
@@ -155,8 +194,8 @@ export default class CityManager {
 		// growable buildings. Apparently ploppable buildings start from a 
 		// building exemplar and then we can look up according 
 		// LotConfiguration exemplar.
-		let file = building.read();
-		if (this.getPropertyValue(file, ExemplarType) !== Buildings) {
+		let file = building!.read();
+		if (this.getPropertyValue(file, 'ExemplarType') !== Property.ExemplarType.Buildings) {
 			throw new Error([
 				'The exemplar is not a building exemplar!',
 				'The `.plop()` function expects a ploppable building exemplar!',
@@ -167,13 +206,16 @@ export default class CityManager {
 		// LotResourceKey & then based on that find the appropriate Building 
 		// exemplar. Note that we currently have no other choice than finding 
 		// everything with the same instance ID...
-		let IID = this.getPropertyValue(file, LotResourceKey);
-		let lotExemplar = this.findExemplarOfType(IID, LotConfigurations);
+		let IID = this.getPropertyValue(file, Property.LotResourceKey)!;
+		let lotExemplar = this.findExemplarOfType(
+			IID,
+			Property.ExemplarType.LotConfigurations
+		)!;
 
 		// Cool, we have both the building & the lot exemplar. Create the lot.
 		this.build({
 			lot: lotExemplar,
-			building,
+			building: building!,
 			x: opts.x,
 			z: opts.z,
 			orientation: opts.orientation,
@@ -186,9 +228,11 @@ export default class CityManager {
 	// from a *Lot Configurations* exemplar, not a ploppable building exemplar 
 	// - which is how the game does it. From then on the logic is pretty much 
 	// the same.
-	grow(opts) {
+	grow(opts: GrowOptions) {
 
-		let { lot = this.index.find(opts.tgi) } = opts;
+		let {
+			lot = this.index.find(opts.tgi as any) as Entry<Exemplar>,
+		} = opts;
 		if (!lot) {
 			throw new Error(
 				`Exemplar ${ JSON.stringify(opts.tgi) } not found!`,
@@ -197,7 +241,7 @@ export default class CityManager {
 
 		// Ensure that the exemplar that was specified.
 		let props = lot.read();
-		if (+props.value(ExemplarType) !== LotConfigurations) {
+		if (props.get(Property.ExemplarType) !== Property.ExemplarType.LotConfigurations) {
 			throw new Error([
 				'The exemplar is not a lot configurations exemplar!',
 				'The `.grow()` function expects a lot exemplar!',
@@ -209,7 +253,7 @@ export default class CityManager {
 		// random building from the family.
 		let { building } = opts;
 		if (!building) {
-			let IIDs = props.lotObjects.find(({ type }) => type === 0x00).IIDs;
+			let { IIDs } = props.lotObjects.find(obj => obj.type === 0x00)!;
 			let IID = rand(IIDs);
 			building = this.findExemplarOfType(IID, 0x02);
 			if (!building) {
@@ -243,7 +287,7 @@ export default class CityManager {
 	// or `.grow()` methods instead. It requires a lot exemplar and a building 
 	// exemplar to be specified. It's the `.plop()` and `.grow()` methods that 
 	// are responsible for deciding what building will be inserted.
-	build(opts) {
+	build(opts: BuildOptions) {
 
 		// First of all create the lot record & insert it into the city.
 		let {
@@ -303,7 +347,7 @@ export default class CityManager {
 	// ## zone(opts)
 	// The function responsible for creating RCI zones. Note that we **don't** 
 	// use the createLot function underneath as that
-	zone(opts) {
+	zone(opts: ZoneOptions) {
 		let {
 			x = 0,
 			z = 0,
@@ -348,7 +392,7 @@ export default class CityManager {
 		lots.push(lot);
 
 		// Put in the zone developer file & update the Zone View Sim Grid.
-		let grid = dbpf.getSimGrid(SimGrid.ZoneData);
+		let grid = dbpf.getSimGrid(SimGrid.ZoneData)!;
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
 				grid.set(x, z, zoneType);
@@ -367,7 +411,13 @@ export default class CityManager {
 
 	// ## createLot(opts)
 	// Creates a new lot object from the given options when plopping a lot.
-	createLot(opts) {
+	createLot(opts: {
+		exemplar: Entry<Exemplar>;
+		building: Entry<Exemplar>;
+		x: number;
+		z: number;
+		orientation: Orientation;
+	}) {
 
 		// Read in the size of the lot because we'll still need it.
 		let { dbpf } = this;
@@ -376,20 +426,20 @@ export default class CityManager {
 		let file = exemplar.read();
 		let [width, depth] = this.getPropertyValue(
 			file,
-			LotConfigPropertySize,
-		);
+			Property.LotConfigPropertySize,
+		)!;
 
 		// Determine the zone type.
 		let zoneTypes = this.getPropertyValue(
 			file,
-			LotConfigPropertyZoneTypes,
-		);
+			Property.LotConfigPropertyZoneTypes,
+		)!;
 		let zoneType = zoneTypes[0] || 0x0f;
 
 		// Determine the zoneWealth as well. Note that this is to be taken 
 		// **from the building**.
 		let buildingFile = building.read();
-		let zoneWealth = this.getPropertyValue(buildingFile, Wealth);
+		let zoneWealth = this.getPropertyValue(buildingFile, Property.Wealth);
 
 		// Cool, we can now create a new lot entry. Note that we will need to 
 		// take into account the
@@ -429,7 +479,7 @@ export default class CityManager {
 		// Now put the lot in the zone developer file as well. TODO: We should 
 		// actually check first and ensure that no building exists yet here!
 		let zones = dbpf.zoneDeveloper;
-		let grid = dbpf.getSimGrid(SimGrid.ZoneData);
+		let grid = dbpf.getSimGrid(SimGrid.ZoneData)!;
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
 				zones.cells[x][z] = new Pointer(lot);
@@ -449,27 +499,26 @@ export default class CityManager {
 
 	// ## createBuilding(opts)
 	// Creates a new building record and inserts it into the savegame.
-	createBuilding(opts) {
+	createBuilding(opts: {
+		lot: Lot,
+		lotObject: LotObject;
+		exemplar: Entry<Exemplar>;
+	}) {
 		let { lot, lotObject, exemplar } = opts;
 		let file = exemplar.read();
-		let [, height] = this.getPropertyValue(file, OccupantSize);
+		let [, height] = this.getPropertyValue(file, Property.OccupantSize)!;
 		let { orientation, y } = lotObject;
 
 		// Create the building.
 		let { terrain } = this.dbpf;
 		let { minX, maxX, minZ, maxZ } = position(lotObject, lot);
-		let yPos = terrain.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
+		let yPos = terrain!.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
 		let building = new Building({
 			mem: this.mem(),
 
 			// Now use the **rotated** building rectangle and use it to 
 			// position the building appropriately.
-			minX,
-			maxX,
-			minZ,
-			maxZ,
-			minY: yPos + y,
-			maxY: yPos + y + height,
+			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the building exemplar.
@@ -479,7 +528,7 @@ export default class CityManager {
 			IID1: exemplar.instance,
 
 		});
-		setTract(building);
+		building.tract.update(building);
 
 		// Put the building in the index at the correct spot.
 		let { dbpf } = this;
@@ -503,7 +552,10 @@ export default class CityManager {
 	// ## createProp(opts)
 	// Creates a new prop record in and inserts it into the save game. Takes 
 	// into account the position it should take up in a lot.
-	createProp({ lot, lotObject }) {
+	createProp({ lot, lotObject }: {
+		lot: Lot;
+		lotObject: LotObject;
+	}) {
 
 		// Note: in contrast to the building, we don't know yet what prop 
 		// we're going to insert if we're dealing with a prop family. As such 
@@ -519,21 +571,15 @@ export default class CityManager {
 
 		// Get the dimensions of the prop bounding box.
 		let file = exemplar.read();
-		let [, height] = this.getPropertyValue(file, OccupantSize);
+		let [, height] = this.getPropertyValue(file, Property.OccupantSize)!;
 
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
 		let { minX, maxX, minZ, maxZ } = position(lotObject, lot);
-		let yPos = terrain.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
+		let yPos = terrain!.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
 		let prop = new Prop({
 			mem: this.mem(),
-
-			minX,
-			maxX,
-			minZ,
-			maxZ,
-			minY: yPos + y,
-			maxY: yPos + y + height,
+			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the prop.
@@ -547,7 +593,7 @@ export default class CityManager {
 			state: 0,
 
 		});
-		setTract(prop);
+		prop.tract.update(prop);
 
 		// Push in the file with all props.
 		let { dbpf } = this;
@@ -555,7 +601,7 @@ export default class CityManager {
 		props.push(prop);
 
 		// Put the prop in the index.
-		this.addToItemIndex(prop, FileType.Prop, lotObject);
+		this.addToItemIndex(prop, FileType.Prop);
 
 		// Update the COM serializer and we're done.
 		let com = dbpf.COMSerializer;
@@ -567,27 +613,30 @@ export default class CityManager {
 	// ## createTexture(opts)
 	// Creates a texture entry in the BaseTexture file of the city for the 
 	// given lot.
-	createTexture(opts) {
+	createTexture(opts: {
+		lot: Lot;
+		textures: LotObject[];
+	}) {
+
+		// Apparently the game requires "insets" on the texture - which it 
+		// sets to 0.1, which get rounded to Float32's by the way.
+		let { lot, textures } = opts;
+		let minX = 16*lot.minX + INSET;
+		let maxX = 16*(lot.maxX+1) - INSET;
+		let minZ = 16*lot.minZ + INSET;
+		let maxZ = 16*(lot.maxZ+1) - INSET;
+
+		// TODO: This is only for flat cities, should use terrain queries 
+		// later on!
+		let minY = lot.yPos;
+		let maxY = lot.yPos + INSET;
 
 		// Create a new texture instance and copy some lot properties in it.
-		let { lot, textures } = opts;
 		let texture = new BaseTexture({
 			mem: this.mem(),
-
-			// Apparently the game requires "insets" on the texture - which it 
-			// sets to 0.1, which get rounded to Float32's by the way.
-			minX: 16*lot.minX + INSET,
-			maxX: 16*(lot.maxX+1) - INSET,
-			minZ: 16*lot.minZ + INSET,
-			maxZ: 16*(lot.maxZ+1) - INSET,
-
-			// TODO: This is only for flat cities, should use terrain queries 
-			// later on!
-			minY: lot.yPos,
-			maxY: lot.yPos + INSET,
-
+			bbox: new Box3([minX, minY, minZ], [maxX, maxY, maxZ]),
 		});
-		setTract(texture);
+		texture.tract.update(texture);
 
 		// Add all required textures.
 		for (let def of textures) {
@@ -632,17 +681,17 @@ export default class CityManager {
 	// ## addToItemIndex(obj)
 	// Helper function for adding the given object - that exposes the tract 
 	// coordinates - to the item index.
-	addToItemIndex(obj, type = obj.type) {
+	addToItemIndex(obj: SavegameObject, type: number) {
 		this.dbpf.itemIndex.add(obj, type);
 	}
 
 	// ## findExemplarOfType(IID, type)
 	// Helper function that can find an exemplar with the given instance of 
 	// the given type. It will make use of the families we have as well.
-	findExemplarOfType(IID, type) {
+	findExemplarOfType(IID: number, type: number) {
 		let { index } = this;
 		let family = index.family(IID);
-		const filter = entry => {
+		const filter = (entry: Entry<Exemplar>) => {
 			let file = entry.read();
 			return index.getPropertyValue(file, 0x10) === type;
 		};
@@ -668,8 +717,8 @@ export default class CityManager {
 		const { city } = this;
 		const index = city.itemIndex;
 		const com = city.COMSerializer;
-		const clear = type => {
-			let file = city.readByType(type);
+		const clear = (type: ArrayFileTypeId & SavegameFileTypeId) => {
+			let file = city.readByType(type) as SavegameObject[];
 			if (file) {
 				file.length = 0;
 				index.rebuild(type, file);
@@ -687,23 +736,11 @@ export default class CityManager {
 		city.zoneDeveloper.clear();
 
 		// Clear some simgrids.
-		city.getSimGrid(SimGrid.ZoneData).clear();
-		city.getSimGrid(SimGrid.Power).clear();
+		city.getSimGrid(SimGrid.ZoneData)?.clear();
+		city.getSimGrid(SimGrid.Power)?.clear();
 
 	}
 
-}
-
-// ## setTract(obj)
-// Helper function for setting the correct "Tract" values in the given object 
-// based on its bounding box.
-function setTract(obj) {
-	const xSize = 16 * 2**obj.xTractSize;
-	const zSize = 16 * 2**obj.zTractSize;
-	obj.xMinTract = Math.max(64, 64 + Math.floor(obj.minX / xSize));
-	obj.xMaxTract = 64 + Math.floor(obj.maxX / xSize);
-	obj.zMinTract = Math.max(64, 64 + Math.floor(obj.minZ / zSize));
-	obj.zMaxTract = 64 + Math.floor(obj.maxZ / zSize);
 }
 
 // ## orient([x, y], lot, opts)
@@ -711,7 +748,11 @@ function setTract(obj) {
 // **local** lot coordinates into global **city** coordinates. Note that local 
 // lot coordinates use an origin in the bottom-left corner of the lot with an 
 // y axis that is going up. This means that we'll need to invert properly!
-function orient([x, y], lot, opts = {}) {
+function orient(
+	[x, y]: [number, number],
+	lot: Lot,
+	opts: { bare?: boolean } = {},
+): [number, number] {
 	let { width, depth } = lot;
 
 	// First of all we need to swap because orientation 0 in the city is "up", 
@@ -749,7 +790,7 @@ function orient([x, y], lot, opts = {}) {
 // ## position(lotObject, lot)
 // Returns the rectangle we need to position the given lotObject on, taken 
 // into account it's positioned on the given lot.
-function position(lotObject, lot) {
+function position(lotObject: LotObject, lot: Lot) {
 	let { minX, maxX, minZ, maxZ } = lotObject;
 	[minX, minZ] = orient([minX, minZ], lot);
 	[maxX, maxZ] = orient([maxX, maxZ], lot);
@@ -764,6 +805,6 @@ function position(lotObject, lot) {
 
 // ## rand(arr)
 // Helper function that randomly selects a value from a given array.
-function rand(arr) {
+function rand<T>(arr: T[]): T {
 	return arr[Math.random()*arr.length | 0];
 }

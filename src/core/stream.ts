@@ -4,6 +4,7 @@ import Pointer from './pointer.js';
 import SGProp from './sgprop.js';
 import Color from './color.js';
 import Vertex from './vertex.js';
+import TractInfo from './tract-info.js';
 import type {
     byte,
     double,
@@ -22,6 +23,8 @@ import type {
 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
+import Box3 from './box-3.js';
+import Vector3 from './vector-3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -119,6 +122,14 @@ export default class Stream extends SmartBuffer {
 		return new Pointer(type, address);
 	}
 
+	// ## vector3()
+	// Helper function for reading in a 3D vector object.
+	vector3() {
+		let v = new Vector3();
+		v.parse(this);
+		return v;
+	}
+
 	// # color()
 	// Reads in a color from the stream.
 	color() {
@@ -136,6 +147,22 @@ export default class Stream extends SmartBuffer {
 		let vertex = new Vertex();
 		vertex.parse(this);
 		return vertex;
+	}
+
+	// ## tract()
+	// Reads in a TractInfo object from the stream.
+	tract() {
+		let tract = new TractInfo();
+		tract.parse(this);
+		return tract;
+	}
+
+	// ## bbox()
+	// Reads in a bounding box from the stream.
+	bbox() {
+		let bbox = new Box3();
+		bbox.parse(this);
+		return bbox;
 	}
 
 	// Helper function for reading in an array. We first read in the length 

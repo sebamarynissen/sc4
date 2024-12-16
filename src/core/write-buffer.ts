@@ -19,6 +19,9 @@ import type {
 	word,
     qword,
 } from 'sc4/types';
+import type Box3 from './box-3.js';
+import type TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -114,6 +117,14 @@ export default class WriteBuffer extends SmartBuffer {
 		}
 	}
 
+	// ## vector3()
+	// Writes away a 3D vector.
+	vector3(vector: Vector3Like) {
+		this.float(vector[0]);
+		this.float(vector[1]);
+		this.float(vector[2]);
+	}
+
 	// ## color(color)
 	// Writes a color data structure to the buffer.
 	color(color: Color) {
@@ -127,6 +138,18 @@ export default class WriteBuffer extends SmartBuffer {
 	// Writes a vertex data structure to the buffer.
 	vertex(vertex: Vertex) {
 		vertex.write(this);
+	}
+
+	// ## tract(tractInfo)
+	// Writes a tract info data structure to the buffer.
+	tract(tract: TractInfo) {
+		tract.write(this);
+	}
+
+	// ## bbox(bbox)
+	// Writes a bbox data structure to the buffer.
+	bbox(bbox: Box3) {
+		bbox.write(this);
 	}
 
 	// ## seal()

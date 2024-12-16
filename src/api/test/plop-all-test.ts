@@ -21,11 +21,11 @@ describe('The plopall api function', function() {
 			bbox: [16, 2, 32, 32],
 		}) as Savegame;
 
-		let [building] = dbpf.buildings;
-		expect(building.maxX).to.be.at.least(16*16)
-		expect(building.maxX).to.be.at.most((16+2)*16);
-		expect(building.maxZ).to.be.at.least(2*16);
-		expect(building.maxZ).to.be.at.most((2+3)*16);
+		let [{ bbox }] = dbpf.buildings;
+		expect(bbox.maxX).to.be.at.least(16*16)
+		expect(bbox.maxX).to.be.at.most((16+2)*16);
+		expect(bbox.maxZ).to.be.at.least(2*16);
+		expect(bbox.maxZ).to.be.at.most((2+3)*16);
 
 	});
 

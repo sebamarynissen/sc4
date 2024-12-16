@@ -6,8 +6,10 @@ import {
 	Color,
 	Pointer,
 	FileType,
+	Box3,
 	type Savegame,
 	type TerrainMap,
+    Vector3,
 } from 'sc4/core';
 
 // Bit flags of what connections are enabled. Based on those sides we'll also 
@@ -197,18 +199,13 @@ export default class PipeManager {
 			// Create the pipe tile and position it correctly first.
 			let pipe = new Pipe({
 				mem: this.ctx.mem(),
-				x: x+8,
-				z: z+8,
-				xMin: x,
-				xMax: x+16,
-				zMin: z,
-				zMax: z+16,
+				position: new Vector3(x+8, 0, z+8),
+				bbox: new Box3([x, 0, z], [x+16, 0, z+16]),
 				xTile: i,
 				zTile: j,
 			});
-			pipe.xMinTract = pipe.xMaxTract = 0x40 + Math.floor(i/4);
-			pipe.zMinTract = pipe.zMaxTract = 0x40 + Math.floor(j/4);
-			pipe.yModel = pipe.y = map.query(pipe.x, pipe.z)-1.4;
+			let pos = pipe.position;
+			pipe.yModel = pos.y = map.query(pos.x, pos.z)-1.4;
 
 			// Set the heights at the corner of the terrain. Obviously we we 
 			// need the actual *terrain* coordinates here, not the egalized 
@@ -224,8 +221,9 @@ export default class PipeManager {
 					cornerValues.push(h);
 				}
 			}
-			pipe.yMax = Math.max(...cornerValues);
-			pipe.yMin = Math.min(...map.contour(i, j));
+			pipe.bbox.max.y = Math.max(...cornerValues);
+			pipe.bbox.min.y = Math.min(...map.contour(i, j));
+			pipe.tract.update(pipe);
 
 			// Set the bottom vertices & bottom texture.
 			for (let i = 0; i < 2; i++) {
@@ -303,7 +301,7 @@ export default class PipeManager {
 
 			// Insert the prop model at the correct position and then rotate 
 			// into place based on the orientation we've set on the tile.
-			pipe.matrix.position = [pipe.x, pipe.y, pipe.z];
+			pipe.matrix.position = pipe.position;
 			if (pipe.orientation === 1) {
 				pipe.matrix.ex = [0, 0, 1];
 				pipe.matrix.ez = [-1, 0, 0];
