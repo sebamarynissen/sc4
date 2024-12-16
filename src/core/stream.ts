@@ -23,7 +23,7 @@ import type {
 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
-import Box3 from './box-3.js';
+import { Box3, type ParseOptions} from './box-3.js';
 import Vector3 from './vector-3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
@@ -159,9 +159,9 @@ export default class Stream extends SmartBuffer {
 
 	// ## bbox()
 	// Reads in a bounding box from the stream.
-	bbox() {
+	bbox(opts?: ParseOptions) {
 		let bbox = new Box3();
-		bbox.parse(this);
+		bbox.parse(this, opts);
 		return bbox;
 	}
 

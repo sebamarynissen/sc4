@@ -9,7 +9,7 @@ describe('A prop subfile', function() {
 	this.timeout(0);
 
 	it('should be parsed & serialized correctly', function() {
-		let dbpf = new DBPF(resource('city.sc4'));
+		let dbpf = new DBPF(resource('City - RCI.sc4'));
 
 		let entry = dbpf.find({ type: FileType.Prop })!;
 		let props = entry.read();
@@ -37,6 +37,18 @@ describe('A prop subfile', function() {
 	it('crashes on a poxed city', function() {
 		let dbpf = new Savegame(resource('poxed.sc4'));
 		expect(() => dbpf.props).to.throw(Error);
+	});
+
+	it('properly parses the bboxes', function() {
+
+		let { props } = new Savegame(resource('City - RCI.sc4'));
+		for (let prop of props) {
+			let { min, max } = prop.bbox;
+			for (let i = 0; i < min.length; i++) {
+				expect(min[i]).to.be.at.most(max[i]);
+			}
+		}
+
 	});
 
 });

@@ -2,12 +2,13 @@
 import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import Vertex from './vertex.js';
-import type { byte, dword, float, word } from 'sc4/types';
+import type { byte, dword, word } from 'sc4/types';
 import type Stream from './stream.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type SGProp from './sgprop.js';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import Vector3 from './vector-3.js';
 
 // # PrebuiltNetwork
 // A class that is used for networks that use prebuilt models, such as 
@@ -27,9 +28,7 @@ export default class PrebuiltNetwork {
 	GID: dword = 0x00000000;
 	TID: dword = 0x00000000;
 	IID: dword = 0x00000000;
-	x: float = 0;
-	y: float = 0;
-	z: float = 0;
+	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
 		new Vertex(),
 		new Vertex(),
@@ -78,9 +77,7 @@ export default class PrebuiltNetwork {
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		unknown.byte();
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.vertices = [
 			rs.vertex(),
 			rs.vertex(),
@@ -96,7 +93,7 @@ export default class PrebuiltNetwork {
 		this.eastConnection = rs.byte();
 		this.southConnection = rs.byte();
 		unknown.bytes(7);
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox({ range: true });
 		unknown.bytes(4);
 		repeat(4, () => unknown.dword());
 		this.rest = rs.rest();

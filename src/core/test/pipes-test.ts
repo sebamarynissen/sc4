@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { compareUint8Arrays } from 'uint8array-extras';
 import fs from '#test/fs.js';
-import { DBPF, Pipe } from 'sc4/core';
+import { DBPF, Pipe, Savegame } from 'sc4/core';
 import { resource } from '#test/files.js';
 
 describe('The pipes subfile', function() {
@@ -26,6 +26,18 @@ describe('The pipes subfile', function() {
 		let pipe = new Pipe();
 		let buffer = pipe.toBuffer();
 		expect(buffer).to.be.ok;
+
+	});
+
+	it('properly parses the range as a bbox', function() {
+
+		let { pipes } = new Savegame(resource('City - Pipes.sc4'));
+		for (let pipe of pipes) {
+			let { min, max } = pipe.bbox;
+			for (let i = 0; i < min.length; i++) {
+				expect(min[i]).to.be.at.most(max[i]);
+			}
+		}
 
 	});
 

@@ -121,7 +121,7 @@ export default class Pipe {
 		this.eastConnection = rs.byte();
 		this.southConnection = rs.byte();
 		unknown.dword();
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox({ range: true });
 		unknown.bytes(3);
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());
@@ -186,7 +186,7 @@ export default class Pipe {
 		ws.byte(this.eastConnection);
 		ws.byte(this.southConnection);
 		unknown.dword();
-		ws.bbox(this.bbox);
+		ws.bbox(this.bbox, { range: true });
 		unknown.bytes();
 		unknown.byte();
 		unknown.repeat(4, () => unknown.dword());

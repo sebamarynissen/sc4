@@ -7,6 +7,7 @@ import type Stream from './stream.js';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
+import Color from './color.js';
 
 // # LotBaseTexture
 export default class LotBaseTexture {
@@ -63,7 +64,7 @@ export default class LotBaseTexture {
 		this.u7 = rs.dword();
 		this.u8 = rs.dword();
 		this.u9 = rs.dword();
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox();
 		this.u10 = rs.byte();
 
 		// Now read the tiles.
@@ -118,10 +119,7 @@ class Texture {
 	z = 0;
 	orientation = 0;
 	priority = 0x00;
-	r = 0xff;
-	g = 0xff;
-	b = 0xff;
-	alpha = 0xff;
+	color = new Color(0xff, 0xff, 0xff, 0xff);
 	u6 = 0xff;
 	u7 = 0x00;
 	constructor(opts?: ConstructorOptions<Texture>) {
@@ -135,10 +133,7 @@ class Texture {
 		this.z = rs.byte();
 		this.orientation = rs.byte();
 		this.priority = rs.byte();
-		this.r = rs.byte();
-		this.g = rs.byte();
-		this.b = rs.byte();
-		this.alpha = rs.byte();
+		this.color = rs.color();
 		this.u6 = rs.byte();
 		this.u7 = rs.byte();
 		return this;
@@ -152,10 +147,7 @@ class Texture {
 		ws.byte(this.z);
 		ws.byte(this.orientation);
 		ws.byte(this.priority);
-		ws.byte(this.r);
-		ws.byte(this.g);
-		ws.byte(this.b);
-		ws.byte(this.alpha);
+		ws.color(this.color);
 		ws.byte(this.u6);
 		ws.byte(this.u7);
 		return ws.toUint8Array();
