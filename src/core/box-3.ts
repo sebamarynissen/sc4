@@ -20,6 +20,8 @@ export default class Box3 extends Array<Vector3> {
 		super(new Vector3(...min), new Vector3(...max));
 	}
 
+	get min(): Vector3 { return this[0]; }
+	get max(): Vector3 { return this[1]; }
 	get minX(): meters { return this[0][0]; }
 	get minY(): meters { return this[0][1]; }
 	get minZ(): meters { return this[0][2]; }
@@ -34,21 +36,13 @@ export default class Box3 extends Array<Vector3> {
 	set maxY(value: meters) { this[1][1] = value; }
 	set maxZ(value: meters) { this[1][2] = value; }
 
-	// ## move()
-	// Moves the bbox with the given vector.
-	move(offset: Vector3): this;
-	move(dx: meters, dy: meters, dz: meters): this;
-	move(dx: Vector3 | meters = 0, dy: meters = 0, dz: meters = 0): this {
-		if (Array.isArray(dx)) {
-			[dx = 0, dy = 0, dz = 0] = dx;
-		}
-		this.minX += dx;
-		this.maxX += dx;
-		this.minY += dy;
-		this.maxY += dy;
-		this.minZ += dz;
-		this.maxZ += dz;
-		return this;
+	// ## translate(offset)
+	// Translates the box with the given vector, and returns a *new* box.
+	translate(offset: Vector3Like) {
+		return new Box3(
+			this.min.add(offset),
+			this.max.add(offset),
+		);
 	}
 
 	// ## parse(rs)

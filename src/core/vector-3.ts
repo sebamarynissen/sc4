@@ -20,6 +20,11 @@ export class Vector3 extends Array<number> {
 	set y(value: number) { this[1] = value; }
 	set z(value: number) { this[2] = value; }
 
+	// ## clone()
+	clone() {
+		return new Vector3(...this);
+	}
+
 	// ## add()
 	add(dv: Vector3Like) {
 		let [dx, dy, dz] = dv;

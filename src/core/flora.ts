@@ -7,7 +7,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
 import TractInfo from './tract-info.js';
-import Vector3 from './vector-3.js';
+import { Vector3, type Vector3Like } from './vector-3.js';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
@@ -38,6 +38,13 @@ export default class Flora {
 
 	constructor(opts?: ConstructorOptions<Flora>) {
 		Object.assign(this, opts);
+	}
+
+	// ## move()
+	move(offset: Vector3Like) {
+		this.position = this.position.add(offset);
+		this.tract.update(this.position);
+		return this;
 	}
 
 	// ## parse(rs)

@@ -3,10 +3,11 @@ import WriteBuffer from './write-buffer.js';
 import FileType from './file-types.js';
 import SGProp from './sgprop.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type Stream from './stream.js';
-import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import type Stream from './stream.js';
+import type { ConstructorOptions } from 'sc4/types';
+import type { Vector3Like } from './vector-3.js';
 
 // # Building()
 // Represents a single building from the building file.
@@ -36,16 +37,13 @@ export default class Building {
 		Object.assign(this, opts);
 	}
 
-	// ## move(dx, dy, dz)
+	// ## move(move)
 	// The move vector of the building contains [dx, dy, dz] and should be 
 	// given in meters! This is because apparently the min/max values of the 
 	// building are given in meters as well.
-	move(dx: number | [number, number, number], dy: number, dz: number) {
-		if (Array.isArray(dx)) {
-			[dx, dy, dz] = dx;
-		}
-		this.bbox.move(dx, dy, dz);
-		this.tract.update(this.bbox);
+	move(offset: Vector3Like) {
+		this.bbox = this.bbox.translate(offset);
+		this.tract.update(this);
 		return this;
 	}
 

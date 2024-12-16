@@ -10,6 +10,7 @@ import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -61,6 +62,12 @@ export default class Network {
 		u.dword(0x00000002);
 		u.dword(0x00000000);
 		Object.assign(this, opts);
+	}
+
+	// ## move()
+	move(offset: Vector3Like) {
+		this.bbox = this.bbox.translate(offset);
+		this.tract.update(this);
 	}
 
 	parse(rs: Stream): this {

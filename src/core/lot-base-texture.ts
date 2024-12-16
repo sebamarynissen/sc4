@@ -6,6 +6,7 @@ import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 // # LotBaseTexture
 export default class LotBaseTexture {
@@ -33,19 +34,14 @@ export default class LotBaseTexture {
 	}
 
 	// ## move(dx, dz)
-	move(dx: [number, number] | number, dz: number) {
-		if (Array.isArray(dx)) {
-			[dx, dz] = dx;
-		}
-		dx = dx ?? 0;
-		dz = dz ?? 0;
-		this.bbox.move(dx, 0, dz);
-		this.tract.update(this.bbox);
+	move(offset: Vector3Like) {
+		this.bbox = this.bbox.translate(offset);
+		this.tract.update(this);
 
 		// Move the actual textures.
 		for (let texture of this.textures) {
-			texture.x += dx;
-			texture.z += dz;
+			texture.x += offset[0];
+			texture.z += offset[2];
 		}
 		return this;
 	}

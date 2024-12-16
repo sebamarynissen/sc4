@@ -3,11 +3,11 @@ import type { tracts } from 'sc4/types';
 import type Box3 from './box-3.js';
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';
+import type { Vector3Like } from './vector-3.js';
 
 // # TractInfo
 // A class that contains some information about the tracts an object is part of. 
 // Tracts are squares of 4x4 tiles that are used within the item index. 
-type Vector3 = [x: number, y: number, z: number];
 type Vector2<T = tracts> = [x: T, z: T];
 export default class TractInfo {
 
@@ -62,8 +62,8 @@ export default class TractInfo {
 	// no bbox - such as flora - from a positional vector.
 	update(record: { bbox: Box3 }): this;
 	update(bbox: Box3): this;
-	update(position: Vector3): this;
-	update(from: { bbox: Box3 } | Box3 | Vector3): this {
+	update(position: Vector3Like): this;
+	update(from: { bbox: Box3 } | Box3 | Vector3Like): this {
 		if ('bbox' in from) {
 			return this.update(from.bbox);
 		}

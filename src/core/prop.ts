@@ -7,6 +7,7 @@ import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import type { Vector3Like } from './vector-3.js';
 
 type Timing = {
 	interval: number;
@@ -48,6 +49,12 @@ export default class Prop {
 	// ## constructor(opts)
 	constructor(opts?: ConstructorOptions<Prop>) {
 		Object.assign(this, opts);
+	}
+
+	// ## move()
+	move(offset: Vector3Like) {
+		this.bbox = this.bbox.translate(offset);
+		this.tract.update(this);
 	}
 
 	// ## parse(rs)
