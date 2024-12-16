@@ -1,4 +1,4 @@
-// # pipe-tile.ts
+// # pipe.ts
 import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import WriteBuffer from './write-buffer.js';

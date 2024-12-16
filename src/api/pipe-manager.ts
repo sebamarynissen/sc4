@@ -221,8 +221,8 @@ export default class PipeManager {
 					cornerValues.push(h);
 				}
 			}
-			pipe.bbox.maxY = Math.max(...cornerValues);
-			pipe.bbox.minY = Math.min(...map.contour(i, j));
+			pipe.bbox.max.y = Math.max(...cornerValues);
+			pipe.bbox.min.y = Math.min(...map.contour(i, j));
 			pipe.tract.update(pipe);
 
 			// Set the bottom vertices & bottom texture.
