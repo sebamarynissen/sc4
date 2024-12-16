@@ -6,8 +6,9 @@ import { resource } from '#test/files.js';
 
 describe('A prop subfile', function() {
 
+	this.timeout(0);
+
 	it('should be parsed & serialized correctly', function() {
-		this.timeout(0);
 		let dbpf = new DBPF(resource('city.sc4'));
 
 		let entry = dbpf.find({ type: FileType.Prop })!;
@@ -34,10 +35,8 @@ describe('A prop subfile', function() {
 	});
 
 	it('crashes on a poxed city', function() {
-
 		let dbpf = new Savegame(resource('poxed.sc4'));
 		expect(() => dbpf.props).to.throw(Error);
-
 	});
 
 });
