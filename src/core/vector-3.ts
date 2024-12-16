@@ -8,7 +8,7 @@ export type Vector3Like = [x: number, y: number, z: number] | Vector3;
 // *value types*, so any operation on it returns a new vector. We don't modify 
 // the vector by reference! Compare this how the new JavaScript temporal api is 
 // designed.
-export default class Vector3 extends Array<number> {
+export class Vector3 extends Array<number> {
 	constructor(x: number = 0, y: number = 0, z: number = 0) {
 		super(x, y, z);
 	}
@@ -16,6 +16,9 @@ export default class Vector3 extends Array<number> {
 	get x() { return this[0]; }
 	get y() { return this[1]; }
 	get z() { return this[2]; }
+	set x(value: number) { this[0] = value; }
+	set y(value: number) { this[1] = value; }
+	set z(value: number) { this[2] = value; }
 
 	// ## add()
 	add(dv: Vector3Like) {
@@ -44,3 +47,4 @@ export default class Vector3 extends Array<number> {
 	}
 
 }
+export default Vector3;

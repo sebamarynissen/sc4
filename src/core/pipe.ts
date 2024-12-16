@@ -1,4 +1,4 @@
-// # pipe-tile.js
+// # pipe-tile.ts
 import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import WriteBuffer from './write-buffer.js';
@@ -6,12 +6,12 @@ import SGProp from './sgprop.js';
 import Matrix from './matrix.js';
 import Matrix3 from './matrix-3.js';
 import Vertex from './vertex.js';
-import { kFileType, kFileTypeArray } from './symbols.js';
-import type { byte, dword, float, word } from 'sc4/types';
-import type Stream from './stream.js';
-import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
+import Vector3 from './vector-3.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
+import type { byte, dword, float, word, ConstructorOptions } from 'sc4/types';
+import type Stream from './stream.js';
 
 // # Pipe
 // Pipe tiles are suprisingly large data structures (usually about 700 bytes). 
@@ -31,9 +31,7 @@ export default class Pipe {
 	TID: dword = 0x00000000;
 	IID: dword = 0x00000000;
 	matrix3: Matrix3 = new Matrix3();
-	x: float = 0;
-	y: float = 0;
-	z: float = 0;
+	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
 		new Vertex(),
 		new Vertex(),
@@ -106,9 +104,7 @@ export default class Pipe {
 		this.IID = rs.dword();
 		unknown.byte();
 		this.matrix3 = rs.struct(Matrix3);
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.vertices = [
 			rs.vertex(),
 			rs.vertex(),
@@ -176,9 +172,7 @@ export default class Pipe {
 		ws.dword(this.IID);
 		unknown.byte();
 		ws.write(this.matrix3);
-		ws.float(this.x);
-		ws.float(this.y);
-		ws.float(this.z);
+		ws.vector3(this.position);
 		this.vertices.forEach(v => ws.vertex(v));
 
 		// Reading model starts below.

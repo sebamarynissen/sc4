@@ -10,6 +10,7 @@ import {
 	FileType,
 	SimGrid,
 	ExemplarProperty as Property,
+	Box3,
 	type Exemplar,
     type ExemplarPropertyKey as Key,
     type Entry,
@@ -20,7 +21,6 @@ import {
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import type { TGIArray, TGIQuery } from 'sc4/types';
-import Box3 from 'src/core/box3.js';
 
 const INSET = 0.1;
 

@@ -2,18 +2,22 @@
 import type { meters } from 'sc4/types';
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';
+import Vector3 from './vector-3.js';
+import type { Vector3Like } from './vector-3.js';
 
 // # Bbox
 // A class for representing a bounding box of an occupant object. A lot of the 
 // savegame data structures include minX, minY, minZ, maxX, maxY, maxZ, so it 
 // makes sense to put it in a separate data structure, especially because it 
 // makes parsing & serializing them easier to read.
-type Vector3 = [x: meters, y: meters, z: meters];
 export default class Box3 extends Array<Vector3> {
 	
 	// ## constructor(min, max)
-	constructor(min: Vector3 = [0, 0, 0], max: Vector3 = [0, 0, 0]) {
-		super(min, max);
+	constructor(
+		min: Vector3Like = [0, 0, 0],
+		max: Vector3Like = [0, 0, 0],
+	) {
+		super(new Vector3(...min), new Vector3(...max));
 	}
 
 	get minX(): meters { return this[0][0]; }
@@ -49,20 +53,16 @@ export default class Box3 extends Array<Vector3> {
 
 	// ## parse(rs)
 	parse(rs: Stream) {
-		this[0] = [rs.float(), rs.float(), rs.float()];
-		this[1] = [rs.float(), rs.float(), rs.float()];
+		this[0] = rs.vector3();
+		this[1] = rs.vector3();
 		return this;
 	}
 
 	// ## write(ws)
 	write(ws: WriteBuffer) {
 		let [min, max] = this;
-		ws.float(min[0]);
-		ws.float(min[1]);
-		ws.float(min[2]);
-		ws.float(max[0]);
-		ws.float(max[1]);
-		ws.float(max[2]);
+		ws.vector3(min);
+		ws.vector3(max);
 		return this;
 	}
 
