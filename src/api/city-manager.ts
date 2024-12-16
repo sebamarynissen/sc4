@@ -20,6 +20,7 @@ import {
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import type { TGIArray, TGIQuery } from 'sc4/types';
+import Box3 from 'src/core/box3.js';
 
 const INSET = 0.1;
 
@@ -28,7 +29,7 @@ type CityManagerOptions = {
 	index?: PluginIndex;
 };
 
-type Orientation = 0 | 1 | 2 | 3;
+type Orientation = number;
 type PlopOptions = {
 	tgi?: TGIQuery | TGIArray;
 	building?: Entry<Exemplar>;
@@ -527,12 +528,7 @@ export default class CityManager {
 
 			// Now use the **rotated** building rectangle and use it to 
 			// position the building appropriately.
-			minX,
-			maxX,
-			minZ,
-			maxZ,
-			minY: yPos + y,
-			maxY: yPos + y + height,
+			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the building exemplar.
@@ -593,13 +589,7 @@ export default class CityManager {
 		let yPos = terrain!.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
 		let prop = new Prop({
 			mem: this.mem(),
-
-			minX,
-			maxX,
-			minZ,
-			maxZ,
-			minY: yPos + y,
-			maxY: yPos + y + height,
+			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the prop.
@@ -638,23 +628,23 @@ export default class CityManager {
 		textures: LotObject[];
 	}) {
 
-		// Create a new texture instance and copy some lot properties in it.
+		// Apparently the game requires "insets" on the texture - which it 
+		// sets to 0.1, which get rounded to Float32's by the way.
 		let { lot, textures } = opts;
+		let minX = 16*lot.minX + INSET;
+		let maxX = 16*(lot.maxX+1) - INSET;
+		let minZ = 16*lot.minZ + INSET;
+		let maxZ = 16*(lot.maxZ+1) - INSET;
+
+		// TODO: This is only for flat cities, should use terrain queries 
+		// later on!
+		let minY = lot.yPos;
+		let maxY = lot.yPos + INSET;
+
+		// Create a new texture instance and copy some lot properties in it.
 		let texture = new BaseTexture({
 			mem: this.mem(),
-
-			// Apparently the game requires "insets" on the texture - which it 
-			// sets to 0.1, which get rounded to Float32's by the way.
-			minX: 16*lot.minX + INSET,
-			maxX: 16*(lot.maxX+1) - INSET,
-			minZ: 16*lot.minZ + INSET,
-			maxZ: 16*(lot.maxZ+1) - INSET,
-
-			// TODO: This is only for flat cities, should use terrain queries 
-			// later on!
-			minY: lot.yPos,
-			maxY: lot.yPos + INSET,
-
+			bbox: new Box3([minX, minY, minZ], [maxX, maxY, maxZ]),
 		});
 		setTract(texture);
 
@@ -766,13 +756,14 @@ export default class CityManager {
 // ## setTract(obj)
 // Helper function for setting the correct "Tract" values in the given object 
 // based on its bounding box.
-function setTract(obj: SavegameObject) {
+function setTract(obj: SavegameObject & { bbox: Box3 }) {
 	const xSize = 16 * 2**obj.xTractSize;
 	const zSize = 16 * 2**obj.zTractSize;
-	obj.xMinTract = Math.max(64, 64 + Math.floor(obj.minX / xSize));
-	obj.xMaxTract = 64 + Math.floor(obj.maxX / xSize);
-	obj.zMinTract = Math.max(64, 64 + Math.floor(obj.minZ / zSize));
-	obj.zMaxTract = 64 + Math.floor(obj.maxZ / zSize);
+	const { bbox } = obj;
+	obj.xMinTract = Math.max(64, 64 + Math.floor(bbox.minX / xSize));
+	obj.xMaxTract = 64 + Math.floor(bbox.maxX / xSize);
+	obj.zMinTract = Math.max(64, 64 + Math.floor(bbox.minZ / zSize));
+	obj.zMaxTract = 64 + Math.floor(bbox.maxZ / zSize);
 }
 
 // ## orient([x, y], lot, opts)

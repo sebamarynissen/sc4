@@ -18,7 +18,7 @@ type PlopAllLotsOptions = {
 	plugins?: folder;
 	logger?: Logger;
 	random?: number | boolean;
-	city: Savegame | string;
+	city: string;
 	clear?: boolean;
 	bbox?: [number, number, number, number];
 	save?: boolean;
@@ -108,7 +108,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 		if (opts.backup && city.file) {
 			await opts.backup(city.file, opts);
 		}
-		const { output = city.file } = opts;
+		const { output = city.file! } = opts;
 		await city.save({ file: output });
 	}
 	return city;

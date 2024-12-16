@@ -147,7 +147,7 @@ export default function skyline(opts: SkylineOptions) {
 
 			// Cool, we got space left to plop the lot. Just do it baby.
 			city.grow({
-				exemplar: lot,
+				lot,
 				x,
 				z,
 				orientation,

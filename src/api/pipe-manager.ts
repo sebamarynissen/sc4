@@ -1,4 +1,5 @@
 // # pipe-manager.js
+import Box3 from 'src/core/box3.js';
 import Context from './city-context.js';
 import {
 	Pipe,
@@ -199,10 +200,7 @@ export default class PipeManager {
 				mem: this.ctx.mem(),
 				x: x+8,
 				z: z+8,
-				xMin: x,
-				xMax: x+16,
-				zMin: z,
-				zMax: z+16,
+				bbox: new Box3([x, 0, z], [x+16, 0, z+16]),
 				xTile: i,
 				zTile: j,
 			});
@@ -224,8 +222,8 @@ export default class PipeManager {
 					cornerValues.push(h);
 				}
 			}
-			pipe.yMax = Math.max(...cornerValues);
-			pipe.yMin = Math.min(...map.contour(i, j));
+			pipe.bbox.maxY = Math.max(...cornerValues);
+			pipe.bbox.minY = Math.min(...map.contour(i, j));
 
 			// Set the bottom vertices & bottom texture.
 			for (let i = 0; i < 2; i++) {

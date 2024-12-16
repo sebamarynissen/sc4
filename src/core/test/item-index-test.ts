@@ -2,7 +2,6 @@
 import { expect } from 'chai';
 import fs from '#test/fs.js';
 import { DBPF, FileType, ItemIndex } from 'sc4/core';
-import { hex } from 'sc4/utils';
 import { resource } from '#test/files.js';
 import { compareUint8Arrays } from 'uint8array-extras';
 
@@ -53,6 +52,8 @@ describe('An item index subfile', function() {
 				xMaxTract: 0x42,
 				zMinTract: 0x44,
 				zMaxTract: 0x45,
+				xTractSize: 0x02,
+				zTractSize: 0x02,
 			},
 		];
 
