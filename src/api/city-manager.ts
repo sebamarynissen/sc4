@@ -528,7 +528,7 @@ export default class CityManager {
 			IID1: exemplar.instance,
 
 		});
-		setTract(building);
+		building.tract.update(building);
 
 		// Put the building in the index at the correct spot.
 		let { dbpf } = this;
@@ -593,7 +593,7 @@ export default class CityManager {
 			state: 0,
 
 		});
-		setTract(prop);
+		prop.tract.update(prop);
 
 		// Push in the file with all props.
 		let { dbpf } = this;
@@ -636,7 +636,7 @@ export default class CityManager {
 			mem: this.mem(),
 			bbox: new Box3([minX, minY, minZ], [maxX, maxY, maxZ]),
 		});
-		setTract(texture);
+		texture.tract.update(texture);
 
 		// Add all required textures.
 		for (let def of textures) {
@@ -741,19 +741,6 @@ export default class CityManager {
 
 	}
 
-}
-
-// ## setTract(obj)
-// Helper function for setting the correct "Tract" values in the given object 
-// based on its bounding box.
-function setTract(obj: SavegameObject & { bbox: Box3 }) {
-	const xSize = 16 * 2**obj.xTractSize;
-	const zSize = 16 * 2**obj.zTractSize;
-	const { bbox } = obj;
-	obj.xMinTract = Math.max(64, 64 + Math.floor(bbox.minX / xSize));
-	obj.xMaxTract = 64 + Math.floor(bbox.maxX / xSize);
-	obj.zMinTract = Math.max(64, 64 + Math.floor(bbox.minZ / zSize));
-	obj.zMaxTract = 64 + Math.floor(bbox.maxZ / zSize);
 }
 
 // ## orient([x, y], lot, opts)

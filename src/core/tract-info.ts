@@ -60,9 +60,13 @@ export default class TractInfo {
 	// ## update()
 	// Updates the tract info based on the given bbox, or in case an object has 
 	// no bbox - such as flora - from a positional vector.
+	update(record: { bbox: Box3 }): this;
 	update(bbox: Box3): this;
 	update(position: Vector3): this;
-	update(from: Box3 | Vector3): this {
+	update(from: { bbox: Box3 } | Box3 | Vector3): this {
+		if ('bbox' in from) {
+			return this.update(from.bbox);
+		}
 		const xSize = 16 * 2**this.xTractSize;
 		const zSize = 16 * 2**this.zTractSize;
 		if (isBbox(from)) {

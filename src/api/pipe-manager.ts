@@ -204,8 +204,6 @@ export default class PipeManager {
 				xTile: i,
 				zTile: j,
 			});
-			pipe.xMinTract = pipe.xMaxTract = 0x40 + Math.floor(i/4);
-			pipe.zMinTract = pipe.zMaxTract = 0x40 + Math.floor(j/4);
 			pipe.yModel = pipe.y = map.query(pipe.x, pipe.z)-1.4;
 
 			// Set the heights at the corner of the terrain. Obviously we we 
@@ -224,6 +222,7 @@ export default class PipeManager {
 			}
 			pipe.bbox.maxY = Math.max(...cornerValues);
 			pipe.bbox.minY = Math.min(...map.contour(i, j));
+			pipe.tract.update(pipe);
 
 			// Set the bottom vertices & bottom texture.
 			for (let i = 0; i < 2; i++) {
