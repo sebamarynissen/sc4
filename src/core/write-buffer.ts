@@ -20,6 +20,7 @@ import type {
     qword,
 } from 'sc4/types';
 import type Box3 from './box3.js';
+import type TractInfo from './tract-info.js';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -128,6 +129,12 @@ export default class WriteBuffer extends SmartBuffer {
 	// Writes a vertex data structure to the buffer.
 	vertex(vertex: Vertex) {
 		vertex.write(this);
+	}
+
+	// ## tract(tractInfo)
+	// Writes a tract info data structure to the buffer.
+	tract(tract: TractInfo) {
+		tract.write(this);
 	}
 
 	// ## bbox(bbox)

@@ -9,6 +9,7 @@ import type Stream from './stream.js';
 import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box3.js';
+import TractInfo from './tract-info.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -21,12 +22,7 @@ export default class Network {
 	minor: word = 0x0004;
 	zot: word = 0x0000;
 	appearance: byte = 0x05;
-	xMinTract: byte = 0x00;
-	zMinTract: byte = 0x00;
-	xMaxTract: byte = 0x00;
-	zMaxTract: byte = 0x00;
-	xTractSize: word = 0x0002;
-	zTractSize: word = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID: dword = 0x00000000;
 	TID: dword = 0x00000000;
@@ -79,12 +75,7 @@ export default class Network {
 		unknown.byte();
 		this.appearance = rs.byte();
 		unknown.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
@@ -132,12 +123,7 @@ export default class Network {
 		unknown.byte();
 		ws.byte(this.appearance);
 		unknown.dword();
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);

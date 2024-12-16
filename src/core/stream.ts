@@ -4,6 +4,7 @@ import Pointer from './pointer.js';
 import SGProp from './sgprop.js';
 import Color from './color.js';
 import Vertex from './vertex.js';
+import TractInfo from './tract-info.js';
 import type {
     byte,
     double,
@@ -137,6 +138,14 @@ export default class Stream extends SmartBuffer {
 		let vertex = new Vertex();
 		vertex.parse(this);
 		return vertex;
+	}
+
+	// ## tract()
+	// Reads in a TractInfo object from the stream.
+	tract() {
+		let tract = new TractInfo();
+		tract.parse(this);
+		return tract;
 	}
 
 	// ## bbox()

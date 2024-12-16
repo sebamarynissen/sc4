@@ -6,12 +6,12 @@ import { getUnixFromJulian, getJulianFromUnix } from 'sc4/utils';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
+import TractInfo from './tract-info.js';
 
 // # Flora
 // Represents a single flora item. Note that you want to register 
 // **Flora.Array** as file for the DBPF files, not the flora class itself!
 export default class Flora {
-
 	static [kFileType] = FileType.Flora;
 	static [kFileTypeArray] = true;
 	crc = 0x00000000;
@@ -22,12 +22,7 @@ export default class Flora {
 	u1 = 0x00;
 	appearance = 0b00001101;
 	u2 = 0x74758926;
-	xMinTract = 0x00;
-	zMinTract = 0x00;
-	xMaxTract = 0x00;
-	zMaxTract = 0x00;
-	xTractSize = 0x0002;
-	zTractSize = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID = 0x00000000;
 	TID = 0x00000000;
@@ -48,7 +43,6 @@ export default class Flora {
 
 	// ## parse(rs)
 	parse(rs: Stream) {
-
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -58,21 +52,8 @@ export default class Flora {
 		this.u1 = rs.byte();
 		this.appearance = rs.byte();
 		this.u2 = rs.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
-
-		// Read properties.
-		const count = this.sgprops.length = rs.dword();
-		for (let i = 0; i < count; i++) {
-			let prop = this.sgprops[i] = new SGProp();
-			prop.parse(rs);
-		}
-
-		// Read group ids.
+		this.tract = rs.tract();
+		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
 		this.IID = rs.dword();
@@ -85,10 +66,7 @@ export default class Flora {
 		this.state = rs.byte();
 		this.orientation = rs.byte();
 		this.objectId = rs.dword();
-
-		// Done
 		return this;
-
 	}
 
 	// ## toBuffer()
@@ -101,12 +79,7 @@ export default class Flora {
 		ws.byte(this.u1);
 		ws.byte(this.appearance);
 		ws.dword(this.u2);
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);

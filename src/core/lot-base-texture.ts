@@ -5,6 +5,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
 import Box3 from './box3.js';
+import TractInfo from './tract-info.js';
 
 // # LotBaseTexture
 export default class LotBaseTexture {
@@ -19,12 +20,7 @@ export default class LotBaseTexture {
 	u3 = 0x00;
 	u4 = 0x05;
 	u5 = 0x497f6d9d;
-	xMinTract = 0x40;
-	zMinTract = 0x40;
-	xMaxTract = 0x40;
-	zMaxTract = 0x40;
-	xTractSize = 0x0002;
-	zTractSize = 0x0002;
+	tract = new TractInfo();
 	u6 = 0x00000000;
 	u7 = 0x00000000;
 	u8 = 0x00000000;
@@ -44,12 +40,7 @@ export default class LotBaseTexture {
 		dx = dx ?? 0;
 		dz = dz ?? 0;
 		this.bbox.move(dx, 0, dz);
-
-		// Recalculate the tracts. A tract is a 4x4 tile, so 4x16m in length.
-		this.xMinTract = 0x40 + Math.floor(this.bbox.minX / 64);
-		this.xMaxTract = 0x40 + Math.floor(this.bbox.maxX / 64);
-		this.zMinTract = 0x40 + Math.floor(this.bbox.minZ / 64);
-		this.zMaxTract = 0x40 + Math.floor(this.bbox.maxZ / 64);
+		this.tract.update(this.bbox);
 
 		// Move the actual textures.
 		for (let texture of this.textures) {
@@ -71,12 +62,7 @@ export default class LotBaseTexture {
 		this.u3 = rs.byte();
 		this.u4 = rs.byte();
 		this.u5 = rs.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
+		this.tract = rs.tract();
 		this.u6 = rs.dword();
 		this.u7 = rs.dword();
 		this.u8 = rs.dword();
@@ -108,12 +94,7 @@ export default class LotBaseTexture {
 		ws.byte(this.u3);
 		ws.byte(this.u4);
 		ws.dword(this.u5);
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.dword(this.u6);
 		ws.dword(this.u7);
 		ws.dword(this.u8);

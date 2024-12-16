@@ -64,20 +64,6 @@ type ZoneOptions = {
 	zoneType?: number;
 };
 
-type CreateLotOptions = {
-	exemplar: Entry<Exemplar>;
-	building: Entry<Exemplar>;
-	x: number;
-	z: number;
-	orientation: Orientation;
-};
-
-type CreateBuildingOptions = {
-	lot: Lot,
-	lotObject: LotObject;
-	exemplar: Entry<Exemplar>;
-};
-
 // # CityManager
 // A class for performing operations on a certain city, such as plopping 
 // arbitrary lots etc. Have a look at https://sc4devotion.com/forums/
@@ -513,7 +499,11 @@ export default class CityManager {
 
 	// ## createBuilding(opts)
 	// Creates a new building record and inserts it into the savegame.
-	createBuilding(opts: CreateBuildingOptions) {
+	createBuilding(opts: {
+		lot: Lot,
+		lotObject: LotObject;
+		exemplar: Entry<Exemplar>;
+	}) {
 		let { lot, lotObject, exemplar } = opts;
 		let file = exemplar.read();
 		let [, height] = this.getPropertyValue(file, Property.OccupantSize)!;

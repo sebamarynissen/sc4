@@ -6,6 +6,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type Stream from './stream.js';
 import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box3.js';
+import TractInfo from './tract-info.js';
 
 // # Building()
 // Represents a single building from the building file.
@@ -19,12 +20,7 @@ export default class Building {
 	zotWord = 0x0;
 	unknown1 = 0x00;
 	appearance = 0b00000101;
-	xMinTract = 0x00;
-	zMinTract = 0x00;
-	xMaxTract = 0x00;
-	zMaxTract = 0x00;
-	xTractSize = 0x0002;
-	zTractSize = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	unknown2 = 0x00;
 	GID = 0x00000000;
@@ -49,14 +45,8 @@ export default class Building {
 			[dx, dy, dz] = dx;
 		}
 		this.bbox.move(dx, dy, dz);
-
-		// Recalculate the tracts. A tract is a 4x4 tile, so 4x16m in length.
-		this.xMinTract = 0x40 + Math.floor(this.bbox.minX / 64);
-		this.xMaxTract = 0x40 + Math.floor(this.bbox.maxX / 64);
-		this.zMinTract = 0x40 + Math.floor(this.bbox.minZ / 64);
-		this.zMaxTract = 0x40 + Math.floor(this.bbox.maxZ / 64);
+		this.tract.update(this.bbox);
 		return this;
-
 	}
 
 	// ## parse(rs)
@@ -73,15 +63,7 @@ export default class Building {
 
 		// 0x278128A0, always the same.
 		rs.dword();
-
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
-
-		// Read the SGProps.
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 
 		// There seems to be an error in the Wiki. The unknown byte should 
@@ -91,7 +73,7 @@ export default class Building {
 		this.IID = rs.dword();
 		this.IID1 = rs.dword();
 		this.unknown2 = rs.byte();
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox();
 		this.orientation = rs.byte();
 		this.scaffold = rs.float();
 
@@ -104,7 +86,6 @@ export default class Building {
 	// # toBuffer()
 	// Creates a buffer for the building.
 	toBuffer() {
-
 		let ws = new WriteBuffer();
 		ws.dword(this.mem);
 		ws.word(this.major);
@@ -113,12 +94,7 @@ export default class Building {
 		ws.byte(this.unknown1);
 		ws.byte(this.appearance);
 		ws.dword(0x278128A0);
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);

@@ -6,6 +6,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
 import Box3 from './box3.js';
+import TractInfo from './tract-info.js';
 
 type Timing = {
 	interval: number;
@@ -27,12 +28,7 @@ export default class Prop {
 	unknown1 = 0x00;
 	appearance = 0b00000101;
 	unknown2 = 0xA823821E;
-	xMinTract = 0x00;
-	zMinTract = 0x00;
-	xMaxTract = 0x00;
-	zMaxTract = 0x00;
-	xTractSize = 0x0002;
-	zTractSize = 0x0002;
+	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	GID = 0x00000000;
 	TID = 0x00000000;
@@ -66,18 +62,13 @@ export default class Prop {
 		this.unknown1 = rs.byte();
 		this.appearance = rs.byte();
 		this.unknown2 = rs.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zTractSize = rs.word();
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		this.IID1 = rs.dword();
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox();
 		this.orientation = rs.byte();
 		this.state = rs.byte();
 		this.start = rs.byte();
@@ -115,12 +106,7 @@ export default class Prop {
 		ws.byte(this.unknown1);
 		ws.byte(this.appearance);
 		ws.dword(this.unknown2);
-		ws.byte(this.xMinTract);
-		ws.byte(this.zMinTract);
-		ws.byte(this.xMaxTract);
-		ws.byte(this.zMaxTract);
-		ws.word(this.xTractSize);
-		ws.word(this.zTractSize);
+		ws.tract(this.tract);
 		ws.array(this.sgprops);
 		ws.dword(this.GID);
 		ws.dword(this.TID);

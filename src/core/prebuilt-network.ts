@@ -7,6 +7,7 @@ import type Stream from './stream.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type SGProp from './sgprop.js';
 import Box3 from './box3.js';
+import TractInfo from './tract-info.js';
 
 // # PrebuiltNetwork
 // A class that is used for networks that use prebuilt models, such as 
@@ -20,10 +21,7 @@ export default class PrebuiltNetwork {
 	minor: word = 0x0008;
 	zot: byte = 0x04;
 	appearance: byte = 0x05;
-	xMinTract: byte = 0x00;
-	zMinTract: byte = 0x00;
-	xMaxTract: byte = 0x00;
-	zMaxTract: byte = 0x00;
+	tract = new TractInfo();
 	xTractSize: word = 0;
 	sgprops: SGProp[] = [];
 	GID: dword = 0x00000000;
@@ -74,12 +72,7 @@ export default class PrebuiltNetwork {
 		unknown.dword();
 		this.appearance = rs.byte();
 		unknown.dword();
-		this.xMinTract = rs.byte();
-		this.zMinTract = rs.byte();
-		this.xMaxTract = rs.byte();
-		this.zMaxTract = rs.byte();
-		this.xTractSize = rs.word();
-		this.zMaxTract = rs.word();
+		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
 		this.GID = rs.dword();
 		this.TID = rs.dword();

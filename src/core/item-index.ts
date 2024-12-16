@@ -13,12 +13,22 @@ type TractSize = 16 | 32 | 64;
 type TileSize = 64 | 128 | 256;
 
 // # ItemIndex
+// The item index is a crucial data structure in determining what the game will 
+// render on screen. If an item is not present in the item index, it won't be 
+// rendered, even if it is present in its respective subfile.
 export default class ItemIndex {
 	static [kFileType] = FileType.ItemIndex;
-
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0001;
+
+	// Below is stored the size of the item index, in various dimensions.
+	// (width, depth) is the size in *meters* - 1024, 2048 and 4096 meters for 
+	// respectively small, medium and large tiles. (tractWidth, tractDepth) 
+	// contains the dimensions in amount of tracts - i.e. 4x4 squares. 16, 32 
+	// and 64 tracts for small, medium and large tiles. (tileWidth, tileDepth)
+	// contains the dimensions in tiles: 64, 128 and 256 for small, medium and 
+	// large cities.
 	width: CitySize = 1024;
 	depth: CitySize = 1024;
 	tractWidth: TractSize = 16;
@@ -90,9 +100,9 @@ export default class ItemIndex {
 		// Now loop all records from the file and insert into the correct 
 		// cells.
 		for (let record of file) {
-			let { mem } = record;
-			for (let x = record.xMinTract; x <= record.xMaxTract; x++) {
-				for (let z = record.zMinTract; z <= record.zMaxTract; z++) {
+			let { mem, tract } = record;
+			for (let x = tract.minX; x <= tract.maxX; x++) {
+				for (let z = tract.minZ; z <= tract.maxZ; z++) {
 					this.elements[x][z].push(new Pointer(type, mem));
 				}
 			}
@@ -122,8 +132,9 @@ export default class ItemIndex {
 	// item needs to expose min and max tract coordinates, but they do so 
 	// quite often!
 	add(item: SavegameObject, type = getClassType(item)) {
-		for (let x = item.xMinTract; x <= item.xMaxTract; x++) {
-			for (let z = item.zMinTract; z <= item.zMaxTract; z++) {
+		let { tract } = item;
+		for (let x = tract.minX; x <= tract.maxX; x++) {
+			for (let z = tract.minZ; z <= tract.maxZ; z++) {
 				this.elements[x][z].push(new Pointer(type, item.mem));
 			}
 		}

@@ -5,6 +5,7 @@ import FileClasses from './file-classes.js';
 import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
 import type { kFileTypeArray } from './symbols.js';
+import type TractInfo from './tract-info.js';
 
 // Contains the type definition that a class implementing a DBPF file should 
 // minimally adhere to. The only requirement here is that it can be parsed from 
@@ -23,14 +24,7 @@ export type SavegameRecord = DBPFFile & { mem: uint32 };
 // their bounding box - given as xMinTract etc. We'll call these SavegameObjects. 
 // Typical examples are Buildings, Props, Flora, etc. Basically anything that 
 // can be added to the item index.
-export type SavegameObject = SavegameRecord & {
-	xMinTract: number;
-	zMinTract: number;
-	xMaxTract: number;
-	zMaxTract: number;
-	xTractSize: number;
-	zTractSize: number;
-};
+export type SavegameObject = SavegameRecord & { tract: TractInfo };
 
 // All savegame file type ids.
 export type SavegameFileTypeId = ValueOf<typeof SavegameFileType>;
