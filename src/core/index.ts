@@ -19,7 +19,7 @@ export { default as Pointer } from './pointer.js';
 export type { DBPFOptions, DBPFSaveOptions, DBPFJSON } from './dbpf.js';
 export type {
 	default as Entry,
-		EntryFromType,
+	EntryFromType,
 	EntryJSON,
 } from './dbpf-entry.js';
 export type {
@@ -30,7 +30,9 @@ export type {
 	FileTypeName,
 	DecodedFileTypeId,
 	DecodedFileTypeName,
+	ArrayFileTypeId,
 	SimGridFileType,
+	SavegameFileTypeId,
 } from './types.js';
 
 export type {

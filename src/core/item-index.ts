@@ -4,16 +4,13 @@ import Pointer from './pointer.js';
 import { FileType } from './enums.js';
 import { getClassType } from './helpers.js';
 import { kFileType } from './symbols.js';
-import { type SavegameFileType } from './file-types.js';
-import type { ValueOf } from 'type-fest';
-import type { SavegameObject } from './types.js';
+import type { SavegameObject, SavegameTypeId } from './types.js';
 import type Stream from './stream.js';
 
 const SIZE = 192;
 type CitySize = 1024 | 2048 | 4096;
 type TractSize = 16 | 32 | 64;
 type TileSize = 64 | 128 | 256;
-type SavegameType = ValueOf<typeof SavegameFileType>;
 
 // # ItemIndex
 export default class ItemIndex {
@@ -74,7 +71,7 @@ export default class ItemIndex {
 	// ## rebuild(type, file)
 	// Rebuilds the index so that it puts all entries of the given file in 
 	// their correct tracts.
-	rebuild(type: SavegameType, file: SavegameObject[]) {
+	rebuild(type: SavegameTypeId, file: SavegameObject[]) {
 
 		// From now on we need a specific file type because certain arrays might 
 		// be empty, in which case we don't know what type of values the array 

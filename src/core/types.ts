@@ -1,6 +1,6 @@
 // # types.ts
 import type { uint32 } from 'sc4/types';
-import type { FileType, SimGridFileType } from './file-types.js';
+import type { FileType, SavegameFileType, SimGridFileType } from './file-types.js';
 import FileClasses from './file-classes.js';
 import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
@@ -28,7 +28,18 @@ export type SavegameObject = SavegameRecord & {
 	zMinTract: number;
 	xMaxTract: number;
 	zMaxTract: number;
+	xTractSize: number;
+	zTractSize: number;
+	minX: number;
+	minY: number;
+	minZ: number;
+	maxX: number;
+	maxY: number;
+	maxZ: number;
 };
+
+// All savegame file type ids.
+export type SavegameFileTypeId = ValueOf<typeof SavegameFileType>;
 
 // The FileTypeId is a literal type that contains all *known* type ids, as 
 // definied in the file-types.ts file. Note that it does not necessarily mean 
