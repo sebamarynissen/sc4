@@ -4,7 +4,7 @@ import { FileType } from './enums.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type { ConstructorOptions } from 'sc4/types';
 import type Stream from './stream.js';
-import Box3 from './box3.js';
+import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
 
 // # LotBaseTexture

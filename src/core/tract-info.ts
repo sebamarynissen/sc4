@@ -1,6 +1,6 @@
 // # tract-info.ts
 import type { tracts } from 'sc4/types';
-import type Box3 from './box3.js';
+import type Box3 from './box-3.js';
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';
 

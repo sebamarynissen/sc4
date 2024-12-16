@@ -23,7 +23,7 @@ import type {
 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
-import Box3 from './box3.js';
+import Box3 from './box-3.js';
 import Vector3 from './vector-3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;

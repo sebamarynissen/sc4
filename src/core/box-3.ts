@@ -1,4 +1,4 @@
-// # bbox.ts
+// # box-3.ts
 import type { meters } from 'sc4/types';
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';

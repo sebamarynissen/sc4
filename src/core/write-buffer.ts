@@ -19,7 +19,7 @@ import type {
 	word,
     qword,
 } from 'sc4/types';
-import type Box3 from './box3.js';
+import type Box3 from './box-3.js';
 import type TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
 
