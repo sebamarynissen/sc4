@@ -23,6 +23,7 @@ import ZoneManager from './zone-manager.js';
 import TractDeveloper from './tract-developer.js';
 import PlumbingSimulator from './plumbing-simulator.js';
 import NetworkTunnelOccupant from './network-tunnel-occupant.js';
+import NetworkManager from './network-manager.js';
 import {
 	SimGridFloat32,
 	SimGridUint32,
@@ -46,6 +47,7 @@ export {
 	Network,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkManager,
 	PrebuiltNetwork,
 	LineItem,
 	DepartmentBudget,
@@ -81,6 +83,7 @@ export default {
 	PrebuiltNetwork,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkManager,
 	LineItem,
 	DepartmentBudget,
 	Pipe,

@@ -48,6 +48,7 @@ export const SavegameFileType = {
 	NetworkBridge: 0x49cc1bcd,
 	NetworkIndex: 0x6a0f82b2,
 	NetworkTunnelOccupant: 0x8a4bd52b,
+	NetworkManager: 0xc990bd46,
 	TractDeveloper: 0x2990c142,
 	LineItem: 0xaa313c9f,
 	DepartmentBudget: 0xe990bffc,

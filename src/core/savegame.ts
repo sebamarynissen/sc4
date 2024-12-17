@@ -59,6 +59,7 @@ export default class Savegame extends DBPF {
 	get tunnels() { return this.readByType(FileType.NetworkTunnelOccupant); }
 	get prebuiltNetwork() { return this.readByType(FileType.PrebuiltNetwork); }
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
+	get networkManager() { return this.readByType(FileType.NetworkManager); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }
