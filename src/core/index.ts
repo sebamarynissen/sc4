@@ -35,7 +35,6 @@ export type {
 	DecodedFileTypeId,
 	DecodedFileTypeName,
 	ArrayFileTypeId,
-	SimGridFileType,
 	SavegameFileTypeId,
 } from './types.js';
 

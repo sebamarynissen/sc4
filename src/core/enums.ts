@@ -63,7 +63,7 @@ export const DemandSourceIndex = {
 };
 
 export { default as OccupantGroups } from './occupant-groups.js';
-export { default as FileType } from './file-types.js';
+export { FileType, SimGridFileType } from './file-types.js';
 export { default as cClass } from './cpp-classes.js';
 
 export const SimGrid = {
