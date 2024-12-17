@@ -35,6 +35,14 @@ export default class TractInfo {
 		[this.maxX, this.maxZ] = max;
 	}
 
+	// ## get min()
+	get min() {
+		return { x: this.minX, z: this.minZ };
+	}
+	get max() {
+		return { x: this.maxX, z: this.maxZ };
+	}
+
 	// ## parse(rs)
 	parse(rs: Stream) {
 		this.minX = rs.byte();
