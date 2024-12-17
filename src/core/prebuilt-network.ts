@@ -11,6 +11,7 @@ import TractInfo from './tract-info.js';
 import Vector3 from './vector-3.js';
 import type Matrix3 from './matrix-3.js';
 import NetworkCrossing from './network-crossing.js';
+import WriteBuffer from './write-buffer.js';
 
 // # PrebuiltNetwork
 // A class that is used for networks that use prebuilt models, such as 
@@ -61,6 +62,7 @@ export default class PrebuiltNetwork {
 		.float(0)
 		.bytes([0, 0, 0, 0, 0]);
 
+	// ## parse(rs)
 	parse(rs: Stream): this {
 		this.u = new Unknown();
 		const unknown = this.u.reader(rs);
@@ -118,6 +120,60 @@ export default class PrebuiltNetwork {
 		}
 		rs.assert();
 		return this;
+	}
+
+	// ## toBuffer()
+	toBuffer() {
+		let ws = new WriteBuffer();
+		const unknown = this.u.writer(ws);
+		ws.dword(this.mem);
+		ws.version(this.version);
+		ws.dword(this.appearance);
+		unknown.dword();
+		ws.tract(this.tract);
+		ws.array(this.sgprops);
+		ws.tgi(this.tgi);
+		if (this.matrix3) {
+			ws.byte(0x05);
+			ws.write(this.matrix3);
+		} else {
+			ws.byte(0x01);
+		}
+		ws.vector3(this.position);
+		this.vertices.forEach(v => ws.vertex(v));
+		ws.dword(this.modelId);
+		ws.byte(this.wealthTexture);
+		ws.dword(this.baseTexture);
+		ws.byte(this.orientation);
+		unknown.bytes();
+		ws.byte(this.crossings.length-1);
+		for (let crossing of this.crossings) {
+			crossing.write(ws);
+		}
+		ws.array(this.walls, ({ texture, vertex }) => {
+			ws.dword(texture);
+			ws.vertex(vertex);
+		});
+		ws.bbox(this.bbox, { range: true });
+		ws.dword(this.constructionStates);
+		ws.dword(this.pathId);
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		ws.qword(this.demolishingCosts);
+		unknown.float();
+		unknown.float();
+		unknown.float();
+		unknown.bytes();
+		if (this.pillar) {
+			ws.dword(this.pillar.id);
+			ws.float(this.pillar.rotation);
+			ws.vector3(this.pillar.position);
+		} else {
+			ws.dword(0x00000000);
+		}
+		unknown.assert();
+		return ws.seal();
 	}
 
 }
