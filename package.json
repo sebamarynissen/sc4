@@ -57,7 +57,8 @@
     "lib"
   ],
   "mocha": {
-    "import": "tsx"
+    "import": "tsx",
+    "extension": ".ts"
   },
   "devDependencies": {
     "@actions/core": "^1.11.1",

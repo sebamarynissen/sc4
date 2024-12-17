@@ -22,6 +22,7 @@ import COMSerializer from './com-serializer.js';
 import ZoneManager from './zone-manager.js';
 import TractDeveloper from './tract-developer.js';
 import PlumbingSimulator from './plumbing-simulator.js';
+import NetworkTunnelOccupant from './network-tunnel-occupant.js';
 import {
 	SimGridFloat32,
 	SimGridUint32,
@@ -43,11 +44,12 @@ export {
 	TerrainMap,
 	BaseTexture,
 	Network,
+	NetworkIndex,
+	NetworkTunnelOccupant,
 	PrebuiltNetwork,
 	LineItem,
 	DepartmentBudget,
 	Pipe,
-	NetworkIndex,
 	ItemIndex,
 	RegionView,
 	ZoneDeveloper,
@@ -77,10 +79,11 @@ export default {
 	BaseTexture,
 	Network,
 	PrebuiltNetwork,
+	NetworkIndex,
+	NetworkTunnelOccupant,
 	LineItem,
 	DepartmentBudget,
 	Pipe,
-	NetworkIndex,
 	ItemIndex,
 	RegionView,
 	ZoneDeveloper,
