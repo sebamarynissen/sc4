@@ -80,7 +80,7 @@ export default class TractInfo {
 		if (isBbox(from)) {
 			this.minX = 0x40 + Math.floor(from.minX / xSize);
 			this.minZ = 0x40 + Math.floor(from.minZ / zSize);
-			this.maxX = 0x40 + Math.floor(from.minX / xSize);
+			this.maxX = 0x40 + Math.floor(from.maxX / xSize);
 			this.maxZ = 0x40 + Math.floor(from.maxZ / zSize);
 		} else {
 			this.minX = this.maxX = 0x40 + Math.floor(from[0] / xSize);
