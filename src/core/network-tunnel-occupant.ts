@@ -12,6 +12,7 @@ import Vertex from './vertex.js';
 import Box3 from './box-3.js';
 import type Pointer from './pointer.js';
 import WriteBuffer from './write-buffer.js';
+import NetworkCrossing from './network-crossing.js';
 
 // # NetworkTunnelOccupant
 // Represents an entrance of a tunnel. It is is similar to the prebuilt network 
@@ -38,12 +39,7 @@ export default class NetworkTunnelOccupant {
 	wealthTexture: byte = 0x00;
 	baseTexture: dword = 0x00000000;
 	orientation: byte = 0x00;
-	crossings: byte = 0x00;
-	networkType: byte = 0x02;
-	westConnection: byte = 0x00;
-	northConnection: byte = 0x00;
-	eastConnection: byte = 0x00;
-	southConnection: byte = 0x00;
+	crossings: NetworkCrossing[] = [];
 	walls: ({ texture: dword, vertex: Vertex })[] = [];
 	bbox = new Box3();
 	constructionStates: dword = 0x00000000;
@@ -52,7 +48,7 @@ export default class NetworkTunnelOccupant {
 	sibling: Pointer;
 	u = new Unknown()
 		.dword(0xc772bf98)
-		.bytes([0, 0])
+		.bytes([2, 0])
 		.dword(0x00000000)
 		.dword(0x00000000)
 		.dword(0x00000000)
@@ -90,12 +86,10 @@ export default class NetworkTunnelOccupant {
 		this.baseTexture = rs.dword();
 		this.orientation = rs.byte();
 		unknown.bytes(2);
-		this.crossings = rs.byte();
-		this.networkType = rs.byte();
-		this.westConnection = rs.byte();
-		this.northConnection = rs.byte();
-		this.eastConnection = rs.byte();
-		this.southConnection = rs.byte();
+		this.crossings = new Array(rs.byte()+1);
+		for (let i = 0; i < this.crossings.length; i++) {
+			this.crossings[i] = new NetworkCrossing().parse(rs);
+		}
 		this.walls = rs.array(() => {
 			let texture = rs.dword();
 			let vertex = rs.vertex();
@@ -139,12 +133,10 @@ export default class NetworkTunnelOccupant {
 		ws.dword(this.baseTexture);
 		ws.byte(this.orientation);
 		unknown.bytes();
-		ws.byte(this.crossings);
-		ws.byte(this.networkType);
-		ws.byte(this.westConnection);
-		ws.byte(this.northConnection);
-		ws.byte(this.eastConnection);
-		ws.byte(this.southConnection);
+		ws.byte(this.crossings.length-1);
+		for (let crossing of this.crossings) {
+			crossing.write(ws);
+		}
 		ws.array(this.walls, ({ texture, vertex }) => {
 			ws.dword(texture);
 			ws.vertex(vertex);

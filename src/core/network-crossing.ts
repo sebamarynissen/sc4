@@ -23,5 +23,6 @@ export default class NetworkCrossing {
 		ws.byte(this.northConnection);
 		ws.byte(this.eastConnection);
 		ws.byte(this.southConnection);
+		return this;
 	}
 }

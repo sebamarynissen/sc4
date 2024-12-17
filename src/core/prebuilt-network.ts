@@ -40,11 +40,6 @@ export default class PrebuiltNetwork {
 	baseTexture: dword = 0x00000000;
 	orientation: byte = 0x00;
 	crossings: NetworkCrossing[] = [];
-	networkType: byte = 0x02;
-	westConnection: byte = 0x00;
-	northConnection: byte = 0x00;
-	eastConnection: byte = 0x00;
-	southConnection: byte = 0x00;
 	walls: ({ texture: dword, vertex: Vertex })[] = [];
 	bbox = new Box3();
 	constructionStates: dword = 0x00000000;
