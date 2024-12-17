@@ -15,6 +15,7 @@ import type {
 	sint32,
 	sint64,
 	sint8,
+    TGIArray,
     uint16,
     uint32,
     uint64,
@@ -25,6 +26,7 @@ import type { Class } from 'type-fest';
 import type { FileTypeId } from './types.js';
 import { Box3, type ParseOptions} from './box-3.js';
 import Vector3 from './vector-3.js';
+import Matrix3 from './matrix-3.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -92,7 +94,7 @@ export default class Stream extends SmartBuffer {
 	uint8(offset?: number): uint8 { return this.readUInt8(offset); }
 	uint16(offset?: number): uint16 { return this.readUInt16LE(offset); }
 	uint32(offset?: number): uint32 { return this.readUInt32LE(offset); }
-	biguint64(offset?: number): uint64 { return this.readBigUInt64BE(offset); }
+	biguint64(offset?: number): uint64 { return this.readBigUInt64LE(offset); }
 
 	// Some aliases.
 	byte(offset?: number): byte { return this.uint8(offset); }
@@ -112,6 +114,28 @@ export default class Stream extends SmartBuffer {
 	// we're reading in a size, so we use an alias.
 	size(offset?: number) { return this.dword(offset); }
 
+	// ## version(n)
+	// Helper function for reading in a version identifier of a record. The 
+	// default is major.minor, but more are possibl as well.
+	version(n = 2) {
+		let parts = [];
+		for (let i = 0; i < n; i++) {
+			parts.push(this.word());
+		}
+		return parts.join('.');
+	}
+
+	// ## tgi()
+	// Reads in a TGI reference to a model - actually given as GTI. This is used 
+	// n items that need a model to properly render. We'll sort it as tgi 
+	// though,a s that's easier to use with the plugin index.
+	tgi(): TGIArray {
+		let group = this.dword();
+		let type = this.dword();
+		let instance = this.dword();
+		return [type, group, instance];
+	}
+
 	// Helper function for reading a pointer. Those are given as [pointer, 
 	// Type ID]. Note that if no address was given, we return "null" (i.e. a 
 	// null pointer).
@@ -128,6 +152,14 @@ export default class Stream extends SmartBuffer {
 		let v = new Vector3();
 		v.parse(this);
 		return v;
+	}
+
+	// ## matrix3()
+	// Helper function for reading in a 3x3 matrix from the stream.
+	matrix3() {
+		let matrix = new Matrix3();
+		matrix.parse(this);
+		return matrix;
 	}
 
 	// # color()

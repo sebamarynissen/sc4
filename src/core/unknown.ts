@@ -103,7 +103,7 @@ class UnknownReader {
 	bool() { this.unknown.bool(this.rs.bool()); }
 	byte() { this.unknown.byte(this.rs.byte()); }
 	word() { this.unknown.word(this.rs.word()); }
-	dword() { this.unknown.dword(this.rs.dword()); }
+	dword(_expected?: number) { this.unknown.dword(this.rs.dword()); }
 	qword() { this.unknown.qword(this.rs.qword()); }
 	float() { this.unknown.float(this.rs.float()); }
 	double() { this.unknown.double(this.rs.double()); }
