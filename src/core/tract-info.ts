@@ -35,6 +35,14 @@ export default class TractInfo {
 		[this.maxX, this.maxZ] = max;
 	}
 
+	// ## get min()
+	get min() {
+		return { x: this.minX, z: this.minZ };
+	}
+	get max() {
+		return { x: this.maxX, z: this.maxZ };
+	}
+
 	// ## parse(rs)
 	parse(rs: Stream) {
 		this.minX = rs.byte();
@@ -72,13 +80,19 @@ export default class TractInfo {
 		if (isBbox(from)) {
 			this.minX = 0x40 + Math.floor(from.minX / xSize);
 			this.minZ = 0x40 + Math.floor(from.minZ / zSize);
-			this.maxX = 0x40 + Math.floor(from.minX / xSize);
-			this.maxZ = 0x40 + Math.floor(from.minX / zSize);
+			this.maxX = 0x40 + Math.floor(from.maxX / xSize);
+			this.maxZ = 0x40 + Math.floor(from.maxZ / zSize);
 		} else {
 			this.minX = this.maxX = 0x40 + Math.floor(from[0] / xSize);
 			this.minZ = this.maxZ = 0x40 + Math.floor(from[2] / zSize);
 		}
 		return this;
+	}
+
+	// ## [Symbol.for('nodejs.util.inspect.custom')]
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		let { minX, minZ, maxX, maxZ } = this;
+		return { minX, minZ, maxX, maxZ };
 	}
 
 }

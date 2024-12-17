@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { DBPF, FileType } from 'sc4/core';
+import { DBPF, FileType, Savegame } from 'sc4/core';
 import { SmartBuffer } from 'smart-arraybuffer';
 import { compareUint8Arrays } from 'uint8array-extras';
 import fs from '#test/fs.js';
@@ -31,6 +31,18 @@ describe('A building subfile', function() {
 		let source = entry!.decompress();
 		let check = entry!.toBuffer();
 		expect(compareUint8Arrays(source, check!)).to.equal(0);
+
+	});
+
+	it('properly parses the bbox', function() {
+
+		let { buildings } = new Savegame(resource('city.sc4'));
+		for (let building of buildings) {
+			let { min, max } = building.bbox;
+			for (let i = 0; i < min.length; i++) {
+				expect(min[i]).to.be.at.most(max[i]);
+			}
+		}
 
 	});
 

@@ -19,7 +19,7 @@ import type {
 	word,
     qword,
 } from 'sc4/types';
-import type Box3 from './box-3.js';
+import type { Box3, ParseOptions } from './box-3.js';
 import type TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
 
@@ -148,8 +148,8 @@ export default class WriteBuffer extends SmartBuffer {
 
 	// ## bbox(bbox)
 	// Writes a bbox data structure to the buffer.
-	bbox(bbox: Box3) {
-		bbox.write(this);
+	bbox(bbox: Box3, opts?: ParseOptions) {
+		bbox.write(this, opts);
 	}
 
 	// ## seal()

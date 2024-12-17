@@ -4,13 +4,13 @@ import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import Vertex from './vertex.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type { byte, dword, float, word } from 'sc4/types';
+import type { byte, dword, word } from 'sc4/types';
 import type Stream from './stream.js';
 import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
-import type { Vector3Like } from './vector-3.js';
+import { Vector3, type Vector3Like } from './vector-3.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -28,9 +28,7 @@ export default class Network {
 	GID: dword = 0x00000000;
 	TID: dword = 0x00000000;
 	IID: dword = 0x00000000;
-	x: float = 0;
-	y: float = 0;
-	z: float = 0;
+	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
 		new Vertex(),
 		new Vertex(),
@@ -58,7 +56,7 @@ export default class Network {
 		u.bytes([0x02, 0, 0]);
 		u.bytes([0x00, 0x00, 0x00]);
 		u.bytes([0x01, 0xa0, 0x00, 0x16]);
-		repeat(4, () => u.dword(0x00000000));
+		u.repeat(4, u => u.dword(0x00000000));
 		u.dword(0x00000002);
 		u.dword(0x00000000);
 		Object.assign(this, opts);
@@ -88,9 +86,7 @@ export default class Network {
 		this.TID = rs.dword();
 		this.IID = rs.dword();
 		unknown.byte();
-		this.x = rs.float();
-		this.y = rs.float();
-		this.z = rs.float();
+		this.position = rs.vector3();
 		this.vertices = [
 			rs.vertex(),
 			rs.vertex(),
@@ -111,7 +107,7 @@ export default class Network {
 			this.crossingBytes = rs.read(5);
 		}
 		unknown.bytes(3);
-		this.bbox = new Box3().parse(rs);
+		this.bbox = rs.bbox({ range: true });
 		unknown.bytes(4);
 		repeat(4, () => unknown.dword());
 		unknown.dword();
@@ -136,9 +132,7 @@ export default class Network {
 		ws.dword(this.TID);
 		ws.dword(this.IID);
 		unknown.byte();
-		ws.float(this.x);
-		ws.float(this.y);
-		ws.float(this.z);
+		ws.vector3(this.position);
 		this.vertices.forEach(v => ws.vertex(v));
 		ws.dword(this.textureId);
 		unknown.bytes();
@@ -154,7 +148,7 @@ export default class Network {
 			ws.write(this.crossingBytes);
 		}
 		unknown.bytes();
-		ws.bbox(this.bbox);
+		ws.bbox(this.bbox, { range: true });
 		unknown.bytes();
 		repeat(4, () => unknown.dword());
 		unknown.dword();

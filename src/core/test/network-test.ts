@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { DBPF, FileType } from 'sc4/core';
+import { DBPF, FileType, Savegame } from 'sc4/core';
 import { SmartBuffer } from 'smart-arraybuffer';
 import { compareUint8Arrays } from 'uint8array-extras';
 import { resource } from '#test/files.js';
@@ -26,6 +26,19 @@ describe('The network subfile', function() {
 		let source = entry.decompress();
 		let check = entry.toBuffer()!;
 		expect(compareUint8Arrays(source, check)).to.equal(0);
+
+	});
+
+	it('parses the network bboxes', function() {
+
+		let dbpf = new Savegame(resource('City - Under the bridge.sc4'));
+		let { network } = dbpf;
+		for (let tile of network) {
+			if (tile.position.y !== 270) continue;
+			let { bbox } = tile;
+			expect(bbox.min.y).to.equal(270);
+			expect(bbox.max.y).to.equal(270);
+		}
 
 	});
 
