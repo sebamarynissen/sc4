@@ -11,6 +11,7 @@ import type Matrix3 from './matrix-3.js';
 import Vertex from './vertex.js';
 import Box3 from './box-3.js';
 import type Pointer from './pointer.js';
+import WriteBuffer from './write-buffer.js';
 
 // # NetworkTunnelOccupant
 // Represents an entrance of a tunnel. It is is similar to the prebuilt network 
@@ -112,6 +113,54 @@ export default class NetworkTunnelOccupant {
 		this.sibling = rs.pointer()!;
 		rs.assert();
 		return this;
+	}
+
+	// ## toBuffer()
+	toBuffer() {
+		let ws = new WriteBuffer();
+		const unknown = this.u.writer(ws);
+		ws.dword(this.mem);
+		ws.version(this.version);
+		ws.dword(this.appearance);
+		unknown.dword();
+		ws.tract(this.tract);
+		ws.array(this.sgprops);
+		ws.tgi(this.tgi);
+		if (this.matrix3) {
+			ws.byte(0x05);
+			ws.write(this.matrix3);
+		} else {
+			ws.byte(0x01);
+		}
+		ws.vector3(this.position);
+		this.vertices.forEach(v => ws.vertex(v));
+		ws.dword(this.modelId);
+		ws.byte(this.wealthTexture);
+		ws.dword(this.baseTexture);
+		ws.byte(this.orientation);
+		unknown.bytes();
+		ws.byte(this.crossings);
+		ws.byte(this.networkType);
+		ws.byte(this.westConnection);
+		ws.byte(this.northConnection);
+		ws.byte(this.eastConnection);
+		ws.byte(this.southConnection);
+		ws.array(this.walls, ({ texture, vertex }) => {
+			ws.dword(texture);
+			ws.vertex(vertex);
+		});
+		ws.bbox(this.bbox, { range: true });
+		ws.dword(this.constructionStates);
+		ws.dword(this.pathId);
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		ws.qword(this.demolishingCosts);
+		unknown.bytes();
+		unknown.byte();
+		ws.pointer(this.sibling);
+		unknown.assert();
+		return ws.seal();
 	}
 
 }

@@ -18,6 +18,7 @@ import type {
 	uint32,
 	word,
     qword,
+    TGIArray,
 } from 'sc4/types';
 import type { Box3, ParseOptions } from './box-3.js';
 import type TractInfo from './tract-info.js';
@@ -99,6 +100,25 @@ export default class WriteBuffer extends SmartBuffer {
 		this.uint32(arr.length);
 		for (let item of arr) {
 			fn(item);
+		}
+	}
+
+	// ## tgi()
+	// Writes away a TGI to the buffer. Note that for some reason, TGI's in 
+	// savegame files are stored as GTI.
+	tgi(tgi: TGIArray) {
+		let [type, group, instance] = tgi;
+		this.dword(group);
+		this.dword(type);
+		this.dword(instance);
+	}
+
+	// ## version(version)
+	// Writes away a version string.
+	version(version: string) {
+		let parts = version.split('.');
+		for (let part of parts) {
+			this.word(+part);
 		}
 	}
 
