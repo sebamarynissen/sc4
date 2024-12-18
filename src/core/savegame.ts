@@ -1,7 +1,7 @@
 // # savegame.js
 import DBPF from './dbpf.js';
 import FileType from './file-types.js';
-import type { DecodedFileTypeId, SimGridFileType } from './types.js';
+import type { DecodedFileTypeId, SimGridFileTypeId } from './types.js';
 import type TerrainMap from './terrain-map.js';
 import { kFileTypeArray } from './symbols.js';
 import { getConstructorByType } from './file-classes-helpers.js';
@@ -92,7 +92,7 @@ export default class Savegame extends DBPF {
 	// Returns the sim grid with the given data id. Note that we used to specify 
 	// the file type as well, but we only accept this as a hint now. It's not 
 	// per se needed anymore.
-	getSimGrid(dataId: number, type?: SimGridFileType): SimGrid | undefined {
+	getSimGrid(dataId: number, type?: SimGridFileTypeId): SimGrid | undefined {
 		if (type !== undefined) {
 			let grids = this.readByType(type);
 			return grids.find(grid => grid.dataId === dataId);

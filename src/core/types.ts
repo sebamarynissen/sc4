@@ -1,5 +1,5 @@
 // # types.ts
-import type { uint32, ConstructorOptions as Options } from 'sc4/types';
+import type { uint32 } from 'sc4/types';
 import type {
 	FileType,
 	SavegameFileType,
