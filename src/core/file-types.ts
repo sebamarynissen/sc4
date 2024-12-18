@@ -48,6 +48,7 @@ export const SavegameFileType = {
 	NetworkBridge: 0x49cc1bcd,
 	NetworkIndex: 0x6a0f82b2,
 	NetworkTunnelOccupant: 0x8a4bd52b,
+	NetworkManager: 0xc990bd46,
 	TractDeveloper: 0x2990c142,
 	LineItem: 0xaa313c9f,
 	DepartmentBudget: 0xe990bffc,
@@ -59,6 +60,8 @@ export const SavegameFileType = {
 	// instance inside a Savegame, but obviously the type id is still needed 
 	// sometimes.
 	TerrainMap: 0xa9dd6ff4,
+	cSTETerrain: 0xe98f9525,
+	cSTETerrainView3D: 0xc9b84e10,
 
 } as const;
 

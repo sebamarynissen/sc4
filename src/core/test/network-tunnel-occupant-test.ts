@@ -1,7 +1,7 @@
 // # network-tunnel-occupant-test.ts
 import { expect } from 'chai';
 import { resource } from '#test/files.js';
-import { FileType, Savegame } from 'sc4/core';
+import { FileType, NetworkTunnelOccupant, Savegame } from 'sc4/core';
 import { compareUint8Arrays } from 'uint8array-extras';
 
 describe('The network tunnel occupant subfile', function() {
@@ -23,6 +23,11 @@ describe('The network tunnel occupant subfile', function() {
 		let check = entry.toBuffer()!;
 		expect(compareUint8Arrays(source, check)).to.equal(0);
 
+	});
+
+	it('serializes an empty occupant', function() {
+		let tile = new NetworkTunnelOccupant();
+		tile.toBuffer();
 	});
 
 });

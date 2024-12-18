@@ -16,6 +16,8 @@ export { default as Vertex } from './vertex.js';
 export { default as Pointer } from './pointer.js';
 export { default as Vector3 } from './vector-3.js';
 export { default as Box3 } from './box-3.js';
+export { default as NetworkCrossing } from './network-crossing.js';
+export { NetworkIndexTile } from './network-index.js';
 
 // Export relevant types.
 export type { DBPFOptions, DBPFSaveOptions, DBPFJSON } from './dbpf.js';
@@ -33,7 +35,6 @@ export type {
 	DecodedFileTypeId,
 	DecodedFileTypeName,
 	ArrayFileTypeId,
-	SimGridFileType,
 	SavegameFileTypeId,
 } from './types.js';
 

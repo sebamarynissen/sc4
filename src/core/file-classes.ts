@@ -23,6 +23,9 @@ import ZoneManager from './zone-manager.js';
 import TractDeveloper from './tract-developer.js';
 import PlumbingSimulator from './plumbing-simulator.js';
 import NetworkTunnelOccupant from './network-tunnel-occupant.js';
+import NetworkManager from './network-manager.js';
+import cSTETerrain from './cste-terrain.js';
+import cSTETerrainView3D from './cste-terrain-view-3d.js';
 import {
 	SimGridFloat32,
 	SimGridUint32,
@@ -41,11 +44,11 @@ export {
 	Building,
 	Prop,
 	Flora,
-	TerrainMap,
 	BaseTexture,
 	Network,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkManager,
 	PrebuiltNetwork,
 	LineItem,
 	DepartmentBudget,
@@ -64,6 +67,9 @@ export {
 	SimGridSint16,
 	SimGridUint16,
 	SimGridUint32,
+	TerrainMap,
+	cSTETerrain,
+	cSTETerrainView3D,
 };
 
 export default {
@@ -75,12 +81,12 @@ export default {
 	Building,
 	Prop,
 	Flora,
-	TerrainMap,
 	BaseTexture,
 	Network,
 	PrebuiltNetwork,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkManager,
 	LineItem,
 	DepartmentBudget,
 	Pipe,
@@ -98,4 +104,7 @@ export default {
 	SimGridSint16,
 	SimGridUint16,
 	SimGridUint32,
+	TerrainMap,
+	cSTETerrain,
+	cSTETerrainView3D,
 } as const;

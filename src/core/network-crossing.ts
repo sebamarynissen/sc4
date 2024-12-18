@@ -1,28 +1,41 @@
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';
 
+type NetworkCrossingOptions = {
+	type?: number;
+	west?: number;
+	north?: number;
+	east?: number;
+	south?: number;
+};
+
 // # NetworkCrossing
 // Small helper class that is used within the various network subfiles.
 export default class NetworkCrossing {
-	networkType = 0x00;
-	westConnection = 0x00;
-	northConnection = 0x00;
-	eastConnection = 0x00;
-	southConnection = 0x00;
+	type = 0x00;
+	west = 0x00;
+	north = 0x00;
+	east = 0x00;
+	south = 0x00;
+	constructor(opts?: NetworkCrossingOptions) {
+		if (opts) {
+			Object.assign(this, opts);
+		}
+	}
 	parse(rs: Stream) {
-		this.networkType = rs.byte();
-		this.westConnection = rs.byte();
-		this.northConnection = rs.byte();
-		this.eastConnection = rs.byte();
-		this.southConnection = rs.byte();
+		this.type = rs.byte();
+		this.west = rs.byte();
+		this.north = rs.byte();
+		this.east = rs.byte();
+		this.south = rs.byte();
 		return this;
 	}
 	write(ws: WriteBuffer) {
-		ws.byte(this.networkType);
-		ws.byte(this.westConnection);
-		ws.byte(this.northConnection);
-		ws.byte(this.eastConnection);
-		ws.byte(this.southConnection);
+		ws.byte(this.type);
+		ws.byte(this.west);
+		ws.byte(this.north);
+		ws.byte(this.east);
+		ws.byte(this.south);
 		return this;
 	}
 }
