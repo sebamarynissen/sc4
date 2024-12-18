@@ -2,7 +2,7 @@
 import type { byte, double, dword, float, qword, word } from 'sc4/types';
 import type Stream from './stream.js';
 import type WriteBuffer from './write-buffer.js';
-type UnknownType = number | boolean | bigint | Uint8Array;
+type UnknownType = number | boolean | bigint | Uint8Array | UnknownType[];
 
 // # Unknown
 // Helper class that we use for easily managing unknown values in data 
@@ -23,6 +23,7 @@ export default class Unknown extends Array<UnknownType> {
 		}
 		return this;
 	}
+	array(value: UnknownType[]) { this.push(value); return this; }
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.
@@ -108,6 +109,19 @@ class UnknownReader {
 	float() { this.unknown.float(this.rs.float()); }
 	double() { this.unknown.double(this.rs.double()); }
 	bytes(length?: number) { this.unknown.bytes(this.rs.read(length)); }
+
+	// ## array()
+	// Reads in the length of an array as a dword, and then creates 
+	// child-unknowns for every entry.
+	array(fn: (this: this, u: this, i?: number) => any) {
+		let arr = new Array(this.rs.dword());
+		for (let i = 0; i < arr.length; i++) {
+			let unknown = arr[i] = new Unknown();
+			let reader = new UnknownReader(unknown, this.rs);
+			fn.call(this, reader, i);
+		}
+		this.unknown.array(arr);
+	}
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.

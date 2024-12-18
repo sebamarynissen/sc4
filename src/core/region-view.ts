@@ -3,7 +3,7 @@ import semver from 'semver';
 import Stream from './stream.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
-import type { byte, dword, float } from 'sc4/types';
+import type { byte, dword, float, word } from 'sc4/types';
 import Unknown from './unknown.js';
 
 type OccupantGroupInfo = {
@@ -99,48 +99,97 @@ export default class RegionView {
 		this.neighbourConnections = rs.array(() => {
 			return new NeighbourConnection().parse(rs);
 		});
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.dword();
+			unknown.bytes(5);
+		});
+		unknown.dword();
+		unknown.float();
+		unknown.dword();
+		unknown.float();
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.repeat(5, unknown => {
+				unknown.dword();
+				unknown.float();
+			});
+		});
+		unknown.array(unknown => unknown.bytes(76));
+		unknown.array(unknown => unknown.bytes(76));
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.array(unknown => {
+				unknown.float();
+				unknown.float();
+				unknown.float();
+			});
+		});
+		rs.assert();
 	}
 
 }
 
 class NeighbourConnection {
 	version = '1';
+	type: dword = 0x00000000;
+	connection: [dword, dword] = [0x00000000, 0x00000000];
+	destination: [dword, dword] = [0x00000000, 0x00000000];
+	properties: Property[] = [];
+	propertyVersion: word = 2;
 	parse(rs: Stream) {
 		this.version = rs.version(1);
 		this.type = rs.dword();
 		this.connection = [rs.dword(), rs.dword()];
 		this.destination = [rs.dword(), rs.dword()];
-		rs.word();
 		rs.byte();
-		rs.size();
-		let rest = rs.rest();
-		console.log(Buffer.from(rest));
-		// let type = rs.dword();
-		// let group = rs.dword();
-		// let instance = rs.dword();
-		// let dataType = rs.byte();
-		// let repeat1 = rs.word();
-		// console.log(dataType, repeat1);
-		// rs.array(() => {
-		// 	let type = rs.dword();
-		// 	let group = rs.dword();
-		// 	let instance = rs.dword();
-		// 	let dataType = rs.byte();
-		// 	let repeat1 = rs.word();
-		// 	let repeat2 = rs.byte();
-		// 	let count = repeat1 || repeat2 || 1;
-		// 	console.log({ repeat1, repeat2, count, dataType });
-		// 	for (let i = 0; i < count; i++) {
-		// 		if (dataType === 0x02) {
-		// 			rs.word();
-		// 		} else if (dataType === 0x03) {
-		// 			rs.dword();
-		// 		} else if (dataType === 0x09) {
-		// 			rs.float();
-		// 			console.log(rs.rest());
-		// 		}
-		// 	}
-		// });
+		this.propertyVersion = rs.word();
+		this.properties = rs.array(() => new Property().parse(rs));
 		return this;
+	}
+}
+
+// # Property
+// The structure of a property as it appears in the region view file is similar 
+// to the Exemplar property format.
+class Property {
+	id: dword = 0x00000000;
+	id2: dword = this.id;
+	type: byte = 0x00;
+	keyType: byte = 0x80;
+	value: unknown;
+	u = new Unknown()
+		.dword(0x00000000)
+		.byte(0x00);
+	parse(rs: Stream) {
+		this.u = new Unknown();
+		const unknown = this.u.reader(rs);
+		this.id = rs.dword();
+		this.id2 = rs.dword();
+		unknown.dword(0x00000000);
+		this.type = rs.byte();
+		this.keyType = rs.word();
+		unknown.byte();
+		const reader = getReader(this.type);
+		if (this.keyType === 0x80) {
+			this.value = rs.array(() => reader(rs));
+		} else {
+			this.value = reader(rs);
+		}
+		return this;
+	}
+}
+
+function getReader(type: byte) {
+	switch (type) {
+		case 0x01: return (rs: Stream) => rs.uint8();
+		case 0x02: return (rs: Stream) => rs.uint16();
+		case 0x03: return (rs: Stream) => rs.uint32();
+		case 0x07: return (rs: Stream) => rs.int32();
+		case 0x08: return (rs: Stream) => rs.bigint64();
+		case 0x09: return (rs: Stream) => rs.float();
+		case 0x0b: return (rs: Stream) => rs.bool();
+		default:
+			throw new Error(`Unknown data type ${type}!`);
 	}
 }
