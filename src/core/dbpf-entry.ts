@@ -9,7 +9,7 @@ import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import { getConstructorByType, hasConstructorByType } from './file-classes-helpers.js';
 import type DBPF from './dbpf.js';
-import { kFileTypeArray } from './symbols.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
 import type {
 	DBPFFile as File,
 	DecodedFileTypeId,
@@ -245,7 +245,7 @@ export default class Entry<T = unknown> {
 	// is obviously when the file was parsed, then we serialize the file back 
 	// into a buffer.
 	toBuffer(): Uint8Array {
-		if (Array.isArray(this.file)) {
+		if (Array.isArray(this.file) && !('toBuffer' in this.file)) {
 			let array = this.file as File[];
 			let buffer = new WriteBuffer();
 			for (let file of array) {

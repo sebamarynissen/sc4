@@ -4,6 +4,15 @@ import type WriteBuffer from './write-buffer.js';
 import type Stream from './stream.js';
 import type { meters } from 'sc4/types';
 
+type VertexOptions = {
+	x?: number;
+	y?: number;
+	z?: number;
+	u?: number;
+	v?: number;
+	color?: Color;
+};
+
 // # Vertex
 // In quite a lot of subfiles often the sequence x, y, z, u, v, r, g, b, a 
 // occurs. It looks like this is a vertex with [x, y, z] as coordinates,
@@ -17,6 +26,13 @@ export default class Vertex {
 	u: number = 0;
 	v: number = 0;
 	color = new Color();
+
+	// ## constructor(opts)
+	constructor(opts?: VertexOptions) {
+		if (opts) {
+			Object.assign(this, opts);
+		}
+	}
 
 	// ## parse(rs)
 	parse(rs: Stream) {

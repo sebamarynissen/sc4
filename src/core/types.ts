@@ -1,5 +1,5 @@
 // # types.ts
-import type { uint32, ConstructorOptions as Options } from 'sc4/types';
+import type { uint32 } from 'sc4/types';
 import type {
 	FileType,
 	SavegameFileType,
@@ -10,8 +10,6 @@ import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
 import type { kFileTypeArray } from './symbols.js';
 import type TractInfo from './tract-info.js';
-import type { Vector3, Vector3Like } from './vector-3.js';
-import type Box3 from './box-3.js';
 
 // Contains the type definition that a class implementing a DBPF file should 
 // minimally adhere to. The only requirement here is that it can be parsed from 
@@ -53,7 +51,7 @@ type ArraySignature = { [kFileTypeArray]: any; };
 export type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
 
 // A literal type containing the type ids of the simgrids.
-export type SimGridFileType = (typeof SimGridFileType)[keyof typeof SimGridFileType];
+export type SimGridFileTypeId = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
 // Some dbpf files - mostly savegame files - are actually arrays of those 
 // structures. The entry class needs to know this, so we use a literal type for 

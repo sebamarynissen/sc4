@@ -8,7 +8,7 @@ import type Pointer from './pointer.js';
 import type { dword, word } from 'sc4/types';
 
 // # NetworkIndex
-export default class NetworkIndex {
+export class NetworkIndex {
 	static[kFileType] = FileType.NetworkIndex;
 	mem = 0x00000000;
 	crc = 0x00000000;
@@ -89,10 +89,11 @@ export default class NetworkIndex {
 	}
 
 }
+export default NetworkIndex;
 
 // # NetworkIndexTile
 // Class for representing a tile in the network index.
-class NetworkIndexTile {
+export class NetworkIndexTile {
 	nr = 0;
 	pointer: Pointer | null = null;
 	blocks: any[];

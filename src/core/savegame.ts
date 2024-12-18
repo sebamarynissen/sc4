@@ -1,7 +1,7 @@
 // # savegame.js
 import DBPF from './dbpf.js';
 import FileType from './file-types.js';
-import type { DecodedFileTypeId, SimGridFileType } from './types.js';
+import type { DecodedFileTypeId, SimGridFileTypeId } from './types.js';
 import type TerrainMap from './terrain-map.js';
 import { kFileTypeArray } from './symbols.js';
 import { getConstructorByType } from './file-classes-helpers.js';
@@ -56,8 +56,10 @@ export default class Savegame extends DBPF {
 	get pipes() { return this.readByType(FileType.Pipe); }
 	get plumbingSimulator() { return this.readByType(FileType.PlumbingSimulator); }
 	get network() { return this.readByType(FileType.Network); }
+	get tunnels() { return this.readByType(FileType.NetworkTunnelOccupant); }
 	get prebuiltNetwork() { return this.readByType(FileType.PrebuiltNetwork); }
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
+	get networkManager() { return this.readByType(FileType.NetworkManager); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }
@@ -65,12 +67,12 @@ export default class Savegame extends DBPF {
 	// ## get terrain()
 	// The terrain is a bit special because there are multiple instances of - 
 	// probably used for the neighbour connections.
-	get terrain(): TerrainMap | null {
+	get terrain(): TerrainMap {
 		let entry = this.find({
 			type: FileType.TerrainMap,
 			instance: 0x01,
 		});
-		return entry ? entry.read() as TerrainMap : null;
+		return entry!.read();
 	}
 
 	// ## get width()
@@ -90,7 +92,7 @@ export default class Savegame extends DBPF {
 	// Returns the sim grid with the given data id. Note that we used to specify 
 	// the file type as well, but we only accept this as a hint now. It's not 
 	// per se needed anymore.
-	getSimGrid(dataId: number, type?: SimGridFileType): SimGrid | undefined {
+	getSimGrid(dataId: number, type?: SimGridFileTypeId): SimGrid | undefined {
 		if (type !== undefined) {
 			let grids = this.readByType(type);
 			return grids.find(grid => grid.dataId === dataId);

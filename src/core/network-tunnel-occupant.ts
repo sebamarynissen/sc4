@@ -1,5 +1,5 @@
 // # network-tunnel-occupant.ts
-import type { byte, dword, qword, TGIArray } from 'sc4/types';
+import type { byte, ConstructorOptions, dword, qword, TGIArray } from 'sc4/types';
 import FileType from './file-types.js';
 import type SGProp from './sgprop.js';
 import type Stream from './stream.js';
@@ -13,6 +13,8 @@ import Box3 from './box-3.js';
 import type Pointer from './pointer.js';
 import WriteBuffer from './write-buffer.js';
 import NetworkCrossing from './network-crossing.js';
+
+type NetworkTunnelOccupantOptions = ConstructorOptions<NetworkTunnelOccupant>;
 
 // # NetworkTunnelOccupant
 // Represents an entrance of a tunnel. It is is similar to the prebuilt network 
@@ -49,13 +51,16 @@ export default class NetworkTunnelOccupant {
 	u = new Unknown()
 		.dword(0xc772bf98)
 		.bytes([2, 0])
-		.dword(0x00000000)
-		.dword(0x00000000)
-		.dword(0x00000000)
-		.float(0)
-		.float(0)
-		.float(0)
-		.bytes([0, 0, 0, 0, 0]);
+		.repeat(3, u => u.dword(0x00000000))
+		.bytes([0, 0, 0, 0, 0])
+		.byte(1);
+
+	// # constructor()
+	constructor(opts?: NetworkTunnelOccupantOptions) {
+		if (opts) {
+			Object.assign(this, opts);
+		}
+	}
 
 	// ## parse(rs)
 	parse(rs: Stream) {
