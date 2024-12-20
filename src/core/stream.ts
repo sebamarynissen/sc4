@@ -27,6 +27,7 @@ import type { FileTypeId } from './types.js';
 import { Box3, type ParseOptions} from './box-3.js';
 import Vector3 from './vector-3.js';
 import Matrix3 from './matrix-3.js';
+import NetworkCrossing from './network-crossing.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -221,6 +222,19 @@ export default class Stream extends SmartBuffer {
 	// Reads in an array of sgprops.
 	sgprops() {
 		return this.array(() => new SGProp().parse(this));
+	}
+
+	// ## crossings()
+	// Reads in an array of network crossings. They often appear in network 
+	// subfiles, so it makes sense to have a specific parser for it.
+	crossings() {
+		let n = this.byte()+1;
+		let array: NetworkCrossing[] = [];
+		for (let i = 0; i < n; i++) {
+			let crossing = new NetworkCrossing().parse(this);
+			array.push(crossing);
+		}
+		return array;
 	}
 
 	// ## assert()

@@ -57,6 +57,7 @@ export default class Savegame extends DBPF {
 	get plumbingSimulator() { return this.readByType(FileType.PlumbingSimulator); }
 	get network() { return this.readByType(FileType.Network); }
 	get tunnels() { return this.readByType(FileType.NetworkTunnelOccupant); }
+	get bridges() { return this.readByType(FileType.NetworkBridgeOccupant); }
 	get prebuiltNetwork() { return this.readByType(FileType.PrebuiltNetwork); }
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
 	get networkManager() { return this.readByType(FileType.NetworkManager); }

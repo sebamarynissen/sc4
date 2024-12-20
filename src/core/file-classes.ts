@@ -23,6 +23,7 @@ import ZoneManager from './zone-manager.js';
 import TractDeveloper from './tract-developer.js';
 import PlumbingSimulator from './plumbing-simulator.js';
 import NetworkTunnelOccupant from './network-tunnel-occupant.js';
+import NetworkBridgeOccupant from './network-bridge-occupant.js';
 import NetworkManager from './network-manager.js';
 import cSTETerrain from './cste-terrain.js';
 import cSTETerrainView3D from './cste-terrain-view-3d.js';
@@ -48,6 +49,7 @@ export {
 	Network,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkBridgeOccupant,
 	NetworkManager,
 	PrebuiltNetwork,
 	LineItem,
@@ -86,6 +88,7 @@ export default {
 	PrebuiltNetwork,
 	NetworkIndex,
 	NetworkTunnelOccupant,
+	NetworkBridgeOccupant,
 	NetworkManager,
 	LineItem,
 	DepartmentBudget,

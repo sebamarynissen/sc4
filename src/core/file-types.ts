@@ -45,7 +45,7 @@ export const SavegameFileType = {
 	COMSerializer: 0x499b23fe,
 	Network: 0xc9c05c6e,
 	PrebuiltNetwork: 0x49c1a034,
-	NetworkBridge: 0x49cc1bcd,
+	NetworkBridgeOccupant: 0x49cc1bcd,
 	NetworkIndex: 0x6a0f82b2,
 	NetworkTunnelOccupant: 0x8a4bd52b,
 	NetworkManager: 0xc990bd46,

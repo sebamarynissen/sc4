@@ -84,11 +84,7 @@ export default class PrebuiltNetwork {
 		this.baseTexture = rs.dword();
 		this.orientation = rs.byte();
 		unknown.bytes(2);
-		this.crossings = new Array<NetworkCrossing>(rs.byte()+1);
-		for (let i = 0; i < this.crossings.length; i++) {
-			let crossing = new NetworkCrossing().parse(rs);
-			this.crossings[i] = crossing;
-		}
+		this.crossings = rs.crossings();
 		this.walls = rs.array(() => {
 			let texture = rs.dword();
 			let vertex = rs.vertex();
