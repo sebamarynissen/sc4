@@ -43,7 +43,7 @@ export default class SavegameContext {
 	// corresponding subfile. Note that we don't use an index here, so for very 
 	// large subfiles - such as the prop file - this is O(n) and can take up 
 	// quite a bit of time! Consider indexing it first if you have to do this.
-	deref(pointer: Pointer | null): SavegameRecord {
+	deref<T extends SavegameRecord>(pointer: Pointer<T> | null): T {
 		if (!pointer || pointer.type === 0x00000000) {
 			throw new Error(`Trying to dereference a null pointer!`);
 		}
@@ -52,13 +52,13 @@ export default class SavegameContext {
 		if (!entry) {
 			throw new Error(`Trying to dereference a pointer from subfile ${hex(type)}, which does not exist in the savegame!`);
 		}
-		let file = entry.read() as SavegameRecord | SavegameRecord[] | Uint8Array;
+		let file = entry.read() as T | T[] | Uint8Array;
 		if (file instanceof Uint8Array) {
 			throw new Error(`Trying to dereference a ponter from a non-decoded subfile ${hex(type)}!`);
 		}
 		let result;
 		if (!Array.isArray(file) || isArrayType(file)) {
-			result = find([file], address) as SavegameRecord;
+			result = find([file], address) as T;
 		} else {
 			result = find(file, address);
 		}

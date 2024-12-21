@@ -9,13 +9,14 @@ import Stream from './stream.js';
 import { getTypeLabel } from './helpers.js';
 import { getConstructorByType, hasConstructorByType } from './file-classes-helpers.js';
 import type DBPF from './dbpf.js';
-import { kFileType, kFileTypeArray } from './symbols.js';
+import { kFileTypeArray } from './symbols.js';
 import type {
 	DBPFFile as File,
 	DecodedFileTypeId,
     DecodedFileClass,
+    TypeIdToFile,
 } from './types.js';
-import type { ReadResult, TypeIdToFile } from './dbpf-entry-types.js';
+import type { ReadResult } from './dbpf-entry-types.js';
 
 /**
  * Returns a DBPF Entry type where the file type pointed to by the entry is 

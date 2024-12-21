@@ -6,6 +6,7 @@ import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 import type Pointer from './pointer.js';
 import type { dword, tiles, word } from 'sc4/types';
+import type { NetworkOccupantType } from './types.js';
 
 // # NetworkIndex
 export class NetworkIndex {
@@ -107,7 +108,7 @@ type ParseOptions = {
 export class NetworkIndexTile {
 	x: tiles = 0;
 	z: tiles = 0;
-	pointer: Pointer | null = null;
+	pointer: Pointer<NetworkOccupantType> | null = null;
 	blocks: any[];
 	automata: any[];
 	reps: Uint8Array[] = [
@@ -130,7 +131,7 @@ export class NetworkIndexTile {
 		let nr = rs.dword();
 		this.x = nr % citySize;
 		this.z = Math.floor(nr / citySize);
-		this.pointer = rs.pointer();
+		this.pointer = rs.pointer()!;
 		this.blocks = rs.array(() => {
 			let nr = rs.dword();
 			return {

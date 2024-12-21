@@ -59,6 +59,14 @@ export type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
 // A literal type containing the type ids of the simgrids.
 export type SimGridFileTypeId = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
+/**
+ * Returns the decoded file as a *type* - i.e. "Lot", "Exemplar", ... based on 
+ * its numerical Type ID.
+ */
+export type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
+	typeof FileClasses[TypeIdToStringKey[T]]
+>;
+
 // Some dbpf files - mostly savegame files - are actually arrays of those 
 // structures. The entry class needs to know this, so we use a literal type for 
 // that as well.
@@ -71,6 +79,13 @@ export type ArrayFileTypeId = ValueOf<{
 		[kFileTypeArray]: any
 	} ? K : never;
 }>;
+
+type FileMap = {
+	[K in DecodedFileTypeId]: TypeIdToFile<K>;
+};
+export type FileToFileTypeId<T> = {
+	[K in keyof FileMap]: FileMap[K] extends T ? K : never;
+}[keyof FileMap];
 
 // Sometimes we'd also like to reference file types using their string names, as 
 // that avoids having to import FileType all the time. Hence we create a literal 

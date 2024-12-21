@@ -1,10 +1,7 @@
 // # dbpf-entry-types.ts
-import type FileType from './file-types.js';
-import type FileClasses from './file-classes.js';
 import type {
 	ArrayFile,
 	DecodedFile,
-	DecodedFileTypeId,
 } from './types.js';
 
 /**
@@ -17,15 +14,3 @@ export type ReadResult<T> = T extends DecodedFile
 	? T[]
 	: T
 	: unknown;
-
-type TypeIdToStringKey = {
-	[K in keyof typeof FileClasses & keyof typeof FileType as (typeof FileType)[K]]: K;
-};
-
-/**
- * Returns the decoded file as a *type* - i.e. "Lot", "Exemplar", ... based on 
- * its numerical Type ID.
- */
-export type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
-	typeof FileClasses[TypeIdToStringKey[T]]
->;

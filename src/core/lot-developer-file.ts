@@ -4,6 +4,7 @@ import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 import type Pointer from './pointer.js';
+import type Building from './building.js';
 
 // # LotDeveloper
 export default class LotDeveloper {
@@ -14,7 +15,7 @@ export default class LotDeveloper {
 	tileSize = 0x00000041;
 	width = 0x44800000;
 	depth = 0x44800000;
-	buildings: Pointer[] = [];
+	buildings: Pointer<Building>[] = [];
 	u3 = 0x00000000;
 	u4 = 0x0000;
 
@@ -33,7 +34,7 @@ export default class LotDeveloper {
 		let count = rs.dword();
 		this.buildings = new Array(count);
 		for (let i = 0; i < count; i++) {
-			this.buildings[i] = rs.pointer() as Pointer;
+			this.buildings[i] = rs.pointer()!;
 		}
 
 		// Read in the rest.
