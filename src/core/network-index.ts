@@ -185,11 +185,6 @@ export class NetworkIndexTile {
 		});
 	}
 
-	// ## [Symbol.toPrimitive]()
-	[Symbol.toPrimitive]() {
-		return this.nr;
-	}
-
 }
 
 // # NetworkIntersection
