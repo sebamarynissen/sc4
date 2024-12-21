@@ -23,10 +23,11 @@ import type {
     word,
 } from 'sc4/types';
 import type { Class } from 'type-fest';
-import type { FileTypeId } from './types.js';
+import type { FileTypeId, SavegameRecord } from './types.js';
 import { Box3, type ParseOptions} from './box-3.js';
 import Vector3 from './vector-3.js';
 import Matrix3 from './matrix-3.js';
+import NetworkCrossing from './network-crossing.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -139,11 +140,11 @@ export default class Stream extends SmartBuffer {
 	// Helper function for reading a pointer. Those are given as [pointer, 
 	// Type ID]. Note that if no address was given, we return "null" (i.e. a 
 	// null pointer).
-	pointer() {
+	pointer<T extends SavegameRecord>() {
 		let address = this.dword();
 		if (address === 0x00000000) return null;
 		let type = this.dword();
-		return new Pointer(type, address);
+		return new Pointer<T>(type, address);
 	}
 
 	// ## vector3()
@@ -221,6 +222,19 @@ export default class Stream extends SmartBuffer {
 	// Reads in an array of sgprops.
 	sgprops() {
 		return this.array(() => new SGProp().parse(this));
+	}
+
+	// ## crossings()
+	// Reads in an array of network crossings. They often appear in network 
+	// subfiles, so it makes sense to have a specific parser for it.
+	crossings() {
+		let n = this.byte()+1;
+		let array: NetworkCrossing[] = [];
+		for (let i = 0; i < n; i++) {
+			let crossing = new NetworkCrossing().parse(this);
+			array.push(crossing);
+		}
+		return array;
 	}
 
 	// ## assert()

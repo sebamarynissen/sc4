@@ -6,12 +6,12 @@ import Pointer from './pointer.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 import type { ConstructorOptions, dword } from 'sc4/types';
+import type { SimGridSint8 } from './sim-grid-file.js';
+import type ItemIndex from './item-index.js';
+import type cSTETerrain from './cste-terrain.js';
 
 // Some type ids. We should put them within the FileType's though!
-const cSC4SimGridSint8 = 0x49b9e603;
 const cSC4City = 0x8990c372;
-const cSC4OccupantManager = 0x098f964d;
-const cSTETerrain = 0xe98f9525;
 const cSC4PollutionSimulator = 0x8990c065;
 const cSC4BudgetSimulator = 0xe990be01;
 
@@ -24,7 +24,7 @@ export default class ZoneManager {
 	major = 0x0001;
 
 	// Pointer to the ZoneView grid.
-	grid = new Pointer(cSC4SimGridSint8);
+	grid: Pointer<SimGridSint8> = new Pointer(FileType.SimGridSint8);
 	u1: number[] = Array(16).fill(0x00000000);
 
 	// Note even though the size is repeated multiple times when parsing, 
@@ -36,8 +36,8 @@ export default class ZoneManager {
 
 	// Pointers to other subfiles.
 	city = new Pointer(cSC4City);
-	occupantManager = new Pointer(cSC4OccupantManager);
-	terrain = new Pointer(cSTETerrain);
+	occupantManager = new Pointer<ItemIndex>(FileType.ItemIndex);
+	terrain = new Pointer<cSTETerrain>(FileType.cSTETerrain);
 	pollutionSimulator = new Pointer(cSC4PollutionSimulator);
 	budgetSimulator = new Pointer(cSC4BudgetSimulator);
 
@@ -53,7 +53,7 @@ export default class ZoneManager {
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
-		this.grid = rs.pointer() as Pointer;
+		this.grid = rs.pointer()!;
 
 		// Read in the unknowns.
 		let arr: dword[] = this.u1 = [];
@@ -69,11 +69,11 @@ export default class ZoneManager {
 		this.u2 = rs.read(533);
 
 		// More pointers follow now.
-		this.city = rs.pointer() as Pointer;
-		this.occupantManager = rs.pointer() as Pointer;
-		this.terrain = rs.pointer() as Pointer;
-		this.pollutionSimulator = rs.pointer() as Pointer;
-		this.budgetSimulator = rs.pointer() as Pointer;
+		this.city = rs.pointer()!;
+		this.occupantManager = rs.pointer()!;
+		this.terrain = rs.pointer()!
+		this.pollutionSimulator = rs.pointer()!
+		this.budgetSimulator = rs.pointer()!;
 
 	}
 

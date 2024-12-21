@@ -14,6 +14,7 @@ let dz = 0;
 let dx = -8;
 
 let dbpf = new Savegame(resource('City - Tunnel mover.sc4'));
+
 const { tunnels, network, networkIndex, itemIndex } = dbpf;
 console.log(tunnels[0].mem);
 
@@ -41,11 +42,9 @@ for (let tile of tunnels) {
 itemIndex.rebuild(FileType.Network, network);
 itemIndex.rebuild(FileType.NetworkTunnelOccupant, tunnels);
 
-let citySize = 64*dbpf.regionView.xSize;
 for (let tile of networkIndex.tiles) {
-	let x = tile.nr % citySize;
-	let z = tile.nr / citySize | 0;
-	tile.nr = (z + dz)*citySize + (x + dx);
+	tile.x += dx;
+	tile.z += dz;
 }
 
 dbpf.save(output);

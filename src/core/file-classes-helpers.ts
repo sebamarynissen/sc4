@@ -24,3 +24,12 @@ export function hasConstructorByType(type: number): boolean;
 export function hasConstructorByType(type: number): boolean {
 	return map.has(type);
 }
+
+
+// # isType(object, type)
+export function isType<T extends DecodedFileTypeId>(object: object, type: T)
+	: object is InstanceType<TypeIdToFileConstructor<T>>
+{
+	let constructor = getConstructorByType(type);
+	return object instanceof constructor;
+}

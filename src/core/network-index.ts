@@ -5,7 +5,8 @@ import Unknown from './unknown.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
 import type Pointer from './pointer.js';
-import type { dword, word } from 'sc4/types';
+import type { dword, tiles, word } from 'sc4/types';
+import type { NetworkOccupantType } from './types.js';
 
 // # NetworkIndex
 export class NetworkIndex {
@@ -34,7 +35,12 @@ export class NetworkIndex {
 		this.mem = rs.dword();
 		this.major = rs.word();
 		this.cityTiles = rs.dword();
-		this.tiles = rs.array(() => rs.struct(NetworkIndexTile));
+		let citySize = this.cityTiles ** 0.5;
+		this.tiles = rs.array(() => {
+			let tile = new NetworkIndexTile();
+			tile.parse(rs, { citySize });
+			return tile;
+		});
 		this.intersections = rs.array(() => rs.struct(NetworkIntersection));
 		this.transitEnabledTiles = rs.array(() => {
 			return rs.struct(TransitEnabledTile);
@@ -69,7 +75,10 @@ export class NetworkIndex {
 		ws.dword(this.mem);
 		ws.word(this.major);
 		ws.dword(this.cityTiles);
-		ws.array(this.tiles);
+		let citySize = this.cityTiles ** 0.5;
+		ws.array(this.tiles, tile => {
+			tile.write(ws, { citySize });
+		});
 		ws.array(this.intersections);
 		ws.array(this.transitEnabledTiles);
 		unknown.dword();
@@ -93,9 +102,13 @@ export default NetworkIndex;
 
 // # NetworkIndexTile
 // Class for representing a tile in the network index.
+type ParseOptions = {
+	citySize: tiles;
+};
 export class NetworkIndexTile {
-	nr = 0;
-	pointer: Pointer | null = null;
+	x: tiles = 0;
+	z: tiles = 0;
+	pointer: Pointer<NetworkOccupantType> | null = null;
 	blocks: any[];
 	automata: any[];
 	reps: Uint8Array[] = [
@@ -113,10 +126,12 @@ export class NetworkIndexTile {
 		.word(0x0000);
 
 	// ## parse(rs)
-	parse(rs: Stream) {
+	parse(rs: Stream, { citySize }: ParseOptions) {
 		let u = this.u.reader(rs);
-		this.nr = rs.dword();
-		this.pointer = rs.pointer();
+		let nr = rs.dword();
+		this.x = nr % citySize;
+		this.z = Math.floor(nr / citySize);
+		this.pointer = rs.pointer()!;
 		this.blocks = rs.array(() => {
 			let nr = rs.dword();
 			return {
@@ -147,9 +162,10 @@ export class NetworkIndexTile {
 	}
 
 	// ## write(ws)
-	write(ws: WriteBuffer) {
+	write(ws: WriteBuffer, { citySize }: ParseOptions) {
 		let u = this.u.writer(ws);
-		ws.dword(this.nr);
+		let nr = this.z*citySize + this.x;
+		ws.dword(nr);
 		ws.pointer(this.pointer);
 		ws.array(this.blocks, block => {
 			ws.dword(block.nr);
@@ -168,11 +184,6 @@ export class NetworkIndexTile {
 			ws.dword(item.nr);
 			ws.write(item.bytes);
 		});
-	}
-
-	// ## [Symbol.toPrimitive]()
-	[Symbol.toPrimitive]() {
-		return this.nr;
 	}
 
 }

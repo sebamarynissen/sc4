@@ -1,6 +1,6 @@
 // # helpers.ts
 import type { uint32 } from 'sc4/types';
-import { kFileType } from './symbols.js';
+import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
 
 // # getClassType(object)
@@ -14,6 +14,18 @@ export function getClassType(object: object): number {
 		return object.constructor[kFileType] as number;
 	} else {
 		return 0;
+	}
+}
+
+// # isArrayType(object)
+// Returns whether the given object is an array type subfile.
+export function isArrayType(object: object): boolean {
+	if (kFileTypeArray in object) {
+		return !!object[kFileTypeArray];
+	} else if (kFileTypeArray in object.constructor) {
+		return !!object.constructor[kFileTypeArray];
+	} else {
+		return false;
 	}
 }
 

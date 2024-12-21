@@ -1,28 +1,28 @@
-// # prebuilt-network.js
-import { FileType } from './enums.js';
-import Unknown from './unknown.js';
-import Vertex from './vertex.js';
-import type { byte, dword, float, qword, TGIArray, word } from 'sc4/types';
-import type Stream from './stream.js';
+// # network-bridge-occupant.ts
+import FileType from './file-types.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type SGProp from './sgprop.js';
-import Box3 from './box-3.js';
+import Unknown from './unknown.js';
+import type Stream from './stream.js';
+import type { byte, dword, float, TGIArray } from 'sc4/types';
 import TractInfo from './tract-info.js';
-import Vector3 from './vector-3.js';
+import type SGProp from './sgprop.js';
 import type Matrix3 from './matrix-3.js';
-import NetworkCrossing from './network-crossing.js';
+import Vector3 from './vector-3.js';
+import Vertex from './vertex.js';
+import Box3 from './box-3.js';
+import type NetworkCrossing from './network-crossing.js';
 import WriteBuffer from './write-buffer.js';
 
-// # PrebuiltNetwork
-// A class that is used for networks that use prebuilt models, such as 
-// elevated highways.
-export default class PrebuiltNetwork {
-	static [kFileType] = FileType.PrebuiltNetwork;
+// # NetworkBridgeOccupant
+// A class that is used for the individual parts of bridges. Apparently the 
+// structure is exactly the same as the prebuilt network file, which makes sense.
+export default class NetworkBridgeOccupant {
+	static [kFileType] = FileType.NetworkBridgeOccupant;
 	static [kFileTypeArray] = true;
 	crc: dword = 0x00000000;
 	mem: dword = 0x00000000;
-	version = '4.8.4';
-	appearance: dword = 0x05;
+	version: string = '4.8.4';
+	appearance: dword = 0x00000005;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
 	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
@@ -34,7 +34,7 @@ export default class PrebuiltNetwork {
 		new Vertex(),
 		new Vertex(),
 	];
-	modelId: dword = 0;
+	modelId: dword = 0x00000000;
 	wealthTexture: byte = 0x00;
 	baseTexture: dword = 0x00000000;
 	orientation: byte = 0x00;
@@ -43,7 +43,7 @@ export default class PrebuiltNetwork {
 	bbox = new Box3();
 	constructionStates: dword = 0x00000000;
 	pathId: dword = 0x00000000;
-	demolishingCosts: qword = 0n;
+	demolishingCosts = 0n;
 	pillar: { id: dword; rotation: float; position: Vector3 } | null = null;
 	u = new Unknown()
 		.dword(0xc772bf98)
@@ -52,8 +52,8 @@ export default class PrebuiltNetwork {
 		.repeat(3, u => u.float(0.0))
 		.bytes([0, 0, 0, 0, 0]);
 
-	// ## parse(rs)
-	parse(rs: Stream): this {
+	// # parse(rs)
+	parse(rs: Stream) {
 		this.u = new Unknown();
 		const unknown = this.u.reader(rs);
 		rs.size();
@@ -104,7 +104,7 @@ export default class PrebuiltNetwork {
 		return this;
 	}
 
-	// ## toBuffer()
+	// # toBuffer()
 	toBuffer() {
 		let ws = new WriteBuffer();
 		const unknown = this.u.writer(ws);

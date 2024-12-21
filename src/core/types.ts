@@ -10,6 +10,12 @@ import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
 import type { kFileTypeArray } from './symbols.js';
 import type TractInfo from './tract-info.js';
+import type {
+	Network,
+	NetworkBridgeOccupant,
+	NetworkTunnelOccupant,
+	PrebuiltNetwork,
+} from './file-classes.js';
 
 // Contains the type definition that a class implementing a DBPF file should 
 // minimally adhere to. The only requirement here is that it can be parsed from 
@@ -53,6 +59,14 @@ export type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
 // A literal type containing the type ids of the simgrids.
 export type SimGridFileTypeId = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
+/**
+ * Returns the decoded file as a *type* - i.e. "Lot", "Exemplar", ... based on 
+ * its numerical Type ID.
+ */
+export type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
+	typeof FileClasses[TypeIdToStringKey[T]]
+>;
+
 // Some dbpf files - mostly savegame files - are actually arrays of those 
 // structures. The entry class needs to know this, so we use a literal type for 
 // that as well.
@@ -66,6 +80,13 @@ export type ArrayFileTypeId = ValueOf<{
 	} ? K : never;
 }>;
 
+type FileMap = {
+	[K in DecodedFileTypeId]: TypeIdToFile<K>;
+};
+export type FileToFileTypeId<T> = {
+	[K in keyof FileMap]: FileMap[K] extends T ? K : never;
+}[keyof FileMap];
+
 // Sometimes we'd also like to reference file types using their string names, as 
 // that avoids having to import FileType all the time. Hence we create a literal 
 // type for this as well.
@@ -73,3 +94,10 @@ export type FileTypeName = [keyof typeof FileType];
 export type DecodedFileTypeName = [
 	keyof typeof FileClasses & keyof typeof FileType
 ];
+
+// All known network-types, which is useful as they share a common structure.
+export type NetworkOccupantType =
+	| Network
+	| PrebuiltNetwork
+	| NetworkBridgeOccupant
+	| NetworkTunnelOccupant;

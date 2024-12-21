@@ -6,6 +6,9 @@ import Pointer from './pointer.js';
 import Unknown from './unknown.js';
 import { kFileType } from './symbols.js';
 import type { byte, dword } from 'sc4/types';
+import type { SimGridUint8 } from './sim-grid-file.js';
+import type Pipe from './pipe.js';
+import type DepartmentBudget from './department-budget.js';
 
 type Building = {
 	xAnchor: dword;
@@ -26,8 +29,8 @@ export default class PlumbingSimulator {
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x0004;
-	grid1 = new Pointer(FileType.SimGridUint8);
-	grid2 = new Pointer(FileType.SimGridUint8);
+	grid1: Pointer<SimGridUint8> = new Pointer(FileType.SimGridUint8);
+	grid2: Pointer<SimGridUint8> = new Pointer(FileType.SimGridUint8);
 	xSize = 0x00000040;
 	zSize = 0x00000040;
 	cells: byte[][] = [];
@@ -37,8 +40,8 @@ export default class PlumbingSimulator {
 	xTiles = 0x0000003f;
 	zTiles = 0x0000003f;
 	filterCapacity = 0x00000000;
-	pipes: Pointer[] = [];
-	departmentBudget = new Pointer(FileType.DepartmentBudget);
+	pipes: Pointer<Pipe>[] = [];
+	departmentBudget: Pointer<DepartmentBudget> = new Pointer(FileType.DepartmentBudget);
 	totalProduced = 0x00000000;
 	actualFilterCapacity = 0x00000000;
 	u = new Unknown()
@@ -74,8 +77,8 @@ export default class PlumbingSimulator {
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.major = rs.word();
-		this.grid1 = rs.pointer() as Pointer;
-		this.grid2 = rs.pointer() as Pointer;
+		this.grid1 = rs.pointer()!;
+		this.grid2 = rs.pointer()!;
 		this.xSize = rs.dword();
 		this.zSize = rs.dword();
 		let cells = this.cells = new Array(this.zSize);
@@ -113,13 +116,13 @@ export default class PlumbingSimulator {
 		this.zTiles = rs.dword();
 		this.filterCapacity = rs.dword();
 		unkown.dword();
-		let pipes = this.pipes = new Array(rs.dword());
+		let pipes = this.pipes = new Array<Pointer<Pipe>>(rs.dword());
 		unkown.dword();
 		unkown.dword();
 		for (let i = 0; i < this.pipes.length; i++) {
-			pipes[i] = rs.pointer();
+			pipes[i] = rs.pointer()!;
 		}
-		this.departmentBudget = rs.pointer() as Pointer;
+		this.departmentBudget = rs.pointer()!;
 		this.totalProduced = rs.dword();
 		unkown.dword();
 		this.actualFilterCapacity = rs.dword();
