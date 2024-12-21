@@ -10,6 +10,12 @@ import type Stream from './stream.js';
 import type { ValueOf } from 'type-fest';
 import type { kFileTypeArray } from './symbols.js';
 import type TractInfo from './tract-info.js';
+import type {
+	Network,
+	NetworkBridgeOccupant,
+	NetworkTunnelOccupant,
+	PrebuiltNetwork,
+} from './file-classes.js';
 
 // Contains the type definition that a class implementing a DBPF file should 
 // minimally adhere to. The only requirement here is that it can be parsed from 
@@ -73,3 +79,10 @@ export type FileTypeName = [keyof typeof FileType];
 export type DecodedFileTypeName = [
 	keyof typeof FileClasses & keyof typeof FileType
 ];
+
+// All known network-types, which is useful as they share a common structure.
+export type NetworkOccupantType =
+	| Network
+	| PrebuiltNetwork
+	| NetworkBridgeOccupant
+	| NetworkTunnelOccupant;
