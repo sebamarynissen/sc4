@@ -24,7 +24,6 @@ export default class PrebuiltNetwork {
 	version = '4.8.4';
 	appearance: dword = 0x05;
 	tract = new TractInfo();
-	xTractSize: word = 0;
 	sgprops: SGProp[] = [];
 	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
 	matrix3: Matrix3 | null = null;
@@ -49,12 +48,8 @@ export default class PrebuiltNetwork {
 	u = new Unknown()
 		.dword(0xc772bf98)
 		.bytes([0, 0])
-		.dword(0x00000000)
-		.dword(0x00000000)
-		.dword(0x00000000)
-		.float(0)
-		.float(0)
-		.float(0)
+		.repeat(3, u => u.dword(0x00000000))
+		.repeat(3, u => u.float(0.0))
 		.bytes([0, 0, 0, 0, 0]);
 
 	// ## parse(rs)
@@ -93,13 +88,9 @@ export default class PrebuiltNetwork {
 		this.bbox = rs.bbox({ range: true });
 		this.constructionStates = rs.dword();
 		this.pathId = rs.dword();
-		unknown.dword(0x00000000);
-		unknown.dword(0x00000000);
-		unknown.dword(0x00000000);
+		unknown.repeat(3, u => u.dword(0x00000000));
 		this.demolishingCosts = rs.qword();
-		unknown.float();
-		unknown.float();
-		unknown.float();
+		unknown.repeat(3, u => u.float());
 		unknown.bytes(5);
 		let pillar = rs.dword();
 		if (pillar > 0) {
