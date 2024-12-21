@@ -30,15 +30,13 @@ for (let tile of network) {
 
 itemIndex.rebuild(FileType.Network, network);
 
-let citySize = networkIndex.cityTiles ** 0.5;
 for (let tile of networkIndex.tiles) {
-	let x = tile.nr % citySize;
-	let z = tile.nr / citySize | 0;
 
 	// The road has x = 40 as tile coordinate, so don't touch anything else.
-	if (x !== 40) continue;
-	if (tile.pointer!.type === FileType.NetworkBridge) continue;
-	tile.nr = (z + dz)*citySize + (x + dx);
+	if (tile.x !== 40) continue;
+	if (tile.pointer!.type === FileType.NetworkBridgeOccupant) continue;
+	tile.x += dx;
+	tile.z += dz;
 
 }
 
