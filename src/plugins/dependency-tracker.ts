@@ -239,7 +239,6 @@ class DependencyTrackingContext {
 	// in the future we might want to do this in parallel!
 	async track() {
 		let tasks = this.files
-			.filter(file => file.endsWith('.SC4Lot'))
 			.map(file => this.read(file));
 		await Promise.all(tasks);
 		return new DependencyTrackingResult(this);
@@ -678,17 +677,18 @@ class DependencyTrackingResult {
 		// Store all dependencies that were touched as a dependency class.
 		this.dependencies = [...ctx.entries.values()] as Dep.Dependency[];
 
-		// Build up the tree class from it.
-		let children = new Set();
-		for (let dep of this.dependencies) {
-			for (let child of dep.children) {
-				if (!child.entry) continue;
-				children.add(child.entry.id);
-			}
+		// Build up the dependency tree from it. We do this by filtering out all 
+		// dependencies that appear as a non-root dependency.
+		let children = new Set<Dep.Dependency>();
+		let queue = this.dependencies.map(dep => dep.children).flat();
+		while (queue.length > 0) {
+			let dep = queue.shift()!;
+			children.add(dep);
+			queue.push(...dep.children);
 		}
 		this.tree = this.dependencies.filter(dep => {
 			if (dep.entry?.type !== FileType.Exemplar) return false;
-			return !children.has(dep.entry.id);
+			return !children.has(dep);
 		});
 
 		// For the actual dependencies, we'll filter out the input files.
