@@ -13,6 +13,7 @@
     "./threading": "./lib/threading/index.js",
     "./cli": "./lib/cli/cli.js",
     "./api": "./lib/api/api.js",
+    "./api/*": "./lib/api/*",
     "./submenus": "./lib/submenus/index.js"
   },
   "imports": {

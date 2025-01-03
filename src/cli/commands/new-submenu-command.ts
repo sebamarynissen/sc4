@@ -1,5 +1,5 @@
 // # new-submenu-command.js
-import { createSubmenuButton } from 'sc4/submenus';
+import { createSubmenuButton } from 'sc4/plugins';
 import logger from '#cli/logger.js';
 
 type NewSubmenuOptions = {

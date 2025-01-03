@@ -1,5 +1,5 @@
 // # create-submenu-patch.js
-import { createSubmenuPatch } from 'sc4/submenus';
+import { createSubmenuPatch } from 'sc4/plugins';
 import logger from '#cli/logger.js';
 
 type AddToSubmenuOptions = {
