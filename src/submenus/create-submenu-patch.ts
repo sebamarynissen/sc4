@@ -61,7 +61,7 @@ export default async function createMenuPatch(options: CreateMenuPatchOptions) {
 		let buffer = dbpf.toBuffer();
 		let { output = 'Submenu patch.dat' } = options;
 		let outputPath = path.resolve(directory, output);
-		fs.writeFileSync(outputPath, buffer);
+		await fs.promises.writeFile(outputPath, buffer);
 		logger?.ok(`Saved to ${outputPath}`);
 	}
 	return dbpf;

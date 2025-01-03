@@ -58,7 +58,7 @@ export async function submenu() {
 	});
 	output = path.resolve(outputDir, output);
 	return [files, {
-		menu,
+		menu: +menu,
 		output,
 		recursive,
 	}];
