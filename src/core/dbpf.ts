@@ -130,6 +130,9 @@ export default class DBPF {
 	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): EntryFromType<T>;
 	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
+		if (!file) {
+			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
+		}
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;
 		this.entries.add(entry);
