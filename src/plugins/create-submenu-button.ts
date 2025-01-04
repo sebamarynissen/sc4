@@ -27,7 +27,7 @@ type createSubmenuButtonOptions = {
 	icon: Uint8Array | string;
 	parent: number;
 	logger?: Logger;
-	save: boolean;
+	save?: boolean;
 	order?: number;
 	directory?: string;
 	output?: string;

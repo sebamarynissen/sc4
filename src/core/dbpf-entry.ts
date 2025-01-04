@@ -13,10 +13,10 @@ import { kFileTypeArray } from './symbols.js';
 import type {
 	DBPFFile as File,
 	DecodedFileTypeId,
-    DecodedFileClass,
     TypeIdToFile,
+    DecodedFile,
+    ReadResult,
 } from './types.js';
-import type { ReadResult } from './dbpf-entry-types.js';
 
 /**
  * Returns a DBPF Entry type where the file type pointed to by the entry is 
@@ -49,7 +49,8 @@ type EntryParseOptions = {
 // a file in a DBPF, but not the file itself yet. In order to actually get the 
 // file, you will need to call entry.read(). If the entry is of a known type, 
 // it will be parsed appropriately.
-export default class Entry<T = unknown> {
+type AllowedEntryType = DecodedFile | Uint8Array;
+export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	type: uint32;
 	group: uint32 = 0;
 	instance: uint32 = 0;
@@ -156,7 +157,7 @@ export default class Entry<T = unknown> {
 	// ## get isKnownType()
 	// Returns whether the type of this entry is a known file type, meaning that 
 	// a class has been registered for it that can properly parse the buffer.
-	isKnownType(): this is Entry<DecodedFileClass> {
+	isKnownType(): this is Entry<DecodedFile> {
 		return hasConstructorByType(this.type);
 	}
 

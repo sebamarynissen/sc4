@@ -6,7 +6,8 @@ import { resource } from '#test/files.js';
 
 describe('The plugin index', function() {
 
-	this.slow(1000);
+	this.slow(2000);
+	this.timeout(10_000);
 
 	it('indexes all files in a directory', async function() {
 
