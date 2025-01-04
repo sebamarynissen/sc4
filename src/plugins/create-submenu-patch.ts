@@ -13,6 +13,10 @@ function random() {
 }
 
 type CreateMenuPatchOptions = {
+	menu: number;
+	targets?: number[];
+	dbpfs?: DBPF[];
+	files?: string[];
 	save?: boolean;
 	logger?: Logger;
 	output?: string;
@@ -22,68 +26,19 @@ type CreateMenuPatchOptions = {
 };
 
 // # createMenuPatch(menu, globsOrFiles, options = {})
-export default async function createMenuPatch(
-	menu: number,
-	globsOrFiles: string[],
-	options: CreateMenuPatchOptions = {},
-) {
+export default async function createMenuPatch(options: CreateMenuPatchOptions) {
 
 	// We'll first find the files to read in. This is a bit complicated because 
 	// we support both globbing, or specifying files and directories explicitly.
 	let {
+		menu,
 		directory = process.cwd(),
-		recursive = false,
+		logger,
 	} = options;
-	let files = new Set<string>();
-	for (let pattern of globsOrFiles) {
-		let fullPath = path.resolve(directory, pattern);
-		if (fs.existsSync(fullPath)) {
-			let info = fs.statSync(fullPath);
-			if (info.isDirectory()) {
-				let localPattern = (recursive ? '**/*' : '*')+'.{dat,sc4*}';
-				for await (let file of new Glob(localPattern, {
-					nodir: true,
-					absolute: true,
-					cwd: fullPath,
-					nocase: true,
-				})) files.add(file);
-			} else {
-				files.add(fullPath);
-			}
-		} else {
-			for await (let file of new Glob(pattern, {
-				nodir: true,
-				absolute: true,
-				cwd: directory,
-			})) files.add(file);
-		}
-	}
-
-	// Collect all [group,instance] pairs for the lots that need to be put in a 
-	// submenu.
-	const { logger } = options;
-	let gis = [];
-	for (let file of files) {
-
-		// We won't try to read in anything else than .dat or .sc4lot files.
-		let fullPath = path.resolve(process.cwd(), file);
-		let basePath = path.relative(process.cwd(), fullPath);
-		let ext = path.extname(fullPath).toLowerCase();
-		if (!(ext === '.dat' || ext.startsWith('.sc4'))) {
-			logger?.info(`Skipping ${basePath}`);
-			continue;
-		}
-
-		// Read in as dbpf and collect the relevant exemplars.
-		logger?.info(chalk.gray(`Reading ${basePath}`));
-		let buffer = fs.readFileSync(fullPath);
-		let dbpf = new DBPF({ buffer, file: fullPath });
-		gis.push(...collect(dbpf, logger));
-
-	}
+	let targets = await findGroupInstancePairs(options);
 
 	// If nothing was found, log a warning.
-	if (gis.length === 0) {
+	if (targets.length === 0) {
 		const { logger } = options;
 		logger?.warn('No lots found to put in a submenu');
 		return null;
@@ -92,7 +47,7 @@ export default async function createMenuPatch(
 	// Create a fresh Cohort file and add the Exemplar Patch Targets 
 	// (0x0062e78a) and Building Submenus (0xAA1DD399)
 	let cohort = new Cohort();
-	cohort.addProperty(0x0062e78a, gis);
+	cohort.addProperty(0x0062e78a, targets);
 	cohort.addProperty(0xAA1DD399, [menu]);
 
 	// Create an empty dbpf and add the cohort to it, assigning it a random 
@@ -106,10 +61,94 @@ export default async function createMenuPatch(
 		let buffer = dbpf.toBuffer();
 		let { output = 'Submenu patch.dat' } = options;
 		let outputPath = path.resolve(directory, output);
-		fs.writeFileSync(outputPath, buffer);
+		await fs.promises.writeFile(outputPath, buffer);
 		logger?.ok(`Saved to ${outputPath}`);
 	}
 	return dbpf;
+
+}
+
+// # findGroupInstancePairs(opts)
+// Finds all group/instance pairs that have to be added to the patch from 
+// various sources.
+async function findGroupInstancePairs(
+	options: CreateMenuPatchOptions,
+): Promise<number[]> {
+
+	// If the group/instance pairs are directly specified as "targets" array, 
+	// then we return it as is.
+	if (options.targets) {
+		return options.targets;
+	}
+
+	// Check if a list of dbpfs was specified. If not, then we'll try to read in 
+	// from files instead.
+	let {
+		logger,
+		dbpfs,
+		files: globsOrFiles,
+		directory = process.cwd(),
+		recursive = false,
+	} = options;
+	if (!dbpfs) {
+		if (!globsOrFiles) {
+			throw new TypeError(`No patch targets found. Neither files, dbfs or targets list was specified!`);
+		}
+		let files = new Set<string>();
+		for (let pattern of globsOrFiles) {
+			let fullPath = path.resolve(directory, pattern);
+			if (fs.existsSync(fullPath)) {
+				let info = fs.statSync(fullPath);
+				if (info.isDirectory()) {
+					let localPattern = (recursive ? '**/*' : '*')+'.{dat,sc4*}';
+					for await (let file of new Glob(localPattern, {
+						nodir: true,
+						absolute: true,
+						cwd: fullPath,
+						nocase: true,
+					})) files.add(file);
+				} else {
+					files.add(fullPath);
+				}
+			} else {
+				for await (let file of new Glob(pattern, {
+					nodir: true,
+					absolute: true,
+					cwd: directory,
+				})) files.add(file);
+			}
+		}
+
+		// Read in all dbpfs from the files that we've collected.
+		dbpfs = [];
+		for (let file of files) {
+
+			// We won't try to read in anything else than .dat or .sc4lot files.
+			let fullPath = path.resolve(process.cwd(), file);
+			let basePath = path.relative(process.cwd(), fullPath);
+			let ext = path.extname(fullPath).toLowerCase();
+			if (!(ext === '.dat' || ext.startsWith('.sc4'))) {
+				logger?.info(`Skipping ${basePath}`);
+				continue;
+			}
+
+			// Read in as dbpf and collect the relevant exemplars.
+			logger?.info(chalk.gray(`Reading ${basePath}`));
+			let buffer = await fs.promises.readFile(fullPath);
+			let dbpf = new DBPF({ buffer, file: fullPath });
+			dbpfs.push(dbpf);
+
+		}
+
+	}
+
+	// Now that we have the list of dbpfs to read the lots from, actually 
+	// collect the targets list.
+	let targets = [];
+	for (let dbpf of dbpfs) {
+		targets.push(...collect(dbpf, logger));
+	}
+	return targets;
 
 }
 
@@ -130,7 +169,7 @@ function collect(dbpf: DBPF, logger?: Logger) {
 			let hasLotResourceKey = ex.props.some(prop => prop.id === 0xea260589);
 			if (!hasLotResourceKey) continue;
 
-			// Cool, this is an item that appears in a menu, grab its tgi and add 
+			// Cool, this is an item that appears in a menu, grab its tgi and add
 			// the group and instance to what we're collecting.
 			let [, group, instance] = entry.tgi;
 			gis.push(group, instance);

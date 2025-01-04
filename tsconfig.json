@@ -9,6 +9,7 @@
 			"sc4/threading": ["src/threading/index.ts"],
 			"sc4/api": ["src/api/api.js"],
 			"sc4/api/*": ["src/api/*"],
+			"sc4/submenus": ["src/submenus/index.ts"],
 			"sc4/types": ["src/types/types.ts"],
 			"#cli/*": ["src/cli/*"],
 		},

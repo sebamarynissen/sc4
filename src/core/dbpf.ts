@@ -111,6 +111,8 @@ export default class DBPF {
 	// Proxies to entries.find().
 	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T> | undefined;
 	find<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T> | undefined;
+	find<T extends FileTypeId>(query: TGIQuery<T>): Entry<Uint8Array> | undefined;
+	find<T extends FileTypeId>(type: T, group: uint32, instance: uint32): Entry<Uint8Array> | undefined;
 	find(...params: FindParameters<Entry>): Entry | undefined;
 	find(...args: FindParameters<Entry>) {
 		return this.entries.find(...args as Parameters<TGIIndex<Entry>['find']>);
@@ -120,6 +122,8 @@ export default class DBPF {
 	// Proxies to entries.findAll()
 	findAll<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T>[];
 	findAll<T extends DecodedFileTypeId>(type: T, group: uint32, instance: uint32): EntryFromType<T>[];
+	findAll<T extends FileTypeId>(query: TGIQuery<T>): Entry<Uint8Array>[];
+	findAll<T extends FileTypeId>(type: T, group: uint32, instance: uint32): Entry<Uint8Array>[];
 	findAll(...params: FindParameters<Entry>): Entry[]
 	findAll(...args: FindParameters<Entry>): Entry[] {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
@@ -130,13 +134,16 @@ export default class DBPF {
 	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): EntryFromType<T>;
 	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
+		if (!file) {
+			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
+		}
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;
 		this.entries.add(entry);
 		if (isUint8Array(file)) {
 			entry.buffer = file;
 		} else if (file) {
-			entry.file = file;
+			entry.file = file as any;
 		}
 		return entry;
 	}

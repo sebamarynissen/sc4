@@ -59,13 +59,18 @@ export type ArrayFile = InstanceType<Extract<DecodedFileClass, ArraySignature>>;
 // A literal type containing the type ids of the simgrids.
 export type SimGridFileTypeId = (typeof SimGridFileType)[keyof typeof SimGridFileType];
 
+// Apparently inlining this in TypeIdToFile doesn't work, so use it as a sub-type.
+type DecodedFileTypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
+	typeof FileClasses[TypeIdToStringKey[T]]
+>;
+
 /**
  * Returns the decoded file as a *type* - i.e. "Lot", "Exemplar", ... based on 
  * its numerical Type ID.
  */
-export type TypeIdToFile<T extends DecodedFileTypeId> = InstanceType<
-	typeof FileClasses[TypeIdToStringKey[T]]
->;
+export type TypeIdToFile<T> = T extends DecodedFileTypeId
+	? DecodedFileTypeIdToFile<T>
+	: Uint8Array;
 
 // Some dbpf files - mostly savegame files - are actually arrays of those 
 // structures. The entry class needs to know this, so we use a literal type for 
@@ -101,3 +106,10 @@ export type NetworkOccupantType =
 	| PrebuiltNetwork
 	| NetworkBridgeOccupant
 	| NetworkTunnelOccupant;
+
+/**
+ * Figures out the return type of an Entry's read() and readAsync() functions. 
+ * We automatically figure out whether the type is a (1) decoded type and (2) 
+ * is an array Type.
+ */
+export type ReadResult<T> = T extends ArrayFile ? T[] : T;

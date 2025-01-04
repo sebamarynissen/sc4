@@ -433,7 +433,7 @@ export default class CityManager {
 		let zoneTypes = this.getPropertyValue(
 			file,
 			Property.LotConfigPropertyZoneTypes,
-		)!;
+		) ?? [];
 		let zoneType = zoneTypes[0] || 0x0f;
 
 		// Determine the zoneWealth as well. Note that this is to be taken 

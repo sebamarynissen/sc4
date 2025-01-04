@@ -108,7 +108,7 @@ type ParseOptions = {
 export class NetworkIndexTile {
 	x: tiles = 0;
 	z: tiles = 0;
-	pointer: Pointer<NetworkOccupantType> | null = null;
+	pointer: Pointer<NetworkOccupantType>;
 	blocks: any[];
 	automata: any[];
 	reps: Uint8Array[] = [

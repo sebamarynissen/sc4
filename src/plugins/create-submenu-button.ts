@@ -27,7 +27,7 @@ type createSubmenuButtonOptions = {
 	icon: Uint8Array | string;
 	parent: number;
 	logger?: Logger;
-	save: boolean;
+	save?: boolean;
 	order?: number;
 	directory?: string;
 	output?: string;
@@ -94,7 +94,9 @@ export default async function createSubmenuButton(
 	if (typeof icon === 'string') {
 		icon = await fs.promises.readFile(icon);
 	}
-	dbpf.add([FileType.PNG, Groups.Icon, buttonId], icon);
+	if (icon) {
+		dbpf.add([FileType.PNG, Groups.Icon, buttonId], icon);
+	}
 
 	// Save the dbpf as well if specified.
 	if (opts.save) {
