@@ -208,3 +208,19 @@ export function duplicateAsync<Y, R, N>(
 		},
 	};
 }
+
+// # isLittleEndian()
+let isLE: boolean;
+export function isLittleEndian() {
+	if (isLE === undefined) {
+		let arr = new Uint32Array([0x11223344]);
+		let view = new Uint8Array(arr.buffer);
+		isLE = view[0] === 0x44;
+	}
+	return isLE;
+}
+
+// # isBigEndian()
+export function isBigEndian() {
+	return !isLittleEndian();
+}

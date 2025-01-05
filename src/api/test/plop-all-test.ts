@@ -36,6 +36,9 @@ describe('The plopall api function', function() {
 			z: 0x41,
 		});
 
+		let flags = dbpf.terrainFlags;
+		expect(flags.raw).to.eql(new Uint16Array(65*65));
+
 	});
 
 });

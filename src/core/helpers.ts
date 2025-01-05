@@ -1,7 +1,12 @@
 // # helpers.ts
+import { SmartBuffer } from 'smart-arraybuffer';
 import type { uint32 } from 'sc4/types';
+import cppClasses from './cpp-classes.js';
+import crc32 from './crc.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
+import type Entry from './dbpf-entry.js';
+import { indexOf } from 'uint8array-extras';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -35,4 +40,80 @@ export function isArrayType(object: object): boolean {
 export function getTypeLabel(value: uint32): string | undefined {
 	const entries = Object.entries(FileType);
 	return entries.find(([, type]) => type === value)?.[0];
+}
+
+// # readRecordsAsBuffers(entry)
+// This function can be useful when decoding the savegame files. It accepts an 
+// entry that consists out of multiple SIZE MEM CRC records, and returns the 
+// array of raw buffers. Note that we return a shallow copy, so the underlying 
+// memory is the same! It can be used to modify values of subfiles of which the 
+// structure is not known yet.
+export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
+	let buffer = entry.decompress();
+
+	// If the buffer can't even hold SIZE CRC MEM, then we skip it.
+	if (buffer.byteLength < 12) return [];
+
+	// If what we're interpreting as size is larged than the buffer, 
+	// it's impossible that this has the structure "SIZE CRC MEM"!
+	let reader = SmartBuffer.fromBuffer(buffer);
+	let size = reader.readUInt32LE(0);
+	if (size > buffer.byteLength) return [];
+
+	// Note that there may be multiple records in this buffer. We're 
+	// going to parse them one by one and calculate the checksum. If the 
+	// checksum matches, we're considering them to have the structure 
+	// "SIZE CRC MEM".
+	let slice = buffer.subarray(8, size);
+	let crc = crc32(slice);
+	if (crc !== reader.readUInt32LE(4)) return [];
+
+	// Allright, first entry is of type "SIZE MEM CRC", we assume that 
+	// all following entries are as well.
+	let records = [];
+	records.push(reader.readUint8Array(size));
+	let index = size;
+	buffer = buffer.subarray(size);
+	while (buffer.byteLength >= 12) {
+		let reader = SmartBuffer.fromBuffer(buffer);
+		let size = reader.readUInt32LE(0);
+		records.push(
+			reader.readUint8Array(size),
+		);
+		index += size;
+		buffer = buffer.subarray(size);
+	}
+	return records;
+}
+
+// # removePointers(record)
+// Nullifies all memory addresses for all pointers in the given record buffer. 
+// This is useful when comparing unknown savegame files where you want to make 
+// abstraction of the memory address, which can be different.
+let knownTypes: Uint8Array[];
+export function removePointers(record: Uint8Array): Uint8Array {
+	if (!knownTypes) {
+		knownTypes = Object.keys(cppClasses)
+			.map(type => new Uint32Array([+type]))
+			.map(arr => new Uint8Array(arr.buffer));
+	}
+	for (let ptr of knownTypes) {
+		removePointer(record, ptr);
+	}
+	return record;
+}
+
+function removePointer(buffer: Uint8Array, pointer: Uint8Array) {
+	let index = 0;
+	let pivot = buffer;
+	while (index > -1) {
+		index = indexOf(pivot, pointer);
+		if (index > -1) {
+			for (let i = 0; i < 4; i++) {
+				pivot[index-4+i] = 0;
+			}
+			pivot = pivot.subarray(index+4);
+		}
+	}
+	return buffer;
 }

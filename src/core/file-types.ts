@@ -60,8 +60,13 @@ export const SavegameFileType = {
 	// instance inside a Savegame, but obviously the type id is still needed 
 	// sometimes.
 	TerrainMap: 0xa9dd6ff4,
+	TerrainBox: 0x8a91e7e3,
+	TerrainFlags: 0x8a91e7e0,
 	cSTETerrain: 0xe98f9525,
 	cSTETerrainView3D: 0xc9b84e10,
+
+	// Render stuff
+	cSC43DRender: 0xe9c622d8,
 
 } as const;
 

@@ -129,11 +129,11 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	remove(query: FindParameters<T>[0], g?: number, i?: number): number {
 		let removed;
 		if (typeof query === 'function') {
-			removed = filterInPlace<T>(this, query);
+			removed = filterInPlace<T>(this, invert(query));
 		} else {
 			let normalizedQuery = normalize(query, g, i);
 			if (!normalizedQuery) return 0;
-			removed = filterInPlace<T>(this, createFilter(normalizedQuery));
+			removed = filterInPlace<T>(this, invert(createFilter(normalizedQuery)));
 		}
 		if (this.index) {
 			this.dirty = true;
@@ -320,4 +320,13 @@ function filterInPlace<T, S extends T = T>(
 	}
 	array.length = j;
 	return out;
+}
+
+// # invert(fn)
+// Curries a function to return the boolean inverse. This is used for removing 
+// entries again, because in that case we have to invert obviously.
+function invert(fn: (...args: any[]) => any) {
+	return function(...args: any[]) {
+		return !fn(...args);
+	}
 }
