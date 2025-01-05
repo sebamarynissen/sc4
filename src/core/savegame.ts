@@ -15,7 +15,7 @@ import type {
 	SimGridUint8,
 } from './sim-grid-file.js';
 import type { EntryFromType } from './dbpf-entry.js';
-import type TerrainFlags from './terrain-flags.js';
+import SavegameContext from './savegame-context.js';
 
 type SimGrid =
 	| SimGridUint8
@@ -89,6 +89,13 @@ export default class Savegame extends DBPF {
 	// Same for the city depth.
 	get depth() {
 		return (this.terrain?.zSize ?? 1) - 1;
+	}
+
+	// ## createContext()
+	// Returns a Savegame context object that allows us to dereference pointers, 
+	// as well as generate new unique pointer addresses.
+	createContext(): SavegameContext {
+		return new SavegameContext(this);
 	}
 
 	// ## getSimGrid(dataId, type)

@@ -440,58 +440,6 @@ export default class DBPF {
 		return list;
 	}
 
-	// ## memRefs()
-	// Returns a list of all records (could be sub-records) in the dbpf that 
-	// use a memory reference (i.e. have general structure SIZE CRC MEM). 
-	// We're using the CRC to detect if this kind of entry works this way.
-	memRefs() {
-		let all = [];
-		for (let entry of this) {
-			let raw = entry.decompress();
-			let buff = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength);
-			if (buff.byteLength < 4) continue;
-			let size = buff.readUInt32LE();
-
-			// If what we're interpreting as size is larger than the buffer, 
-			// it's impossible that this has the structure "SIZE CRC MEM"!
-			if (size > buff.byteLength) continue;
-
-			// Note that there may be multiple records in this buffer. We're 
-			// going to parse them one by one and calculate the checksum. If 
-			// the checksum matches, we're considering them to have the 
-			// structure "SIZE CRC MEM".
-			let slice = buff.subarray(0, size);
-			let crc = crc32(slice, 8);
-			if (crc !== buff.readUInt32LE(4)) continue;
-
-			// Allright, first entry is of type "SIZE MEM CRC", we assume that 
-			// all following entries are as well.
-			all.push({
-				mem: slice.readUInt32LE(8),
-				type: entry.type,
-				entry,
-				index: 0,
-			});
-			let index = size;
-			buff = buff.subarray(size);
-			while (buff.length > 4) {
-				let size = buff.readUInt32LE(0);
-				let slice = buff.subarray(0, size);
-				let mem = slice.readUInt32LE(8);
-				all.push({
-					mem,
-					type: entry.type,
-					entry,
-					index,
-				});
-				index += size;
-				buff = buff.subarray(size);
-			}
-
-		}
-		return all;
-	}
-
 	// ## memSearch(refs)
 	// Searches all entries for a reference to the given memory address.
 	memSearch(refs: uint32 | uint32[]) {
