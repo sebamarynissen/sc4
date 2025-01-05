@@ -405,41 +405,6 @@ export default class DBPF {
 		return this.exemplars.map(entry => entry.read());
 	}
 
-	// ## recordCount()
-	// Returns an object that lists how many records are counted per sub file.
-	recordCount() {
-		let list = [];
-		for (let entry of this) {
-			let raw = entry.decompress();
-			let buff = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength);
-			let size = buff.readUInt32LE();
-
-			// Skip the entries that don't seem to hold size crc mem records.
-			if (size > buff.byteLength) {
-				continue;
-			}
-			let slice = buff.subarray(0, size);
-			let crc = crc32(slice, 8);
-			if (crc !== buff.readUInt32LE(4)) {
-				continue;
-			}
-
-			// Okay, count records now.
-			let i = 0;
-			while (buff.length > 4) {
-				i++;
-				let size = buff.readUInt32LE(0);
-				buff = buff.subarray(size);
-			}
-			if (buff.length > 0) {
-				console.log('size mismatch');
-			}
-			list.push([cClass[entry.type as keyof typeof cClass], i]);
-
-		}
-		return list;
-	}
-
 	// ## memSearch(refs)
 	// Searches all entries for a reference to the given memory address.
 	memSearch(refs: uint32 | uint32[]) {
