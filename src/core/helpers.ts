@@ -1,10 +1,12 @@
 // # helpers.ts
 import { SmartBuffer } from 'smart-arraybuffer';
 import type { uint32 } from 'sc4/types';
+import cppClasses from './cpp-classes.js';
 import crc32 from './crc.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
 import type Entry from './dbpf-entry.js';
+import { indexOf } from 'uint8array-extras';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -82,4 +84,36 @@ export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
 		buffer = buffer.subarray(size);
 	}
 	return records;
+}
+
+// # removePointers(record)
+// Nullifies all memory addresses for all pointers in the given record buffer. 
+// This is useful when comparing unknown savegame files where you want to make 
+// abstraction of the memory address, which can be different.
+let knownTypes;
+export function removePointers(record: Uint8Array): Uint8Array {
+	if (!knownTypes) {
+		knownTypes = Object.keys(cppClasses)
+			.map(type => new Uint32Array([+type]))
+			.map(arr => new Uint8Array(arr.buffer));
+	}
+	for (let ptr of knownTypes) {
+		removePointer(record, ptr);
+	}
+	return record;
+}
+
+function removePointer(buffer: Uint8Array, pointer: Uint8Array) {
+	let index = 0;
+	let pivot = buffer;
+	while (index > -1) {
+		index = indexOf(pivot, pointer);
+		if (index > -1) {
+			for (let i = 0; i < 4; i++) {
+				pivot[index-4+i] = 0;
+			}
+			pivot = pivot.subarray(index+4);
+		}
+	}
+	return buffer;
 }
