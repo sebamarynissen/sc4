@@ -4,12 +4,11 @@ import type Savegame from './savegame.js';
 import Pointer from './pointer.js';
 import { hex } from 'sc4/utils';
 import { isArrayType, readRecordsAsBuffers } from './helpers.js';
-import type { DecodedFile, SavegameRecord } from './types.js';
+import type { SavegameRecord } from './types.js';
 import { SmartBuffer } from 'smart-arraybuffer';
 import type Entry from './dbpf-entry.js';
 import { cClass } from './enums.js';
 
-type DecodedSavegameRecord = DecodedFile & SavegameRecord;
 type RecordRow = {
 	entry: Entry;
 	type: number;
@@ -20,7 +19,6 @@ type RecordInfo = {
 	pointer: Pointer;
 	offset: number;
 	buffer: Uint8Array;
-	record: DecodedSavegameRecord | undefined;
 };
 
 // # SavegameContext
@@ -122,17 +120,6 @@ export default class SavegameContext {
 			let buffers = readRecordsAsBuffers(entry);
 			if (buffers.length === 0) continue;
 
-			// Parse the entry. If it's not a Uint8Array, then we'll have to 
-			// include it as well.
-			let files: any = entry.read();
-			if (files instanceof Uint8Array) {
-				files = undefined;
-			} else {
-				if (!Array.isArray(files) || !isArrayType(files)) {
-					files = [files];
-				}
-			}
-
 			// Create the rows.
 			let row: RecordRow = {
 				entry,
@@ -144,12 +131,10 @@ export default class SavegameContext {
 			for (let i = 0; i < buffers.length; i++) {
 				let buffer = buffers[i];
 				let address = SmartBuffer.fromBuffer(buffer).readUInt32LE(8);
-				let record = files ? files[i] as DecodedSavegameRecord : undefined;
 				row.records.push({
 					pointer: new Pointer(entry.type, address),
 					offset,
 					buffer,
-					record,
 				});
 				offset += buffer.byteLength;
 			}
