@@ -3,7 +3,7 @@ import type { dword } from 'sc4/types';
 import type Savegame from './savegame.js';
 import type Pointer from './pointer.js';
 import { hex } from 'sc4/utils';
-import { isArrayType } from './helpers.js';
+import { isArrayType, readRecordsAsBuffers } from './helpers.js';
 import type { SavegameRecord } from './types.js';
 import { SmartBuffer } from 'smart-arraybuffer';
 import crc32 from './crc.js';
@@ -54,7 +54,16 @@ export default class SavegameContext {
 		}
 		let file = entry.read() as T | T[] | Uint8Array;
 		if (file instanceof Uint8Array) {
-			throw new Error(`Trying to dereference a ponter from a non-decoded subfile ${hex(type)}!`);
+			let buffers = readRecordsAsBuffers(entry);
+			let record = buffers.find(buffer => {
+				let reader = SmartBuffer.fromBuffer(buffer);
+				let mem = reader.readUInt32LE(8);
+				return mem === address;
+			});
+			if (!record) {
+				throw new Error(`Trying to dereference a pointer to a non-existent record!`);
+			}
+			return record;
 		}
 		let result;
 		if (!Array.isArray(file) || isArrayType(file)) {
