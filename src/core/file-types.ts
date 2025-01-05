@@ -65,6 +65,9 @@ export const SavegameFileType = {
 	cSTETerrain: 0xe98f9525,
 	cSTETerrainView3D: 0xc9b84e10,
 
+	// Render stuff
+	cSC43DRender: 0xe9c622d8,
+
 } as const;
 
 export const SimGridFileType = {

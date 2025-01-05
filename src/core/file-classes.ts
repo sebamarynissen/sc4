@@ -29,6 +29,7 @@ import TerrainBox from './terrain-box.js';
 import TerrainFlags from './terrain-flags.js';
 import cSTETerrain from './cste-terrain.js';
 import cSTETerrainView3D from './cste-terrain-view-3d.js';
+import cSC43DRender from './csc4-3drender.js';
 import {
 	SimGridFloat32,
 	SimGridUint32,
@@ -76,6 +77,7 @@ export {
 	TerrainFlags,
 	cSTETerrain,
 	cSTETerrainView3D,
+	cSC43DRender,
 };
 
 export default {
@@ -116,4 +118,5 @@ export default {
 	TerrainFlags,
 	cSTETerrain,
 	cSTETerrainView3D,
+	cSC43DRender,
 } as const;
