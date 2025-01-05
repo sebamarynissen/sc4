@@ -134,6 +134,7 @@ export async function refs(opts) {
 
 	const { logger = defaultLogger } = opts;
 	let dbpf = opts.dbpf;
+	let ctx = dbpf.createContext();
 
 	if (opts.address) {
 
@@ -150,7 +151,7 @@ export async function refs(opts) {
 		// interested in.
 		let queries = opts.queries;
 		let types = Object.values(queries);
-		let refs = dbpf.memRefs().filter(row => types.includes(row.type));
+		let refs = ctx.findAllMemRefs().filter(row => types.includes(row.type));
 		let oLength = refs.length;
 
 		// Put a maximum on the types of refs, especially for the large city 
@@ -213,7 +214,8 @@ export async function pointer(opts) {
 	} = opts;
 
 	logger.info('Searching for', hex(opts.pointer));
-	let refs = dbpf.memRefs();
+	let ctx = dbpf.createContext();
+	let refs = ctx.findAllMemRefs();
 	let entry = refs.find(ref => {
 		return ref.mem === pointer;
 	});

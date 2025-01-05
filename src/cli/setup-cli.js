@@ -6,7 +6,7 @@ import tar from 'tar';
 import ora from 'ora';
 import { program as commander, Command } from 'commander';
 import * as commands from '#cli/commands';
-import { DBPF, FileType } from 'sc4/core';
+import { DBPF, FileType, Savegame } from 'sc4/core';
 import * as api from 'sc4/api';
 import { hex } from 'sc4/utils';
 import version from './version.js';
@@ -430,7 +430,7 @@ export function factory(program) {
 			let file = path.resolve(dir, city);
 			let buff = fs.readFileSync(file);
 			let opts = baseOptions();
-			opts.dbpf = new DBPF(buff);
+			opts.dbpf = new Savegame(buff);
 
 			if (this.address) {
 				opts.address = this.address.split(',').map(x => Number(x));

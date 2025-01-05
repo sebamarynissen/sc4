@@ -18,6 +18,7 @@ import {
     type SavegameObject,
     type ArrayFileTypeId,
     type SavegameFileTypeId,
+    SavegameContext,
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import type { TGIArray, TGIQuery } from 'sc4/types';
@@ -70,9 +71,8 @@ type ZoneOptions = {
 // index.php?topic=5656.0, contains a lot of relevant info.
 export default class CityManager {
 	dbpf: Savegame;
+	ctx: SavegameContext;
 	index: PluginIndex;
-	memRefs: Set<number> = new Set();
-	#mem = 1;
 
 	// ## constructor(opts)
 	// Sets up the city manager.
@@ -120,14 +120,7 @@ export default class CityManager {
 
 		// Create the city.
 		this.dbpf = new Savegame({ file: full });
-
-		// Index the *initial* mem refs as well. We need to make sure we do 
-		// this before creating any new files in the dbpf, otherwise we're 
-		// indexing mem refs we might have created ourselves.
-		let set = this.memRefs = new Set();
-		for (let { mem } of this.dbpf.memRefs()) {
-			set.add(mem);
-		}
+		this.ctx = this.dbpf.createContext();
 		return this.dbpf;
 
 	}
@@ -143,15 +136,7 @@ export default class CityManager {
 	// a city - such as buildings etc. - because we need to make sure that the 
 	// memory addresses for every record are unique.
 	mem() {
-
-		// Create a new memory reference, but make sure it doesn't exist yet.
-		let ref = this.#mem++;
-		while (this.memRefs.has(ref)) {
-			ref = this.#mem++;
-		}
-		this.memRefs.add(ref);
-		return ref;
-
+		return this.ctx.mem();
 	}
 
 	// ## getProperty(file, key)
