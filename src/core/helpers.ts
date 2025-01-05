@@ -90,7 +90,7 @@ export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
 // Nullifies all memory addresses for all pointers in the given record buffer. 
 // This is useful when comparing unknown savegame files where you want to make 
 // abstraction of the memory address, which can be different.
-let knownTypes;
+let knownTypes: Uint8Array[];
 export function removePointers(record: Uint8Array): Uint8Array {
 	if (!knownTypes) {
 		knownTypes = Object.keys(cppClasses)
