@@ -148,6 +148,12 @@ export default class DBPF {
 		return entry;
 	}
 
+	// ## remove(tgi)
+	// Removes a certain entry again.
+	remove(query: TGIQuery | TGILiteral): number {
+		return this.entries.remove(query);
+	}
+
 	// ## free()
 	// This method unloads the underlying buffer of the dbpf so that it can be 
 	// garbage collected to free up some memory. This is useful if we just 

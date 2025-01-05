@@ -6,7 +6,6 @@ import Lot from './lot.js';
 import Building from './building.js';
 import Prop from './prop.js';
 import Flora from './flora.js';
-import TerrainMap from './terrain-map.js';
 import BaseTexture from './lot-base-texture.js';
 import Network from './network.js';
 import PrebuiltNetwork from './prebuilt-network.js';
@@ -25,6 +24,8 @@ import PlumbingSimulator from './plumbing-simulator.js';
 import NetworkTunnelOccupant from './network-tunnel-occupant.js';
 import NetworkBridgeOccupant from './network-bridge-occupant.js';
 import NetworkManager from './network-manager.js';
+import TerrainMap from './terrain-map.js';
+import TerrainBox from './terrain-box.js';
 import cSTETerrain from './cste-terrain.js';
 import cSTETerrainView3D from './cste-terrain-view-3d.js';
 import {
@@ -70,6 +71,7 @@ export {
 	SimGridUint16,
 	SimGridUint32,
 	TerrainMap,
+	TerrainBox,
 	cSTETerrain,
 	cSTETerrainView3D,
 };
@@ -108,6 +110,7 @@ export default {
 	SimGridUint16,
 	SimGridUint32,
 	TerrainMap,
+	TerrainBox,
 	cSTETerrain,
 	cSTETerrainView3D,
 } as const;
