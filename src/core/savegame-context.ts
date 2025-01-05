@@ -43,7 +43,7 @@ export default class SavegameContext {
 	// corresponding subfile. Note that we don't use an index here, so for very 
 	// large subfiles - such as the prop file - this is O(n) and can take up 
 	// quite a bit of time! Consider indexing it first if you have to do this.
-	deref<T extends SavegameRecord>(pointer: Pointer<T> | null): T {
+	deref<T extends SavegameRecord | Uint8Array>(pointer: Pointer<T> | null): T {
 		if (!pointer || pointer.type === 0x00000000) {
 			throw new Error(`Trying to dereference a null pointer!`);
 		}
@@ -63,7 +63,7 @@ export default class SavegameContext {
 			if (!record) {
 				throw new Error(`Trying to dereference a pointer to a non-existent record!`);
 			}
-			return record;
+			return record as T;
 		}
 		let result;
 		if (!Array.isArray(file) || isArrayType(file)) {
@@ -74,7 +74,7 @@ export default class SavegameContext {
 		if (!result) {
 			throw new Error(`Trying to dereference a pointer to a non-existent record!`);
 		}
-		return result;
+		return result as T;
 	}
 
 	// ## findAllMemRefs()

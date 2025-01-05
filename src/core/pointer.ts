@@ -7,16 +7,16 @@ import { getClassType } from './helpers.js';
 import type { SavegameRecord } from './types.js';
 
 // # Pointer
-export default class Pointer<T extends SavegameRecord = SavegameRecord> {
+export default class Pointer<T extends SavegameRecord | Uint8Array = SavegameRecord> {
 	type: uint32;
 	address: uint32 = 0x00000000;
 
 	// ## constructor(object, address)
 	// We can construct a pointer in two ways. Either directly from a type and 
 	// address, or from a record itself.
-	constructor(object: T);
+	constructor(object: Exclude<T, Uint8Array>);
 	constructor(type: number, address?: uint32);
-	constructor(objectOrType: T | number, address = 0x00000000) {
+	constructor(objectOrType: Exclude<T, Uint8Array> | number, address = 0x00000000) {
 		if (typeof objectOrType === 'number') {
 			this.type = objectOrType;
 			this.address = address;
