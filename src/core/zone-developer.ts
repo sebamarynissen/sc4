@@ -1,4 +1,4 @@
-// # zone-developer-file.js
+// # zone-developer.ts
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';

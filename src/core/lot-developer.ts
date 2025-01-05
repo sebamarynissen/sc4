@@ -1,4 +1,4 @@
-// # lot-developer-file.ts
+// # lot-developer.ts
 import Stream from './stream.js';
 import WriteBuffer from './write-buffer.js';
 import { FileType } from './enums.js';
