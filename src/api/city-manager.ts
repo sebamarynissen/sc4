@@ -739,6 +739,9 @@ export default class CityManager {
 		city.getSimGrid(SimGrid.ZoneData)?.clear();
 		city.getSimGrid(SimGrid.Power)?.clear();
 
+		// Render all terrain tiles again.
+		city.terrainFlags.clear();
+
 	}
 
 }

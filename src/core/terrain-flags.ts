@@ -37,5 +37,8 @@ export default class TerrainFlags {
 		}
 		return ws.toUint8Array();
 	}
-
+	clear() {
+		this.raw.fill(0);
+		return null;
+	}
 }
