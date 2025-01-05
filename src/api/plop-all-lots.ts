@@ -38,7 +38,6 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 	let lots = await new FileScanner(pattern, { cwd: directory }).walk();
 	if (lots.length === 0) {
 		logger?.warn(`No lots found in files that match the pattern ${pattern} in ${directory}.`);
-		return false;
 	}
 
 	// Check if we have to plop the lots in random order.
@@ -52,14 +51,17 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 		}
 	}
 
-	// First of all we need to index the plugin folder.
-	logger?.step('Building plugin index...');
+	// First of all we need to index the plugin folder, but only if there are 
+	// actually lots to be plopped of course.
 	const { installation, plugins } = opts;
 	const index = new PluginIndex({ installation, plugins });
-	await index.build({  });
-	logger?.progress('Indexing building & prop families...');
-	await index.buildFamilies();
-	logger?.succeed('Plugin index built');
+	if (lots.length > 0) {
+		logger?.step('Building plugin index...');
+		await index.build();
+		logger?.progress('Indexing building & prop families...');
+		await index.buildFamilies();
+		logger?.succeed('Plugin index built');
+	}
 
 	// Open the savegame where we have to plop everything.
 	const { city: cityId } = opts;
