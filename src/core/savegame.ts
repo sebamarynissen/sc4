@@ -44,6 +44,7 @@ export default class Savegame extends DBPF {
 	get lots() { return this.readByType(FileType.Lot); }
 	get buildings() { return this.readByType(FileType.Building); }
 	get props() { return this.readByType(FileType.Prop); }
+	get propDeveloper() { return this.readByType(FileType.PropDeveloper); }
 	get textures() { return this.readByType(FileType.BaseTexture); }
 	get flora() { return this.readByType(FileType.Flora); }
 	get itemIndex() { return this.readByType(FileType.ItemIndex); }

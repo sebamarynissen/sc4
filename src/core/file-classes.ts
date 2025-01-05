@@ -6,6 +6,7 @@ import Lot from './lot.js';
 import Building from './building.js';
 import Prop from './prop.js';
 import PropManager from './prop-manager.js';
+import PropDeveloper from './prop-developer.js';
 import Flora from './flora.js';
 import BaseTexture from './lot-base-texture.js';
 import Network from './network.js';
@@ -49,6 +50,7 @@ export {
 	Building,
 	Prop,
 	PropManager,
+	PropDeveloper,
 	Flora,
 	BaseTexture,
 	Network,
@@ -91,6 +93,7 @@ export default {
 	Building,
 	Prop,
 	PropManager,
+	PropDeveloper,
 	Flora,
 	BaseTexture,
 	Network,

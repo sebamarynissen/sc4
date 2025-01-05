@@ -11,7 +11,7 @@ export default class Unknown extends Array<UnknownType> {
 	bool(value: boolean) { this.push(value); return this; }
 	byte(value: byte) { this.push(value); return this; }
 	word(value: word) { this.push(value); return this; }
-	dword(value: dword) { this.push(value); return this; }
+	dword(value: dword = 0) { this.push(value); return this; }
 	qword(value: qword) { this.push(value); return this; }
 	float(value: float) { this.push(value); return this; }
 	double(value: double) { this.push(value); return this; }
