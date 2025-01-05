@@ -1,5 +1,4 @@
 // # pipe-manager.js
-import Context from './city-context.js';
 import {
 	Pipe,
 	Vertex,
@@ -10,6 +9,7 @@ import {
 	type Savegame,
 	type TerrainMap,
     Vector3,
+    SavegameContext,
 } from 'sc4/core';
 
 // Bit flags of what connections are enabled. Based on those sides we'll also 
@@ -31,12 +31,12 @@ const SIDE_MAP = new Map([
 type PipeTile = [number, number, number];
 export default class PipeManager {
 	dbpf: Savegame;
-	ctx: Context;
+	ctx: SavegameContext;
 
 	// ## constructor(dbpf)
-	constructor(dbpf: Savegame, ctx = new Context(dbpf)) {
+	constructor(dbpf: Savegame) {
 		this.dbpf = dbpf;
-		this.ctx = ctx;
+		this.ctx = dbpf.createContext();
 	}
 
 	// Shortcuts.
