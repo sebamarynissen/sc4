@@ -33,6 +33,7 @@ export const SavegameFileType = {
 	Lot: 0xC9BD5D4A,
 	Building: 0xa9bd882d,
 	Prop: 0x2977AA47,
+	PropManager: 0xa990bd10,
 	Flora: 0xa9c05c85,
 	BaseTexture: 0xc97f987c,
 	Occupant: 0xa9bc9ab6,

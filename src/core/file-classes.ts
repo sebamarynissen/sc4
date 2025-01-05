@@ -5,6 +5,7 @@ import LTEXT from './ltext.js';
 import Lot from './lot.js';
 import Building from './building.js';
 import Prop from './prop.js';
+import PropManager from './prop-manager.js';
 import Flora from './flora.js';
 import BaseTexture from './lot-base-texture.js';
 import Network from './network.js';
@@ -47,6 +48,7 @@ export {
 	Lot,
 	Building,
 	Prop,
+	PropManager,
 	Flora,
 	BaseTexture,
 	Network,
@@ -88,6 +90,7 @@ export default {
 	Lot,
 	Building,
 	Prop,
+	PropManager,
 	Flora,
 	BaseTexture,
 	Network,
