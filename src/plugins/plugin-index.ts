@@ -2,7 +2,7 @@
 import { os } from 'sc4/utils';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { DBPF, Exemplar, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
 import { TGIIndex, hex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
 import WorkerPool from './worker-pool.js';
@@ -16,7 +16,10 @@ import type {
 } from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
-const Family = 0x27812870;
+const Family = ExemplarProperty.BuildingpropFamily;
+
+// The amount of files we need to scan before we're going to use multithreading.
+const MULTITHREAD_LIMIT = 1_000;
 
 // The hash function we use for type, group and instances. It's fastest to just 
 // use the identity function here, but for debugging purposes it can often be 
@@ -30,6 +33,7 @@ type PluginIndexOptions = {
 	installation?: folder;
 	plugins?: folder;
 	mem?: number;
+	threads?: number;
 };
 
 type GeneralBuildOptions = {
@@ -70,6 +74,7 @@ export default class PluginIndex {
 		core: boolean;
 		installation: folder | undefined;
 		plugins: folder | undefined;
+		threads: number | undefined;
 	};
 
 	// ## constructor(opts)
@@ -91,12 +96,14 @@ export default class PluginIndex {
 			installation = process.env.SC4_INSTALLATION,
 			plugins = process.env.SC4_PLUGINS,
 			mem = +os!.totalmem,
+			threads,
 		} = opts;
 		this.options = {
 			scan: [scan].flat(),
 			core,
 			installation,
 			plugins,
+			threads,
 		};
 
 		// Set up the cache that we'll use to free up memory of DBPF files 
@@ -168,10 +175,18 @@ export default class PluginIndex {
 	async build(opts: BuildOptions = {}) {
 
 		// Open a new worker pool because we'll be parsing all dbpf files in 
-		// separate threads that report to the main thread.
-		const pool = new WorkerPool();
+		// separate threads that report to the main thread. However, note that 
+		// actual multithreading is only useful when we have a ton of files. 
+		// We're already reading in the files itself asynchronously, so even 
+		// without multithreading we make use of multiple cores. Starting the 
+		// threads has an overhead, so we'll only use multithreading with a very 
+		// large amount of files.
 		const { plugins = this.options.plugins } = opts;
 		const files = await this.getFilesToScan({ plugins });
+		let {
+			threads = (files.length > MULTITHREAD_LIMIT ? undefined : 0),
+		} = this.options;
+		const pool = new WorkerPool({ n: threads });
 
 		// Loop all files and then parse them one by one. Note that it's crucial 
 		// here to maintain the sort order, so when a file is read in, we don't 

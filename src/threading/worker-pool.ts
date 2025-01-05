@@ -74,7 +74,6 @@ export default class WorkerPool extends EventEmitter {
 		this.workers = [];
 		this.freeWorkers = [];
 		this.tasks = [];
-
 		for (let i = 0; i < this.numThreads; i++) {
 			this.addNewWorker();
 		}
@@ -95,7 +94,7 @@ export default class WorkerPool extends EventEmitter {
 	// automatically registered. Hence we'll figure out automatically whether 
 	// we're running a TypeScript file or not. Note that as long as we haven't 
 	// migrated, we still need to handle .js files as well!
-	addNewWorker() {
+	private addNewWorker() {
 		let worker;
 		if (this.ts && this.url) {
 			worker = new Worker(`
@@ -148,7 +147,7 @@ export default class WorkerPool extends EventEmitter {
 	}
 
 	// ## runCallback(task, callback)
-	runCallback(task: StructuredCloneable, callback: TaskCallback) {
+	private runCallback(task: StructuredCloneable, callback: TaskCallback) {
 		if (this.freeWorkers.length === 0) {
 			// No free threads, wait until a worker thread becomes free.
 			this.tasks.push({ task, callback });
@@ -165,16 +164,29 @@ export default class WorkerPool extends EventEmitter {
 
 	}
 
+	// ## runInThread(task)
+	// Runs the task in the same thread. Note that for this to work, the script 
+	// from the url should export a proper function as welL. Using the 
+	// worker-thread.ts module handles this automatically.
+	private async runInThread(task: StructuredCloneable): Promise<unknown> {
+		let { default: fn } = await import(this.url!);
+		return await fn(task);
+	}
+
 	// ## run(task)
 	// A promised version of `runCallback()`. That's a bit more ergonomic to 
 	// work with.
 	run(task: StructuredCloneable): Promise<unknown> {
-		return new Promise((resolve, reject) => {
-			this.runCallback(task, (err, data) => {
-				if (err) reject(err);
-				else resolve(data);
+		if (this.numThreads === 0 && typeof this.url === 'string') {
+			return this.runInThread(task);
+		} else {
+			return new Promise((resolve, reject) => {
+				this.runCallback(task, (err, data) => {
+					if (err) reject(err);
+					else resolve(data);
+				});
 			});
-		});
+		}
 	}
 
 	// ## getUsage()
