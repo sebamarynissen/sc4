@@ -15,6 +15,7 @@ import type {
 	SimGridUint8,
 } from './sim-grid-file.js';
 import type { EntryFromType } from './dbpf-entry.js';
+import type TerrainFlags from './terrain-flags.js';
 
 type SimGrid =
 	| SimGridUint8
@@ -61,6 +62,7 @@ export default class Savegame extends DBPF {
 	get prebuiltNetwork() { return this.readByType(FileType.PrebuiltNetwork); }
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
 	get networkManager() { return this.readByType(FileType.NetworkManager); }
+	get terrainFlags() { return this.readByType(FileType.TerrainFlags); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }

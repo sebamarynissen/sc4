@@ -26,6 +26,7 @@ import NetworkBridgeOccupant from './network-bridge-occupant.js';
 import NetworkManager from './network-manager.js';
 import TerrainMap from './terrain-map.js';
 import TerrainBox from './terrain-box.js';
+import TerrainFlags from './terrain-flags.js';
 import cSTETerrain from './cste-terrain.js';
 import cSTETerrainView3D from './cste-terrain-view-3d.js';
 import {
@@ -72,6 +73,7 @@ export {
 	SimGridUint32,
 	TerrainMap,
 	TerrainBox,
+	TerrainFlags,
 	cSTETerrain,
 	cSTETerrainView3D,
 };
@@ -111,6 +113,7 @@ export default {
 	SimGridUint32,
 	TerrainMap,
 	TerrainBox,
+	TerrainFlags,
 	cSTETerrain,
 	cSTETerrainView3D,
 } as const;

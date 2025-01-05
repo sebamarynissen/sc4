@@ -61,6 +61,7 @@ export const SavegameFileType = {
 	// sometimes.
 	TerrainMap: 0xa9dd6ff4,
 	TerrainBox: 0x8a91e7e3,
+	TerrainFlags: 0x8a91e7e0,
 	cSTETerrain: 0xe98f9525,
 	cSTETerrainView3D: 0xc9b84e10,
 
