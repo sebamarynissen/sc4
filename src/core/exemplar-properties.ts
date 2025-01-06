@@ -12594,9 +12594,11 @@ export const ExemplarProperty = {
 		[kPropertyId]: 0x8a2602cc,
 		[kPropertyType]: Uint32,
 		[kInspect]: inspector,
+		Disabled: 0x00000000,
 		SubmenuButton: 0x00000001,
 		NetworkItemInSubmenu: 0x00000002,
 		FloraItemInSubmenu: 0x00000004,
+		BuildingUnhiddenInSubmenu: 0x00000008,
 	},
 	/**
 	 * A list of Exemplar files this patch applies to (format: Group ID 1,
@@ -12606,6 +12608,16 @@ export const ExemplarProperty = {
 	ExemplarPatchTargets: {
 		[kToPrimitive]: () => 0x0062e78a,
 		[kPropertyId]: 0x0062e78a,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
+	/**
+	 * For use with Submenus DLL: the Button IDs of the submenus this building
+	 * appears in if the DLL is loaded
+	 */
+	BuildingSubmenus: {
+		[kToPrimitive]: () => 0xaa1dd399,
+		[kPropertyId]: 0xaa1dd399,
 		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 	},
@@ -13931,7 +13943,8 @@ type StringKeys_08 =
 	| 'BudgetItemPurpose'
 	| 'AuxiliaryModel3Key'
 	| 'SchoolCapacityChunkSize'
-	| 'ExemplarPatchTargets';
+	| 'ExemplarPatchTargets'
+	| 'BuildingSubmenus';
 
 type StringKeys_09 =
 	| 'IgnoreLotStateEffects'
@@ -15346,6 +15359,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xec214180
 		| 0xec43826b
 		| 0x0062e78a
+		| 0xaa1dd399
 		| StringKeys_08
 		? uint32[] :
 	T extends
