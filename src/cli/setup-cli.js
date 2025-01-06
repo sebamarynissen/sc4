@@ -141,7 +141,7 @@ export function factory(program) {
 	submenu
 		.command('unpack')
 		.argument('[dir]', 'The directory where the submenus to unpack are located. Defaults to the current working directory')
-		.description('Unpacks all submenus that match the given glob patterns')
+		.description('Unpacks all in a given directory for use in github.com/sebamarynissen/sc4-submenu-collection')
 		.option('-p, --patterns [patterns...]', 'A list of glob patterns that define the submenus to match. Defaults to **/*.dat')
 		.option('-o, --output [dir]', 'Path to the output directory. Defaults to the current working directory')
 		.action(commands.submenuUnpack);
