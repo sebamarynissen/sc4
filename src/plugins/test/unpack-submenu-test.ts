@@ -6,10 +6,10 @@ describe('#unpackSubmenu()', function() {
 
 	it.only('unpacks a submenu button', async function() {
 
-		let file = resource('airport-atc-submenu.dat');
-		let dist = output('airport-atc-submenu');
+		let directory = resource('unpack_submenu_test');
+		let dist = output('unpack_submenu_test');
 		await unpackSubmenu({
-			file,
+			directory,
 			output: dist,
 		});
 

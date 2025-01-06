@@ -1,61 +1,167 @@
 // # unpack-submenu.ts
 import path from 'node:path';
 import fs from 'node:fs';
-import { DBPF, FileType, type Exemplar } from 'sc4/core';
+import os from 'node:os';
+import { FileType, type Exemplar } from 'sc4/core';
 import type { TGILiteral } from 'sc4/types';
 import { Document, Scalar  } from 'yaml';
+import PluginIndex from './plugin-index.js';
+import { hex } from 'sc4/utils';
 
 type UnpackSubmenuOptions = {
-	file?: string
-	dbpf?: DBPF;
+	directory?: string;
 	output: string;
 };
 
-type MenuYaml = {
+type MenuInfo = {
 	id: number;
 	parent: number;
 	name: string;
+	dirname: string;
 	order: number;
 	description?: string;
 	icon?: TGILiteral;
 };
 
-// # unpackSubmenu(opts)
-// Unpacks a dbpf file containing a submenu button or submenu patches.
-export default async function unpackSubmenu(opts: UnpackSubmenuOptions) {
+export default async function(opts: UnpackSubmenuOptions) {
+	let unpacker = new Unpacker();
+	return await unpacker.unpack(opts);
+};
 
-	// Group all entries by type because we will first need to handle the 
-	// exemplars to create the main folders.
-	let { dbpf, file } = opts;
-	if (!dbpf) {
-		dbpf = new DBPF(file!);
-	}
-	let {
-		exemplars = [],
-		cohorts = [],
-	} = Object.groupBy(dbpf.entries, entry => {
-		switch (entry.type) {
-			case FileType.Exemplar: return 'exemplars';
-			case FileType.Cohort: return 'cohorts';
-			default: return 'ignore';
+// # Unpacker
+class Unpacker {
+	index: PluginIndex;
+	menus: MenuInfo[] = [];
+
+	// ## unpack()
+	// Entry point for unpacking a directory containing a bunch of submenus.
+	async unpack(opts: UnpackSubmenuOptions) {
+		let {
+			directory = process.cwd(),
+			output = process.cwd(),
+		} = opts;
+
+		// Build up the plugin index first.
+		this.index = new PluginIndex({
+			scan: '**/*.dat',
+			plugins: directory,
+			core: false,
+		});
+		await this.index.build();
+
+		// Read in the exemplars first and look for the menus configurations.
+		let exemplars = this.index.findAll({
+			type: FileType.Exemplar,
+			group: 0x2a3858e4,
+		});
+		for (let entry of exemplars) {
+			this.parseExemplar(entry.read());
 		}
-	});
 
-	// Read all the exemplars looking for a submenu.
-	let menus: MenuYaml[] = [];
-	for (let entry of exemplars) {
-		let exemplar = entry.read() as Exemplar;
+		// Next we'll create the actual folders with the unpacked _menu.yaml and 
+		// _icon.png. These need to be present before we can loop the cohorts 
+		// and look for patches.
+		let parents = new Map<number, { path: string }>();
+		for (let menu of this.menus) {
+
+			// Check if we can find the parent menu folder. If not, this is an 
+			// orphaned menu and we should add it to that folder as well.
+			let dir;
+			let parent = parents.get(menu.id);
+			if (!parent) {
+				dir = path.resolve(output, 'orphans', menu.dirname);
+			} else {
+				dir = path.resolve(output, parent.path, menu.dirname);
+			}
+			await fs.promises.mkdir(dir, { recursive: true });
+
+			// Write away the _menu.yaml file. Note that the parent menu gets 
+			// included here if it's an orphan!
+			let doc = new Document({
+				id: menu.id,
+				... parent ? { parent: menu.parent } : null,
+				description: menu.description,
+			});
+			(doc.get('id', true) as Scalar || {}).format = 'HEX';
+			(doc.get('parent', true) as Scalar || {}).format = 'HEX';
+			await fs.promises.writeFile(
+				path.join(dir, '_menu.yaml'),
+				String(doc),
+			);
+
+			// Unpack the png icon as well, if it exists.
+			if (menu.icon) {
+				let png = this.index.find(menu.icon)!.read() as Uint8Array;
+				await fs.promises.writeFile(path.join(dir, '_icon.png'), png);
+			}
+
+			// Store the menu as an available parent menu.
+			parents.set(menu.id, { path: dir });
+
+		}
+
+		// Next we'll read in the cohorts to look for patches.
+		let cohorts = this.index.findAll({
+			type: FileType.Cohort,
+			group: 0xb03697d1,
+		});
+		for (let entry of cohorts) {
+
+			// Find out what menu the patch belongs to. If no parent was found, 
+			// we shortcut obviously.
+			let cohort = entry.read();
+			let [menuId] = cohort.get('BuildingSubmenus') ?? [];
+			if (!menuId) continue;
+			let parent = parents.get(menuId);
+			if (!parent) continue;
+
+			// Read in the target file if it already exists so that we can 
+			// ensure we don't add pairs twice.
+			let { dbpf } = entry;
+			let basename = path.basename(dbpf.file!, path.extname(dbpf.file!));
+			let fullPath = path.join(parent.path, `${basename}.txt`);
+			let existingTargets = new Set();
+			try {
+				let contents = String(await fs.promises.readFile(fullPath));
+				let lines = contents.trim().split('\n');
+				for (let line of lines) {
+					let [group, instance] = line.split(',');
+					existingTargets.add(`${hex(+group)}, ${hex(+instance)}`);
+				}
+			} catch (e) {
+				if (e.code !== 'ENOENT') throw e;
+			}
+
+			// Serialize the patch targets as hex numbers, make sure we don't 
+			// duplicate and then write away.
+			let targets = cohort.get('ExemplarPatchTargets') ?? [];
+			while (targets.length > 0) {
+				let group = targets.shift()!;
+				let instance = targets.shift();
+				if (instance === undefined) break;
+				existingTargets.add(`${hex(+group)}, ${hex(+instance)}`);
+			}
+			let contents = [...existingTargets].join(os.EOL)+os.EOL;
+			await fs.promises.writeFile(fullPath, contents);
+			
+		}
+
+	}
+
+	// ## parseExemplar(exemplar)
+	// Parses an exemplar and extracts the basic menu information from it.
+	parseExemplar(exemplar: Exemplar) {
 		let buttonId = exemplar.get('ItemButtonID');
-		if (!buttonId) continue;
+		if (!buttonId) return;
 
 		// Find the description for this menu. We require this to be in this 
-		// file, though this is not strictly require by the game obviously! It's 
-		// the convention though.
+		// file, though this is not strictly require by the game obviously! 
+		// It's the convention though.
 		let description;
 		let uvnk = exemplar.get('UserVisibleNameKey');
 		if (uvnk) {
 			let [type, group, instance] = uvnk;
-			let ltext = dbpf.find({ type, group, instance });
+			let ltext = this.index.find({ type, group, instance });
 			if (ltext) {
 				description = String(ltext.read());
 			}
@@ -65,7 +171,7 @@ export default async function unpackSubmenu(opts: UnpackSubmenuOptions) {
 		let icon;
 		let iconInstance = exemplar.get('ItemIcon');
 		if (iconInstance) {
-			let entry = dbpf.find({
+			let entry = this.index.find({
 				type: FileType.PNG,
 				group: 0x6a386d26,
 				instance: iconInstance,
@@ -75,48 +181,21 @@ export default async function unpackSubmenu(opts: UnpackSubmenuOptions) {
 				icon = { type, group, instance };
 			}
 		}
-		menus.push({
+
+		// Determine the basename for the menu's directory.
+		let order = exemplar.get('ItemOrder') ?? 0;
+		let prefix = '0x'+order.toString(16).padStart(8).toUpperCase();
+		let name = exemplar.get('ExemplarName') ?? '';
+		if (order >= 0x80000000) prefix = `_${prefix}`;
+		this.menus.push({
 			id: buttonId,
 			parent: exemplar.get('ItemSubmenuParentId')!,
-			name: exemplar.get('ExemplarName') ?? '',
-			order: exemplar.get('ItemOrder') ?? 0,
+			name,
+			dirname: `${prefix}-${name}`,
+			order,
 			description,
 			icon,
 		});
-
-	}
-
-	// Unpack the menu to the output directory and then store where this menu 
-	// was stored.
-	let created = new Map<number, string>();
-	for (let menu of menus.values()) {
-		let { order } = menu;
-		let prefix = '0x'+order.toString(16).padStart(8).toUpperCase();
-		if (order >= 0x80000000) prefix = `_${prefix}`;
-		let dir = path.resolve(opts.output, `${prefix}-${menu.name}`);
-		await fs.promises.mkdir(dir, { recursive: true });
-
-		// Write away the _menu.yaml file. Note that the parent menu gets 
-		// included here. In the submenu collection repository it will be 
-		// filtered out again and just derived from the parent folder!
-		let doc = new Document({
-			id: menu.id,
-			parent: menu.parent,
-			description: menu.description,
-		});
-		(doc.get('id', true) as Scalar || {}).format = 'HEX';
-		(doc.get('parent', true) as Scalar || {}).format = 'HEX';
-		await fs.promises.writeFile(path.join(dir, '_menu.yaml'), String(doc));
-
-		// Unpack the png icon as well, if it exists.
-		if (menu.icon) {
-			let png = dbpf.find(menu.icon)!.read() as Uint8Array;
-			await fs.promises.writeFile(path.join(dir, '_icon.png'), png);
-		}
-
-		// Store where this menu is stored so that we can unpack the patches to 
-		// this folder later on.
-		created.set(menu.id, dir);
 
 	}
 
