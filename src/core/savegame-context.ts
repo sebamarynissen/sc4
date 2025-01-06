@@ -17,7 +17,10 @@ type RecordRow = {
 };
 type RecordInfo = {
 	pointer: Pointer;
+	type: number;
+	address: number;
 	offset: number;
+	label: string;
 	buffer: Uint8Array;
 };
 
@@ -133,6 +136,9 @@ export default class SavegameContext {
 				let address = SmartBuffer.fromBuffer(buffer).readUInt32LE(8);
 				row.records.push({
 					pointer: new Pointer(entry.type, address),
+					type: entry.type,
+					label: row.label,
+					address,
 					offset,
 					buffer,
 				});
