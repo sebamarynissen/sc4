@@ -39,9 +39,11 @@ export default async function createSubmenuButton(
 	opts: createSubmenuButtonOptions,
 ) {
 
+	// If no description is specified, we use the default description of memo's 
+	// submenus, being "Click here to open submenu".
 	let {
 		name,
-		description = '',
+		description = [0x2026960b, 0x123006aa, 0x6e967dff],
 		buttonId = randomId({ except: excluded }),
 		icon,
 		parent,
