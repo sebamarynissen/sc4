@@ -7,6 +7,7 @@ import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
 import type Entry from './dbpf-entry.js';
 import { indexOf } from 'uint8array-extras';
+import { buffer } from 'node:stream/consumers';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -98,22 +99,28 @@ export function removePointers(record: Uint8Array): Uint8Array {
 			.map(arr => new Uint8Array(arr.buffer));
 	}
 	for (let ptr of knownTypes) {
-		removePointer(record, ptr);
+		let offsets = findPatternOffsets(record, ptr);
+		for (let index of offsets) {
+			for (let i = 0; i < 4; i++) {
+				record[index-4+i] = 0;
+			}
+		}
 	}
 	return record;
 }
 
-function removePointer(buffer: Uint8Array, pointer: Uint8Array) {
+// # findPatternOffsets(buffer, pattern)
+// Finds all offsets of the given Uint8Array pattern.
+export function findPatternOffsets(buffer: Uint8Array, pattern: Uint8Array) {
 	let index = 0;
 	let pivot = buffer;
+	let offsets: number[] = [];
 	while (index > -1) {
-		index = indexOf(pivot, pointer);
+		index = indexOf(pivot, pattern);
 		if (index > -1) {
-			for (let i = 0; i < 4; i++) {
-				pivot[index-4+i] = 0;
-			}
-			pivot = pivot.subarray(index+4);
+			offsets.push(index);
+			pivot = pivot.subarray(index + pattern.length);
 		}
 	}
-	return buffer;
+	return offsets;
 }

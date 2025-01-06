@@ -2,8 +2,8 @@
 // Contains the JavaScript api of the cli. This separates concerns nicely: the 
 // api does the actual job, while the cli is merely responsible for the 
 // options parsing.
-import { fs, path, crypto, hex } from 'sc4/utils';
-import { Savegame, FileType, SimGrid } from 'sc4/core';
+import { fs, path, crypto } from 'sc4/utils';
+import { Savegame, SimGrid } from 'sc4/core';
 
 // # historical(opts)
 // The api function that makes buildings historical within a savegame.
@@ -126,82 +126,6 @@ export async function growify(opts = {}) {
 	logger.ok('Done');
 
 	return dbpf;
-
-}
-
-// # refs(opts)
-export async function refs(opts) {
-
-	const { logger = defaultLogger } = opts;
-	let dbpf = opts.dbpf;
-	let ctx = dbpf.createContext();
-
-	if (opts.address) {
-
-		logger.info('Searching for', opts.address.map(hex).join(', '));
-		let result = dbpf.memSearch(opts.address);
-		for (let i = 0; i < result.length; i++) {
-			logger.info(`${hex(opts.address[i])} was found in:`);
-			console.table(result[i].map(x => x.class));
-		}
-
-	} else {
-
-		// Find all entries that have a memory field, but only the ones we're 
-		// interested in.
-		let queries = opts.queries;
-		let types = Object.values(queries);
-		let refs = ctx.findAllMemRefs().filter(row => types.includes(row.type));
-		let oLength = refs.length;
-
-		// Put a maximum on the types of refs, especially for the large city 
-		// here. Group by type for this.
-		refs = refs.reduce(function(mem, ref) {
-			(mem[ ref.type ] || (mem[ ref.type ] = [])).push(ref);
-			return mem;
-		}, {});
-
-		let max = opts.max || Infinity;
-		for (let type in refs) {
-			let arr = refs[type];
-			arr.length = Math.min(max, arr.length);
-		}
-		refs = Object.values(refs).reduce(function(mem, arr) {
-			mem.push(...arr);
-			return mem;
-		}, []);
-
-		logger.info('Searching for', Object.keys(queries).join(', '));
-		logger.info(`Searching ${refs.length} refs (${ Math.round(10000*refs.length / oLength)/100}%)`);
-		let start = new Date();
-		logger.info('Started at', start.toTimeString());
-
-		// Now search for all these refs.
-		let result = dbpf.memSearch(refs.map(ref => ref.mem));
-
-		// Now group per type.
-		let groups = {};
-		for (let key in queries) {
-			groups[ queries[key] ] = new Set();
-		}
-		for (let i = 0; i < result.length; i++) {
-			let ref = refs[i];
-			let set = groups[ ref.type ];
-			let row = result[i];
-			for (let cell of row) {
-				set.add(cell.class);
-			}
-		}
-
-		logger.ok('Took', String((new Date() - start)/1000)+'s');
-
-		// Log.
-		for (let type in queries) {
-			logger.info(`${type} references were found in:`);
-			console.table([...groups[ queries[type] ]].sort());
-		}
-
-	}
 
 }
 

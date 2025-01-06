@@ -6,7 +6,7 @@ import tar from 'tar';
 import ora from 'ora';
 import { program as commander, Command } from 'commander';
 import * as commands from '#cli/commands';
-import { DBPF, FileType, Savegame } from 'sc4/core';
+import { DBPF, FileType } from 'sc4/core';
 import * as api from 'sc4/api';
 import { hex } from 'sc4/utils';
 import version from './version.js';
@@ -93,6 +93,19 @@ export function factory(program) {
 		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
 		.action(commands.plopAll);
 
+	// Command for looking for refs.
+	city
+		.command('refs <city>')
+		.description('Lists all subfiles where the given pointer address or pointer type is referenced')
+		.option('--address <ref>', 'A specific memory reference to look for')
+		.option('--type <type>', 'The Type IDs for which we need to look for references')
+		.action(commands.cityRefs);
+
+	city
+		.command('pointer <city> <pointer>')
+		.description('Finds the subfile entry addressed by the given pointer')
+		.action(commands.cityPointer);
+
 	const submenu = program
 		.command('submenu')
 		.description(`Manage submenus. Run ${chalk.magentaBright('sc4 submenu')} to list available commands`);
@@ -138,8 +151,48 @@ export function factory(program) {
 		.option('--tree', 'Shows the entire dependency tree')
 		.action(commands.track);
 
+	// There are several commands that we have implemented, but they need to be 
+	// reworked. We'll put thos under the "misc" category and instruct users not 
+	// to use them, or at least with care.
+	const misc = program
+		.command('misc')
+		.description('Contains various commands that are experimental and not officially supported. Be very careful when using them!');
+
+	// Command for comparing
+	misc
+		.command('dump <city>')
+		.storeOptionsAsProperties()
+		.description('Give a human-readable representation of all lots in the city')
+		.action(function(city) {
+
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			
+			let dword = 'crc mem IID dateCreated buildingIID linkedIndustrial linkedAgricultural demandSourceIndex name unknown0'.split(' ');
+			let word = 'unknown6'.split(' ');
+			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
+			function replacer(name, val) {
+				if (name === 'commuteBuffer') return val ? '...' : null;
+				else if (dword.includes(name)) return hex(val);
+				else if (byte.includes(name)) return hex(val, 2);
+				else if (word.includes(name)) return hex(val, 4);
+				else return val;
+			}
+
+			let dbpf = new DBPF(buff);
+			let lots = dbpf.find({ type: FileType.Lot }).read();
+			let all = [];
+			for (let lot of lots) {
+				let str = JSON.stringify(lot, replacer, 2);
+				all.push(str);
+			}
+			console.log(all.join('\n\n-----------------\n\n'));
+
+		});
+
 	// Some commands.
-	plugins
+	misc
 		.command('tileset [dir]')
 		.storeOptionsAsProperties()
 		.description('Set the tilesets for all buildings in the given directory')
@@ -238,13 +291,6 @@ export function factory(program) {
 			console.log(chalk.green('DONE'), chalk.gray('('+time+'ms)'));
 
 		});
-
-	// There are several commands that we have implemented, but they need to be 
-	// reworked. We'll put thos under the "misc" category and instruct users not 
-	// to use them, or at least with care.
-	const misc = program
-		.command('misc')
-		.description('Contains various commands that are experimental and not officially supported. Be very careful when using them!');
 
 	// Backup command for backup a region or a plugins folder.
 	misc
@@ -399,96 +445,6 @@ export function factory(program) {
 
 		});
 
-	// Command for comparing
-	city
-		.command('dump <city>')
-		.storeOptionsAsProperties()
-		.description('Give a human-readable representation of all lots in the city')
-		.action(function(city) {
-
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			
-			let dword = 'crc mem IID dateCreated buildingIID linkedIndustrial linkedAgricultural demandSourceIndex name unknown0'.split(' ');
-			let word = 'unknown6'.split(' ');
-			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
-			function replacer(name, val) {
-				if (name === 'commuteBuffer') return val ? '...' : null;
-				else if (dword.includes(name)) return hex(val);
-				else if (byte.includes(name)) return hex(val, 2);
-				else if (word.includes(name)) return hex(val, 4);
-				else return val;
-			}
-
-			let dbpf = new DBPF(buff);
-			let lots = dbpf.find({ type: FileType.Lot }).read();
-			let all = [];
-			for (let lot of lots) {
-				let str = JSON.stringify(lot, replacer, 2);
-				all.push(str);
-			}
-			console.log(all.join('\n\n-----------------\n\n'));
-
-		});
-
-	// Command for looking for refs.
-	city
-		.command('refs <city>')
-		.storeOptionsAsProperties()
-		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
-		.option('--address <ref>', 'A specific memory reference to look for')
-		.option('--types <type>', 'The Type IDs for which we need to look for references')
-		.option('-a, --all', 'Finds lot, building, texture & prop references')
-		.option('-l, --lots', 'Find lot references')
-		.option('-b, --buildings', 'Find building references')
-		.option('-t, --textures', 'Find texture references')
-		.option('-p, --props', 'Find prop references')
-		.description('Finds internal memory references within a city')
-		.action(function(city) {
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			let opts = baseOptions();
-			opts.dbpf = new Savegame(buff);
-
-			if (this.address) {
-				opts.address = this.address.split(',').map(x => Number(x));
-			} else {
-				// If nothing was specified explicitly, set to all by default.
-				if (!this.all && !this.lots && !this.buildings && !this.textures && !this.props && !this.types) {
-					this.all = true;
-				}
-
-				// Build up the queries.
-				let queries = opts.queries = {};
-				if (this.lots || this.all) queries.Lot = FileType.Lot;
-				if (this.buildings || this.all) queries.Building = FileType.Building;
-				if (this.textures || this.all) queries.Texture = FileType.BaseT$;
-				if (this.props || this.all) queries.Prop = FileType.Prop;
-
-				// Handle more types.
-				if (this.types) {
-					this.types.split(',').forEach(function(type) {
-						let nr = Number(type);
-						queries[hex(nr)] = nr;
-					});
-				}
-
-				if (this.max) {
-					opts.max = +this.max;
-				}
-
-			}
-
-			api.refs(opts);
-		});
-
-	city
-		.command('pointer <city> <pointer>')
-		.description('Finds the subfile entry addressed by the given pointer')
-		.action(commands.cityPointer);
-
 	// Command for switching the active tilesets in a city.
 	misc
 		.command('tracts <city>')
@@ -550,7 +506,7 @@ export function factory(program) {
 
 	// Command for opening the config file.
 	config
-		.command('open')
+		.command('edit')
 		.description(`Allows editing the config file manually. Be careful with this if you don't know what you're doing!`)
 		.action(commands.config);
 
