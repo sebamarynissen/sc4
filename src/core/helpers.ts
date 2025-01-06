@@ -5,9 +5,8 @@ import cppClasses from './cpp-classes.js';
 import crc32 from './crc.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
+import { findPatternOffsets } from 'sc4/utils';
 import type Entry from './dbpf-entry.js';
-import { indexOf } from 'uint8array-extras';
-import { buffer } from 'node:stream/consumers';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -107,20 +106,4 @@ export function removePointers(record: Uint8Array): Uint8Array {
 		}
 	}
 	return record;
-}
-
-// # findPatternOffsets(buffer, pattern)
-// Finds all offsets of the given Uint8Array pattern.
-export function findPatternOffsets(buffer: Uint8Array, pattern: Uint8Array) {
-	let index = 0;
-	let pivot = buffer;
-	let offsets: number[] = [];
-	while (index > -1) {
-		index = indexOf(pivot, pattern);
-		if (index > -1) {
-			offsets.push(index);
-			pivot = pivot.subarray(index + pattern.length);
-		}
-	}
-	return offsets;
 }

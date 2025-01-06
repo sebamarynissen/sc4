@@ -2,7 +2,7 @@
 import logger from '#cli/logger.js';
 import path from 'node:path';
 import { Savegame } from 'sc4/core';
-import { findPatternOffsets } from 'src/core/helpers.js';
+import { findPatternOffsets } from 'sc4/utils';
 
 type CityRefsCommandOptions = {
 	address?: number | string;
