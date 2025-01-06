@@ -10,8 +10,10 @@ import { hex } from 'sc4/utils';
 import { Glob } from 'glob';
 
 type UnpackSubmenuOptions = {
+	patterns?: string | string[];
 	directory?: string;
-	output: string;
+	output?: string;
+	logger?: any;
 };
 
 type MenuInfo = {
@@ -26,9 +28,9 @@ type MenuInfo = {
 	icon?: TGILiteral;
 };
 
-export default async function(opts: UnpackSubmenuOptions) {
-	let unpacker = new Unpacker();
-	return await unpacker.unpack(opts);
+// # unpackSubmenu()
+export default async function unpackSubmenu(opts: UnpackSubmenuOptions) {
+	return await new Unpacker().unpack(opts);
 };
 
 // # Unpacker
@@ -40,13 +42,15 @@ class Unpacker {
 	// Entry point for unpacking a directory containing a bunch of submenus.
 	async unpack(opts: UnpackSubmenuOptions) {
 		let {
+			patterns = '**/*.dat',
 			directory = process.cwd(),
 			output = process.cwd(),
+			logger,
 		} = opts;
 
 		// Build up the plugin index first.
 		this.index = new PluginIndex({
-			scan: '**/*.dat',
+			scan: patterns,
 			plugins: directory,
 			core: false,
 		});
@@ -57,7 +61,13 @@ class Unpacker {
 			type: FileType.Exemplar,
 			group: 0x2a3858e4,
 		});
+		let had = new Set<string>();
 		for (let entry of exemplars) {
+			let { file } = entry.dbpf;
+			if (!had.has(file!)) {
+				had.add(file!);
+				logger?.info(`Reading ${path.relative(directory, file!)}`);
+			}
 			this.parseExemplar(entry.read());
 		}
 
@@ -67,7 +77,11 @@ class Unpacker {
 		// Loop all menus and fill in their paths.
 		outer:
 		for (let menu of this.menus.values()) {
-			if (menu.path || !menu.parent) continue;
+			if (menu.path) continue;
+			if (!menu.parent) {
+				logger?.warn(`Menu ${menu.name} has no parent set!`);
+				continue;
+			}
 			let chain = [menu.dirname];
 			let parent = this.menus.get(menu.parent);
 			while (parent && !parent.path) {
@@ -91,7 +105,8 @@ class Unpacker {
 
 			// Check if we can find the parent menu folder. If not, this is an 
 			// orphaned menu and we should add it to that folder as well.
-			let dir = menu.path!;
+			let dir = menu.path;
+			if (!dir) continue;
 			await fs.promises.mkdir(dir, { recursive: true });
 
 			// Write away the _menu.yaml file. Note that the parent menu gets 
@@ -214,7 +229,7 @@ class Unpacker {
 
 		// Determine the basename for the menu's directory.
 		let order = exemplar.get('ItemOrder') ?? 0;
-		let prefix = '0x'+order.toString(16).padStart(8).toUpperCase();
+		let prefix = '0x'+order.toString(16).padStart(8, '0').toUpperCase();
 		let exemplarName = exemplar.get('ExemplarName') ?? '';
 		if (order >= 0x80000000) prefix = `_${prefix}`;
 		this.menus.set(buttonId, {

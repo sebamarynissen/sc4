@@ -138,6 +138,14 @@ export function factory(program) {
 		.description('Scans the given folder for any submenus and adds them to the config file. Uses your configured plugin folder by default')
 		.action(commands.scanForMenus);
 
+	submenu
+		.command('unpack')
+		.argument('[dir]', 'The directory where the submenus to unpack are located. Defaults to the current working directory')
+		.description('Unpacks all submenus that match the given glob patterns')
+		.option('-p, --patterns [patterns...]', 'A list of glob patterns that define the submenus to match. Defaults to **/*.dat')
+		.option('-o, --output [dir]', 'Path to the output directory. Defaults to the current working directory')
+		.action(commands.submenuUnpack);
+
 	// Subcommand for plugin-related functionalities
 	const plugins = program
 		.command('plugins')
