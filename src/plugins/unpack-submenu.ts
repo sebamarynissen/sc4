@@ -2,8 +2,8 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { FileType, type Exemplar } from 'sc4/core';
-import type { TGILiteral } from 'sc4/types';
+import { FileType, LTEXT, type Exemplar } from 'sc4/core';
+import type { TGIArray, TGILiteral } from 'sc4/types';
 import { Document, parse, Scalar  } from 'yaml';
 import PluginIndex from './plugin-index.js';
 import { hex } from 'sc4/utils';
@@ -22,7 +22,7 @@ type MenuInfo = {
 	dirname: string;
 	path?: string;
 	order?: number;
-	description?: string;
+	description?: string | TGIArray;
 	icon?: TGILiteral;
 };
 
@@ -97,13 +97,12 @@ class Unpacker {
 			// Write away the _menu.yaml file. Note that the parent menu gets 
 			// included here if it's an orphan!
 			let parent = this.menus.get(menu.parent!);
-			let doc = new Document({
+			let doc = stylize(new Document({
 				id: menu.id,
 				...!parent ? { parent: menu.parent } : null,
+				name: menu.name,
 				description: menu.description,
-			});
-			(doc.get('id', true) as Scalar || {}).format = 'HEX';
-			(doc.get('parent', true) as Scalar || {}).format = 'HEX';
+			}));
 			await fs.promises.writeFile(
 				path.join(dir, '_menu.yaml'),
 				String(doc),
@@ -174,13 +173,27 @@ class Unpacker {
 		// Find the description for this menu. We require this to be in this 
 		// file, though this is not strictly require by the game obviously! 
 		// It's the convention though.
-		let description;
+		let name;
 		let uvnk = exemplar.get('UserVisibleNameKey');
 		if (uvnk) {
 			let [type, group, instance] = uvnk;
 			let ltext = this.index.find({ type, group, instance });
 			if (ltext) {
-				description = String(ltext.read());
+				name = String(ltext.read() as LTEXT);
+			}
+		}
+
+		// Check for the description. Note that if the description was not 
+		// found, we store it as a tgi instead.
+		let description: string | TGIArray | undefined;
+		let idk = exemplar.get('ItemDescriptionKey');
+		if (idk) {
+			let [type, group, instance] = idk;
+			let ltext = this.index.find({ type, group, instance });
+			if (ltext) {
+				description = String(ltext.read() as LTEXT);
+			} else {
+				description = [type, group, instance];
 			}
 		}
 
@@ -202,14 +215,14 @@ class Unpacker {
 		// Determine the basename for the menu's directory.
 		let order = exemplar.get('ItemOrder') ?? 0;
 		let prefix = '0x'+order.toString(16).padStart(8).toUpperCase();
-		let name = exemplar.get('ExemplarName') ?? '';
+		let exemplarName = exemplar.get('ExemplarName') ?? '';
 		if (order >= 0x80000000) prefix = `_${prefix}`;
 		this.menus.set(buttonId, {
 			existing: false,
 			id: buttonId,
 			parent: exemplar.get('ItemSubmenuParentId'),
 			name,
-			dirname: `${prefix}-${name}`,
+			dirname: `${prefix}-${exemplarName}`,
 			order,
 			description,
 			icon,
@@ -234,4 +247,17 @@ class Unpacker {
 		}
 	}
 
+}
+
+function stylize(doc: Document) {
+	(doc.get('id', true) as Scalar || {}).format = 'HEX';
+	(doc.get('parent', true) as Scalar || {}).format = 'HEX';
+	let desc = doc.get('description', true) as any;
+	if (desc?.items) {
+		desc.flow = true;
+		for (let item of desc.items) {
+			item.format = 'HEX';
+		}
+	}
+	return doc;
 }
