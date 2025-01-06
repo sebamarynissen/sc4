@@ -51,7 +51,11 @@ export function factory(program) {
 		].join('\n'))
 		.action(commands.interactive);
 
-	program
+	const city = program
+		.command('city')
+		.description(`Modify savegames. Run ${chalk.magentaBright('sc4 city')} to view all available commands`);
+
+	city
 		.command('historical <city>')
 		.description('Make buildings within the given city historical')
 		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
@@ -62,7 +66,7 @@ export function factory(program) {
 		.option('-g, --agricultural', 'Make all agricultural buildings historical')
 		.action(commands.historical);
 
-	program
+	city
 		.command('growify <city>')
 		.description('Convert plopped buildings into functional growables')
 		.option('-o, --output <out>', 'The output path to store the city. Overrides the file by default')
@@ -73,19 +77,28 @@ export function factory(program) {
 		.option('--no-historical', 'Don\'t make the growified lots historical')
 		.action(commands.growify);
 
-	program
-		.command('create-submenu-patch')
-		.argument('[files...]', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
-		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
-		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
-		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
-		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
-		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
-		.option('-r, --recursive', 'Whether to scan any folders specified recursively. Defaults to false')
-		.action(commands.submenu);
+	// Command for generating the optimal pipe layout in a city.
+	city
+		.command('pipes <city>')
+		.description('Create the optimal pipe layout in the given city')
+		.action(commands.pipes);
 
-	program
-		.command('create-new-submenu')
+	// Command for plopping all lots from a folder in a city.
+	city
+		.command('plop <city> [patterns...]')
+		.description(`Plops all lots that match the patterns in the city. DO NOT use this on established cities!`)
+		.option('--bbox <bbox>', 'The bounding box to plop the lots in, given as minX,minZ,maxX,maxZ. Defaults to the entire city.')
+		.option('--clear', 'Clears the existing lots in the city')
+		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
+		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
+		.action(commands.plopAll);
+
+	const submenu = program
+		.command('submenu')
+		.description(`Manage submenus. Run ${chalk.magentaBright('sc4 submenu')} to list available commands`);
+
+	submenu
+		.command('create')
 		.description('Generates a new submenu button')
 		.argument('<icon>', 'The path to the png icon to use')
 		.requiredOption('--name', 'The name of the submenu as it appears in the game')
@@ -96,29 +109,29 @@ export function factory(program) {
 		.option('-d, --directory [dir]', 'The directory where the output path will be relative to. Defaults to your plugins folder')
 		.action(commands.newSubmenu);
 
-	program
-		.command('scan-for-menus [folder]')
+	submenu
+		.command('add')
+		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
+		.argument('[files...]', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
+		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
+		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
+		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
+		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
+		.option('-r, --recursive', 'Whether to scan any folders specified recursively. Defaults to false')
+		.action(commands.submenu);
+
+	submenu
+		.command('scan [folder]')
 		.description('Scans the given folder for any submenus and adds them to the config file. Uses your configured plugin folder by default')
 		.action(commands.scanForMenus);
 
-	// Command for generating the optimal pipe layout in a city.
-	program
-		.command('pipes <city>')
-		.description('Create the optimal pipe layout in the given city')
-		.action(commands.pipes);
-
-	// Command for plopping all lots from a folder in a city.
-	program
-		.command('plop-all <city> [patterns...]')
-		.description(`Plops all lots that match the patterns in the city. DO NOT use this on established cities!`)
-		.option('--bbox <bbox>', 'The bounding box to plop the lots in, given as minX,minZ,maxX,maxZ. Defaults to the entire city.')
-		.option('--clear', 'Clears the existing lots in the city')
-		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
-		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
-		.action(commands.plopAll);
+	// Subcommand for plugin-related functionalities
+	const plugins = program
+		.command('plugins')
+		.description(`Manage plugins. Run ${chalk.magentaBright('sc4 plugins')} to list available commands`);
 
 	// Command for tracking dependencies.
-	program
+	plugins
 		.command('track [patterns...]')
 		.description('Finds all dependencies for the files that match the given patterns')
 		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to your configured plugins folder')
@@ -126,7 +139,7 @@ export function factory(program) {
 		.action(commands.track);
 
 	// Some commands.
-	program
+	plugins
 		.command('tileset [dir]')
 		.storeOptionsAsProperties()
 		.description('Set the tilesets for all buildings in the given directory')
@@ -226,8 +239,15 @@ export function factory(program) {
 
 		});
 
+	// There are several commands that we have implemented, but they need to be 
+	// reworked. We'll put thos under the "misc" category and instruct users not 
+	// to use them, or at least with care.
+	const misc = program
+		.command('misc')
+		.description('Contains various commands that are experimental and not officially supported. Be very careful when using them!');
+
 	// Backup command for backup a region or a plugins folder.
-	program
+	misc
 		.command('backup')
 		.storeOptionsAsProperties()
 		.description('Backup a region or your entire plugins folder')
@@ -380,7 +400,7 @@ export function factory(program) {
 		});
 
 	// Command for comparing
-	program
+	city
 		.command('dump <city>')
 		.storeOptionsAsProperties()
 		.description('Give a human-readable representation of all lots in the city')
@@ -413,7 +433,7 @@ export function factory(program) {
 		});
 
 	// Command for looking for refs.
-	program
+	city
 		.command('refs <city>')
 		.storeOptionsAsProperties()
 		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
@@ -464,10 +484,10 @@ export function factory(program) {
 			api.refs(opts);
 		});
 
-	program
+	city
 		.command('pointer <city> <pointer>')
 		.storeOptionsAsProperties()
-		.description('Finds the subfile entery addressed by the given pointer')
+		.description('Finds the subfile entry addressed by the given pointer')
 		.action(function(city, pointer) {
 			let dir = this.cwd;
 			let file = path.resolve(dir, city);
@@ -479,7 +499,7 @@ export function factory(program) {
 		});
 
 	// Command for switching the active tilesets in a city.
-	program
+	misc
 		.command('tracts <city>')
 		.storeOptionsAsProperties()
 		.option('-t, --tilesets <tilesets>', 'The tileset identifiers, given as numbers')
@@ -523,7 +543,7 @@ export function factory(program) {
 		});
 
 	// Command for finding duplicate files in a plugin folder.
-	program
+	misc
 		.command('duplicates <folder>')
 		.storeOptionsAsProperties()
 		.action(function(folder) {
@@ -533,10 +553,14 @@ export function factory(program) {
 			});
 		});
 
-	// Command for opening the config file.
-	program
+	const config = program
 		.command('config')
-		.description(`Allows modifying the config file. Be careful with this if you don't know what you're doing!`)
+		.description(`Manage sc4 configuration. Run ${chalk.magentaBright('sc4 config')} to list available commands`);
+
+	// Command for opening the config file.
+	config
+		.command('open')
+		.description(`Allows editing the config file manually. Be careful with this if you don't know what you're doing!`)
 		.action(commands.config);
 
 	// End of factory function.
