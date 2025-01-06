@@ -6,7 +6,6 @@ import Entry, { type EntryJSON, type EntryFromType } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
-import crc32 from './crc.js';
 import { cClass, FileType } from './enums.js';
 import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';

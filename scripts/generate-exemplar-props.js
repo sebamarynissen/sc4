@@ -71,9 +71,11 @@ obj.ItemButtonClass = {
 	type: 'Uint32',
 	standard: 1,
 	options: {
+		Disabled: 0,
 		SubmenuButton: 1,
 		NetworkItemInSubmenu: 2,
 		FloraItemInSubmenu: 4,
+		BuildingUnhiddenInSubmenu: 8,
 	},
 	description: 'Required for submenu functionality, but usually should not need to be changed',
 };
@@ -82,6 +84,12 @@ obj.ExemplarPatchTargets = {
 	type: 'Uint32',
 	count: -2,
 	description: 'A list of Exemplar files this patch applies to (format: Group ID 1, Instance ID 1, Group ID 2, Instance ID 2, ...). The list must contain an even number of IDs',
+};
+obj.BuildingSubmenus = {
+	id: 0xaa1dd399,
+	type: 'Uint32',
+	count: -1,
+	description: 'For use with Submenus DLL: the Button IDs of the submenus this building appears in if the DLL is loaded',
 };
 
 // Serialize to yaml, but make sure to transform to an *array*.

@@ -8088,9 +8088,11 @@
   type: Uint32
   standard: 1
   options:
+    Disabled: 0x0
     SubmenuButton: 0x1
     NetworkItemInSubmenu: 0x2
     FloraItemInSubmenu: 0x4
+    BuildingUnhiddenInSubmenu: 0x8
   description: Required for submenu functionality, but usually should not need to be changed
 - name: ExemplarPatchTargets
   id: 0x62e78a
@@ -8099,3 +8101,9 @@
   description: "A list of Exemplar files this patch applies to (format: Group ID
     1, Instance ID 1, Group ID 2, Instance ID 2, ...). The list must contain an
     even number of IDs"
+- name: BuildingSubmenus
+  id: 0xaa1dd399
+  type: Uint32
+  count: -1
+  description: "For use with Submenus DLL: the Button IDs of the submenus this
+    building appears in if the DLL is loaded"
