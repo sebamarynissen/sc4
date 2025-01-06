@@ -8,10 +8,16 @@ export async function newSubmenu() {
 		message: 'What is the name of the submenu?',
 		required: true,
 	});
+
+	// If the description is left empty, we have to set it to "undefined" so 
+	// that the default description is used.
 	let description = await prompts.input({
-		message: 'Enter the description of the submenu:',
+		message: 'Enter the description of the submenu (leave open to use the default)',
 		default: '',
 	});
+	if (description.trim().length === 0) {
+		description = undefined;
+	}
 	let parent = await prompts.menu({
 		message: 'Select the parent menu',
 	});

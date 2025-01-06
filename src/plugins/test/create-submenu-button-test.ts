@@ -83,4 +83,18 @@ describe('#createSubmenuButton()', function() {
 
 	});
 
+	it('uses the default description if none specified', async function() {
+
+		let { dbpf } = await createSubmenuButton({
+			name: 'Submenu',
+			parent: 0xabcde123,
+		});
+
+		let clone = new DBPF(dbpf.toBuffer());
+		let exemplar = clone.find({ type: FileType.Exemplar })!.read();
+		let key = exemplar.get('ItemDescriptionKey');
+		expect(key).to.eql([0x2026960b, 0x123006aa, 0x6e967dff]);
+
+	});
+
 });

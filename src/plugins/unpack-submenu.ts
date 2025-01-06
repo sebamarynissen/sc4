@@ -146,6 +146,13 @@ class Unpacker {
 			let parent = this.menus.get(menuId);
 			if (!parent) continue;
 
+			// Log that we're reading the cohort.
+			let file = entry.dbpf.file!;
+			if (!had.has(file)) {
+				had.add(file);
+				logger?.info(`Reading ${path.relative(directory, file)}`);
+			}
+
 			// Read in the target file if it already exists so that we can 
 			// ensure we don't add pairs twice.
 			let { dbpf } = entry;
