@@ -5,6 +5,7 @@ import { resource } from '#test/files.js';
 import { DBPF, FileType } from 'sc4/core';
 import createSubmenuButton from '../create-submenu-button.js';
 import { compareUint8Arrays } from 'uint8array-extras';
+import { randomId } from 'sc4/utils';
 
 describe('#createSubmenuButton()', function() {
 
@@ -59,6 +60,26 @@ describe('#createSubmenuButton()', function() {
 		let clone = new DBPF(dbpf.toBuffer());
 		let png = clone.find({ type: FileType.PNG })!.read();
 		expect(compareUint8Arrays(png, buffer)).to.equal(0);
+
+	});
+
+	it('accepts a TGIArray as the description', async function() {
+
+		let type = randomId();
+		let { dbpf } = await createSubmenuButton({
+			name: 'The menu name',
+			parent: 0xabcde123,
+			description: [
+				FileType.LTEXT,
+				0x123006aa,
+				type,
+			],
+		});
+
+		let clone = new DBPF(dbpf.toBuffer());
+		let exemplar = clone.find({ type: FileType.Exemplar })!.read();
+		let key = exemplar.get('ItemDescriptionKey');
+		expect(key).to.eql([FileType.LTEXT, 0x123006aa, type]);
 
 	});
 
