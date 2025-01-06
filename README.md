@@ -86,7 +86,7 @@ Options:
 
 which can be used for example as
 ```
-sc4 growify -r Low -c High --no-historical "City - Plopped city.sc4"
+sc4 city growify -r Low -c High --no-historical "City - Plopped city.sc4"
 ```
 
 ## Backups
