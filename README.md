@@ -42,7 +42,11 @@ As such you can simply double-click one of your cities, and subsequently it will
 ### Advanced usage
 
 If you are an advanced user and you have some experience with cli tools, then there is also the option to use `sc4` by running one of its commands directly.
-Run `sc4 --help` in a command prompt to get an overview of all available commands:
+Run `sc4 --help` in a command prompt to get an overview of all available commands.
+Beware that certain actions that a typical end-user would not regularly use are not available in interactive mode!
+
+Note that since v0.2.0, the commands have been grouped with subcommands.
+For example, the old `sc4 growify <city>` command can now be used as `sc4 city growify <city>`, and `sc4 plop-all <city>` is now `sc4 city plop`.
 
 ```
 Usage: sc4 [options] [command]
@@ -52,30 +56,21 @@ You can use the individual commands listed below, or just run sc4 without any co
 Run sc4 [command] --help to view all options for the individual commands.
 
 Options:
-  -V, --version                              output the version number
-  -h, --help                                 display help for command
+  -V, --version  output the version number
+  -h, --help     display help for command
 
 Commands:
-  historical [options] <city>                Make buildings within the given city historical
-  growify [options] <city>                   Convert plopped buildings into functional growables
-  create-submenu-patch [options] [files...]  Adds all specified lots to the given menu using the Exemplar Patching method
-  create-new-submenu [options] <icon>        Generates a new submenu button
-  pipes <city>                               Create the optimal pipe layout in the given city
-  plop-all [options] <city> [patterns...]    Plops all lots that match the patterns in the city. DO NOT use this on established cities!
-  track [options] [patterns...]              Finds all dependencies for the files that match the given patterns
-  tileset [options] [dir]                    Set the tilesets for all buildings in the given directory
-  backup [options]                           Backup a region or your entire plugins folder
-  dump <city>                                Give a human-readable representation of all lots in the city
-  refs [options] <city>                      Finds internal memory references within a city
-  pointer <city> <pointer>                   Finds the subfile entery addressed by the given pointer
-  tracts [options] <city>                    Changes the active tilesets in the given city
-  config                                     Allows modifying the config file. Be careful with this if you don't know what you're doing!
+  city           Modify savegames. Run sc4 city to view all available commands
+  submenu        Manage submenus. Run sc4 submenu to list available commands
+  plugins        Manage plugins. Run sc4 plugins to list available commands
+  misc           Contains various commands that are experimental and not officially supported. Be very careful when using them!
+  config         Manage sc4 configuration. Run sc4 config to list available commands
 ```
 
 You can run `sc4 [command] --help` to get an overview of the options for every command.
-For example, if you run `sc4 growify --help` you'll see
+For example, if you run `sc4 city growify --help` you'll see
 ```
-Usage: sc4 growify [options] <city>
+Usage: sc4 city growify [options] <city>
 
 Convert plopped buildings into functional growables
 
