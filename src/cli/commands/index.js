@@ -8,3 +8,4 @@ export * from './scan-for-menus-command.js';
 export * from './config-command.js';
 export * from './plop-all-command.js';
 export * from './track-command.js';
+export * from './city-pointer-command.js';

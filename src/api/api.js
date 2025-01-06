@@ -205,38 +205,6 @@ export async function refs(opts) {
 
 }
 
-// # pointer(opts)
-export async function pointer(opts) {
-	let {
-		logger = defaultLogger,
-		dbpf,
-		pointer,
-	} = opts;
-
-	logger.info('Searching for', hex(opts.pointer));
-	let ctx = dbpf.createContext();
-	let refs = ctx.findAllMemRefs();
-	let entry = refs.find(ref => {
-		return ref.mem === pointer;
-	});
-	if (!entry) {
-		logger.error('Pointer not found!');
-		return;
-	}
-
-	// Check if it matches a specific file type.
-	let name = '';
-	for (let [key, value] of Object.entries(FileType)) {
-		if (value === entry.type) {
-			name = ` (${key})`;
-			break;
-		}
-	}
-
-	logger.ok(`Found in ${hex(entry.type)}${name}`);
-
-}
-
 // # duplicates(opts)
 // Finds duplicates files in a plugin folder.
 export function duplicates(opts) {

@@ -486,17 +486,8 @@ export function factory(program) {
 
 	city
 		.command('pointer <city> <pointer>')
-		.storeOptionsAsProperties()
 		.description('Finds the subfile entry addressed by the given pointer')
-		.action(function(city, pointer) {
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			let opts = baseOptions();
-			opts.dbpf = new DBPF(buff);
-			opts.pointer = +pointer;
-			api.pointer(opts);
-		});
+		.action(commands.cityPointer);
 
 	// Command for switching the active tilesets in a city.
 	misc
