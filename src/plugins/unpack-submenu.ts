@@ -4,9 +4,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { FileType, type Exemplar } from 'sc4/core';
 import type { TGILiteral } from 'sc4/types';
-import { Document, Scalar  } from 'yaml';
+import { Document, parse, Scalar  } from 'yaml';
 import PluginIndex from './plugin-index.js';
 import { hex } from 'sc4/utils';
+import { Glob } from 'glob';
 
 type UnpackSubmenuOptions = {
 	directory?: string;
@@ -14,11 +15,13 @@ type UnpackSubmenuOptions = {
 };
 
 type MenuInfo = {
+	existing: boolean;
 	id: number;
-	parent: number;
-	name: string;
+	parent?: number;
+	name?: string;
 	dirname: string;
-	order: number;
+	path?: string;
+	order?: number;
 	description?: string;
 	icon?: TGILiteral;
 };
@@ -31,7 +34,7 @@ export default async function(opts: UnpackSubmenuOptions) {
 // # Unpacker
 class Unpacker {
 	index: PluginIndex;
-	menus: MenuInfo[] = [];
+	menus: Map<number, MenuInfo> = new Map();
 
 	// ## unpack()
 	// Entry point for unpacking a directory containing a bunch of submenus.
@@ -58,28 +61,45 @@ class Unpacker {
 			this.parseExemplar(entry.read());
 		}
 
+		// Parse any existing menus in the output dirctory as well.
+		await this.parseExistingMenus(output);
+
+		// Loop all menus and fill in their paths.
+		outer:
+		for (let menu of this.menus.values()) {
+			if (menu.path || !menu.parent) continue;
+			let chain = [menu.dirname];
+			let parent = this.menus.get(menu.parent);
+			while (parent && !parent.path) {
+				chain.unshift(parent.dirname);
+				if (!parent.parent) continue outer;
+				parent = this.menus.get(parent.parent);
+			}
+			if (parent && parent.path) {
+				chain.unshift(parent.path);
+			} else {
+				chain.unshift(path.join(output, 'orphans'));
+			}
+			menu.path = path.join(...chain);
+		}
+
 		// Next we'll create the actual folders with the unpacked _menu.yaml and 
 		// _icon.png. These need to be present before we can loop the cohorts 
 		// and look for patches.
-		let parents = new Map<number, { path: string }>();
-		for (let menu of this.menus) {
+		for (let menu of this.menus.values()) {
+			if (menu.existing) continue;
 
 			// Check if we can find the parent menu folder. If not, this is an 
 			// orphaned menu and we should add it to that folder as well.
-			let dir;
-			let parent = parents.get(menu.id);
-			if (!parent) {
-				dir = path.resolve(output, 'orphans', menu.dirname);
-			} else {
-				dir = path.resolve(output, parent.path, menu.dirname);
-			}
+			let dir = menu.path!;
 			await fs.promises.mkdir(dir, { recursive: true });
 
 			// Write away the _menu.yaml file. Note that the parent menu gets 
 			// included here if it's an orphan!
+			let parent = this.menus.get(menu.parent!);
 			let doc = new Document({
 				id: menu.id,
-				... parent ? { parent: menu.parent } : null,
+				...!parent ? { parent: menu.parent } : null,
 				description: menu.description,
 			});
 			(doc.get('id', true) as Scalar || {}).format = 'HEX';
@@ -95,9 +115,6 @@ class Unpacker {
 				await fs.promises.writeFile(path.join(dir, '_icon.png'), png);
 			}
 
-			// Store the menu as an available parent menu.
-			parents.set(menu.id, { path: dir });
-
 		}
 
 		// Next we'll read in the cohorts to look for patches.
@@ -112,14 +129,14 @@ class Unpacker {
 			let cohort = entry.read();
 			let [menuId] = cohort.get('BuildingSubmenus') ?? [];
 			if (!menuId) continue;
-			let parent = parents.get(menuId);
+			let parent = this.menus.get(menuId);
 			if (!parent) continue;
 
 			// Read in the target file if it already exists so that we can 
 			// ensure we don't add pairs twice.
 			let { dbpf } = entry;
 			let basename = path.basename(dbpf.file!, path.extname(dbpf.file!));
-			let fullPath = path.join(parent.path, `${basename}.txt`);
+			let fullPath = path.join(parent.path!, `${basename}.txt`);
 			let existingTargets = new Set();
 			try {
 				let contents = String(await fs.promises.readFile(fullPath));
@@ -187,9 +204,10 @@ class Unpacker {
 		let prefix = '0x'+order.toString(16).padStart(8).toUpperCase();
 		let name = exemplar.get('ExemplarName') ?? '';
 		if (order >= 0x80000000) prefix = `_${prefix}`;
-		this.menus.push({
+		this.menus.set(buttonId, {
+			existing: false,
 			id: buttonId,
-			parent: exemplar.get('ItemSubmenuParentId')!,
+			parent: exemplar.get('ItemSubmenuParentId'),
 			name,
 			dirname: `${prefix}-${name}`,
 			order,
@@ -197,6 +215,23 @@ class Unpacker {
 			icon,
 		});
 
+	}
+	async parseExistingMenus(directory: string) {
+		let glob = new Glob('**/_menu.yaml', {
+			cwd: directory,
+			absolute: true,
+		});
+		let files = await glob.walk();
+		for (let file of files) {
+			let yaml = String(await fs.promises.readFile(file));
+			let parsed = parse(yaml);
+			this.menus.set(parsed.id, {
+				existing: true,
+				id: parsed.id,
+				dirname: path.basename(path.dirname(file)),
+				path: path.dirname(file),
+			});
+		}
 	}
 
 }
