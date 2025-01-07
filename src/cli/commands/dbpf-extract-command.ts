@@ -1,15 +1,19 @@
 // # dbpf-extract-command.ts
 import path from 'node:path';
-import fs from 'node:fs';
+import fs, { type OpenMode, type PathLike } from 'node:fs';
 import os from 'node:os';0
 import ora from 'ora';
 import PQueue from 'p-queue';
+import { attempt } from 'sc4/utils';
 import { Cohort, DBPF, Exemplar, FileType, type Entry } from 'sc4/core';
 import type { TGILiteral } from 'sc4/types';
 import { Document } from 'yaml';
+import logger from '#cli/logger.js';
 
 type DbpfExtractCommandOptions = {
 	yaml?: boolean;
+	force?: boolean;
+	output?: string;
 } & Partial<TGILiteral>;
 
 export async function dbpfExtract(file: string, options: DbpfExtractCommandOptions) {
@@ -22,24 +26,23 @@ export async function dbpfExtract(file: string, options: DbpfExtractCommandOptio
 		parse: false,
 	});
 	let filter = createFilter(options);
+	let flag: OpenMode = options.force ? 'w' : 'wx';
 
 	// Ensure that the output folder exists.
-	let output = path.resolve(
-		process.cwd(),
-		path.basename(file, path.extname(file))
-	);
+	let { output = '.' } = options;
+	output = path.resolve(process.cwd(), output);
 	await fs.promises.mkdir(output, { recursive: true });
 
 	// Run as much as possible in parallel, which means we won't use a simple 
 	// loop, but create promises instead, but we have to make sure to not create
 	// too many open file handles either, so use a promise queue.
+	let warnings: string[] = [];
 	let queue = new PQueue({ concurrency: 250 });
 	let spinner = ora(`Reading ${dbpf.file}`).start();
 	await dbpf.parseAsync();
 	let counter = 0;
 	for (let entry of dbpf) {
 		if (!filter(entry)) continue;
-		counter++;
 		let { id } = entry;
 		queue.add(async () => {
 			spinner.text = `Reading ${id}`;
@@ -62,27 +65,44 @@ export async function dbpfExtract(file: string, options: DbpfExtractCommandOptio
 			}
 			let basename = `${id}${extension}`;
 			let filePath = path.join(output, basename);
-			await fs.promises.writeFile(filePath, buffer);
+			if (await write(filePath, buffer, flag, warnings)) {
+				counter++;
+			}
 
 			// Reader generates .TGI files as well when extracting files from 
 			// dbpf, so we'll use that convention as well.
-			let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`);
-			await fs.promises.writeFile(`${filePath}.TGI`, tgi);
+			let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`).join('');
+			await write(`${filePath}.TGI`, tgi, flag, warnings);
 
 		});
 	}
 	await queue.onIdle();
 	spinner.succeed(`Extracted ${counter} files from ${dbpf.file}`);
+	for (let warning of warnings) {
+		logger?.warn(warning);
+	}
 
 }
 
-// # rawHex(number)
-// Converts a number to the hex notation, but uses uppercase and doesn't prefix 
-// with 0x. That's apparently how reader does it.
-function rawHex(number: number) {
-	return number.toString(16).padStart(8, '0').toUpperCase();
+// # write(file, buffer, warnings)
+async function write(
+	file: PathLike,
+	buffer: Uint8Array | string,
+	flag: OpenMode,
+	warnings: string[] = [],
+) {
+	const [err] = await attempt(
+		() => fs.promises.writeFile(file, buffer, { flag }),
+	);
+	if (!err) return true;
+	if (err.code === 'EEXIST') {
+		warnings.push(`${file} already exists`);
+		return false;
+	}
+	throw err;
 }
 
+// # createFilter()
 function createFilter(query: Partial<TGILiteral>) {
 	return function(entry: Entry) {
 		for (let key of ['type', 'group', 'instance'] as const) {
@@ -92,6 +112,13 @@ function createFilter(query: Partial<TGILiteral>) {
 		}
 		return true;
 	}
+}
+
+// # rawHex(number)
+// Converts a number to the hex notation, but uses uppercase and doesn't prefix 
+// with 0x. That's apparently how reader does it.
+function rawHex(number: number) {
+	return number.toString(16).padStart(8, '0').toUpperCase();
 }
 
 // # getExtension(entry)

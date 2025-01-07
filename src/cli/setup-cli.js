@@ -171,6 +171,8 @@ export function factory(program) {
 		.option('-t, --type <type>', 'Only extract files with the given TypeID', parsers.typeId)
 		.option('-g, --group <group>', 'Only extract files with the given GroupID', parsers.number)
 		.option('-i, --instance <instance>', 'Only extract files with the given InstanceID', parsers.number)
+		.option('-f, --force', 'Force overwriting existing output files')
+		.option('-o, --output <directory>', 'Output directory. Defaults to the current working directory')
 		.option('--yaml', 'Extract exemplars & cohorts as yaml')
 		.action(commands.dbpfExtract);
 

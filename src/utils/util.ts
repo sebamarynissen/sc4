@@ -241,3 +241,12 @@ export function findPatternOffsets(buffer: Uint8Array, pattern: Uint8Array) {
 	}
 	return offsets;
 }
+
+// Helper function that mimicks the "safe assignment operator", asynchronously.
+export async function attempt(fn: () => any) {
+	try {
+		return [null, await fn()];
+	} catch (e) {
+		return [e, null];
+	}
+}
