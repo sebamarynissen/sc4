@@ -171,6 +171,7 @@ export function factory(program) {
 		.option('-t, --type <type>', 'Only extract files with the given TypeID', parsers.typeId)
 		.option('-g, --group <group>', 'Only extract files with the given GroupID', parsers.number)
 		.option('-i, --instance <instance>', 'Only extract files with the given InstanceID', parsers.number)
+		.option('--yaml', 'Extract exemplars & cohorts as yaml')
 		.action(commands.dbpfExtract);
 
 	// There are several commands that we have implemented, but they need to be 

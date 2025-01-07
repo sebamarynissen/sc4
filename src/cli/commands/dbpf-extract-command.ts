@@ -4,10 +4,13 @@ import fs from 'node:fs';
 import os from 'node:os';0
 import ora from 'ora';
 import PQueue from 'p-queue';
-import { DBPF, FileType, type Entry } from 'sc4/core';
+import { Cohort, DBPF, Exemplar, FileType, type Entry } from 'sc4/core';
 import type { TGILiteral } from 'sc4/types';
+import { Document } from 'yaml';
 
-type DbpfExtractCommandOptions = {} & Partial<TGILiteral>;
+type DbpfExtractCommandOptions = {
+	yaml?: boolean;
+} & Partial<TGILiteral>;
 
 export async function dbpfExtract(file: string, options: DbpfExtractCommandOptions) {
 
@@ -40,21 +43,30 @@ export async function dbpfExtract(file: string, options: DbpfExtractCommandOptio
 		let { id } = entry;
 		queue.add(async () => {
 			spinner.text = `Reading ${id}`;
-			let buffer = await entry.decompressAsync();
+			let buffer: Uint8Array | string = await entry.decompressAsync();
 
 			// If it's an LTEXT, we just export it as a .txt file, that's 
 			// easier.
-			let basename = `${id}${getExtension(entry)}`;
+			let extension = getExtension(entry)
 			if (entry.type === FileType.LTEXT) {
 				buffer = Buffer.from(String(entry.read()), 'utf8');
+			} else if (
+				options.yaml &&
+				(
+					entry.isType(FileType.Exemplar) ||
+					entry.isType(FileType.Cohort)
+				)
+			) {
+				extension = '.yaml';
+				buffer = exemplarToYaml(entry.read());
 			}
+			let basename = `${id}${extension}`;
 			let filePath = path.join(output, basename);
 			await fs.promises.writeFile(filePath, buffer);
 
 			// Reader generates .TGI files as well when extracting files from 
 			// dbpf, so we'll use that convention as well.
-			let lf = os.EOL.repeat(2);
-			let tgi = entry.tgi.map(nr => rawHex(nr)).join(lf)+os.EOL;
+			let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`);
 			await fs.promises.writeFile(`${filePath}.TGI`, tgi);
 
 		});
@@ -90,7 +102,7 @@ function getExtension(entry: Entry): string {
 		case FileType.PNG: return '.png';
 		case FileType.Thumbnail: return '.png';
 		case FileType.LTEXT: return '.txt';
-		case FileType.Exemplar: return '.exemplar';
+		case FileType.Exemplar: return '.eqz';
 		case FileType.Cohort: return '.cohort';
 		case FileType.DIR: return '.dir';
 		case FileType.FSH: return '.fsh';
@@ -100,4 +112,37 @@ function getExtension(entry: Entry): string {
 		case FileType.SC4Path: return '.sc4path';
 		default: return '';
 	}
+}
+
+// # exemplarToYaml(exemplar)
+// Serializes an exemplar to a yaml string.
+function exemplarToYaml(exemplar: Exemplar | Cohort) {
+	let json = exemplar.toJSON();
+	let doc = new Document(json) as any;
+	let parent = doc.get('parent', true);
+	if (parent) {
+		parent.flow = true;
+		for (let item of parent.items) {
+			item.format = 'HEX';
+		}
+	}
+	for (let item of doc.get('properties', true).items) {
+		(item.get('id', true) || {}).format = 'HEX';
+		let value = item.get('value', true);
+		let type = item.get('type');
+		if (value) {
+			let shouldCast = ['Uint8', 'Uint16', 'Uint32'];
+			if (value.items) {
+				if (value.items.length <= 3) value.flow = true;
+				if (shouldCast.includes(type)) {
+					for (let item of value.items) {
+						item.format = 'HEX';
+					}
+				}
+			} else if (shouldCast.includes(type)) {
+				value.format = 'HEX';
+			}
+		}
+	}
+	return doc.toString();
 }

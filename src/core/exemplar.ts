@@ -70,6 +70,10 @@ const idToName: Map<number, string> = new Map(
 		return [+(object as NumberLike), name as string];
 	}),
 );
+let config = +ExemplarProperty.LotConfigPropertyLotObject;
+for (let i = 1; i < 1280; i++) {
+	idToName.set(config+i, 'LotConfigPropertyLotObject');
+}
 
 // We no longer use an enum for indicating the type of an exemplar property. 
 // Instead we use the native built-in JavaScript typed arrays to indicate the 
@@ -385,9 +389,10 @@ abstract class BaseExemplar {
 		return {
 			parent: [...this.parent],
 			properties: this.props.map(prop => {
+				let { name } = prop;
 				return {
 					id: prop.id,
-					name: prop.name,
+					...(name ? { name } : null),
 					type: getJsonType(prop.type),
 					value: prop.value,
 				};
