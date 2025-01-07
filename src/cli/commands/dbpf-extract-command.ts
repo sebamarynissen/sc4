@@ -1,6 +1,7 @@
 // # dbpf-extract-command.ts
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';0
 import ora from 'ora';
 import PQueue from 'p-queue';
 import { DBPF, FileType, type Entry } from 'sc4/core';
@@ -47,13 +48,27 @@ export async function dbpfExtract(file: string, options: DbpfExtractCommandOptio
 			if (entry.type === FileType.LTEXT) {
 				buffer = Buffer.from(String(entry.read()), 'utf8');
 			}
-			await fs.promises.writeFile(path.join(output, basename), buffer);
+			let filePath = path.join(output, basename);
+			await fs.promises.writeFile(filePath, buffer);
+
+			// Reader generates .TGI files as well when extracting files from 
+			// dbpf, so we'll use that convention as well.
+			let lf = os.EOL.repeat(2);
+			let tgi = entry.tgi.map(nr => rawHex(nr)).join(lf)+os.EOL;
+			await fs.promises.writeFile(`${filePath}.TGI`, tgi);
 
 		});
 	}
 	await queue.onIdle();
 	spinner.succeed(`Extracted ${counter} files from ${dbpf.file}`);
 
+}
+
+// # rawHex(number)
+// Converts a number to the hex notation, but uses uppercase and doesn't prefix 
+// with 0x. That's apparently how reader does it.
+function rawHex(number: number) {
+	return number.toString(16).padStart(8, '0').toUpperCase();
 }
 
 function createFilter(query: Partial<TGILiteral>) {
