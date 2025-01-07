@@ -1,6 +1,6 @@
 {
   "name": "sc4",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A command line utility for automating SimCity 4 modding tasks & modifying savegames",
   "main": "lib/core/index.js",
   "type": "module",
