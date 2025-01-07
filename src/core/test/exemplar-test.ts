@@ -27,14 +27,16 @@ describe('The Exemplar file', function() {
 
 	});
 
-	it('should read textual exemplars', function() {
+	it('reads textual exemplars', function() {
 
 		let file = resource('quotes.sc4desc');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.exemplars[0];
-		entry.read();
+		let exemplar = entry.read();
+		let pollution = exemplar.get('PollutionAtCenter');
+		expect(pollution).to.eql([1, 1, 4, 0]);
 
 	});
 
@@ -187,6 +189,36 @@ describe('The Exemplar file', function() {
 					expect(cloned).to.eql(prop);
 				}
 			}
+
+		});
+
+	});
+
+	describe('#toJSON()', function() {
+
+		it('serializes to JSON', function() {
+
+			let exemplar = new Exemplar({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				props: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						value: 0x21,
+					},
+				],
+			});
+			let json = exemplar.toJSON();
+			expect(json).to.eql({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						type: 'Uint32',
+						name: 'ExemplarType',
+						value: 0x21,
+					},
+				],
+			});
 
 		});
 
