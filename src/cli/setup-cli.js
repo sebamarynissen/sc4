@@ -166,14 +166,16 @@ export function factory(program) {
 		.description(`Operate on DBPF files. Run ${chalk.magentaBright('sc4 dbpf')} to list available commands`);
 
 	dbpf
-		.command('extract <dbpf>')
-		.description('Extracts the contents of a DBPF file')
-		.option('-t, --type <type>', 'Only extract files with the given TypeID', parsers.typeId)
-		.option('-g, --group <group>', 'Only extract files with the given GroupID', parsers.number)
-		.option('-i, --instance <instance>', 'Only extract files with the given InstanceID', parsers.number)
+		.command('extract')
+		.description('Extracts the contents of one or more DBPF files')
+		.argument('<dbpf...>', 'Glob pattern(s) of DBPF files to match, e.g. **/*.{sc4lot,dat}')
+		.option('-t, --type <type>', 'Only extract files with the given TypeID (e.g. png, 0x6534284A)', parsers.typeId)
+		.option('-g, --group <group>', 'Only extract files with the given GroupID (e.g. 0x123006aa)', parsers.number)
+		.option('-i, --instance <instance>', 'Only extract files with the given InstanceID (e.g. 0x00003000)', parsers.number)
 		.option('-f, --force', 'Force overwriting existing output files')
 		.option('-o, --output <directory>', 'Output directory. Defaults to the current working directory')
 		.option('--yaml', 'Extract exemplars & cohorts as yaml')
+		.option('--no-tgi', 'Skips creating .TGI files')
 		.action(commands.dbpfExtract);
 
 	// There are several commands that we have implemented, but they need to be 

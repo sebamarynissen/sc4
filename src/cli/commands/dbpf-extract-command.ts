@@ -6,6 +6,7 @@ import ora, { type Ora } from 'ora';
 import PQueue from 'p-queue';
 import { attempt } from 'sc4/utils';
 import { Cohort, DBPF, Exemplar, FileType, type Entry } from 'sc4/core';
+import { FileScanner } from 'sc4/plugins';
 import type { TGILiteral } from 'sc4/types';
 import { Document } from 'yaml';
 import logger from '#cli/logger.js';
@@ -14,15 +15,20 @@ type DbpfExtractCommandOptions = {
 	yaml?: boolean;
 	force?: boolean;
 	output?: string;
+	tgi?: boolean;
 } & Partial<TGILiteral>;
 
 // # dbpfExtract(files, options)
-export async function dbpfExtract(files: string | string[], options: DbpfExtractCommandOptions) {
-	return new ExtractOperation(options).extract([files].flat());
+export async function dbpfExtract(
+	patterns: string | string[],
+	options: DbpfExtractCommandOptions,
+) {
+	return new ExtractOperation(options).extract([patterns].flat());
 }
 
 // # ExtractOptions
 class ExtractOperation {
+	files: string[];
 	options: DbpfExtractCommandOptions;
 	output: string;
 	filter: (entry: Entry) => boolean;
@@ -44,7 +50,19 @@ class ExtractOperation {
 	}
 
 	// Entry point for starting the extraction.
-	async extract(files: string[]) {
+	async extract(patterns: string | string[]) {
+
+		// First we'll scan for all dbpf files that match the patterns.
+		this.spinner.start('Scanning for files');
+		let glob = new FileScanner(patterns, {
+			cwd: process.cwd(),
+			absolute: true,
+		});
+		this.files = await glob.walk();
+		if (this.files.length === 0) {
+			this.spinner.warn(`No files found that match the pattern ${patterns}`);
+			return;
+		}
 
 		// Ensure that the output folder exists.
 		await fs.promises.mkdir(this.output, { recursive: true });
@@ -52,8 +70,8 @@ class ExtractOperation {
 		// We'll run as much as possible in parallel, so don't loop 
 		// sequentially, but in parallel.
 		let tasks = [];
-		this.spinner.start(`Starting extraction`);
-		for (let file of files) {
+		this.spinner.text = `Starting extraction`;
+		for (let file of this.files) {
 			let task = this.extractSingleFile(file);
 			tasks.push(task);
 		}
@@ -114,6 +132,7 @@ class ExtractOperation {
 
 				// Reader generates .TGI files as well when extracting files 
 				// from dbpf, so we'll use that convention as well.
+				if (!this.options.tgi) return;
 				let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`).join('');
 				await this.write(`${filePath}.TGI`, tgi);
 
