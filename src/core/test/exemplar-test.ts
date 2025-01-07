@@ -27,14 +27,16 @@ describe('The Exemplar file', function() {
 
 	});
 
-	it('should read textual exemplars', function() {
+	it('reads textual exemplars', function() {
 
 		let file = resource('quotes.sc4desc');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.exemplars[0];
-		entry.read();
+		let exemplar = entry.read();
+		let pollution = exemplar.get('PollutionAtCenter');
+		expect(pollution).to.eql([1, 1, 4, 0]);
 
 	});
 
@@ -133,6 +135,22 @@ describe('The Exemplar file', function() {
 
 	});
 
+	it('converts numbers to bigints if that\'s the type', function() {
+
+		let exemplar = new Exemplar({
+			props: [
+				{
+					id: +ExemplarProperty.BulldozeCost,
+					type: BigInt64Array,
+					value: 10,
+				},
+			],
+		});
+		let [prop] = exemplar;
+		expect(prop.value).to.equal(10n);
+
+	});
+
 	describe('#get()', function() {
 
 		it('automatically unwraps single-value arrays for non-array properties', function() {
@@ -187,6 +205,70 @@ describe('The Exemplar file', function() {
 					expect(cloned).to.eql(prop);
 				}
 			}
+
+		});
+
+	});
+
+	describe('#toJSON()', function() {
+
+		it('serializes to JSON', function() {
+
+			let exemplar = new Exemplar({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				props: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						type: Uint32Array,
+						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: BigInt64Array,
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: String,
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: Float32Array,
+						value: [10.5, 3.5, 2.75],
+					},
+				],
+			});
+			let json = exemplar.toJSON();
+			expect(json).to.eql({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						type: 'Uint32',
+						name: 'ExemplarType',
+						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: 'Sint64',
+						name: 'BulldozeCost',
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: 'String',
+						name: 'ItemDescription',
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: 'Float32',
+						name: 'OccupantSize',
+						value: [10.5, 3.5, 2.75],
+					},
+				],
+			});
 
 		});
 

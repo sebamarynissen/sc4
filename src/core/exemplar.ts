@@ -14,6 +14,7 @@ import {
     type Value,
     type Key,
     type NumberLike,
+    type ValueType,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
@@ -47,6 +48,17 @@ type AddPropertyOptions<K extends Key = Key> = {
 	type?: PropertyValueType;
 };
 
+type ExemplarJSON = {
+	parent: TGIArray;
+	properties: ExemplarPropertyJSON[];
+};
+
+type ExemplarPropertyJSON = {
+	id: number;
+	name?: string;
+	value: any;
+};
+
 const LotObjectRange = [
 	+ExemplarProperty.LotConfigPropertyLotObject,
 	+ExemplarProperty.LotConfigPropertyLotObject+1279,
@@ -58,6 +70,10 @@ const idToName: Map<number, string> = new Map(
 		return [+(object as NumberLike), name as string];
 	}),
 );
+let config = +ExemplarProperty.LotConfigPropertyLotObject;
+for (let i = 1; i < 1280; i++) {
+	idToName.set(config+i, 'LotConfigPropertyLotObject');
+}
 
 // We no longer use an enum for indicating the type of an exemplar property. 
 // Instead we use the native built-in JavaScript typed arrays to indicate the 
@@ -135,7 +151,10 @@ abstract class BaseExemplar {
 		this.id = data.id || 'EQZB1###';
 		this.parent = data.parent || [0, 0, 0];
 		this.props = [...data.props || []].map(def => {
-			return isClone ? new Property(def) : def as Property;
+			return (isClone || !(def instanceof Property) ?
+				new Property(def) :
+				def as Property
+			);
 		});
 		Object.defineProperty(this, 'table', {
 			enumerable: false,
@@ -362,6 +381,25 @@ abstract class BaseExemplar {
 
 	}
 
+	// ## toJSON()
+	// Serializes the exemplar as json. Note that the json might actually 
+	// include Bigints as well, so it's not pure json, but yaml is able to 
+	// handle this properly.
+	toJSON(): ExemplarJSON {
+		return {
+			parent: [...this.parent],
+			properties: this.props.map(prop => {
+				let { name } = prop;
+				return {
+					id: prop.id,
+					...(name ? { name } : null),
+					type: getJsonType(prop.type),
+					value: prop.value,
+				};
+			}),
+		};
+	}
+
 }
 
 // # normalaizeId(idOrName)
@@ -406,6 +444,20 @@ function normalizeType(
 
 }
 
+// # getJsonType(type)
+function getJsonType(type: PropertyValueType) {
+	switch (type) {
+		case Uint8Array: return 'Uint8';
+		case Uint16Array: return 'Uint16';
+		case Uint32Array: return 'Uint32';
+		case Int32Array: return 'Sint32';
+		case BigInt64Array: return 'Sint64';
+		case Float32Array: return 'Float32';
+		case Bool: return 'Bool';
+		case String: return 'String';
+	}
+}
+
 // # Exemplar
 export class Exemplar extends BaseExemplar {
 	static [kFileType] = FileType.Exemplar;
@@ -434,7 +486,10 @@ class Property<K extends Key = Key> {
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
 		this.type = type;
-		this.value = isClone ? structuredClone(value) : value;
+		this.value = value !== undefined ? cast(
+			type,
+			isClone ? structuredClone(value as ValueType) : value as ValueType
+		) as Value<K> : undefined;
 	}
 
 	// ## getSafeValue()
@@ -627,4 +682,18 @@ class Property<K extends Key = Key> {
 		};
 	}
 
+}
+
+// # cast(type, value)
+// Ensures a value specified for a property matches its specified type.
+function cast(type: PropertyValueType, value: ValueType): ValueType {
+	if (Array.isArray(value)) {
+		return value.map(value => cast(type, value)) as Primitive[];
+	}
+	switch (type) {
+		case String: return String(value);
+		case Bool: return Boolean(value);
+		case Sint64: return BigInt(value);
+		default: return Number(value);
+	}
 }

@@ -14,7 +14,7 @@
 			"#cli/*": ["src/cli/*"],
 		},
 		"lib": ["es2024"],
-		"target": "es2024",
+		"target": "esnext",
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"verbatimModuleSyntax": true,
