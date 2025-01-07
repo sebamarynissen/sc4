@@ -73,6 +73,7 @@ function createFilter(query: Partial<TGILiteral>) {
 function getExtension(entry: Entry): string {
 	switch (entry.type) {
 		case FileType.PNG: return '.png';
+		case FileType.Thumbnail: return '.png';
 		case FileType.LTEXT: return '.txt';
 		case FileType.Exemplar: return '.exemplar';
 		case FileType.Cohort: return '.cohort';
