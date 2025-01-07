@@ -14,6 +14,7 @@ import {
     type Value,
     type Key,
     type NumberLike,
+    type ValueType,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
@@ -480,7 +481,10 @@ class Property<K extends Key = Key> {
 		let { id = 0, type = Uint32Array, value } = data || {};
 		this.id = +id;
 		this.type = type;
-		this.value = isClone ? structuredClone(value) : value;
+		this.value = value !== undefined ? cast(
+			type,
+			isClone ? structuredClone(value as ValueType) : value as ValueType
+		) as Value<K> : undefined;
 	}
 
 	// ## getSafeValue()
@@ -673,4 +677,18 @@ class Property<K extends Key = Key> {
 		};
 	}
 
+}
+
+// # cast(type, value)
+// Ensures a value specified for a property matches its specified type.
+function cast(type: PropertyValueType, value: ValueType): ValueType {
+	if (Array.isArray(value)) {
+		return value.map(value => cast(type, value)) as Primitive[];
+	}
+	switch (type) {
+		case String: return String(value);
+		case Bool: return Boolean(value);
+		case Sint64: return BigInt(value);
+		default: return Number(value);
+	}
 }

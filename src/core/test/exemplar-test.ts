@@ -135,6 +135,22 @@ describe('The Exemplar file', function() {
 
 	});
 
+	it('converts numbers to bigints if that\'s the type', function() {
+
+		let exemplar = new Exemplar({
+			props: [
+				{
+					id: +ExemplarProperty.BulldozeCost,
+					type: BigInt64Array,
+					value: 10,
+				},
+			],
+		});
+		let [prop] = exemplar;
+		expect(prop.value).to.equal(10n);
+
+	});
+
 	describe('#get()', function() {
 
 		it('automatically unwraps single-value arrays for non-array properties', function() {
@@ -203,7 +219,23 @@ describe('The Exemplar file', function() {
 				props: [
 					{
 						id: +ExemplarProperty.ExemplarType,
+						type: Uint32Array,
 						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: BigInt64Array,
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: String,
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: Float32Array,
+						value: [10.5, 3.5, 2.75],
 					},
 				],
 			});
@@ -216,6 +248,24 @@ describe('The Exemplar file', function() {
 						type: 'Uint32',
 						name: 'ExemplarType',
 						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: 'Sint64',
+						name: 'BulldozeCost',
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: 'String',
+						name: 'ItemDescription',
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: 'Float32',
+						name: 'OccupantSize',
+						value: [10.5, 3.5, 2.75],
 					},
 				],
 			});
