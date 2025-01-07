@@ -1,8 +1,8 @@
 // # dbpf-extract-command.ts
 import path from 'node:path';
 import fs, { type OpenMode, type PathLike } from 'node:fs';
-import os from 'node:os';0
-import ora from 'ora';
+import os from 'node:os';
+import ora, { type Ora } from 'ora';
 import PQueue from 'p-queue';
 import { attempt } from 'sc4/utils';
 import { Cohort, DBPF, Exemplar, FileType, type Entry } from 'sc4/core';
@@ -16,90 +16,129 @@ type DbpfExtractCommandOptions = {
 	output?: string;
 } & Partial<TGILiteral>;
 
-export async function dbpfExtract(file: string, options: DbpfExtractCommandOptions) {
-
-	// DBPF files can be pretty large, so we won't load them all in memory, but 
-	// make use of the random file system access.
-	let fullPath = path.resolve(process.cwd(), file);
-	let dbpf = new DBPF({
-		file: fullPath,
-		parse: false,
-	});
-	let filter = createFilter(options);
-	let flag: OpenMode = options.force ? 'w' : 'wx';
-
-	// Ensure that the output folder exists.
-	let { output = '.' } = options;
-	output = path.resolve(process.cwd(), output);
-	await fs.promises.mkdir(output, { recursive: true });
-
-	// Run as much as possible in parallel, which means we won't use a simple 
-	// loop, but create promises instead, but we have to make sure to not create
-	// too many open file handles either, so use a promise queue.
-	let warnings: string[] = [];
-	let queue = new PQueue({ concurrency: 250 });
-	let spinner = ora(`Reading ${dbpf.file}`).start();
-	await dbpf.parseAsync();
-	let counter = 0;
-	for (let entry of dbpf) {
-		if (!filter(entry)) continue;
-		let { id } = entry;
-		queue.add(async () => {
-			spinner.text = `Reading ${id}`;
-			let buffer: Uint8Array | string = await entry.decompressAsync();
-
-			// If it's an LTEXT, we just export it as a .txt file, that's 
-			// easier.
-			let extension = getExtension(entry)
-			if (entry.type === FileType.LTEXT) {
-				buffer = Buffer.from(String(entry.read()), 'utf8');
-			} else if (
-				options.yaml &&
-				(
-					entry.isType(FileType.Exemplar) ||
-					entry.isType(FileType.Cohort)
-				)
-			) {
-				extension = '.yaml';
-				buffer = exemplarToYaml(entry.read());
-			}
-			let basename = `${id}${extension}`;
-			let filePath = path.join(output, basename);
-			if (await write(filePath, buffer, flag, warnings)) {
-				counter++;
-			}
-
-			// Reader generates .TGI files as well when extracting files from 
-			// dbpf, so we'll use that convention as well.
-			let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`).join('');
-			await write(`${filePath}.TGI`, tgi, flag, warnings);
-
-		});
-	}
-	await queue.onIdle();
-	spinner.succeed(`Extracted ${counter} files from ${dbpf.file}`);
-	for (let warning of warnings) {
-		logger?.warn(warning);
-	}
-
+// # dbpfExtract(files, options)
+export async function dbpfExtract(files: string | string[], options: DbpfExtractCommandOptions) {
+	return new ExtractOperation(options).extract([files].flat());
 }
 
-// # write(file, buffer, warnings)
-async function write(
-	file: PathLike,
-	buffer: Uint8Array | string,
-	flag: OpenMode,
-	warnings: string[] = [],
-) {
-	const [err] = await attempt(
-		() => fs.promises.writeFile(file, buffer, { flag }),
-	);
-	if (!err) return true;
-	if (err.code === 'EEXIST') {
-		warnings.push(`${file} already exists`);
-		return false;
+// # ExtractOptions
+class ExtractOperation {
+	options: DbpfExtractCommandOptions;
+	output: string;
+	filter: (entry: Entry) => boolean;
+	flag: OpenMode = 'wx';
+	spinner: Ora;
+	counter = 0;
+	warnings: string[] = [];
+
+	// We'll run as much as possible in parallel, but we have to be careful to 
+	// not use up too many file handles. 250 is a reasonable limit which still 
+	// ensure sufficient concurrency to benefit from parallelization.
+	queue = new PQueue({ concurrency: 250 });
+	constructor(options: DbpfExtractCommandOptions) {
+		this.options = options;
+		this.filter = createFilter(options);
+		this.flag = options.force ? 'w' : 'wx';
+		this.spinner = ora();
+		this.output = path.resolve(process.cwd(), options.output ?? '.');
 	}
-	throw err;
+
+	// Entry point for starting the extraction.
+	async extract(files: string[]) {
+
+		// Ensure that the output folder exists.
+		await fs.promises.mkdir(this.output, { recursive: true });
+
+		// We'll run as much as possible in parallel, so don't loop 
+		// sequentially, but in parallel.
+		let tasks = [];
+		this.spinner.start(`Starting extraction`);
+		for (let file of files) {
+			let task = this.extractSingleFile(file);
+			tasks.push(task);
+		}
+		await Promise.allSettled(tasks);
+
+		// Log the result information.
+		let text = `Extracted ${this.counter} files`;
+		if (this.warnings.length > 0) {
+			this.spinner.warn(text);
+		} else {
+			this.spinner.succeed(text);
+		}
+		for (let warning of this.warnings) {
+			logger?.warn(warning);
+		}
+
+	}
+
+	// # extractSingleFile(file)
+	async extractSingleFile(file: string) {
+
+		// DBPF files can be pretty large, so we won't load them all in memory, 
+		// but make use of the random file system access.
+		let fullPath = path.resolve(process.cwd(), file);
+		let dbpf = new DBPF({
+			file: fullPath,
+			parse: false,
+		});
+		await dbpf.parseAsync();
+		let tasks = [];
+		for (let entry of dbpf) {
+			if (!this.filter(entry)) continue;
+			let { id } = entry;
+			let task = this.queue.add(async () => {
+				this.spinner.text = `Reading ${id}`;
+				let buffer: Uint8Array | string = await entry.decompressAsync();
+
+				// If it's an LTEXT, we just export it as a .txt file, that's 
+				// easier.
+				let extension = getExtension(entry)
+				if (entry.type === FileType.LTEXT) {
+					buffer = Buffer.from(String(entry.read()), 'utf8');
+				} else if (
+					this.options.yaml &&
+					(
+						entry.isType(FileType.Exemplar) ||
+						entry.isType(FileType.Cohort)
+					)
+				) {
+					extension = '.yaml';
+					buffer = exemplarToYaml(entry.read());
+				}
+				let basename = `${id}${extension}`;
+				let filePath = path.join(this.output, basename);
+				let success = await this.write(filePath, buffer);
+				if (!success) return;
+				this.counter++;
+
+				// Reader generates .TGI files as well when extracting files 
+				// from dbpf, so we'll use that convention as well.
+				let tgi = entry.tgi.map(nr => `${rawHex(nr)}${os.EOL}`).join('');
+				await this.write(`${filePath}.TGI`, tgi);
+
+			});
+			tasks.push(task);
+		}
+		await Promise.all(tasks);
+
+	}
+
+	// # write(file, buffer, warnings)
+	// Actually writes away a raw file to the output.
+	async write(file: PathLike, buffer: Uint8Array | string) {
+		const { flag } = this;
+		const [err] = await attempt(
+			() => fs.promises.writeFile(file, buffer, { flag }),
+		);
+		if (!err) return true;
+		if (err.code === 'EEXIST') {
+			this.warnings.push(`${file} already exists`);
+			return false;
+		}
+		throw err;
+	}
+
 }
 
 // # createFilter()
