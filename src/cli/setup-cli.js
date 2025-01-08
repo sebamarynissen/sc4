@@ -126,7 +126,7 @@ export function factory(program) {
 	submenu
 		.command('add')
 		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
-		.argument('[files...]', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
+		.argument('<files...>', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
 		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
 		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
 		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
@@ -179,7 +179,7 @@ export function factory(program) {
 		.action(commands.dbpfExtract);
 
 	dbpf
-		.command('add <files...>')
+		.command('add')
 		.description('Add files to a DBPF file. Can be used for datpacking as well')
 		.argument('<files...>', 'Glob pattern(s) of files to add to a DBPF, e.g. **/*.{png,fsh}')
 		.requiredOption('-o, --output <file>', 'Output DBPF file to generate')
