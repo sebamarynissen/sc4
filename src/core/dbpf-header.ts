@@ -90,7 +90,10 @@ export default class Header {
 		// Below we reserve 24 bytes for the index count, offset & size and the 
 		// hole count, offset & size. These will be filled in later by the DBPF 
 		// itself once their values are actually known.
-		buffer.zeroes(24);
+		buffer.uint32(this.indexCount);
+		buffer.uint32(this.indexOffset);
+		buffer.uint32(this.indexSize);
+		buffer.zeroes(12);
 		buffer.uint32(this.indexMinor);
 		buffer.uint32(0);
 		buffer.zeroes(4);
