@@ -2,11 +2,12 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { Glob } from 'glob';
-import { DBPF, DBPFStream, FileType, LTEXT, TGI } from 'sc4/core';
+import { DBPF, DBPFStream, Exemplar, FileType, LTEXT, TGI } from 'sc4/core';
 import { attempt } from 'sc4/utils';
 import type { Logger, TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
 import cliLogger from '#cli/logger.js';
+import { parse } from 'yaml';
 
 type AddOperationCommandOptions = {
 	output: string;
@@ -163,6 +164,13 @@ function transform(buffer: Uint8Array, tgi: TGI, file: string): Uint8Array {
 	if (tgi.type === FileType.LTEXT && ext === '.txt') {
 		let reader = SmartBuffer.fromBuffer(buffer);
 		return new LTEXT(reader.readString('utf8')).toBuffer();
+	} else if (
+		(tgi.type === FileType.Exemplar || tgi.type === FileType.Cohort) &&
+		ext.match(/\.ya?ml$/)
+	) {
+		let reader = SmartBuffer.fromBuffer(buffer);
+		let json = parse(reader.readString('utf8'));
+		return new Exemplar(json).toBuffer();
 	}
 	return buffer;
 }

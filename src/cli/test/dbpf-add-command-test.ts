@@ -7,6 +7,7 @@ import { randomId } from 'sc4/utils';
 import { dbpfAdd } from '../commands/dbpf-add-command.js';
 import { compareUint8Arrays } from 'uint8array-extras';
 import { expect } from 'chai';
+import { stringify } from 'yaml';
 
 describe('The dbpfAdd() command', function() {
 
@@ -98,6 +99,42 @@ describe('The dbpfAdd() command', function() {
 		let entry = result.find({ type: FileType.LTEXT })!;
 		let ltext = entry.read();
 		expect(ltext.value).to.equal('Hello, this is a description');
+
+	});
+
+	it('automatically converts yaml exemplars', async function() {
+
+		const cwd = output('dbpf_add_yaml');
+		const write = this.createWriter(cwd);
+
+		await write('exemplar.yaml', stringify({
+			parent: [FileType.Cohort, 0x1ae45fee, 0x4a879d5f],
+			properties: [
+				{
+					id: 0x10,
+					value: 0x21,
+					type: 'Uint32',
+				},
+				{
+					id: 0x27812821,
+					value: [FileType.S3D, 0x1ae45fee, 0x4a879d5f],
+					type: 'Uint32',
+				},
+			],
+		}));
+		await write('exemplar.yaml.TGI', `6534284A\nA8FBD372\n483248BB`);
+
+		await dbpfAdd('*.yaml', {
+			output: 'dist/dbpf.SC4Desc',
+			directory: cwd,
+			logger: null,
+		});
+
+		let result = new DBPF(path.join(cwd, 'dist/dbpf.SC4Desc'));
+		let entry = result.find({ type: FileType.Exemplar })!;
+		let exemplar = entry.read();
+		expect(exemplar.get('ExemplarType')).to.equal(0x21);
+		expect(exemplar.get('ResourceKeyType1')).to.eql([FileType.S3D, 0x1ae45fee, 0x4a879d5f]);
 
 	});
 
