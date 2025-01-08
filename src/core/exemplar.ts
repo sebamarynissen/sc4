@@ -468,7 +468,7 @@ class Property<K extends Key = Key> {
 	// If the data passed is a property, then we'll use a *clone* strategy.
 	constructor(data?: PropertyOptions<K> | Property<K>) {
 		let isClone = data instanceof Property;
-		let { id = 0, type = 'Uint32', value } = data || {};
+		let { id = 0, type = getTypeFromId(id), value } = data || {};
 		this.id = +id;
 		this.type = type;
 		this.value = value !== undefined ? cast(
@@ -681,4 +681,16 @@ function cast(type: PropertyValueType, value: ValueType): ValueType {
 		case 'Sint64': return BigInt(value);
 		default: return Number(value);
 	}
+}
+
+// # getTypeFromId()
+function getTypeFromId(id: number): PropertyValueType {
+	let name = idToName.get(id);
+	if (name !== undefined) {
+		let info = ExemplarProperty[name as keyof typeof ExemplarProperty];
+		if (typeof info === 'number') return 'Uint32';
+		let type = info[kPropertyType];
+		return Array.isArray(type) ? type[0] : type;
+	}
+	return 'Uint32';
 }

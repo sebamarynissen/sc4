@@ -181,10 +181,27 @@ describe('The Exemplar file', function() {
 					},
 				],
 			});
+			expect(exemplar.parent).to.eql(new TGI(type, group, instance));
 			expect(exemplar.get('ExemplarType')).to.equal(0x21);
 			expect(exemplar.get('ExemplarName')).to.equal('Exemplar name');
 			expect(exemplar.get('OccupantSize')).to.eql([10, Math.PI, 5]);
 			expect(exemplar.get('MonthlyConstantIncome')).to.equal(200n);
+
+		});
+
+		it('figures out the type from known exemplar properties if not specified explicitly', function() {
+
+			let exemplar = new Exemplar({
+				properties: [
+					{
+						id: +ExemplarProperty.MediumWealthEQ,
+						value: 0xfe,
+					},
+				],
+			});
+			let prop = exemplar.prop('MediumWealthEQ')!;
+			expect(prop.type).to.equal('Uint8');
+			expect(prop.value).to.equal(0xfe);
 
 		});
 
