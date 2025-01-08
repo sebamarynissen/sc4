@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import ora from 'ora';
 import { Glob } from 'glob';
-import { DBPF, DBPFStream, FileType } from 'sc4/core';
+import { DBPF, DBPFStream, FileType, LTEXT, TGI } from 'sc4/core';
 import { attempt } from 'sc4/utils';
 import type { TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
@@ -102,10 +102,15 @@ class AddOperation {
 			} else throw err;
 		}
 
-		// Parse the tgi.
-		let tgi = parseTGI(contents);
+		// Read in the file from disk and parse the TGI as well. Then we'll 
+		// check whether certain 
 		this.spinner.text = `Adding ${file}`;
-		await this.stream.add(tgi, await fs.promises.readFile(file));
+		let buffer: Uint8Array = await fs.promises.readFile(file);
+		let tgi = parseTGI(contents);
+		buffer = transform(buffer, tgi, file);
+
+		// Parse the tgi.
+		await this.stream.add(tgi, buffer);
 		this.counter++;
 	}
 
@@ -136,13 +141,22 @@ class AddOperation {
 
 }
 
-function parseTGI(buffer: Uint8Array): TGIArray {
+function parseTGI(buffer: Uint8Array): TGI {
 	let reader = SmartBuffer.fromBuffer(buffer);
 	let contents = reader.readString('utf8');
-	return contents
+	return new TGI(contents
 		.split('\n')
 		.map(line => line.trim())
 		.filter(line => !!line)
 		.map(line => Number(`0x${line}`))
-		.slice(0, 3) as TGIArray;
+		.slice(0, 3) as TGIArray);
+}
+
+function transform(buffer: Uint8Array, tgi: TGI, file: string): Uint8Array {
+	let ext = path.extname(file).toLowerCase();
+	if (tgi.type === FileType.LTEXT && ext === '.txt') {
+		let reader = SmartBuffer.fromBuffer(buffer);
+		return new LTEXT(reader.readString('utf8')).toBuffer();
+	}
+	return buffer;
 }

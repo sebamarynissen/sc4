@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { output, resource } from '#test/files.js';
-import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType, LTEXT } from 'sc4/core';
 import { randomId } from 'sc4/utils';
 import { dbpfAdd } from '../commands/dbpf-add-command.js';
 import { compareUint8Arrays } from 'uint8array-extras';
@@ -78,6 +78,24 @@ describe('The dbpfAdd() command', function() {
 
 	});
 
-	it('adds a .txt as LTEXT');
+	it('adds a .txt as LTEXT', async function() {
+
+		const cwd = output('dbpf_add_txt');
+		const write = this.createWriter(cwd);
+
+		await write('description.txt', 'Hello, this is a description');
+		await write('description.txt.TGI', `2026960B\nA8FBD372\n483248BB`);
+
+		await dbpfAdd('*.txt', {
+			output: 'dist/dbpf.SC4Desc',
+			directory: cwd,
+		});
+
+		let result = new DBPF(path.join(cwd, 'dist/dbpf.SC4Desc'));
+		let entry = result.find({ type: FileType.LTEXT })!;
+		let ltext = entry.read();
+		expect(ltext.value).to.equal('Hello, this is a description');
+
+	});
 
 });
