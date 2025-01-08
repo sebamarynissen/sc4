@@ -127,6 +127,15 @@ export default class Stream extends SmartBuffer {
 		return parts.join('.');
 	}
 
+	// ## tgi()
+	// Reads in a TGI.
+	tgi(): TGI {
+		let type = this.dword();
+		let group = this.dword();
+		let instance = this.dword();
+		return new TGI(type, group, instance);
+	}
+
 	// ## gti()
 	// Reads in a TGI when it is given as GTI. This often happens in savegames 
 	// where gti is used to reference a model to render.
