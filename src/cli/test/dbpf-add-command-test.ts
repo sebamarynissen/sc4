@@ -42,6 +42,7 @@ describe('The dbpfAdd() command', function() {
 		await dbpfAdd('*', {
 			output: 'dist/dbpf.SC4Lot',
 			directory: dist,
+			logger: null,
 		});
 
 		let result = new DBPF(path.join(dist, 'dist/dbpf.SC4Lot'));
@@ -60,6 +61,7 @@ describe('The dbpfAdd() command', function() {
 		await dbpfAdd(source.file!, {
 			output: 'dist/packed.dat',
 			directory: cwd,
+			logger: null,
 		});
 
 		let result = new DBPF(path.join(cwd, 'dist/packed.dat'));
@@ -89,6 +91,7 @@ describe('The dbpfAdd() command', function() {
 		await dbpfAdd('*.txt', {
 			output: 'dist/dbpf.SC4Desc',
 			directory: cwd,
+			logger: null,
 		});
 
 		let result = new DBPF(path.join(cwd, 'dist/dbpf.SC4Desc'));

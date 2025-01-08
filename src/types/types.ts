@@ -59,8 +59,11 @@ export type Logger = {
 	warn: (...args: any[]) => any,
 	info: (...args: any[]) => any,
 	log: (...args: any[]) => any,
-	step: (text: string) => any,
-	progress: (text?: string) => any,
-	succeed: (text?: string) => any,
-	fail: (text?: string) => any,
+	progress: {
+		start: (text?: string) => any,
+		update: (text: string) => any,
+		succeed: (text?: string) => any,
+		fail: (text?: string) => any,
+		warn: (text?: string) => any,
+	},
 };

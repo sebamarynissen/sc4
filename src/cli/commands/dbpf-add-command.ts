@@ -1,12 +1,18 @@
 // # dbpf-add-command.ts
 import path from 'node:path';
 import fs from 'node:fs';
-import ora from 'ora';
 import { Glob } from 'glob';
 import { DBPF, DBPFStream, FileType, LTEXT, TGI } from 'sc4/core';
 import { attempt } from 'sc4/utils';
-import type { TGIArray } from 'sc4/types';
+import type { Logger, TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
+import cliLogger from '#cli/logger.js';
+
+type AddOperationCommandOptions = {
+	output: string;
+	directory?: string;
+	logger?: Logger | null;
+};
 
 export async function dbpfAdd(
 	patterns: string | string[],
@@ -15,32 +21,32 @@ export async function dbpfAdd(
 	return await new AddOperation(options).add([patterns].flat());
 }
 
-type AddOperationCommandOptions = {
-	output: string;
-	directory?: string;
-};
-
 class AddOperation {
 	options: AddOperationCommandOptions;
 	file: string;
 	cwd: string;
-	spinner = ora();
 	stream: DBPFStream;
 	warnings: string[] = [];
+	spinner: Logger['progress'] | undefined;
 	counter = 0;
 	constructor(options: AddOperationCommandOptions) {
 		this.options = options;
-		let { directory = process.cwd(), output } = options;
+		let {
+			directory = process.cwd(),
+			output,
+			logger = cliLogger,
+		} = options;
 		this.cwd = directory;
 		this.file = path.resolve(this.cwd, output);
 		this.stream = new DBPFStream(this.file);
+		this.spinner = logger?.progress;
 	}
 
 	// The actual entry point for adding files to a dbpf.
 	async add(patterns: string[]) {
 
 		// First we'll scan for all dbpf files that match the patterns.
-		this.spinner.start();
+		this.spinner?.start();
 		let glob = new Glob(patterns, {
 			cwd: this.cwd,
 			nocase: true,
@@ -78,9 +84,9 @@ class AddOperation {
 		}
 
 		// At last seal the dbpf.
-		this.spinner.text = 'Selaing dbpf';
+		this.spinner?.update('Sealing dbpf');
 		await this.stream.seal();
-		this.spinner.succeed(`Added ${this.counter} files to ${this.file}`);
+		this.spinner?.succeed(`Added ${this.counter} files to ${this.file}`);
 		return this;
 
 	}
@@ -104,7 +110,7 @@ class AddOperation {
 
 		// Read in the file from disk and parse the TGI as well. Then we'll 
 		// check whether certain 
-		this.spinner.text = `Adding ${file}`;
+		this.spinner?.update(`Adding ${file}`);
 		let buffer: Uint8Array = await fs.promises.readFile(file);
 		let tgi = parseTGI(contents);
 		buffer = transform(buffer, tgi, file);
@@ -117,7 +123,7 @@ class AddOperation {
 	// Adds an entire dbpf file to the destination dbpf. Note that this is also 
 	// known as *dat packing*.
 	async addDbpfFile(file: string) {
-		this.spinner.text = `Adding ${file}`;
+		this.spinner?.update(`Adding ${file}`);
 		let dbpf = new DBPF({ file, parse: false });
 		await dbpf.parseAsync();
 		for (let entry of dbpf) {
