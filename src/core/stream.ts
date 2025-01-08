@@ -28,6 +28,7 @@ import { Box3, type ParseOptions} from './box-3.js';
 import Vector3 from './vector-3.js';
 import Matrix3 from './matrix-3.js';
 import NetworkCrossing from './network-crossing.js';
+import TGI from './tgi.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -127,14 +128,22 @@ export default class Stream extends SmartBuffer {
 	}
 
 	// ## tgi()
-	// Reads in a TGI reference to a model - actually given as GTI. This is used 
-	// n items that need a model to properly render. We'll sort it as tgi 
-	// though,a s that's easier to use with the plugin index.
-	tgi(): TGIArray {
+	// Reads in a TGI.
+	tgi(): TGI {
+		let type = this.dword();
+		let group = this.dword();
+		let instance = this.dword();
+		return new TGI(type, group, instance);
+	}
+
+	// ## gti()
+	// Reads in a TGI when it is given as GTI. This often happens in savegames 
+	// where gti is used to reference a model to render.
+	gti(): TGI {
 		let group = this.dword();
 		let type = this.dword();
 		let instance = this.dword();
-		return [type, group, instance];
+		return new TGI(type, group, instance);
 	}
 
 	// Helper function for reading a pointer. Those are given as [pointer, 

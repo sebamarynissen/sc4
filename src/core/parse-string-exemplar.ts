@@ -1,16 +1,6 @@
 import type { TGIArray } from 'sc4/types';
 import type { PropertyOptions } from './exemplar.js';
-import type { Value } from './exemplar-properties-types.js';
-
-type TypeIndicator =
-	| 'String'
-	| 'Uint32'
-	| 'Uint16'
-	| 'Uint8'
-	| 'Float32'
-	| 'Sint64'
-	| 'Sint32'
-	| 'Bool';
+import type { Value, PropertyValueType } from './exemplar-properties-types.js';
 
 let val: string;
 export default function parseStringExemplar(str: string) {
@@ -27,14 +17,14 @@ export default function parseStringExemplar(str: string) {
 	const propCount = readHex() as number;
 	until('\n');
 
-	let props: PropertyOptions[] = [];
+	let properties: PropertyOptions[] = [];
 	for (let i = 0; i < propCount; i++) {
-		props.push(readProp());
+		properties.push(readProp());
 	}
 
 	return {
 		parent,
-		props,
+		properties,
 	};
 
 }
@@ -96,7 +86,7 @@ function readProp() {
 
 	// Read the type.
 	index = val.indexOf(':');
-	let typeHint = val.slice(0, index) as TypeIndicator;
+	let type = val.slice(0, index) as PropertyValueType;
 	advance(index+1);
 
 	// Read the resp.
@@ -104,7 +94,7 @@ function readProp() {
 	let reps = Number(val.slice(0, index));
 	advance(index+1);
 
-	let value = readValue(typeHint, reps) as Value;
+	let value = readValue(type, reps) as Value;
 
 	// Restore.
 	val = temp;
@@ -113,16 +103,6 @@ function readProp() {
 	ws();
 
 	// Convert the string type to an actual type hint used by the prop.
-	let type = ({
-		Uint8: Uint8Array,
-		Uint16: Uint16Array,
-		Uint32: Uint32Array,
-		Sint32: Int32Array,
-		Sint64: BigInt64Array,
-		Float32: Float32Array,
-		Bool: Boolean,
-		String,
-	})[typeHint];
 	return { id, comment, type, value };
 
 }
@@ -135,7 +115,7 @@ function readComment() {
 }
 
 const stringRegex = /{"(.*)"}/;
-function readValue(type: TypeIndicator, reps: number) {
+function readValue(type: PropertyValueType, reps: number) {
 	if (type === 'String') {
 		let match = val.match(stringRegex);
 		if (!match) return '';
@@ -155,7 +135,7 @@ function readValue(type: TypeIndicator, reps: number) {
 
 }
 
-function readSingleValue(type: TypeIndicator) {
+function readSingleValue(type: PropertyValueType) {
 	switch (type) {
 		case 'Uint32':
 		case 'Uint16':

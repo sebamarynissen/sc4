@@ -121,7 +121,7 @@ class ExtractOperation {
 						entry.isType(FileType.Cohort)
 					)
 				) {
-					extension = '.yaml';
+					extension = `${extension}.yaml`;
 					buffer = exemplarToYaml(entry.read());
 				}
 				let basename = `${id}${extension}`;
@@ -188,12 +188,14 @@ function getExtension(entry: Entry): string {
 		case FileType.Thumbnail: return '.png';
 		case FileType.LTEXT: return '.txt';
 		case FileType.Exemplar: return '.eqz';
-		case FileType.Cohort: return '.cohort';
+		case FileType.Cohort: return '.cqz';
 		case FileType.DIR: return '.dir';
 		case FileType.FSH: return '.fsh';
 		case FileType.S3D: return '.s3d';
 		case FileType.LUA: return '.lua';
 		case FileType.XML: return '.xml';
+		case FileType.BMP: return '.bmp';
+		case FileType.JFIF: return '.jfif';
 		case FileType.SC4Path: return '.sc4path';
 		default: return '';
 	}

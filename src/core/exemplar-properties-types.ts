@@ -61,3 +61,13 @@ export function isKey(key: unknown): key is Key {
 		return false;
 	}
 }
+
+export type PropertyValueType =
+ 	| 'Uint8'
+ 	| 'Uint16'
+ 	| 'Uint32'
+ 	| 'Sint32'
+ 	| 'Sint64'
+ 	| 'Float32'
+ 	| 'Bool'
+ 	| 'String';

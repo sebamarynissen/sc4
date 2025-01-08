@@ -3,7 +3,7 @@ import fs from '#test/fs.js';
 import { uint8ArrayToHex } from 'uint8array-extras';
 import { expect } from 'chai';
 import { resource } from '#test/files.js';
-import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType, TGI } from 'sc4/core';
 
 describe('The Exemplar file', function() {
 
@@ -110,7 +110,7 @@ describe('The Exemplar file', function() {
 		let buffer = exemplar.toBuffer();
 		expect(buffer.byteLength).to.equal(entry!.decompress().byteLength);
 		let cloned = new Exemplar(buffer);
-		expect(cloned.props).to.have.length(exemplar.props.length);
+		expect(cloned.properties).to.have.length(exemplar.properties.length);
 		for (let prop of exemplar) {
 			let clone = cloned.prop(prop.id);
 			expect(clone).to.eql(prop);
@@ -138,16 +138,72 @@ describe('The Exemplar file', function() {
 	it('converts numbers to bigints if that\'s the type', function() {
 
 		let exemplar = new Exemplar({
-			props: [
+			properties: [
 				{
 					id: +ExemplarProperty.BulldozeCost,
-					type: BigInt64Array,
+					type: 'Sint64',
 					value: 10,
 				},
 			],
 		});
 		let [prop] = exemplar;
 		expect(prop.value).to.equal(10n);
+
+	});
+
+	describe('#constructor()', function() {
+
+		it('constructs from JSON', function() {
+
+			let [type, group, instance] = TGI.random(FileType.Cohort);
+			let exemplar = new Exemplar({
+				parent: [type, group, instance],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						value: 0x21,
+						type: 'Uint32',
+					},
+					{
+						id: +ExemplarProperty.ExemplarName,
+						value: 'Exemplar name',
+						type: 'String',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						value: [10, Math.PI, 5],
+						type: 'Float32',
+					},
+					{
+						id: +ExemplarProperty.MonthlyConstantIncome,
+						value: 200,
+						type: 'Sint64',
+					},
+				],
+			});
+			expect(exemplar.parent).to.eql(new TGI(type, group, instance));
+			expect(exemplar.get('ExemplarType')).to.equal(0x21);
+			expect(exemplar.get('ExemplarName')).to.equal('Exemplar name');
+			expect(exemplar.get('OccupantSize')).to.eql([10, Math.PI, 5]);
+			expect(exemplar.get('MonthlyConstantIncome')).to.equal(200n);
+
+		});
+
+		it('figures out the type from known exemplar properties if not specified explicitly', function() {
+
+			let exemplar = new Exemplar({
+				properties: [
+					{
+						id: +ExemplarProperty.MediumWealthEQ,
+						value: 0xfe,
+					},
+				],
+			});
+			let prop = exemplar.prop('MediumWealthEQ')!;
+			expect(prop.type).to.equal('Uint8');
+			expect(prop.value).to.equal(0xfe);
+
+		});
 
 	});
 
@@ -185,9 +241,9 @@ describe('The Exemplar file', function() {
 				let buffer = entry.decompress();
 				let exemplar = entry.read();
 				let clone = exemplar.clone();
-				for (let i = 0; i < exemplar.props.length; i++) {
-					let prop = exemplar.props[i];
-					let cloned = clone.props[i];
+				for (let i = 0; i < exemplar.properties.length; i++) {
+					let prop = exemplar.properties[i];
+					let cloned = clone.properties[i];
 					expect(prop.name).to.equal(cloned.name);
 					expect(prop.id).to.equal(cloned.id);
 					expect(prop.name).to.eql(cloned.name);
@@ -216,25 +272,25 @@ describe('The Exemplar file', function() {
 
 			let exemplar = new Exemplar({
 				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
-				props: [
+				properties: [
 					{
 						id: +ExemplarProperty.ExemplarType,
-						type: Uint32Array,
+						type: 'Uint32',
 						value: 0x21,
 					},
 					{
 						id: +ExemplarProperty.BulldozeCost,
-						type: BigInt64Array,
+						type: 'Sint64',
 						value: 46723n,
 					},
 					{
 						id: +ExemplarProperty.ItemDescription,
-						type: String,
+						type: 'String',
 						value: 'This is a description',
 					},
 					{
 						id: +ExemplarProperty.OccupantSize,
-						type: Float32Array,
+						type: 'Float32',
 						value: [10.5, 3.5, 2.75],
 					},
 				],

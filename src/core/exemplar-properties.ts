@@ -2,11 +2,13 @@
 // manually!
 import { inspect } from 'sc4/utils';
 import type { uint8, uint32, sint32, sint64, float } from 'sc4/types';
-const Uint32 = Uint32Array;
-const Uint8 = Uint8Array;
-const Sint32 = Int32Array;
-const Sint64 = BigInt64Array;
-const Float = Float32Array;
+const Uint32 = 'Uint32';
+const Uint8 = 'Uint8';
+const Sint32 = 'Sint32';
+const Sint64 = 'Sint64';
+const Float = 'Float32';
+const String = 'String';
+const Boolean = 'Bool';
 
 function inspector(this: any) {
 	let keys = Object.keys(this);

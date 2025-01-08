@@ -56,11 +56,11 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 	const { installation, plugins } = opts;
 	const index = new PluginIndex({ installation, plugins });
 	if (lots.length > 0) {
-		logger?.step('Building plugin index...');
+		logger?.progress.start('Building plugin index...');
 		await index.build();
-		logger?.progress('Indexing building & prop families...');
+		logger?.progress.update('Indexing building & prop families...');
 		await index.buildFamilies();
-		logger?.succeed('Plugin index built');
+		logger?.progress.succeed('Plugin index built');
 	}
 
 	// Open the savegame where we have to plop everything.
@@ -72,7 +72,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 	if (opts.clear) mgr.clear();
 
 	// Now loop all files
-	logger?.step('Plopped 0 lots');
+	logger?.progress.start('Plopped 0 lots');
 	let i = 0;
 	const { bbox } = opts;
 	for (let file of lots) {
@@ -98,12 +98,12 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 			});
 			if (result !== false) {
 				i++;
-				logger?.progress(`Plopped ${i} lots`);
+				logger?.progress.update(`Plopped ${i} lots`);
 			}
 
 		}
 	}
-	logger?.succeed();
+	logger?.progress.succeed();
 
 	// Save at last. If a backup function was specified, we'll first call it.
 	if (opts.save) {

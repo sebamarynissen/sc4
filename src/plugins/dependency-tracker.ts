@@ -85,7 +85,7 @@ export default class DependencyTracker {
 
 		// If a dependency cache was specified, check if it exists.
 		const { logger = this.logger } = opts;
-		logger?.step('Building plugin index');
+		logger?.progress.start('Building plugin index');
 		let { cache } = this.options;
 		if (cache) {
 			let buffer;
@@ -99,7 +99,7 @@ export default class DependencyTracker {
 			if (buffer) {
 				const json = JSON.parse(buffer.toString());
 				this.index = await new PluginIndex().load(json);
-				logger?.succeed('Plugin index built');
+				logger?.progress.succeed('Plugin index built');
 				return;
 			}
 
@@ -113,15 +113,15 @@ export default class DependencyTracker {
 			installation,
 		});
 		await index.build();
-		logger?.progress('Indexing building & prop families');
+		logger?.progress.update('Indexing building & prop families');
 		await index.buildFamilies();
-		logger?.succeed();
+		logger?.progress.succeed();
 
 		// If the index needs to be cached, then do it now.
 		if (cache) {
-			logger?.step('Saving index to cache');
+			logger?.progress.start('Saving index to cache');
 			await fs.promises.writeFile(cache, JSON.stringify(index.toJSON()));
-			logger?.succeed();
+			logger?.progress.succeed();
 		}
 
 	}

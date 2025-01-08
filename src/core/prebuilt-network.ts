@@ -2,7 +2,7 @@
 import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import Vertex from './vertex.js';
-import type { byte, dword, float, qword, TGIArray, word } from 'sc4/types';
+import type { byte, dword, float, qword } from 'sc4/types';
 import type Stream from './stream.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import type SGProp from './sgprop.js';
@@ -12,6 +12,7 @@ import Vector3 from './vector-3.js';
 import type Matrix3 from './matrix-3.js';
 import NetworkCrossing from './network-crossing.js';
 import WriteBuffer from './write-buffer.js';
+import TGI from './tgi.js';
 
 // # PrebuiltNetwork
 // A class that is used for networks that use prebuilt models, such as 
@@ -25,7 +26,7 @@ export default class PrebuiltNetwork {
 	appearance: dword = 0x05;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
-	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
+	tgi = new TGI();
 	matrix3: Matrix3 | null = null;
 	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
@@ -64,7 +65,7 @@ export default class PrebuiltNetwork {
 		unknown.dword(0xc772bf98);
 		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
-		this.tgi = rs.tgi();
+		this.tgi = rs.gti();
 		let hasMatrix = rs.byte() === 0x05;
 		this.matrix3 = hasMatrix ? rs.matrix3() : null;
 		this.position = rs.vector3();
@@ -114,7 +115,7 @@ export default class PrebuiltNetwork {
 		unknown.dword();
 		ws.tract(this.tract);
 		ws.array(this.sgprops);
-		ws.tgi(this.tgi);
+		ws.gti(this.tgi);
 		if (this.matrix3) {
 			ws.byte(0x05);
 			ws.write(this.matrix3);

@@ -126,7 +126,7 @@ export function factory(program) {
 	submenu
 		.command('add')
 		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
-		.argument('[files...]', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
+		.argument('<files...>', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
 		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
 		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
 		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
@@ -177,6 +177,15 @@ export function factory(program) {
 		.option('--yaml', 'Extract exemplars & cohorts as yaml')
 		.option('--no-tgi', 'Skips creating .TGI files')
 		.action(commands.dbpfExtract);
+
+	dbpf
+		.command('add')
+		.description('Add files to a DBPF file. Can be used for datpacking as well')
+		.argument('<files...>', 'Glob pattern(s) of files to add to a DBPF, e.g. **/*.{png,fsh}')
+		.requiredOption('-o, --output <file>', 'Output DBPF file to generate')
+		.option('-f, --force', 'Overwrite the output DBPF if it exists')
+		.option('-c, --compress [glob]', 'Glob pattern that specifies files to compress, .e.g *.eqz')
+		.action(commands.dbpfAdd);
 
 	// There are several commands that we have implemented, but they need to be 
 	// reworked. We'll put thos under the "misc" category and instruct users not 
@@ -285,7 +294,7 @@ export function factory(program) {
 					// allow it later on! A parser should be written for it 
 					// though...
 					let exemplar = entry.read();
-					for (let prop of exemplar.props) {
+					for (let prop of exemplar.properties) {
 						
 						// Look for the "OccupantGroups" property.
 						if (prop.id === 0xAA1DD396) {

@@ -86,6 +86,8 @@ export const FileType = {
 	Cohort: 0x05342861,
 	DIR: 0xE86B1EEF,
 	PNG: 0x856DDBAC,
+	BMP: 0x66778001,
+	JFIF: 0x74807101,
 	LTEXT: 0x2026960b,
 	FSH: 0x7ab50e44,
 	S3D: 0x5ad0e817,

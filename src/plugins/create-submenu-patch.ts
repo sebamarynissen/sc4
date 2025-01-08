@@ -166,7 +166,7 @@ function collect(dbpf: DBPF, logger?: Logger) {
 		// Check if the LotResourceKey exists.
 		try {
 			let ex = entry.read();
-			let hasLotResourceKey = ex.props.some(prop => prop.id === 0xea260589);
+			let hasLotResourceKey = ex.properties.some(prop => prop.id === 0xea260589);
 			if (!hasLotResourceKey) continue;
 
 			// Cool, this is an item that appears in a menu, grab its tgi and add
@@ -175,7 +175,7 @@ function collect(dbpf: DBPF, logger?: Logger) {
 			gis.push(group, instance);
 
 			// In this case we'll also log the name of the lot we're adding.
-			let nameProp = ex.props.find(prop => prop.id === 0x20);
+			let nameProp = ex.properties.find(prop => prop.id === 0x20);
 			let name = nameProp?.value || 'Lot without a name';
 			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
 		} catch (e) {

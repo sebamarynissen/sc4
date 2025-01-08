@@ -10,6 +10,7 @@ import {
 	Savegame,
 	Vector3,
 	Vertex,
+	TGI,
 } from 'sc4/core';
 
 let source = new Savegame(resource('City - Tunnel.sc4'));
@@ -28,7 +29,7 @@ let { tunnels, itemIndex, networkIndex } = dbpf;
 
 let start = new NetworkTunnelOccupant({
 	mem: 0x1,
-	tgi: [ 1697917002, 673312147, 181403648 ],
+	tgi: new TGI([ 1697917002, 673312147, 181403648 ]),
 	sibling: new Pointer(FileType.NetworkTunnelOccupant, 0x2),
 	position: new Vector3(128+8, 270, 128+8),
 	vertices: [
@@ -50,7 +51,7 @@ tunnels.push(start);
 
 let end = new NetworkTunnelOccupant({
 	mem: 0x2,
-	tgi: [ 1697917002, 673312147, 181403648 ],
+	tgi: new TGI([ 1697917002, 673312147, 181403648 ]),
 	sibling: new Pointer(FileType.NetworkTunnelOccupant, 0x1),
 	position: new Vector3(128+8, 270, 64+8),
 	vertices: [
