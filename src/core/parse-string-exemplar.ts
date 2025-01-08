@@ -27,14 +27,14 @@ export default function parseStringExemplar(str: string) {
 	const propCount = readHex() as number;
 	until('\n');
 
-	let props: PropertyOptions[] = [];
+	let properties: PropertyOptions[] = [];
 	for (let i = 0; i < propCount; i++) {
-		props.push(readProp());
+		properties.push(readProp());
 	}
 
 	return {
 		parent,
-		props,
+		properties,
 	};
 
 }

@@ -33,7 +33,7 @@ type PropertyValueType =
 export type ExemplarOptions = {
 	id?: ExemplarId;
 	parent?: TGIArray;
-	props?: Property[] | PropertyOptions[];
+	properties?: Property[] | PropertyOptions[];
 };
 export type PropertyOptions<K extends Key = Key> = {
 	id: number;
@@ -136,7 +136,7 @@ const VALUE_WRITERS = new Map<PropertyValueType, Function>([
 abstract class BaseExemplar {
 	id: ExemplarId = 'EQZB1###';
 	parent: TGIArray = [0, 0, 0];
-	props: Property[] = [];
+	properties: Property[] = [];
 	#lotObjects: LotObject[];
 	#table: Map<number, Property> = new Map();
 
@@ -150,7 +150,7 @@ abstract class BaseExemplar {
 		const isClone = data instanceof this.constructor;
 		this.id = data.id || 'EQZB1###';
 		this.parent = data.parent || [0, 0, 0];
-		this.props = [...data.props || []].map(def => {
+		this.properties = [...data.properties || []].map(def => {
 			return (isClone || !(def instanceof Property) ?
 				new Property(def) :
 				def as Property
@@ -181,7 +181,7 @@ abstract class BaseExemplar {
 
 	// ## *[Symbol.iterator]()
 	*[Symbol.iterator]() {
-		yield* this.props;
+		yield* this.properties;
 	}
 
 	// ## get lotObjects()
@@ -272,7 +272,7 @@ abstract class BaseExemplar {
 			};
 		}
 		let prop = new Property<K>(options);
-		this.props.push(prop);
+		this.properties.push(prop);
 		this.#table.set(prop.id, prop);
 		return prop;
 	}
@@ -300,7 +300,7 @@ abstract class BaseExemplar {
 
 		// Read all properties one by one.
 		const count = rs.uint32();
-		const props = this.props = new Array(count);
+		const props = this.properties = new Array(count);
 		this.#table = Object.create(null);
 		for (let i = 0; i < count; i++) {
 			let prop = props[i] = new Property();
@@ -318,7 +318,7 @@ abstract class BaseExemplar {
 	parseFromString(str: string) {
 		let obj = parseStringExemplar(str);
 		this.parent = obj.parent;
-		this.props = obj.props.map(def => {
+		this.properties = obj.properties.map(def => {
 			return new Property({
 				id: def.id,
 				type: def.type,
@@ -334,7 +334,7 @@ abstract class BaseExemplar {
 	// ## createTable()
 	createTable() {
 		const table = this.#table = new Map();
-		for (let prop of this.props) {
+		for (let prop of this.properties) {
 			table.set(prop.id, prop);
 		}
 		return this;
@@ -358,7 +358,7 @@ abstract class BaseExemplar {
 
 		// IMPORTANT! If the lot objects have been parsed, then we have to 
 		// filter them out from our raw props.
-		let { props } = this;
+		let { properties: props } = this;
 		if (this.#lotObjects) {
 			let [min, max] = LotObjectRange;
 			props = props.filter(prop => {
@@ -388,7 +388,7 @@ abstract class BaseExemplar {
 	toJSON(): ExemplarJSON {
 		return {
 			parent: [...this.parent],
-			properties: this.props.map(prop => {
+			properties: this.properties.map(prop => {
 				let { name } = prop;
 				return {
 					id: prop.id,

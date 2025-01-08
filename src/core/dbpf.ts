@@ -132,6 +132,7 @@ export default class DBPF {
 	// Adds the given file to the DBPF with the specified tgi.
 	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): EntryFromType<T>;
 	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
+	add(tgi: TGILiteral | TGIArray, file: Uint8Array): Entry;
 	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
 		if (!file) {
 			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
@@ -349,7 +350,6 @@ export default class DBPF {
 				fileSize: buffer.byteLength,
 				compressedSize: buffer.byteLength,
 			});
-
 		}
 
 		// Allright, now create all entries. We'll add them right after the 

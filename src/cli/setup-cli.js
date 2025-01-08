@@ -285,7 +285,7 @@ export function factory(program) {
 					// allow it later on! A parser should be written for it 
 					// though...
 					let exemplar = entry.read();
-					for (let prop of exemplar.props) {
+					for (let prop of exemplar.properties) {
 						
 						// Look for the "OccupantGroups" property.
 						if (prop.id === 0xAA1DD396) {

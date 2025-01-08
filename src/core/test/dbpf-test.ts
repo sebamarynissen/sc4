@@ -174,7 +174,7 @@ describe('A DBPF file', function() {
 		});
 		expect(entries).to.have.length(2);
 		let [one, two] = entries.map(x => x.read());
-		expect(two.props).to.have.length.above(one.props.length);
+		expect(two.properties).to.have.length.above(one.properties.length);
 
 		let landmarkEffect = two.value(0x2781284F);
 		expect(landmarkEffect).to.eql([-40, 64]);

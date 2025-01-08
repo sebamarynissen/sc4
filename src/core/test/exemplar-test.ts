@@ -110,7 +110,7 @@ describe('The Exemplar file', function() {
 		let buffer = exemplar.toBuffer();
 		expect(buffer.byteLength).to.equal(entry!.decompress().byteLength);
 		let cloned = new Exemplar(buffer);
-		expect(cloned.props).to.have.length(exemplar.props.length);
+		expect(cloned.properties).to.have.length(exemplar.properties.length);
 		for (let prop of exemplar) {
 			let clone = cloned.prop(prop.id);
 			expect(clone).to.eql(prop);
@@ -138,7 +138,7 @@ describe('The Exemplar file', function() {
 	it('converts numbers to bigints if that\'s the type', function() {
 
 		let exemplar = new Exemplar({
-			props: [
+			properties: [
 				{
 					id: +ExemplarProperty.BulldozeCost,
 					type: BigInt64Array,
@@ -185,9 +185,9 @@ describe('The Exemplar file', function() {
 				let buffer = entry.decompress();
 				let exemplar = entry.read();
 				let clone = exemplar.clone();
-				for (let i = 0; i < exemplar.props.length; i++) {
-					let prop = exemplar.props[i];
-					let cloned = clone.props[i];
+				for (let i = 0; i < exemplar.properties.length; i++) {
+					let prop = exemplar.properties[i];
+					let cloned = clone.properties[i];
 					expect(prop.name).to.equal(cloned.name);
 					expect(prop.id).to.equal(cloned.id);
 					expect(prop.name).to.eql(cloned.name);
@@ -216,7 +216,7 @@ describe('The Exemplar file', function() {
 
 			let exemplar = new Exemplar({
 				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
-				props: [
+				properties: [
 					{
 						id: +ExemplarProperty.ExemplarType,
 						type: Uint32Array,
