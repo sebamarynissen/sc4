@@ -2,9 +2,8 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import ora from 'ora';
-import PQueue from 'p-queue';
 import { Glob } from 'glob';
-import { DBPF, FileType } from 'sc4/core';
+import { DBPF, DBPFStream, FileType } from 'sc4/core';
 import { attempt } from 'sc4/utils';
 import type { TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
@@ -23,16 +22,18 @@ type AddOperationCommandOptions = {
 
 class AddOperation {
 	options: AddOperationCommandOptions;
+	file: string;
 	cwd: string;
-	queue = new PQueue({ concurrency: 250 });
 	spinner = ora();
-	dbpf = new DBPF();
+	stream: DBPFStream;
 	warnings: string[] = [];
 	counter = 0;
 	constructor(options: AddOperationCommandOptions) {
 		this.options = options;
-		let { directory = process.cwd() } = options;
+		let { directory = process.cwd(), output } = options;
 		this.cwd = directory;
+		this.file = path.resolve(this.cwd, output);
+		this.stream = new DBPFStream(this.file);
 	}
 
 	// The actual entry point for adding files to a dbpf.
@@ -48,9 +49,11 @@ class AddOperation {
 		});
 		let files = await glob.walk();
 
-		// Loop all the files and handle them in parallel. Note that we have to 
-		// treat dbpf file types differently!
-		let tasks = [];
+		// Ensure that the directory for our output file exists.
+		await fs.promises.mkdir(path.dirname(this.file), { recursive: true });
+
+		// Loop all files sequentially. As we have to write to the DBPF 
+		// sequentially anyway, it doesn't make sense to read them in parallel.
 		for (let file of files) {
 
 			// If this is a TGI file, it won't be added as is, it's meta 
@@ -65,57 +68,53 @@ class AddOperation {
 				case '.dat':
 				case '.sc4lot':
 				case '.sc4desc':
-				case '.sc4model': tasks.push(this.addDbpfFile(file));
-				default: tasks.push(this.addSingleFile(file));
+				case '.sc4model': {
+					await this.addDbpfFile(file);
+					break;
+				}
+				default: await this.addSingleFile(file);
 			}
 
 		}
-		await Promise.all(tasks);
 
-		// At last save the dbpf.
-		let dist = path.resolve(this.cwd, this.options.output);
-		await fs.promises.mkdir(path.dirname(dist), { recursive: true });
-		await fs.promises.writeFile(dist, this.dbpf.toBuffer());
-		this.spinner.succeed(`Added ${this.counter} files to ${dist}`);
+		// At last seal the dbpf.
+		this.spinner.text = 'Selaing dbpf';
+		await this.stream.seal();
+		this.spinner.succeed(`Added ${this.counter} files to ${this.file}`);
 		return this;
 
 	}
 
 	// Adds a non-DBPF file to the output dbpf.
 	async addSingleFile(file: string) {
-		// Note that we don't blindly start reading the file. We have to put it 
-		// in the queue to ensure we don't have too many file handles open at 
-		// once.
-		await this.queue.add(async () => {
+		// Adding this file to the DBPF means that we need to know the tgi 
+		// for it. This is stored in a .TGI file metadata - which is how the 
+		// reader works as well.
+		let meta = `${file}.TGI`;
+		const [err, contents] = await attempt(
+			() => fs.promises.readFile(meta),
+		);
+		if (err) {
+			if (err.code === 'ENOENT') {
+				this.warnings.push(
+					`${file} has no .TGI meta file, skipping`,
+				);
+			} else throw err;
+		}
 
-			// Adding this file to the DBPF means that we need to know the tgi 
-			// for it. This is stored in a .TGI file metadata - which is how the 
-			// reader works as well.
-			let meta = `${file}.TGI`;
-			const [err, contents] = await attempt(
-				() => fs.promises.readFile(meta),
-			);
-			if (err) {
-				if (err.code === 'ENOENT') {
-					this.warnings.push(
-						`${file} has no .TGI meta file, skipping`,
-					);
-				} else throw err;
-			}
-
-			// Parse the tgi.
-			let tgi = parseTGI(contents);
-			this.spinner.text = `Adding ${file}`;
-			this.dbpf.add(tgi, await fs.promises.readFile(file));
-			this.counter++;
-		});
+		// Parse the tgi.
+		let tgi = parseTGI(contents);
+		this.spinner.text = `Adding ${file}`;
+		await this.stream.add(tgi, await fs.promises.readFile(file));
+		this.counter++;
 	}
 
 	// Adds an entire dbpf file to the destination dbpf. Note that this is also 
 	// known as *dat packing*.
 	async addDbpfFile(file: string) {
+		this.spinner.text = `Adding ${file}`;
 		let dbpf = new DBPF({ file, parse: false });
-		await this.queue.add(() => dbpf.parseAsync());
+		await dbpf.parseAsync();
 		for (let entry of dbpf) {
 
 			// Skip the dir entry of course, the destination DBPF will create 
@@ -125,7 +124,7 @@ class AddOperation {
 			// Don't parse or decompress the entry, we'll just keep it as is: a 
 			// potentially compressed buffer read from the filesystem.
 			let buffer = await entry.readRawAsync();
-			this.dbpf.add(entry.tgi, buffer, {
+			await this.stream.add(entry.tgi, buffer, {
 				compressed: entry.compressed,
 				compressedSize: entry.compressedSize,
 				fileSize: entry.fileSize,
