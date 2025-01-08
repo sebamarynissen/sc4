@@ -89,7 +89,7 @@ describe('The dbpfAdd() command', function() {
 		await fs.promises.rm(cwd, { recursive: true, force: true });
 
 		await write('description.txt', 'Hello, this is a description');
-		await write('description.txt.TGI', `2026960B\nA8FBD372\n483248BB`);
+		await write('description.txt.TGI', `0x2026960B\n0xA8FBD372\n483248BB`);
 
 		await dbpfAdd('*.txt', {
 			output: 'dist/dbpf.SC4Desc',

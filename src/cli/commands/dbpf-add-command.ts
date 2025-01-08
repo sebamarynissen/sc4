@@ -174,6 +174,7 @@ function parseTGI(buffer: Uint8Array): TGI {
 		.split('\n')
 		.map(line => line.trim())
 		.filter(line => !!line)
+		.map(line => line.replace(/^0x/, ''))
 		.map(line => Number(`0x${line}`))
 		.slice(0, 3) as TGIArray);
 }
