@@ -141,6 +141,32 @@ describe('The dbpfAdd() command', function() {
 
 	});
 
+	it('specifies what files need to be compressed', async function() {
+
+		const cwd = output('dbpf_add_compress');
+		const write = this.createWriter(cwd);
+		await fs.promises.rm(cwd, { recursive: true, force: true });
+
+		await write('icon.png', new Uint8Array([0, 1]));
+		await write('icon.png.TGI', `856DDBAC\nA8FBD372\n483248BB`);
+
+		await write('exemplar.eqz', new Uint8Array(100));
+		await write('exemplar.eqz.TGI', `6534284A\nA8FBD372\n483248BB`);
+
+		await dbpfAdd('*', {
+			output: 'output.dat',
+			directory: cwd,
+			logger: null,
+			compress: '*.eqz',
+		});
+		let result = new DBPF(path.join(cwd, 'output.dat'));
+		let icon = result.find({ type: FileType.PNG })!;
+		expect(icon.compressed).to.be.false;
+		let exemplar = result.find({ type: FileType.Exemplar })!;
+		expect(exemplar.compressed).to.be.true;
+
+	});
+
 	it('throws an error if the output file exists', async function() {
 
 		const cwd = output('dbpf_add_exists');
@@ -149,7 +175,7 @@ describe('The dbpfAdd() command', function() {
 
 		await write('dist/output.dat', new Uint8Array());
 		await write('icon.png', new Uint8Array([0, 1]));
-		await write('icon.png.TGI', `6534284A\nA8FBD372\n483248BB`);
+		await write('icon.png.TGI', `856DDBAC\nA8FBD372\n483248BB`);
 
 		try {
 			await dbpfAdd('*.png', {

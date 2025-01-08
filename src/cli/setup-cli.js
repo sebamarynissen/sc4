@@ -184,6 +184,7 @@ export function factory(program) {
 		.argument('<files...>', 'Glob pattern(s) of files to add to a DBPF, e.g. **/*.{png,fsh}')
 		.requiredOption('-o, --output <file>', 'Output DBPF file to generate')
 		.option('-f, --force', 'Overwrite the output DBPF if it exists')
+		.option('-c, --compress [glob]', 'Glob pattern that specifies files to compress, .e.g *.eqz')
 		.action(commands.dbpfAdd);
 
 	// There are several commands that we have implemented, but they need to be 

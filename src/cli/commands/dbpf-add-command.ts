@@ -8,12 +8,14 @@ import type { Logger, TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
 import cliLogger from '#cli/logger.js';
 import { parse } from 'yaml';
+import { Minimatch } from 'minimatch';
 
 type AddOperationCommandOptions = {
 	output: string;
 	directory?: string;
 	force?: boolean;
 	logger?: Logger | null;
+	compress?: string | boolean;
 };
 
 export async function dbpfAdd(
@@ -31,17 +33,27 @@ class AddOperation {
 	warnings: string[] = [];
 	spinner: Logger['progress'] | undefined;
 	counter = 0;
+	shouldCompress: (file: string) => boolean = () => false;
 	constructor(options: AddOperationCommandOptions) {
 		this.options = options;
 		let {
 			directory = process.cwd(),
 			output,
 			logger = cliLogger,
+			compress,
 		} = options;
 		this.cwd = directory;
 		this.file = path.resolve(this.cwd, output);
 		this.stream = new DBPFStream(this.file, options.force ? 'w' : 'wx');
 		this.spinner = logger?.progress;
+		if (typeof compress === 'boolean') {
+			this.shouldCompress = () => true;
+		} else if (typeof compress === 'string') {
+			let mm = new Minimatch(compress);
+			this.shouldCompress = (file: string) => {
+				return mm.match(path.relative(this.cwd, file));
+			};
+		}
 	}
 
 	// The actual entry point for adding files to a dbpf.
@@ -122,7 +134,9 @@ class AddOperation {
 		buffer = transform(buffer, tgi, file);
 
 		// Parse the tgi.
-		await this.stream.add(tgi, buffer);
+		await this.stream.add(tgi, buffer, {
+			compress: this.shouldCompress(file),
+		});
 		this.counter++;
 	}
 
