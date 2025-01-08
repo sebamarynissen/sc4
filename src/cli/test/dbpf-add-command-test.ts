@@ -55,6 +55,7 @@ describe('The dbpfAdd() command', function() {
 
 		const source = new DBPF(resource('cement.sc4lot'));
 		const cwd = output('dbpf_add_dbpf_test');
+		await fs.promises.mkdir(cwd, { recursive: true });
 
 		await dbpfAdd(source.file!, {
 			output: 'dist/packed.dat',
