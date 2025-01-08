@@ -5,34 +5,27 @@ import WriteBuffer from './write-buffer.js';
 import FileType from './file-types.js';
 import LotObject, { type LotObjectArray } from './lot-object.js';
 import { ExemplarProperty, kPropertyType } from './exemplar-properties.js';
-import { invertMap, hex, inspect } from 'sc4/utils';
+import { hex, inspect } from 'sc4/utils';
 import { kFileType } from './symbols.js';
-import type { byte, float, sint32, sint64, TGIArray, uint16, uint32 } from 'sc4/types';
+import type { byte, float, sint32, sint64, TGIArray, TGILike, uint16, uint32 } from 'sc4/types';
 import {
 	isKey,
     type Primitive,
     type Value,
     type Key,
     type NumberLike,
+    type PropertyValueType,
     type ValueType,
 } from './exemplar-properties-types.js';
 import parseStringExemplar from './parse-string-exemplar.js';
 import type { Class } from 'type-fest';
+import TGI from './tgi.js';
 
 type ExemplarId = 'EQZB1###' | 'EQZT1###' | 'CQZB1###' | 'CQZT###';
-type PropertyValueType =
- 	| typeof Uint8Array
- 	| typeof Uint16Array
- 	| typeof Uint32Array
- 	| typeof Int32Array
- 	| typeof BigInt64Array
- 	| typeof Float32Array
- 	| typeof Boolean
- 	| typeof String;
 
 export type ExemplarOptions = {
 	id?: ExemplarId;
-	parent?: TGIArray;
+	parent?: TGILike;
 	properties?: Property[] | PropertyOptions[];
 };
 export type PropertyOptions<K extends Key = Key> = {
@@ -75,67 +68,73 @@ for (let i = 1; i < 1280; i++) {
 	idToName.set(config+i, 'LotConfigPropertyLotObject');
 }
 
-// We no longer use an enum for indicating the type of an exemplar property. 
-// Instead we use the native built-in JavaScript typed arrays to indicate the 
-// type of a property, as there is no "Uint32" *type* in JavaScript. To make it 
-// a bit more readable though, we'll create aliases because Uint32Array might 
-// indicate that the type *has* to be an array, but that is not the case 
-// actually. It onl indicates that the *values* are Uint32!s
-const Uint8 = Uint8Array;
-const Uint16 = Uint16Array;
-const Uint32 = Uint32Array;
-const Sint32 = Int32Array;
-const Sint64 = globalThis.BigInt64Array;
-const Float32 = Float32Array;
-const Bool = Boolean;
+type ITypeInfo = {
+	hex: number;
+	bytes: number;
+	read: (rs: Stream, length?: number) => Value;
+	write: (buff: WriteBuffer, value: Value, length?: number) => void,
+};
 
-const TYPE_TO_HEX = new Map<PropertyValueType, number>([
-	[Uint8, 0x100],
-	[Uint16, 0x200],
-	[Uint32, 0x300],
-	[Sint32, 0x700],
-	[Sint64, 0x800],
-	[Float32, 0x900],
-	[Bool, 0xB00],
-	[String, 0xc00],
-]);
-const HEX_TO_TYPE = invertMap(TYPE_TO_HEX);
-
-function getByteLengthFromType(type: PropertyValueType) {
-	if ('BYTES_PER_ELEMENT' in type) {
-		return type.BYTES_PER_ELEMENT;
-	} else {
-		return 1;
-	}
-}
-
-const VALUE_READERS = new Map<PropertyValueType, Function>([
-	[Uint8, (rs: Stream) => rs.uint8()],
-	[Uint16, (rs: Stream) => rs.uint16()],
-	[Uint32, (rs: Stream) => rs.uint32()],
-	[Sint32, (rs: Stream) => rs.int32()],
-	[Sint64, (rs: Stream) => rs.bigint64()],
-	[Float32, (rs: Stream) => rs.float()],
-	[Bool, (rs: Stream) => Boolean(rs.uint8())],
-	[String, (rs: Stream, length: number) => rs.string(length)],
-]);
-
-const VALUE_WRITERS = new Map<PropertyValueType, Function>([
-	[Uint8, (buff: WriteBuffer, value: byte) => buff.writeUInt8(value)],
-	[Uint16, (buff: WriteBuffer, value: uint16) => buff.writeUInt16LE(value)],
-	[Uint32, (buff: WriteBuffer, value: uint32) => buff.writeUInt32LE(value)],
-	[Sint32, (buff: WriteBuffer, value: sint32) => buff.writeInt32LE(value)],
-	[Sint64, (buff: WriteBuffer, value: sint64) => buff.writeBigInt64LE(value)],
-	[Float32, (buff: WriteBuffer, value: float) => buff.writeFloatLE(value)],
-	[Bool, (buff: WriteBuffer, value: boolean) => buff.writeUInt8(Number(value))],
-	[String, (buff: WriteBuffer, str: string) => buff.string(str)],
-]);
+const TypeInfo: Record<PropertyValueType, ITypeInfo> = {
+	Uint8: {
+		hex: 0x100 as const,
+		bytes: 1,
+		read: (rs: Stream) => rs.uint8(),
+		write: (buff: WriteBuffer, value: byte) => buff.writeUInt8(value),
+	},
+	Uint16: {
+		hex: 0x200 as const,
+		bytes: 2,
+		read: (rs: Stream) => rs.uint16(),
+		write: (buff: WriteBuffer, value: uint16) => buff.writeUInt16LE(value),
+	},
+	Uint32: {
+		hex: 0x300 as const,
+		bytes: 4,
+		read: (rs: Stream) => rs.uint32(),
+		write: (buff: WriteBuffer, value: uint32) => buff.writeUInt32LE(value),
+	},
+	Sint32: {
+		hex: 0x700 as const,
+		bytes: 4,
+		read: (rs: Stream) => rs.int32(),
+		write: (buff: WriteBuffer, value: sint32) => buff.writeInt32LE(value),
+	},
+	Sint64: {
+		hex: 0x800 as const,
+		bytes: 8,
+		read: (rs: Stream) => rs.bigint64(),
+		write: (buff: WriteBuffer, value: sint64) => buff.writeBigInt64LE(value),
+	},
+	Float32: {
+		hex: 0x900 as const,
+		bytes: 4,
+		read: (rs: Stream) => rs.float(),
+		write: (buff: WriteBuffer, value: float) => buff.writeFloatLE(value),
+	},
+	Bool: {
+		hex: 0xb00 as const,
+		bytes: 1,
+		read: (rs: Stream) => Boolean(rs.uint8()),
+		write: (buff: WriteBuffer, value: boolean) => buff.writeUInt8(Number(value)),
+	},
+	String: {
+		hex: 0xc00 as const,
+		bytes: 1,
+		read: (rs: Stream, length: number) => rs.string(length),
+		write: (buff: WriteBuffer, str: string) => buff.string(str),
+	},
+};
+const HEX_TO_TYPE: Record<string, PropertyValueType> = Object.fromEntries(
+	Object.entries(TypeInfo)
+		.map(([type, { hex }]) => [hex, type as PropertyValueType]),
+);
 
 // # Exemplar()
 // See https://www.wiki.sc4devotion.com/index.php?title=EXMP for the spec.
 abstract class BaseExemplar {
 	id: ExemplarId = 'EQZB1###';
-	parent: TGIArray = [0, 0, 0];
+	parent: TGI;
 	properties: Property[] = [];
 	#lotObjects: LotObject[];
 	#table: Map<number, Property> = new Map();
@@ -149,7 +148,7 @@ abstract class BaseExemplar {
 		}
 		const isClone = data instanceof this.constructor;
 		this.id = data.id || 'EQZB1###';
-		this.parent = data.parent || [0, 0, 0];
+		this.parent = new TGI(data.parent || [0, 0, 0]);
 		this.properties = [...data.properties || []].map(def => {
 			return (isClone || !(def instanceof Property) ?
 				new Property(def) :
@@ -254,7 +253,7 @@ abstract class BaseExemplar {
 	addProperty<K extends Key>(
 		idOrPropOptions: K | AddPropertyOptions<K>,
 		value?: Value<K>,
-		typeHint: PropertyValueType = Uint32Array,
+		typeHint: PropertyValueType = 'Uint32',
 	): Property<K> {
 		let options: PropertyOptions<K>;
 		if (isKey(idOrPropOptions)) {
@@ -296,7 +295,7 @@ abstract class BaseExemplar {
 		}
 
 		// Get the parent cohort TGI. Set to 0 in case of no parent.
-		this.parent = [rs.uint32(), rs.uint32(), rs.uint32()];
+		this.parent = rs.tgi();
 
 		// Read all properties one by one.
 		const count = rs.uint32();
@@ -317,7 +316,7 @@ abstract class BaseExemplar {
 	// ## parseFromString(str)
 	parseFromString(str: string) {
 		let obj = parseStringExemplar(str);
-		this.parent = obj.parent;
+		this.parent = new TGI(obj.parent);
 		this.properties = obj.properties.map(def => {
 			return new Property({
 				id: def.id,
@@ -387,13 +386,13 @@ abstract class BaseExemplar {
 	// handle this properly.
 	toJSON(): ExemplarJSON {
 		return {
-			parent: [...this.parent],
+			parent: [...this.parent] as TGIArray,
 			properties: this.properties.map(prop => {
 				let { name } = prop;
 				return {
 					id: prop.id,
 					...(name ? { name } : null),
-					type: getJsonType(prop.type),
+					type: prop.type,
 					value: prop.value,
 				};
 			}),
@@ -424,38 +423,24 @@ function normalizeId(idOrName: NumberLike | string): number {
 function normalizeType(
 	id: number,
 	value: Value,
-	typeHint: PropertyValueType = Uint32Array,
+	typeHint: PropertyValueType = 'Uint32',
 ): PropertyValueType {
 	let name = idToName.get(id);
 	if (name && name in ExemplarProperty) {
 		let object = ExemplarProperty[name as keyof typeof ExemplarProperty];
-		if (typeof object === 'number') return Uint32Array;
+		if (typeof object === 'number') return 'Uint32';
 		let [type] = [object[kPropertyType]].flat();
 		return type;
 	}
 
 	// The property is not a known property, so we're in uncharted territory. 
 	// Now check if we can figure out the type from the value itself.
-	if (typeof value === 'string') return String;
+	if (typeof value === 'string') return 'String';
 	let [first] = [value].flat();
-	if (typeof first === 'boolean') return Boolean;
-	else if (typeof first === 'bigint') return BigInt64Array;
+	if (typeof first === 'boolean') return 'Bool';
+	else if (typeof first === 'bigint') return 'Sint64';
 	else return typeHint;
 
-}
-
-// # getJsonType(type)
-function getJsonType(type: PropertyValueType) {
-	switch (type) {
-		case Uint8Array: return 'Uint8';
-		case Uint16Array: return 'Uint16';
-		case Uint32Array: return 'Uint32';
-		case Int32Array: return 'Sint32';
-		case BigInt64Array: return 'Sint64';
-		case Float32Array: return 'Float32';
-		case Bool: return 'Bool';
-		case String: return 'String';
-	}
 }
 
 // # Exemplar
@@ -476,14 +461,14 @@ export class Cohort extends BaseExemplar {
 // Wrapper class around an Exemplar property.
 class Property<K extends Key = Key> {
 	id = 0x00000000;
-	type: PropertyValueType = Uint32Array;
+	type: PropertyValueType = 'Uint32';
 	value: Value<K> | undefined;
 
 	// ## constructor({ id, type, value } = {})
 	// If the data passed is a property, then we'll use a *clone* strategy.
 	constructor(data?: PropertyOptions<K> | Property<K>) {
 		let isClone = data instanceof Property;
-		let { id = 0, type = Uint32Array, value } = data || {};
+		let { id = 0, type = 'Uint32', value } = data || {};
 		this.id = +id;
 		this.type = type;
 		this.value = value !== undefined ? cast(
@@ -546,7 +531,7 @@ class Property<K extends Key = Key> {
 
 	// ## get hexType()
 	get hexType(): number {
-		return TYPE_TO_HEX.get(this.type) as number;
+		return TypeInfo[this.type].hex;
 	}
 
 	// ## get keyType()
@@ -567,7 +552,7 @@ class Property<K extends Key = Key> {
 	// multiple values because we need to store the string length here!
 	get byteLength() {
 		let { type, value } = this;
-		let bytes = getByteLengthFromType(type);
+		let { bytes } = TypeInfo[type];
 		return this.multiple ? (4 + (value as any[]).length * bytes) : bytes;
 	}
 
@@ -579,15 +564,15 @@ class Property<K extends Key = Key> {
 		// Parse value type & associated reader.
 		this.id = rs.uint32();
 		let nr = rs.uint16();
-		let type = this.type = HEX_TO_TYPE.get(nr) as PropertyValueType;
-		let reader = VALUE_READERS.get(type);
+		let type = this.type = HEX_TO_TYPE[nr] as PropertyValueType;
+		let { read } = TypeInfo[type];
 
 		// Parse key type.
 		let keyType = rs.uint16();
 
 		if (keyType === 0) {
 			void rs.uint8();
-			this.value = reader!(rs);
+			this.value = read(rs) as Value<K>;
 		} else if (keyType === 0x80) {
 			void rs.uint8();
 			let reps = rs.uint32();
@@ -600,12 +585,12 @@ class Property<K extends Key = Key> {
 			// can't guarantee us that Value<K> can hold a string at runtime 
 			// because it might just as well evaluate to int32[] or something. 
 			// Hence using "as" is justified here.
-			if (type === String) {
+			if (type === 'String') {
 				this.value = rs.string(reps) as Value<K>;
 			} else {
 				let values: Primitive[] = [];
 				for (let i = 0; i < reps; i++) {
-					values.push(reader!(rs) as Primitive);
+					values.push(read(rs) as Primitive);
 				}
 				this.value = values as Value<K>;
 			}
@@ -644,14 +629,14 @@ class Property<K extends Key = Key> {
 		if (typeof value === 'string') {
 			buff.string(value);
 		} else {
-			const writer = VALUE_WRITERS.get(type);
+			const { write } = TypeInfo[type];
 			if (Array.isArray(value)) {
 				buff.writeUInt32LE(value.length);
 				for (let entry of value) {
-					writer!(buff, entry);
+					write(buff, entry);
 				}
 			} else {
-				writer!(buff, value);
+				write(buff, value!);
 			}
 		}
 		return buff.toUint8Array();
@@ -666,9 +651,9 @@ class Property<K extends Key = Key> {
 		let { type, value } = this;
 		let tf = (x: any) => x;
 		switch (type) {
-			case Uint8:
-			case Uint16:
-			case Uint32:
+			case 'Uint8':
+			case 'Uint16':
+			case 'Uint32':
 				tf = (x: any) => inspect.hex(x);
 		}
 		if (value !== undefined) {
@@ -677,7 +662,7 @@ class Property<K extends Key = Key> {
 		return {
 			id: inspect.hex(this.id),
 			name: this.name,
-			type: inspect.constructor(type),
+			type,
 			value,
 		};
 	}
@@ -691,9 +676,9 @@ function cast(type: PropertyValueType, value: ValueType): ValueType {
 		return value.map(value => cast(type, value)) as Primitive[];
 	}
 	switch (type) {
-		case String: return String(value);
-		case Bool: return Boolean(value);
-		case Sint64: return BigInt(value);
+		case 'String': return String(value);
+		case 'Bool': return Boolean(value);
+		case 'Sint64': return BigInt(value);
 		default: return Number(value);
 	}
 }

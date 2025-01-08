@@ -40,9 +40,12 @@ export default class TGI<T extends uint32 = uint32> {
 		return `TGI(${str})`;
 	}
 
-	*[Symbol.iterator]() {
-		yield this.type;
-		yield this.group;
-		yield this.instance;
+	toArray(): TGIArray {
+		return [this.type, this.group, this.instance];
 	}
+
+	*[Symbol.iterator]() {
+		yield* this.toArray();
+	}
+
 }

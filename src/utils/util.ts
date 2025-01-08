@@ -73,10 +73,10 @@ export const inspect = {
 			},
 		};
 	},
-	constructor(value: Constructor<any>) {
+	constructor(value: Constructor<any> | string) {
 		return {
 			[Symbol.for('nodejs.util.inspect.custom')]() {
-				return util!.styleText('cyan', value.name);
+				return util!.styleText('cyan', typeof value === 'string' ? value : value.name);
 			},
 		};
 	},
