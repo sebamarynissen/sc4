@@ -178,6 +178,15 @@ export function factory(program) {
 		.option('--no-tgi', 'Skips creating .TGI files')
 		.action(commands.dbpfExtract);
 
+	dbpf
+		.command('add <files...>')
+		.description('Add files to a DBPF file. Can be used for datpacking as well')
+		.argument('<files...>', 'Glob pattern(s) of files to add to a DBPF, e.g. **/*.{png,fsh}')
+		.requiredOption('-o, --output <file>', 'Output DBPF file to generate')
+		.option('-f, --force', 'Overwrite the output DBPF if it exists')
+		.option('-a, --add', 'Adds the files to the output DBPF if it already exists')
+		.action(commands.dbpfAdd);
+
 	// There are several commands that we have implemented, but they need to be 
 	// reworked. We'll put thos under the "misc" category and instruct users not 
 	// to use them, or at least with care.
