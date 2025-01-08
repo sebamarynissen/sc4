@@ -3,7 +3,7 @@ import FileType from './file-types.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import Unknown from './unknown.js';
 import type Stream from './stream.js';
-import type { byte, dword, float, TGIArray } from 'sc4/types';
+import type { byte, dword, float } from 'sc4/types';
 import TractInfo from './tract-info.js';
 import type SGProp from './sgprop.js';
 import type Matrix3 from './matrix-3.js';
@@ -12,6 +12,7 @@ import Vertex from './vertex.js';
 import Box3 from './box-3.js';
 import type NetworkCrossing from './network-crossing.js';
 import WriteBuffer from './write-buffer.js';
+import TGI from './tgi.js';
 
 // # NetworkBridgeOccupant
 // A class that is used for the individual parts of bridges. Apparently the 
@@ -25,7 +26,7 @@ export default class NetworkBridgeOccupant {
 	appearance: dword = 0x00000005;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
-	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
+	tgi = new TGI();
 	matrix3: Matrix3 | null = null;
 	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
@@ -64,7 +65,7 @@ export default class NetworkBridgeOccupant {
 		unknown.dword(0xc772bf98);
 		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
-		this.tgi = rs.tgi();
+		this.tgi = rs.gti();
 		let hasMatrix = rs.byte() === 0x05;
 		this.matrix3 = hasMatrix ? rs.matrix3() : null;
 		this.position = rs.vector3();
@@ -114,7 +115,7 @@ export default class NetworkBridgeOccupant {
 		unknown.dword();
 		ws.tract(this.tract);
 		ws.array(this.sgprops);
-		ws.tgi(this.tgi);
+		ws.gti(this.tgi);
 		if (this.matrix3) {
 			ws.byte(0x05);
 			ws.write(this.matrix3);

@@ -18,7 +18,8 @@ export default class TGI<T extends uint32 = uint32> {
 
 	constructor(tgi: TGIArray<T> | TGILiteral<T>);
 	constructor(type: T, group: uint32, instance: uint32);
-	constructor(tgiOrType: TGIArray<T> | TGILiteral<T> | T, group?: uint32, instance?: uint32) {
+	constructor();
+	constructor(tgiOrType: TGIArray<T> | TGILiteral<T> | T = 0 as T, group: uint32 = 0, instance: uint32 = 0) {
 		let type;
 		if (Array.isArray(tgiOrType)) {
 			[type, group, instance] = tgiOrType;

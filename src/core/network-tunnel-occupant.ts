@@ -1,5 +1,5 @@
 // # network-tunnel-occupant.ts
-import type { byte, ConstructorOptions, dword, qword, TGIArray } from 'sc4/types';
+import type { byte, ConstructorOptions, dword, qword } from 'sc4/types';
 import FileType from './file-types.js';
 import type SGProp from './sgprop.js';
 import type Stream from './stream.js';
@@ -13,6 +13,7 @@ import Box3 from './box-3.js';
 import type Pointer from './pointer.js';
 import WriteBuffer from './write-buffer.js';
 import NetworkCrossing from './network-crossing.js';
+import TGI from './tgi.js';
 
 type NetworkTunnelOccupantOptions = ConstructorOptions<NetworkTunnelOccupant>;
 
@@ -28,7 +29,7 @@ export default class NetworkTunnelOccupant {
 	appearance = 0x05000000;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
-	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
+	tgi = new TGI();
 	matrix3: Matrix3 | null = null;
 	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
@@ -74,7 +75,7 @@ export default class NetworkTunnelOccupant {
 		unknown.dword(0xc772bf98);
 		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
-		this.tgi = rs.tgi();
+		this.tgi = rs.gti();
 
 		// 0x01 means no transformation matrix, 0x05 means has a transformation matrix.
 		let hasMatrix = rs.byte() === 0x05;
@@ -124,7 +125,7 @@ export default class NetworkTunnelOccupant {
 		unknown.dword();
 		ws.tract(this.tract);
 		ws.array(this.sgprops);
-		ws.tgi(this.tgi);
+		ws.gti(this.tgi);
 		if (this.matrix3) {
 			ws.byte(0x05);
 			ws.write(this.matrix3);
