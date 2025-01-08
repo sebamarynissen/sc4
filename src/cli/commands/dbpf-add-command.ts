@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import ora from 'ora';
 import PQueue from 'p-queue';
 import { Glob } from 'glob';
-import { DBPF } from 'sc4/core';
+import { DBPF, FileType } from 'sc4/core';
 import { attempt } from 'sc4/utils';
 import type { TGIArray } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
@@ -13,7 +13,7 @@ export async function dbpfAdd(
 	patterns: string | string[],
 	options: AddOperationCommandOptions,
 ) {
-	await new AddOperation(options).add([patterns].flat());
+	return await new AddOperation(options).add([patterns].flat());
 }
 
 type AddOperationCommandOptions = {
@@ -74,8 +74,10 @@ class AddOperation {
 
 		// At last save the dbpf.
 		let dist = path.resolve(this.cwd, this.options.output);
+		await fs.promises.mkdir(path.dirname(dist), { recursive: true });
 		await fs.promises.writeFile(dist, this.dbpf.toBuffer());
 		this.spinner.succeed(`Added ${this.counter} files to ${dist}`);
+		return this;
 
 	}
 
@@ -106,7 +108,6 @@ class AddOperation {
 			this.spinner.text = `Adding ${file}`;
 			this.dbpf.add(tgi, await fs.promises.readFile(file));
 			this.counter++;
-
 		});
 	}
 
@@ -115,6 +116,23 @@ class AddOperation {
 	async addDbpfFile(file: string) {
 		let dbpf = new DBPF({ file, parse: false });
 		await this.queue.add(() => dbpf.parseAsync());
+		for (let entry of dbpf) {
+
+			// Skip the dir entry of course, the destination DBPF will create 
+			// its own dir entry.
+			if (entry.type === FileType.DIR) continue;
+
+			// Don't parse or decompress the entry, we'll just keep it as is: a 
+			// potentially compressed buffer read from the filesystem.
+			let buffer = await entry.readRawAsync();
+			this.dbpf.add(entry.tgi, buffer, {
+				compressed: entry.compressed,
+				compressedSize: entry.compressedSize,
+				fileSize: entry.fileSize,
+			});
+			this.counter++;
+
+		}
 	}
 
 }
