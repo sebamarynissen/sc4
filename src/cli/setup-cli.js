@@ -6,9 +6,10 @@ import tar from 'tar';
 import ora from 'ora';
 import { program as commander, Command } from 'commander';
 import * as commands from '#cli/commands';
-import { DBPF, FileType, Savegame } from 'sc4/core';
+import { DBPF, FileType } from 'sc4/core';
 import * as api from 'sc4/api';
 import { hex } from 'sc4/utils';
+import * as parsers from './parsers.js';
 import version from './version.js';
 
 const Style = {
@@ -51,7 +52,11 @@ export function factory(program) {
 		].join('\n'))
 		.action(commands.interactive);
 
-	program
+	const city = program
+		.command('city')
+		.description(`Modify savegames. Run ${chalk.magentaBright('sc4 city')} to view all available commands`);
+
+	city
 		.command('historical <city>')
 		.description('Make buildings within the given city historical')
 		.option('-o, --output <out>', 'The output path to store the city if you\'re not force-overriding')
@@ -62,7 +67,7 @@ export function factory(program) {
 		.option('-g, --agricultural', 'Make all agricultural buildings historical')
 		.action(commands.historical);
 
-	program
+	city
 		.command('growify <city>')
 		.description('Convert plopped buildings into functional growables')
 		.option('-o, --output <out>', 'The output path to store the city. Overrides the file by default')
@@ -73,19 +78,41 @@ export function factory(program) {
 		.option('--no-historical', 'Don\'t make the growified lots historical')
 		.action(commands.growify);
 
-	program
-		.command('create-submenu-patch')
-		.argument('[files...]', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
-		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
-		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
-		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
-		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
-		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
-		.option('-r, --recursive', 'Whether to scan any folders specified recursively. Defaults to false')
-		.action(commands.submenu);
+	// Command for generating the optimal pipe layout in a city.
+	city
+		.command('pipes <city>')
+		.description('Create the optimal pipe layout in the given city')
+		.action(commands.pipes);
 
-	program
-		.command('create-new-submenu')
+	// Command for plopping all lots from a folder in a city.
+	city
+		.command('plop <city> [patterns...]')
+		.description(`Plops all lots that match the patterns in the city. DO NOT use this on established cities!`)
+		.option('--bbox <bbox>', 'The bounding box to plop the lots in, given as minX,minZ,maxX,maxZ. Defaults to the entire city.')
+		.option('--clear', 'Clears the existing lots in the city')
+		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
+		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
+		.action(commands.plopAll);
+
+	// Command for looking for refs.
+	city
+		.command('refs <city>')
+		.description('Lists all subfiles where the given pointer address or pointer type is referenced')
+		.option('--address <ref>', 'A specific memory reference to look for')
+		.option('--type <type>', 'The Type IDs for which we need to look for references')
+		.action(commands.cityRefs);
+
+	city
+		.command('pointer <city> <pointer>')
+		.description('Finds the subfile entry addressed by the given pointer')
+		.action(commands.cityPointer);
+
+	const submenu = program
+		.command('submenu')
+		.description(`Manage submenus. Run ${chalk.magentaBright('sc4 submenu')} to list available commands`);
+
+	submenu
+		.command('create')
 		.description('Generates a new submenu button')
 		.argument('<icon>', 'The path to the png icon to use')
 		.requiredOption('--name', 'The name of the submenu as it appears in the game')
@@ -96,37 +123,112 @@ export function factory(program) {
 		.option('-d, --directory [dir]', 'The directory where the output path will be relative to. Defaults to your plugins folder')
 		.action(commands.newSubmenu);
 
-	program
-		.command('scan-for-menus [folder]')
+	submenu
+		.command('add')
+		.description('Adds all specified lots to the given menu using the Exemplar Patching method')
+		.argument('<files...>', 'The files or directories to scan. Can also be a glob pattern. Defaults to the current working directory')
+		.requiredOption('-m, --menu [button id]', 'The button ID of the submenu, e.g. 0x83E040BB for highway signage.')
+		.option('-o, --output [file]', 'Path to the output file. Defaults to "Submenu patch.dat".')
+		.option('-d, --directory [dir]', 'The directory where the files are located. Defaults to current work directory')
+		.option('--instance [IID]', 'The instance id (IID) to use for the patch, random by default.')
+		.option('-r, --recursive', 'Whether to scan any folders specified recursively. Defaults to false')
+		.action(commands.submenu);
+
+	submenu
+		.command('scan [folder]')
 		.description('Scans the given folder for any submenus and adds them to the config file. Uses your configured plugin folder by default')
 		.action(commands.scanForMenus);
 
-	// Command for generating the optimal pipe layout in a city.
-	program
-		.command('pipes <city>')
-		.description('Create the optimal pipe layout in the given city')
-		.action(commands.pipes);
+	submenu
+		.command('unpack')
+		.argument('[dir]', 'The directory where the submenus to unpack are located. Defaults to the current working directory')
+		.description('Unpacks all in a given directory for use in github.com/sebamarynissen/sc4-submenu-collection')
+		.option('-p, --patterns [patterns...]', 'A list of glob patterns that define the submenus to match. Defaults to **/*.dat')
+		.option('-o, --output [dir]', 'Path to the output directory. Defaults to the current working directory')
+		.action(commands.submenuUnpack);
 
-	// Command for plopping all lots from a folder in a city.
-	program
-		.command('plop-all <city> [patterns...]')
-		.description(`Plops all lots that match the patterns in the city. DO NOT use this on established cities!`)
-		.option('--bbox <bbox>', 'The bounding box to plop the lots in, given as minX,minZ,maxX,maxZ. Defaults to the entire city.')
-		.option('--clear', 'Clears the existing lots in the city')
-		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
-		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
-		.action(commands.plopAll);
+	// Subcommand for plugin-related functionalities
+	const plugins = program
+		.command('plugins')
+		.description(`Manage plugins. Run ${chalk.magentaBright('sc4 plugins')} to list available commands`);
 
 	// Command for tracking dependencies.
-	program
+	plugins
 		.command('track [patterns...]')
 		.description('Finds all dependencies for the files that match the given patterns')
 		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to your configured plugins folder')
 		.option('--tree', 'Shows the entire dependency tree')
 		.action(commands.track);
 
+	// Commands that operate specifically on dbpfs, such as extracting a DBPF.
+	const dbpf = program
+		.command('dbpf')
+		.description(`Operate on DBPF files. Run ${chalk.magentaBright('sc4 dbpf')} to list available commands`);
+
+	dbpf
+		.command('extract')
+		.description('Extracts the contents of one or more DBPF files')
+		.argument('<dbpf...>', 'Glob pattern(s) of DBPF files to match, e.g. **/*.{sc4lot,dat}')
+		.option('-t, --type <type>', 'Only extract files with the given TypeID (e.g. png, 0x6534284A)', parsers.typeId)
+		.option('-g, --group <group>', 'Only extract files with the given GroupID (e.g. 0x123006aa)', parsers.number)
+		.option('-i, --instance <instance>', 'Only extract files with the given InstanceID (e.g. 0x00003000)', parsers.number)
+		.option('-f, --force', 'Force overwriting existing output files')
+		.option('-o, --output <directory>', 'Output directory. Defaults to the current working directory')
+		.option('--yaml', 'Extract exemplars & cohorts as yaml')
+		.option('--no-tgi', 'Skips creating .TGI files')
+		.action(commands.dbpfExtract);
+
+	dbpf
+		.command('add')
+		.description('Add files to a DBPF file. Can be used for datpacking as well')
+		.argument('<files...>', 'Glob pattern(s) of files to add to a DBPF, e.g. **/*.{png,fsh}')
+		.requiredOption('-o, --output <file>', 'Output DBPF file to generate')
+		.option('-f, --force', 'Overwrite the output DBPF if it exists')
+		.option('-c, --compress [glob]', 'Glob pattern that specifies files to compress, .e.g *.eqz')
+		.action(commands.dbpfAdd);
+
+	// There are several commands that we have implemented, but they need to be 
+	// reworked. We'll put thos under the "misc" category and instruct users not 
+	// to use them, or at least with care.
+	const misc = program
+		.command('misc')
+		.description('Contains various commands that are experimental and not officially supported. Be very careful when using them!');
+
+	// Command for comparing
+	misc
+		.command('dump <city>')
+		.storeOptionsAsProperties()
+		.description('Give a human-readable representation of all lots in the city')
+		.action(function(city) {
+
+			let dir = this.cwd;
+			let file = path.resolve(dir, city);
+			let buff = fs.readFileSync(file);
+			
+			let dword = 'crc mem IID dateCreated buildingIID linkedIndustrial linkedAgricultural demandSourceIndex name unknown0'.split(' ');
+			let word = 'unknown6'.split(' ');
+			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
+			function replacer(name, val) {
+				if (name === 'commuteBuffer') return val ? '...' : null;
+				else if (dword.includes(name)) return hex(val);
+				else if (byte.includes(name)) return hex(val, 2);
+				else if (word.includes(name)) return hex(val, 4);
+				else return val;
+			}
+
+			let dbpf = new DBPF(buff);
+			let lots = dbpf.find({ type: FileType.Lot }).read();
+			let all = [];
+			for (let lot of lots) {
+				let str = JSON.stringify(lot, replacer, 2);
+				all.push(str);
+			}
+			console.log(all.join('\n\n-----------------\n\n'));
+
+		});
+
 	// Some commands.
-	program
+	misc
 		.command('tileset [dir]')
 		.storeOptionsAsProperties()
 		.description('Set the tilesets for all buildings in the given directory')
@@ -192,7 +294,7 @@ export function factory(program) {
 					// allow it later on! A parser should be written for it 
 					// though...
 					let exemplar = entry.read();
-					for (let prop of exemplar.props) {
+					for (let prop of exemplar.properties) {
 						
 						// Look for the "OccupantGroups" property.
 						if (prop.id === 0xAA1DD396) {
@@ -227,7 +329,7 @@ export function factory(program) {
 		});
 
 	// Backup command for backup a region or a plugins folder.
-	program
+	misc
 		.command('backup')
 		.storeOptionsAsProperties()
 		.description('Backup a region or your entire plugins folder')
@@ -379,107 +481,8 @@ export function factory(program) {
 
 		});
 
-	// Command for comparing
-	program
-		.command('dump <city>')
-		.storeOptionsAsProperties()
-		.description('Give a human-readable representation of all lots in the city')
-		.action(function(city) {
-
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			
-			let dword = 'crc mem IID dateCreated buildingIID linkedIndustrial linkedAgricultural demandSourceIndex name unknown0'.split(' ');
-			let word = 'unknown6'.split(' ');
-			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
-			function replacer(name, val) {
-				if (name === 'commuteBuffer') return val ? '...' : null;
-				else if (dword.includes(name)) return hex(val);
-				else if (byte.includes(name)) return hex(val, 2);
-				else if (word.includes(name)) return hex(val, 4);
-				else return val;
-			}
-
-			let dbpf = new DBPF(buff);
-			let lots = dbpf.find({ type: FileType.Lot }).read();
-			let all = [];
-			for (let lot of lots) {
-				let str = JSON.stringify(lot, replacer, 2);
-				all.push(str);
-			}
-			console.log(all.join('\n\n-----------------\n\n'));
-
-		});
-
-	// Command for looking for refs.
-	program
-		.command('refs <city>')
-		.storeOptionsAsProperties()
-		.option('-m, --max <max>', 'Max amount of references to search for per file type. Defaults to infinity')
-		.option('--address <ref>', 'A specific memory reference to look for')
-		.option('--types <type>', 'The Type IDs for which we need to look for references')
-		.option('-a, --all', 'Finds lot, building, texture & prop references')
-		.option('-l, --lots', 'Find lot references')
-		.option('-b, --buildings', 'Find building references')
-		.option('-t, --textures', 'Find texture references')
-		.option('-p, --props', 'Find prop references')
-		.description('Finds internal memory references within a city')
-		.action(function(city) {
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			let opts = baseOptions();
-			opts.dbpf = new Savegame(buff);
-
-			if (this.address) {
-				opts.address = this.address.split(',').map(x => Number(x));
-			} else {
-				// If nothing was specified explicitly, set to all by default.
-				if (!this.all && !this.lots && !this.buildings && !this.textures && !this.props && !this.types) {
-					this.all = true;
-				}
-
-				// Build up the queries.
-				let queries = opts.queries = {};
-				if (this.lots || this.all) queries.Lot = FileType.Lot;
-				if (this.buildings || this.all) queries.Building = FileType.Building;
-				if (this.textures || this.all) queries.Texture = FileType.BaseT$;
-				if (this.props || this.all) queries.Prop = FileType.Prop;
-
-				// Handle more types.
-				if (this.types) {
-					this.types.split(',').forEach(function(type) {
-						let nr = Number(type);
-						queries[hex(nr)] = nr;
-					});
-				}
-
-				if (this.max) {
-					opts.max = +this.max;
-				}
-
-			}
-
-			api.refs(opts);
-		});
-
-	program
-		.command('pointer <city> <pointer>')
-		.storeOptionsAsProperties()
-		.description('Finds the subfile entery addressed by the given pointer')
-		.action(function(city, pointer) {
-			let dir = this.cwd;
-			let file = path.resolve(dir, city);
-			let buff = fs.readFileSync(file);
-			let opts = baseOptions();
-			opts.dbpf = new DBPF(buff);
-			opts.pointer = +pointer;
-			api.pointer(opts);
-		});
-
 	// Command for switching the active tilesets in a city.
-	program
+	misc
 		.command('tracts <city>')
 		.storeOptionsAsProperties()
 		.option('-t, --tilesets <tilesets>', 'The tileset identifiers, given as numbers')
@@ -523,7 +526,7 @@ export function factory(program) {
 		});
 
 	// Command for finding duplicate files in a plugin folder.
-	program
+	misc
 		.command('duplicates <folder>')
 		.storeOptionsAsProperties()
 		.action(function(folder) {
@@ -533,10 +536,14 @@ export function factory(program) {
 			});
 		});
 
-	// Command for opening the config file.
-	program
+	const config = program
 		.command('config')
-		.description(`Allows modifying the config file. Be careful with this if you don't know what you're doing!`)
+		.description(`Manage sc4 configuration. Run ${chalk.magentaBright('sc4 config')} to list available commands`);
+
+	// Command for opening the config file.
+	config
+		.command('edit')
+		.description(`Allows editing the config file manually. Be careful with this if you don't know what you're doing!`)
 		.action(commands.config);
 
 	// End of factory function.

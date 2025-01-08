@@ -20,7 +20,7 @@ export default class FileScanner extends Glob<GlobOptions & { withFileTypes: fal
 			extensions = ['dat', 'sc4lot', 'sc4desc', 'sc4model'],
 			...rest
 		} = opts;
-		let suffix = extensions ? `.{${extensions.join(',')}}` : '';
+		let suffix = extensions?.length > 0 ? `.{${extensions.join(',')}}` : '';
 		let rec = recursive ? '**/*' : '*';
 		let parsed = [patterns].flat().map(pattern => {
 

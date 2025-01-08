@@ -6,7 +6,6 @@ import Entry, { type EntryJSON, type EntryFromType } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
-import crc32 from './crc.js';
 import { cClass, FileType } from './enums.js';
 import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
@@ -30,6 +29,12 @@ export type DBPFJSON = {
 	file: string;
 	header: HeaderJSON;
 	entries: EntryJSON;
+};
+
+type FileAddOptions = {
+	compressed?: boolean;
+	compressedSize?: number;
+	fileSize?: number;
 };
 
 // # DBPF()
@@ -131,20 +136,31 @@ export default class DBPF {
 
 	// ## add(tgi, file)
 	// Adds the given file to the DBPF with the specified tgi.
-	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[]): EntryFromType<T>;
-	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: Uint8Array): Entry;
-	add(tgi: TGILiteral | TGIArray , file: DBPFFile | DBPFFile[] | Uint8Array) {
-		if (!file) {
+	add<T extends DecodedFileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, file: DBPFFile | DBPFFile[], opts?: FileAddOptions): EntryFromType<T>;
+	add<T extends FileTypeId>(tgi: TGILiteral<T> | TGIArray<T>, buffer: Uint8Array, opts?: FileAddOptions): Entry;
+	add(tgi: TGILiteral | TGIArray, buffer: Uint8Array, opts?: FileAddOptions): Entry;
+	add(tgi: TGILiteral | TGIArray , fileOrBuffer: DBPFFile | DBPFFile[] | Uint8Array, opts: FileAddOptions = {}) {
+		if (!fileOrBuffer) {
 			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
 		}
 		let entry = new Entry({ dbpf: this });
 		entry.tgi = tgi;
 		this.entries.add(entry);
-		if (isUint8Array(file)) {
-			entry.buffer = file;
-		} else if (file) {
-			entry.file = file as any;
+		if (isUint8Array(fileOrBuffer)) {
+
+			// If the buffer is already compressed, we store it as the raw 
+			// buffer instead.
+			if (opts.compressed) {
+				entry.raw = fileOrBuffer;
+			} else {
+				entry.buffer = fileOrBuffer;
+			}
+
+		} else if (fileOrBuffer) {
+			entry.file = fileOrBuffer as any;
 		}
+		let { compressed = false, fileSize = 0, compressedSize = 0 } = opts;
+		Object.assign(entry, { compressed, fileSize, compressedSize });
 		return entry;
 	}
 
@@ -304,7 +320,7 @@ export default class DBPF {
 				group: entry.group,
 				instance: entry.instance,
 			};
-			if (entry.isTouched()) {
+			if (entry.file || entry.buffer) {
 				let buffer = entry.toBuffer();
 				let fileSize = buffer.byteLength;
 				if (entry.compressed) {
@@ -321,7 +337,7 @@ export default class DBPF {
 			} else {
 
 				// If the entry has never been read, we just reuse it as is.
-				let raw = entry.readRaw();
+				let raw = entry.raw || entry.readRaw();
 				if (entry.compressed) {
 					dir.push({ ...tgi, size: entry.fileSize });
 				}
@@ -350,7 +366,6 @@ export default class DBPF {
 				fileSize: buffer.byteLength,
 				compressedSize: buffer.byteLength,
 			});
-
 		}
 
 		// Allright, now create all entries. We'll add them right after the 

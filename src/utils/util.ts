@@ -3,6 +3,7 @@ import { util } from './node-builtins.js';
 import type { Constructor, UnknownRecord } from 'type-fest';
 import type { uint32, TGILiteral } from 'sc4/types';
 import type { InspectOptionsStylized } from 'node:util';
+import { indexOf } from 'uint8array-extras';
 
 // Julian day offset between unix epoch and Julian Date 0.
 const JULIAN_OFFSET = 2440587.5;
@@ -72,10 +73,10 @@ export const inspect = {
 			},
 		};
 	},
-	constructor(value: Constructor<any>) {
+	constructor(value: Constructor<any> | string) {
 		return {
 			[Symbol.for('nodejs.util.inspect.custom')]() {
-				return util!.styleText('cyan', value.name);
+				return util!.styleText('cyan', typeof value === 'string' ? value : value.name);
 			},
 		};
 	},
@@ -223,4 +224,29 @@ export function isLittleEndian() {
 // # isBigEndian()
 export function isBigEndian() {
 	return !isLittleEndian();
+}
+
+// # findPatternOffsets(buffer, pattern)
+// Finds all offsets of the given Uint8Array pattern.
+export function findPatternOffsets(buffer: Uint8Array, pattern: Uint8Array) {
+	let index = 0;
+	let pivot = buffer;
+	let offsets: number[] = [];
+	while (index > -1) {
+		index = indexOf(pivot, pattern);
+		if (index > -1) {
+			offsets.push(index);
+			pivot = pivot.subarray(index + pattern.length);
+		}
+	}
+	return offsets;
+}
+
+// Helper function that mimicks the "safe assignment operator", asynchronously.
+export async function attempt(fn: () => any) {
+	try {
+		return [null, await fn()];
+	} catch (e) {
+		return [e, null];
+	}
 }

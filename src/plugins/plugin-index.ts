@@ -359,12 +359,9 @@ export default class PluginIndex {
 	// it up in the parent cohort and so on all the way up.
 	getProperty<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = exemplar.prop(key);
-		while (!prop && exemplar.parent[0]) {
+		while (!prop && exemplar.parent.type) {
 			let { parent } = exemplar;
-			type ExemplarLike =
-				| typeof FileType.Exemplar
-				| typeof FileType.Cohort;
-			let entry = this.find(parent as TGIArray<ExemplarLike>);
+			let entry = this.find(parent);
 			if (!entry) {
 				break;
 			};
@@ -373,8 +370,8 @@ export default class PluginIndex {
 			// parent cohorts. This happens for example with the NAM. We need to 
 			// handle this gracefully.
 			if (!(
-				entry.type === FileType.Exemplar ||
-				entry.type === FileType.Cohort
+				entry.isType(FileType.Exemplar) ||
+				entry.isType(FileType.Cohort)
 			)) {
 				break;
 			}

@@ -56,6 +56,7 @@ export const SavegameFileType = {
 	Pipe: 0x49c05b9f,
 	PlumbingSimulator: 0x0990c075,
 	ZoneManager: 0x298f9b2d,
+	Thumbnail: 0x8a2482b9,
 
 	// Terrain map is a bit special because it is also identified by group and 
 	// instance inside a Savegame, but obviously the type id is still needed 
@@ -86,6 +87,8 @@ export const FileType = {
 	Cohort: 0x05342861,
 	DIR: 0xE86B1EEF,
 	PNG: 0x856DDBAC,
+	BMP: 0x66778001,
+	JFIF: 0x74807101,
 	LTEXT: 0x2026960b,
 	FSH: 0x7ab50e44,
 	S3D: 0x5ad0e817,

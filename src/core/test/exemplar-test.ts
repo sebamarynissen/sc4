@@ -3,7 +3,7 @@ import fs from '#test/fs.js';
 import { uint8ArrayToHex } from 'uint8array-extras';
 import { expect } from 'chai';
 import { resource } from '#test/files.js';
-import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType, TGI } from 'sc4/core';
 
 describe('The Exemplar file', function() {
 
@@ -27,14 +27,16 @@ describe('The Exemplar file', function() {
 
 	});
 
-	it('should read textual exemplars', function() {
+	it('reads textual exemplars', function() {
 
 		let file = resource('quotes.sc4desc');
 		let buff = fs.readFileSync(file);
 		let dbpf = new DBPF(buff);
 
 		let entry = dbpf.exemplars[0];
-		entry.read();
+		let exemplar = entry.read();
+		let pollution = exemplar.get('PollutionAtCenter');
+		expect(pollution).to.eql([1, 1, 4, 0]);
 
 	});
 
@@ -108,7 +110,7 @@ describe('The Exemplar file', function() {
 		let buffer = exemplar.toBuffer();
 		expect(buffer.byteLength).to.equal(entry!.decompress().byteLength);
 		let cloned = new Exemplar(buffer);
-		expect(cloned.props).to.have.length(exemplar.props.length);
+		expect(cloned.properties).to.have.length(exemplar.properties.length);
 		for (let prop of exemplar) {
 			let clone = cloned.prop(prop.id);
 			expect(clone).to.eql(prop);
@@ -130,6 +132,78 @@ describe('The Exemplar file', function() {
 		let clone = new Exemplar(exemplar.toBuffer());
 		expect(clone.get(ExemplarProperty.LotConfigPropertyLotObject)).to.be.undefined;
 		expect(clone.lotObjects).to.have.length(0);
+
+	});
+
+	it('converts numbers to bigints if that\'s the type', function() {
+
+		let exemplar = new Exemplar({
+			properties: [
+				{
+					id: +ExemplarProperty.BulldozeCost,
+					type: 'Sint64',
+					value: 10,
+				},
+			],
+		});
+		let [prop] = exemplar;
+		expect(prop.value).to.equal(10n);
+
+	});
+
+	describe('#constructor()', function() {
+
+		it('constructs from JSON', function() {
+
+			let [type, group, instance] = TGI.random(FileType.Cohort);
+			let exemplar = new Exemplar({
+				parent: [type, group, instance],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						value: 0x21,
+						type: 'Uint32',
+					},
+					{
+						id: +ExemplarProperty.ExemplarName,
+						value: 'Exemplar name',
+						type: 'String',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						value: [10, Math.PI, 5],
+						type: 'Float32',
+					},
+					{
+						id: +ExemplarProperty.MonthlyConstantIncome,
+						value: 200,
+						type: 'Sint64',
+					},
+				],
+			});
+			expect(exemplar.parent).to.eql(new TGI(type, group, instance));
+			expect(exemplar.get('ExemplarType')).to.equal(0x21);
+			expect(exemplar.get('ExemplarName')).to.equal('Exemplar name');
+			expect(exemplar.get('OccupantSize')).to.eql([10, Math.PI, 5]);
+			expect(exemplar.get('MonthlyConstantIncome')).to.equal(200n);
+
+		});
+
+		it('figures out the type from known exemplar properties if not specified explicitly', function() {
+
+			let exemplar = new Exemplar({
+				properties: [
+					{
+						id: +ExemplarProperty.MediumWealthEQ,
+						value: 0xfe,
+					},
+				],
+			});
+			let prop = exemplar.prop('MediumWealthEQ')!;
+			expect(prop.type).to.equal('Uint8');
+			expect(prop.value).to.equal(0xfe);
+
+		});
 
 	});
 
@@ -167,9 +241,9 @@ describe('The Exemplar file', function() {
 				let buffer = entry.decompress();
 				let exemplar = entry.read();
 				let clone = exemplar.clone();
-				for (let i = 0; i < exemplar.props.length; i++) {
-					let prop = exemplar.props[i];
-					let cloned = clone.props[i];
+				for (let i = 0; i < exemplar.properties.length; i++) {
+					let prop = exemplar.properties[i];
+					let cloned = clone.properties[i];
 					expect(prop.name).to.equal(cloned.name);
 					expect(prop.id).to.equal(cloned.id);
 					expect(prop.name).to.eql(cloned.name);
@@ -187,6 +261,70 @@ describe('The Exemplar file', function() {
 					expect(cloned).to.eql(prop);
 				}
 			}
+
+		});
+
+	});
+
+	describe('#toJSON()', function() {
+
+		it('serializes to JSON', function() {
+
+			let exemplar = new Exemplar({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						type: 'Uint32',
+						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: 'Sint64',
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: 'String',
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: 'Float32',
+						value: [10.5, 3.5, 2.75],
+					},
+				],
+			});
+			let json = exemplar.toJSON();
+			expect(json).to.eql({
+				parent: [FileType.Cohort, 0x01234567, 0xfedcba98],
+				properties: [
+					{
+						id: +ExemplarProperty.ExemplarType,
+						type: 'Uint32',
+						name: 'ExemplarType',
+						value: 0x21,
+					},
+					{
+						id: +ExemplarProperty.BulldozeCost,
+						type: 'Sint64',
+						name: 'BulldozeCost',
+						value: 46723n,
+					},
+					{
+						id: +ExemplarProperty.ItemDescription,
+						type: 'String',
+						name: 'ItemDescription',
+						value: 'This is a description',
+					},
+					{
+						id: +ExemplarProperty.OccupantSize,
+						type: 'Float32',
+						name: 'OccupantSize',
+						value: [10.5, 3.5, 2.75],
+					},
+				],
+			});
 
 		});
 

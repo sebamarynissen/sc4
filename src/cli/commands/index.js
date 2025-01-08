@@ -8,3 +8,8 @@ export * from './scan-for-menus-command.js';
 export * from './config-command.js';
 export * from './plop-all-command.js';
 export * from './track-command.js';
+export * from './city-pointer-command.js';
+export * from './city-refs-command.js';
+export * from './submenu-unpack-command.js';
+export * from './dbpf-extract-command.js';
+export * from './dbpf-add-command.js';

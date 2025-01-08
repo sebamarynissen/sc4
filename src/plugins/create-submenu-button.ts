@@ -1,7 +1,7 @@
 // # create-submenu-button.ts
 import { fs, path, randomId, hex } from 'sc4/utils';
 import { DBPF, Exemplar, LTEXT, FileType, OccupantGroups } from 'sc4/core';
-import type { Logger } from 'sc4/types';
+import type { Logger, TGIArray, TGILiteral } from 'sc4/types';
 const Props = {
 	ExemplarType: 0x10,
 	ExemplarName: 0x20,
@@ -22,9 +22,9 @@ const Groups = {
 
 type createSubmenuButtonOptions = {
 	name: string;
-	description?: string;
+	description?: string | TGIArray | TGILiteral;
 	buttonId?: number;
-	icon: Uint8Array | string;
+	icon?: Uint8Array | string;
 	parent: number;
 	logger?: Logger;
 	save?: boolean;
@@ -39,9 +39,11 @@ export default async function createSubmenuButton(
 	opts: createSubmenuButtonOptions,
 ) {
 
+	// If no description is specified, we use the default description of memo's 
+	// submenus, being "Click here to open submenu".
 	let {
 		name,
-		description = '',
+		description = [0x2026960b, 0x123006aa, 0x6e967dff],
 		buttonId = randomId({ except: excluded }),
 		icon,
 		parent,
@@ -66,11 +68,24 @@ export default async function createSubmenuButton(
 		Groups.Name,
 		buttonId,
 	]);
-	exemplar.addProperty(Props.ItemDescriptionKey, [
-		FileType.LTEXT,
-		Groups.Description,
-		buttonId,
-	]);
+
+	// If the description is given as a TGI literal, then we add it as such.
+	if (typeof description !== 'string') {
+		let tgi: number[];
+		if (Array.isArray(description)) {
+			tgi = description;
+		} else {
+			let { type, group, instance } = description
+			tgi = [type, group, instance];
+		}
+		exemplar.addProperty(Props.ItemDescriptionKey, tgi);
+	} else {
+		exemplar.addProperty(Props.ItemDescriptionKey, [
+			FileType.LTEXT,
+			Groups.Description,
+			buttonId,
+		]);
+	}
 
 	// Add the exemplar to a DBPF. The exemplar will be compressed.
 	let dbpf = new DBPF();
@@ -82,10 +97,12 @@ export default async function createSubmenuButton(
 		[FileType.LTEXT, Groups.Name, buttonId],
 		new LTEXT(name),
 	);
-	dbpf.add(
-		[FileType.LTEXT, Groups.Description, buttonId],
-		new LTEXT(description),
-	);
+	if (typeof description === 'string') {
+		dbpf.add(
+			[FileType.LTEXT, Groups.Description, buttonId],
+			new LTEXT(description),
+		);
+	}
 
 	// At last we'll add the png icon as well. Note that the icon can be 
 	// specified as a raw buffer, but it can also be a file - in which case we 

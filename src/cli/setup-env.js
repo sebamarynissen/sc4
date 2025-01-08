@@ -58,6 +58,10 @@ async function ensureInstallation() {
 		return folder;
 	}
 
+	// If this is not an interactive terminal, we can't prompt the user of 
+	// course.
+	if (!process.stdin.isTTY) return process.cwd();
+
 	// If we didn't find a SimCity 4 installation folder, then we'll notify the 
 	// user that they might need to locate it themselves, but first we'll ask if 
 	// they even have SimCity 4 installed.
@@ -141,6 +145,9 @@ async function ensureFolder(name, paths) {
 		return folder;
 	}
 	spinner.fail(`SimCity 4 ${name} folder not found`);
+
+	// If this is not an interactive terminal, we can't continue.
+	if (!process.stdin.isTTY) return process.cwd();
 
 	// If we didn't find the folder we're looking for, ask the user whether they 
 	// want to select one themselves.

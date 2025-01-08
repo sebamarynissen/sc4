@@ -4,7 +4,7 @@ import { FileType } from './enums.js';
 import Unknown from './unknown.js';
 import Vertex from './vertex.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
-import type { byte, dword, qword, TGIArray } from 'sc4/types';
+import type { byte, dword, qword } from 'sc4/types';
 import type Stream from './stream.js';
 import type SGProp from './sgprop.js';
 import type { ConstructorOptions } from 'sc4/types';
@@ -12,6 +12,7 @@ import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
 import { Vector3, type Vector3Like } from './vector-3.js';
 import NetworkCrossing from './network-crossing.js';
+import TGI from './tgi.js';
 
 // # Network
 // A class for representing a single network tile.
@@ -24,7 +25,7 @@ export default class Network {
 	appearance: dword = 0x0500000000;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
-	tgi: TGIArray = [0x00000000, 0x00000000, 0x00000000];
+	tgi = new TGI();
 	position = new Vector3();
 	vertices: [Vertex, Vertex, Vertex, Vertex] = [
 		new Vertex(),
@@ -69,7 +70,7 @@ export default class Network {
 		unknown.dword(0xc772bf98);
 		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
-		this.tgi = rs.tgi();
+		this.tgi = rs.gti();
 		unknown.byte();
 		this.position = rs.vector3();
 		this.vertices = [
@@ -110,7 +111,7 @@ export default class Network {
 		unknown.dword();
 		ws.tract(this.tract);
 		ws.array(this.sgprops);
-		ws.tgi(this.tgi);
+		ws.gti(this.tgi);
 		unknown.byte();
 		ws.vector3(this.position);
 		this.vertices.forEach(v => ws.vertex(v));

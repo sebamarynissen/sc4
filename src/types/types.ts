@@ -29,6 +29,11 @@ export type TGIArray<
 	G extends uint32 = uint32,
 	I extends uint32 = uint32
 > = [type: T, group: G, instance: I];
+export type TGILike<
+	T extends uint32 = uint32,
+	G extends uint32 = uint32,
+	I extends uint32 = uint32
+> = TGILiteral<T, G, I> | TGIArray<T, G, I>;
 
 // It's not always clear what units are being used, as you can have meters (1 
 // tile = 16 meters), tiles, or tracts - where 1 tract is dependent on the 
@@ -54,8 +59,11 @@ export type Logger = {
 	warn: (...args: any[]) => any,
 	info: (...args: any[]) => any,
 	log: (...args: any[]) => any,
-	step: (text: string) => any,
-	progress: (text?: string) => any,
-	succeed: (text?: string) => any,
-	fail: (text?: string) => any,
+	progress: {
+		start: (text?: string) => any,
+		update: (text: string) => any,
+		succeed: (text?: string) => any,
+		fail: (text?: string) => any,
+		warn: (text?: string) => any,
+	},
 };
