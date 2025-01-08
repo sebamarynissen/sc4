@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { output, resource } from '#test/files.js';
-import { DBPF, Exemplar, ExemplarProperty, FileType, LTEXT } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
 import { randomId } from 'sc4/utils';
 import { dbpfAdd } from '../commands/dbpf-add-command.js';
 import { compareUint8Arrays } from 'uint8array-extras';
@@ -57,6 +57,7 @@ describe('The dbpfAdd() command', function() {
 
 		const source = new DBPF(resource('cement.sc4lot'));
 		const cwd = output('dbpf_add_dbpf_test');
+		await fs.promises.rm(cwd, { recursive: true, force: true });
 		await fs.promises.mkdir(cwd, { recursive: true });
 
 		await dbpfAdd(source.file!, {
@@ -85,6 +86,7 @@ describe('The dbpfAdd() command', function() {
 
 		const cwd = output('dbpf_add_txt');
 		const write = this.createWriter(cwd);
+		await fs.promises.rm(cwd, { recursive: true, force: true });
 
 		await write('description.txt', 'Hello, this is a description');
 		await write('description.txt.TGI', `2026960B\nA8FBD372\n483248BB`);
@@ -106,6 +108,7 @@ describe('The dbpfAdd() command', function() {
 
 		const cwd = output('dbpf_add_yaml');
 		const write = this.createWriter(cwd);
+		await fs.promises.rm(cwd, { recursive: true, force: true });
 
 		await write('exemplar.yaml', stringify({
 			parent: [FileType.Cohort, 0x1ae45fee, 0x4a879d5f],
@@ -135,6 +138,50 @@ describe('The dbpfAdd() command', function() {
 		let exemplar = entry.read();
 		expect(exemplar.get('ExemplarType')).to.equal(0x21);
 		expect(exemplar.get('ResourceKeyType1')).to.eql([FileType.S3D, 0x1ae45fee, 0x4a879d5f]);
+
+	});
+
+	it('throws an error if the output file exists', async function() {
+
+		const cwd = output('dbpf_add_exists');
+		const write = this.createWriter(cwd);
+		await fs.promises.rm(cwd, { recursive: true, force: true });
+
+		await write('dist/output.dat', new Uint8Array());
+		await write('icon.png', new Uint8Array([0, 1]));
+		await write('icon.png.TGI', `6534284A\nA8FBD372\n483248BB`);
+
+		try {
+			await dbpfAdd('*.png', {
+				output: 'dist/output.dat',
+				directory: cwd,
+				logger: null,
+			});
+		} catch (e) {
+			expect(e.code).to.equal('EEXIST');
+			return;
+		}
+
+		// We shouldn't reach this point.
+		throw new Error();
+
+	});
+
+	it('overrides output files with the -f flag', async function() {
+
+		const cwd = output('dbpf_add_exists');
+		const write = this.createWriter(cwd);
+		await fs.promises.rm(cwd, { recursive: true, force: true });
+
+		await write('dist/output.dat', new Uint8Array());
+		await write('icon.png', new Uint8Array([0, 1]));
+		await write('icon.png.TGI', `6534284A\nA8FBD372\n483248BB`);
+		await dbpfAdd('*.png', {
+			output: 'dist/output.dat',
+			directory: cwd,
+			logger: null,
+			force: true,
+		});
 
 	});
 

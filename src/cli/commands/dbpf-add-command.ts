@@ -12,6 +12,7 @@ import { parse } from 'yaml';
 type AddOperationCommandOptions = {
 	output: string;
 	directory?: string;
+	force?: boolean;
 	logger?: Logger | null;
 };
 
@@ -39,7 +40,7 @@ class AddOperation {
 		} = options;
 		this.cwd = directory;
 		this.file = path.resolve(this.cwd, output);
-		this.stream = new DBPFStream(this.file);
+		this.stream = new DBPFStream(this.file, options.force ? 'w' : 'wx');
 		this.spinner = logger?.progress;
 	}
 
@@ -55,6 +56,10 @@ class AddOperation {
 			absolute: true,
 		});
 		let files = await glob.walk();
+		if (files.length === 0) {
+			this.spinner?.warn(`No files matching pattern ${patterns} found.`);
+			return this;
+		}
 
 		// Ensure that the directory for our output file exists.
 		await fs.promises.mkdir(path.dirname(this.file), { recursive: true });
