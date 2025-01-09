@@ -550,40 +550,66 @@ export default class CityManager {
 		// we'll check the families first.
 		let { OID, IIDs, orientation, y } = lotObject;
 		let IID = rand(IIDs);
-		let exemplar = this.findExemplarOfType(IID, 0x1e);
+		let exemplarEntry = this.findExemplarOfType(IID, 0x1e);
 
 		// Missing props? Just ignore them.
-		if (!exemplar) {
+		if (!exemplarEntry) {
 			return 0;
 		}
 
 		// Get the dimensions of the prop bounding box.
-		let file = exemplar.read();
-		let size = this.getPropertyValue(file, 'OccupantSize');
+		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
+		let size = exemplar.get('OccupantSize');
 		if (!size) {
-			console.warn(`Prop ${exemplar.tgi} is missing OccupantSize!`);
+			console.warn(`Prop ${exemplarEntry.tgi} is missing OccupantSize!`);
 			return 0;
 		}
 		let [, height] = size;
 
-		// If the prop is a timed prop, then we have to set the condition to 
-		// 0xf. Ideally we'd check the current city date as well though, but 
-		// that's for later.
+		// If the prop is used with a start date, we'll check the current date 
+		// in the city to determine whether the prop should be active or not.
 		let condition = 0x00;
-		let date = this.getPropertyValue(file, 'SimulatorDateStart');
+		let startMonthDay = exemplar.get('SimulatorDateStart');
 		let timing = null;
 		let state = 0;
-		if (date) {
-			state = 1;
-			condition = 13;
-			let start = getJulianFromUnix(new Date('2000-10-24T12:00:00Z'));
-			let duration = 61;
+		if (startMonthDay) {
+
+			// Read in the current date of the city, and then we'll check if the 
+			// prop should be active during this interval.
+			let duration = exemplar.get('SimulatorDateDuration') ?? 0;
+			let interval = exemplar.get('SimulatorDateInterval') ?? 0;
+			let [startMonth, startDay] = startMonthDay;
+			let { date } = this.dbpf.date;
+			let start = date.with({ month: startMonth, day: startDay });
+			let end = start.add({ days: duration });
+			if (date <= end) {
+				if (date < start) {
+					state = 1;
+					condition = 0x0d;
+				} else {
+					start = start.add({ years: 1 });
+					state = 0;
+					condition = 0x0f;
+				}
+			} else {
+				start = start.add({ years: 1 });
+				end = end.add({ years: 1 });
+				if (date >= start) {
+					start = start.add({ years: 1 });
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x0d;
+				}
+			}
 			timing = {
-				interval: 365,
+				interval,
 				duration,
 				start,
-				end: start+duration,
+				end,
 			};
+			console.log(timing);
 		}
 
 		// Create the prop & position correctly.
@@ -596,10 +622,10 @@ export default class CityManager {
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the prop.
-			TID: exemplar.type,
-			GID: exemplar.group,
-			IID: exemplar.instance,
-			IID1: exemplar.instance,
+			TID: exemplarEntry.type,
+			GID: exemplarEntry.group,
+			IID: exemplarEntry.instance,
+			IID1: exemplarEntry.instance,
 			OID,
 
 			appearance: 5,
@@ -617,7 +643,7 @@ export default class CityManager {
 
 		// If it's a timed prop, we have to reference it in the prop developer 
 		// as well.
-		if (date) {
+		if (startMonthDay) {
 			dbpf.propDeveloper.array5.push(new Pointer(prop));
 		}
 

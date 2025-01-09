@@ -353,6 +353,18 @@ export default class PluginIndex {
 		return arr || null;
 	}
 
+	// ## getHierarchicExemplar(exemplar)
+	// Creates a small wrapper around the given exemplar that looks up values in 
+	// the exemplar's parent cohort if they are not present in the exemplar 
+	// itself.
+	getHierarchicExemplar(exemplar: Exemplar) {
+		return {
+			get: <K extends Key = Key>(key: K) => {
+				return this.getPropertyValue(exemplar, key);
+			},
+		};
+	}
+
 	// ## getProperty(exemplar, key)
 	// This function accepts a parsed exemplar file and looks up the property 
 	// with the given key. If the property doesn't exist, then tries to look 
