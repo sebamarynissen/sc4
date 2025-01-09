@@ -26,6 +26,7 @@ import PlumbingSimulator from './plumbing-simulator.js';
 import NetworkTunnelOccupant from './network-tunnel-occupant.js';
 import NetworkBridgeOccupant from './network-bridge-occupant.js';
 import NetworkManager from './network-manager.js';
+import ParkManager from './park-manager.js';
 import TerrainMap from './terrain-map.js';
 import TerrainBox from './terrain-box.js';
 import TerrainFlags from './terrain-flags.js';
@@ -60,6 +61,7 @@ export {
 	NetworkBridgeOccupant,
 	NetworkManager,
 	PrebuiltNetwork,
+	ParkManager,
 	LineItem,
 	DepartmentBudget,
 	Pipe,
@@ -105,6 +107,7 @@ export default {
 	NetworkBridgeOccupant,
 	NetworkManager,
 	LineItem,
+	ParkManager,
 	DepartmentBudget,
 	Pipe,
 	ItemIndex,

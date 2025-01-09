@@ -57,6 +57,7 @@ export const SavegameFileType = {
 	PlumbingSimulator: 0x0990c075,
 	ZoneManager: 0x298f9b2d,
 	Thumbnail: 0x8a2482b9,
+	ParkManager: 0xaa3fe6bc,
 
 	// Terrain map is a bit special because it is also identified by group and 
 	// instance inside a Savegame, but obviously the type id is still needed 
