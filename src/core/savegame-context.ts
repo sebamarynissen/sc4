@@ -14,6 +14,7 @@ type RecordRow = {
 	type: number;
 	label: string;
 	records: RecordInfo[];
+	byteLength: number;
 };
 type RecordInfo = {
 	pointer: Pointer;
@@ -70,7 +71,7 @@ export default class SavegameContext {
 		}
 		let file = entry.read() as T | T[] | Uint8Array;
 		if (file instanceof Uint8Array) {
-			let buffers = readRecordsAsBuffers(entry);
+			let buffers = readRecordsAsBuffers(entry.decompress());
 			let record = buffers.find(buffer => {
 				let reader = SmartBuffer.fromBuffer(buffer);
 				let mem = reader.readUInt32LE(8);
@@ -120,7 +121,8 @@ export default class SavegameContext {
 
 			// If the entry does not follow the SIZE CRC MEM convention, then we 
 			// don't include it.
-			let buffers = readRecordsAsBuffers(entry);
+			let buffer = entry.decompress();
+			let buffers = readRecordsAsBuffers(buffer);
 			if (buffers.length === 0) continue;
 
 			// Create the rows.
@@ -129,6 +131,7 @@ export default class SavegameContext {
 				type: entry.type,
 				label: cClass[entry.type as keyof typeof cClass],
 				records: [],
+				byteLength: buffer.byteLength,
 			};
 			let offset = 0;
 			for (let i = 0; i < buffers.length; i++) {
@@ -163,6 +166,7 @@ export default class SavegameContext {
 			return {
 				name: row.label,
 				count: row.records.length,
+				bytes: row.byteLength,
 			};
 		});
 	}

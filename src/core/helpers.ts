@@ -6,7 +6,6 @@ import crc32 from './crc.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
 import { findPatternOffsets } from 'sc4/utils';
-import type Entry from './dbpf-entry.js';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -48,8 +47,7 @@ export function getTypeLabel(value: uint32): string | undefined {
 // array of raw buffers. Note that we return a shallow copy, so the underlying 
 // memory is the same! It can be used to modify values of subfiles of which the 
 // structure is not known yet.
-export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
-	let buffer = entry.decompress();
+export function readRecordsAsBuffers(buffer: Uint8Array): Uint8Array[] {
 
 	// If the buffer can't even hold SIZE CRC MEM, then we skip it.
 	if (buffer.byteLength < 12) return [];
