@@ -13,3 +13,4 @@ export * from './city-refs-command.js';
 export * from './submenu-unpack-command.js';
 export * from './dbpf-extract-command.js';
 export * from './dbpf-add-command.js';
+export * from './city-count-command.js';
