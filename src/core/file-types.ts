@@ -70,6 +70,10 @@ export const SavegameFileType = {
 	// Render stuff
 	cSC43DRender: 0xe9c622d8,
 
+	// Other classes. Looks like they don't really hold much actual data, but 
+	// are simply a representation of the game's class structure.
+	cSC4City: 0x8990c372,
+
 } as const;
 
 export const SimGridFileType = {
