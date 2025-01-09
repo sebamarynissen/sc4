@@ -104,6 +104,17 @@ export default class WriteBuffer extends SmartBuffer {
 		}
 	}
 
+	// ## tuple(arr)
+	// Helper function for writing away a tuple, which is an array of *fixed* 
+	// length. The difference with "array" is that we don't prefix it with the 
+	// length.
+	tuple<T>(arr: T[], fn?: (item: T) => any): void;
+	tuple<T>(arr: T[], fn: (item: any) => any = (item => this.write(item))): void {
+		for (let item of arr) {
+			fn.call(this, item);
+		}
+	}
+
 	// ## tgi()
 	// Writes away a TGI.
 	tgi(tgi: TGILike) {

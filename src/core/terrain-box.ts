@@ -3,6 +3,7 @@ import FileType from './file-types.js';
 import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Unknown from './unknown.js';
+import WriteBuffer from './write-buffer.js';
 
 // # terrain-box.ts
 export default class TerrainBox {
@@ -15,8 +16,6 @@ export default class TerrainBox {
 	unknown = new Unknown()
 		.dword(0x00000000)
 		.float(308);
-
-	// # parse(rs)
 	parse(rs: Stream) {
 		this.unknown = new Unknown();
 		let unknown = this.unknown.reader(rs);
@@ -29,5 +28,16 @@ export default class TerrainBox {
 		unknown.float();
 		rs.assert();
 	}
-
+	toBuffer() {
+		let ws = new WriteBuffer();
+		let unknown = this.unknown.writer(ws);
+		ws.word(this.major);
+		ws.dword(this.xSize);
+		ws.dword(this.zSize);
+		unknown.dword();
+		ws.float(this.minY);
+		ws.float(this.maxY);
+		unknown.float();
+		return ws.toUint8Array();
+	}
 }

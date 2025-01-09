@@ -5,12 +5,13 @@ import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Unknown from './unknown.js';
 import type Pointer from './pointer.js';
-import { getUnixFromJulian } from 'sc4/utils';
+import { getJulianFromUnix, getUnixFromJulian } from 'sc4/utils';
+import WriteBuffer from './write-buffer.js';
 
 export default class cSC4City {
 	static [kFileType] = FileType.cSC4City;
-	mem: dword = 0x00000000;
 	crc: dword = 0x00000000;
+	mem: dword = 0x00000000;
 	version = '12.2';
 	date = new Date('2000-01-01T12:00:00Z');
 	name = '';
@@ -43,8 +44,8 @@ export default class cSC4City {
 		this.u = new Unknown();
 		let unknown = this.u.reader(rs);
 		rs.size();
-		this.mem = rs.dword();
 		this.crc = rs.dword();
+		this.mem = rs.dword();
 		this.version = rs.version(2);
 		unknown.dword();
 		unknown.dword();
@@ -75,5 +76,36 @@ export default class cSC4City {
 		}
 		unknown.byte();
 		rs.assert();
+	}
+	toBuffer() {
+		let ws = new WriteBuffer();
+		let unknown = this.u.writer(ws);
+		ws.dword(this.mem);
+		ws.version(this.version);
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.repeat(4, u => u.dword());
+		ws.dword(getJulianFromUnix(this.date));
+		unknown.word();
+		ws.string(this.name);
+		ws.string(this.originalName);
+		ws.string(this.mayor);
+		ws.string(this.anotherName);
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.float();
+		unknown.dword();
+		ws.tuple(this.physicalSize, ws.float);
+		ws.tuple(this.physicalTileSize, ws.float);
+		ws.tuple(this.tilesPerMeter, ws.float);
+		ws.tuple(this.size, ws.dword);
+		for (let pointer of this.pointers) {
+			ws.pointer(pointer);
+		}
+		unknown.byte();
+		return ws.seal();
 	}
 }

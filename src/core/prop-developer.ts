@@ -4,6 +4,7 @@ import { kFileType } from './symbols.js';
 import Unknown from './unknown.js';
 import type Stream from './stream.js';
 import type Pointer from './pointer.js';
+import WriteBuffer from './write-buffer.js';
 
 // # prop-developer.ts
 export default class PropDeveloper {
@@ -75,5 +76,43 @@ export default class PropDeveloper {
 		unknown.byte();
 		rs.assert();
 		return this;
+	}
+	toBuffer() {
+		let ws = new WriteBuffer();
+		let unknown = this.u.writer(ws);
+		ws.dword(this.mem);
+		ws.word(this.major);
+		unknown.bytes();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.dword();
+		unknown.byte();
+		unknown.dword();
+		ws.pointer(this.wealthRequester);
+		ws.pointer(this.crimeSimulator);
+		ws.pointer(this.pollutionSimulator);
+		ws.pointer(this.zoneDeveloper);
+		ws.pointer(this.propManager);
+		ws.pointer(this.networkLotManager);
+		ws.dword(this.count1);
+		if (this.count1 > 0) {
+			unknown.dword();
+		}
+		unknown.dword();
+		unknown.dword();
+		unknown.byte();
+		ws.array(this.array1, x => ws.pointer(x));
+		ws.array(this.adviceArray, x => ws.dword(x));
+		ws.array(this.array3, x => ws.pointer(x));
+		ws.array(this.array4, x => ws.pointer(x));
+		ws.array(this.array5, x => ws.pointer(x));
+		ws.array(this.array6, x => ws.pointer(x));
+		unknown.dword();
+		unknown.byte();
+		return ws.seal();
 	}
 }
