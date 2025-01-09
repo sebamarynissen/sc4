@@ -42,7 +42,7 @@ export default class SimulatorDate {
 		return new SimulatorDate({ julian, unix: timestamp });
 	}
 
-	static fromYearDateMonth(year: number, month: number, day: number) {
+	static fromYearMonthDay(year: number, month: number, day: number) {
 		let unix = getDate(year, month, day).getTime();
 		let julian = getJulianFromUnix(unix);
 		return new SimulatorDate({ unix, julian, year, month, day });
@@ -86,7 +86,7 @@ export default class SimulatorDate {
 			month = this.month,
 			day = this.day,
 		} = opts;
-		return SimulatorDate.fromYearDateMonth(year, month, day);
+		return SimulatorDate.fromYearMonthDay(year, month, day);
 	}
 
 	// # add(opts)

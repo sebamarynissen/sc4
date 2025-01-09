@@ -611,7 +611,6 @@ export default class CityManager {
 				start,
 				end,
 			};
-			console.log(timing);
 		}
 
 		// Create the prop & position correctly.

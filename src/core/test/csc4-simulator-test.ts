@@ -14,7 +14,7 @@ describe('#cSC4Simulator', function() {
 		expect(date.weekOfYear).to.equal(4);
 		expect(date.monthOfYear).to.equal(1);
 		expect(date.year).to.equal(2052);
-		expect(date.date).to.eql(SimulatorDate.fromYearDateMonth(2052, 1, 26));
+		expect(date.date).to.eql(SimulatorDate.fromYearMonthDay(2052, 1, 26));
 	});
 
 });
