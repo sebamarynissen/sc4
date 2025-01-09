@@ -5,8 +5,8 @@ import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Unknown from './unknown.js';
 import type Pointer from './pointer.js';
-import { getJulianFromUnix, getUnixFromJulian } from 'sc4/utils';
 import WriteBuffer from './write-buffer.js';
+import SimulatorDate from './simulator-date.js';
 
 export default class cSC4City {
 	static [kFileType] = FileType.cSC4City;
@@ -18,7 +18,7 @@ export default class cSC4City {
 	// that's found in the cSC4Simulator subfile. Looks like this is the last 
 	// date when something significantly changed in the city (something was 
 	// plopped, etc.)
-	date = new Date('2000-01-01T12:00:00Z');
+	date = SimulatorDate.epoch();
 	name = '';
 	originalName = '';
 	mayor = '';
@@ -56,7 +56,7 @@ export default class cSC4City {
 		unknown.dword();
 		unknown.dword();
 		unknown.repeat(4, u => u.dword());
-		this.date = new Date(getUnixFromJulian(rs.dword()));
+		this.date = rs.date();
 		unknown.word();
 		this.name = rs.string();
 		this.originalName = rs.string();
@@ -91,7 +91,7 @@ export default class cSC4City {
 		unknown.dword();
 		unknown.dword();
 		unknown.repeat(4, u => u.dword());
-		ws.dword(getJulianFromUnix(this.date));
+		ws.date(this.date);
 		unknown.word();
 		ws.string(this.name);
 		ws.string(this.originalName);

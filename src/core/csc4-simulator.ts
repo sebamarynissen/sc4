@@ -4,8 +4,8 @@ import FileType from './file-types.js';
 import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Unknown from './unknown.js';
-import { getJulianFromUnix, getUnixFromJulian } from 'sc4/utils';
 import WriteBuffer from './write-buffer.js';
+import SimulatorDate from './simulator-date.js';
 
 export default class cSC4Simulator {
 	static [kFileType] = FileType.cSC4Simulator;
@@ -17,7 +17,7 @@ export default class cSC4Simulator {
 	weekOfYear: dword = 1;
 	monthOfYear: dword = 0;
 	year: dword = 2000;
-	date = new Date('2000-01-01T12:00:00Z');
+	date = SimulatorDate.epoch();
 	unknown = new Unknown()
 		.byte(0x00)
 		.byte(0x01)
@@ -77,7 +77,7 @@ export default class cSC4Simulator {
 		unknown.byte();
 		unknown.dword();
 		unknown.byte();
-		this.date = new Date(getUnixFromJulian(rs.dword()));
+		this.date = rs.date();
 		rs.assert();
 	}
 	toBuffer() {
@@ -113,7 +113,7 @@ export default class cSC4Simulator {
 		unknown.byte();
 		unknown.dword();
 		unknown.byte();
-		ws.dword(getJulianFromUnix(this.date));
+		ws.date(this.date);
 		return ws.seal();
 	}
 }
