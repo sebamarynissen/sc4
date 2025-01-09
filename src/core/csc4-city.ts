@@ -13,6 +13,11 @@ export default class cSC4City {
 	crc: dword = 0x00000000;
 	mem: dword = 0x00000000;
 	version = '12.2';
+
+	// Note: the date below is apparently not the current date in the city, 
+	// that's found in the cSC4Simulator subfile. Looks like this is the last 
+	// date when something significantly changed in the city (something was 
+	// plopped, etc.)
 	date = new Date('2000-01-01T12:00:00Z');
 	name = '';
 	originalName = '';
