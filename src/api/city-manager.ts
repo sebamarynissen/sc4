@@ -1,5 +1,5 @@
 // # city-manager.ts
-import { path, fs, hex } from 'sc4/utils';
+import { path, fs, hex, getJulianFromUnix } from 'sc4/utils';
 import {
 	Savegame,
 	Lot,
@@ -78,7 +78,10 @@ export default class CityManager {
 	// Sets up the city manager.
 	constructor(opts: CityManagerOptions = {}) {
 		let { dbpf, index } = opts;
-		if (dbpf) this.dbpf = dbpf;
+		if (dbpf) {
+			this.dbpf = dbpf;
+			this.ctx = dbpf.createContext();
+		}
 		if (index) this.index = index;
 	}
 
@@ -551,12 +554,37 @@ export default class CityManager {
 
 		// Missing props? Just ignore them.
 		if (!exemplar) {
-			return;
+			return 0;
 		}
 
 		// Get the dimensions of the prop bounding box.
 		let file = exemplar.read();
-		let [, height] = this.getPropertyValue(file, Property.OccupantSize)!;
+		let size = this.getPropertyValue(file, 'OccupantSize');
+		if (!size) {
+			console.warn(`Prop ${exemplar.tgi} is missing OccupantSize!`);
+			return 0;
+		}
+		let [, height] = size;
+
+		// If the prop is a timed prop, then we have to set the condition to 
+		// 0xf. Ideally we'd check the current city date as well though, but 
+		// that's for later.
+		let condition = 0x00;
+		let date = this.getPropertyValue(file, 'SimulatorDateStart');
+		let timing = null;
+		let state = 0;
+		if (date) {
+			state = 1;
+			condition = 13;
+			let start = getJulianFromUnix(new Date('2000-10-24T12:00:00Z'));
+			let duration = 61;
+			timing = {
+				interval: 365,
+				duration,
+				start,
+				end: start+duration,
+			};
+		}
 
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
@@ -575,7 +603,9 @@ export default class CityManager {
 			OID,
 
 			appearance: 5,
-			state: 0,
+			state,
+			condition,
+			timing,
 
 		});
 		prop.tract.update(prop);
@@ -584,6 +614,12 @@ export default class CityManager {
 		let { dbpf } = this;
 		let { props } = dbpf;
 		props.push(prop);
+
+		// If it's a timed prop, we have to reference it in the prop developer 
+		// as well.
+		if (date) {
+			dbpf.propDeveloper.array5.push(new Pointer(prop));
+		}
 
 		// Put the prop in the index.
 		this.addToItemIndex(prop, FileType.Prop);
