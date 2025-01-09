@@ -2,6 +2,7 @@
 import { resource } from '#test/files.js';
 import { expect } from 'chai';
 import Savegame from '../savegame.js';
+import SimulatorDate from '../simulator-date.js';
 
 describe('#cSC4Simulator', function() {
 
@@ -13,7 +14,7 @@ describe('#cSC4Simulator', function() {
 		expect(date.weekOfYear).to.equal(4);
 		expect(date.monthOfYear).to.equal(1);
 		expect(date.year).to.equal(2052);
-		expect(date.date).to.eql(new Date('2052-01-26T12:00:00Z'));
+		expect(date.date).to.eql(SimulatorDate.fromYearDateMonth(2052, 1, 26));
 	});
 
 });
