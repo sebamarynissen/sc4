@@ -65,6 +65,7 @@ export default class Savegame extends DBPF {
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
 	get networkManager() { return this.readByType(FileType.NetworkManager); }
 	get terrainFlags() { return this.readByType(FileType.TerrainFlags); }
+	get cityInfo() { return this.readByType(FileType.cSC4City); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }
