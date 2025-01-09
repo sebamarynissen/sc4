@@ -572,6 +572,8 @@ export default class CityManager {
 		let startMonthDay = exemplar.get('SimulatorDateStart');
 		let timing = null;
 		let state = 0;
+		let powerNeeded = exemplar.get('RequiresPowerToAppear');
+		let powerFlag = powerNeeded ? 0x00 : 0x08;
 		if (startMonthDay) {
 
 			// Read in the current date of the city, and then we'll check if the 
@@ -585,7 +587,7 @@ export default class CityManager {
 			if (date <= end) {
 				if (date < start) {
 					state = 1;
-					condition = 0x0d;
+					condition = 0x05 | powerFlag;
 				} else {
 					start = start.add({ years: 1 });
 					state = 0;
@@ -600,7 +602,7 @@ export default class CityManager {
 					condition = 0x0f;
 				} else {
 					state = 1;
-					condition = 0x0d;
+					condition = 0x05 | powerFlag;
 				}
 			}
 			timing = {
