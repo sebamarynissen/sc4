@@ -75,6 +75,7 @@ export const SavegameFileType = {
 	// are simply a representation of the game's class structure.
 	cSC4City: 0x8990c372,
 	cSC4Simulator: 0x2990c1e5,
+	cSC424HourClock: 0xa7e7f929,
 
 } as const;
 
