@@ -67,6 +67,7 @@ export default class Savegame extends DBPF {
 	get terrainFlags() { return this.readByType(FileType.TerrainFlags); }
 	get cityInfo() { return this.readByType(FileType.cSC4City); }
 	get date() { return this.readByType(FileType.cSC4Simulator); }
+	get clock() { return this.readByType(FileType.cSC424HourClock); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }

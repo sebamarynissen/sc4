@@ -570,8 +570,11 @@ export default class CityManager {
 		// in the city to determine whether the prop should be active or not.
 		let condition = 0x00;
 		let startMonthDay = exemplar.get('SimulatorDateStart');
+		let timeOfDay = exemplar.get('PropTimeOfDay');
 		let timing = null;
 		let state = 0;
+		let start = 0;
+		let stop = 0;
 		let powerNeeded = exemplar.get('RequiresPowerToAppear');
 		let powerFlag = powerNeeded ? 0x00 : 0x08;
 		if (startMonthDay) {
@@ -611,6 +614,33 @@ export default class CityManager {
 				start,
 				end,
 			};
+		} else if (timeOfDay) {
+			timeOfDay = [14, 14.5];
+			let [startHour, stopHour] = timeOfDay;
+			start = startHour*10;
+			stop = stopHour*10;
+
+			// Figure out whether the prop should be active or not.
+			let { clock } = this.dbpf;
+			let dayHour = (clock.secondOfDay) / 360;
+			if (start < stop) {
+				if (start < dayHour && dayHour < stop) {
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x06 | powerFlag;
+				}
+			} else {
+				if (dayHour > start || dayHour < stop) {
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x06 | powerFlag;
+				}
+			}
+
 		}
 
 		// Create the prop & position correctly.
@@ -630,6 +660,10 @@ export default class CityManager {
 			OID,
 
 			appearance: 5,
+
+			// Conditional configuration.
+			start,
+			stop,
 			state,
 			condition,
 			timing,
@@ -646,6 +680,8 @@ export default class CityManager {
 		// as well.
 		if (startMonthDay) {
 			dbpf.propDeveloper.dateTimedProps.push(new Pointer(prop));
+		} else if (timeOfDay) {
+			dbpf.propDeveloper.hourTimedProps.push(new Pointer(prop));
 		}
 
 		// Put the prop in the index.

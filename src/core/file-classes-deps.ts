@@ -35,6 +35,7 @@ export { default as cSTETerrainView3D } from './cste-terrain-view-3d.js';
 export { default as cSC43DRender } from './csc4-3drender.js';
 export { default as cSC4City } from './csc4-city.js';
 export { default as cSC4Simulator } from './csc4-simulator.js';
+export { default as cSC424HourClock } from './csc4-24hour-clock.js';
 export {
 	SimGridFloat32,
 	SimGridUint32,
