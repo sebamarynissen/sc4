@@ -89,7 +89,10 @@ export function readRecordsAsBuffers(buffer: Uint8Array): Uint8Array[] {
 // This is useful when comparing unknown savegame files where you want to make 
 // abstraction of the memory address, which can be different.
 let knownTypes: Uint8Array[];
-export function removePointers(record: Uint8Array): Uint8Array {
+export function removePointers(
+	record: Uint8Array,
+	replace: Uint8Array = new Uint8Array(4),
+): Uint8Array {
 	if (!knownTypes) {
 		knownTypes = Object.keys(cppClasses)
 			.map(type => new Uint32Array([+type]))
@@ -99,7 +102,7 @@ export function removePointers(record: Uint8Array): Uint8Array {
 		let offsets = findPatternOffsets(record, ptr);
 		for (let index of offsets) {
 			for (let i = 0; i < 4; i++) {
-				record[index-4+i] = 0;
+				record[index-4+i] = replace[i];
 			}
 		}
 	}
