@@ -70,6 +70,7 @@ export default class Unknown extends Array<UnknownType> {
 			float: () => fn() as float,
 			double: () => fn() as double,
 			bytes: () => fn() as Uint8Array,
+			array: () => fn() as Array<Unknown>,
 			assert: () => {
 				result = it.next();
 				if (!result.done) {
@@ -152,6 +153,16 @@ class UnknownWriter {
 	double() { this.ws.double(this.generator.double()) };
 	bytes() { this.ws.write(this.generator.bytes()) };
 	assert() { this.generator.assert(); }
+
+	// ## array()
+	array(fn: (this: this, u: this, i?: number) => any) {
+		let array = this.generator.array();
+		this.ws.dword(array.length);
+		for (let i = 0; i < array.length; i++) {
+			let unknown = array[i].writer(this.ws);
+			fn.call(unknown, unknown, i);
+		}
+	}
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.

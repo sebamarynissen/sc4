@@ -3,8 +3,9 @@ import semver from 'semver';
 import Stream from './stream.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
-import type { byte, dword, float, word } from 'sc4/types';
+import type { byte, dword, float, sint32, sint64, uint16, uint32, uint8, word } from 'sc4/types';
 import Unknown from './unknown.js';
+import WriteBuffer from './write-buffer.js';
 
 type OccupantGroupInfo = {
 	occupantGroup: dword;
@@ -127,7 +128,77 @@ export default class RegionView {
 		});
 		rs.assert();
 	}
-
+	toBuffer() {
+		let ws = new WriteBuffer();
+		let unknown = this.u.writer(ws);
+		ws.version(this.version);
+		ws.dword(this.x);
+		ws.dword(this.z);
+		ws.dword(this.xSize);
+		ws.dword(this.zSize);
+		ws.dword(this.population.residential);
+		ws.dword(this.population.commercial);
+		ws.dword(this.population.industrial);
+		if (semver.gt(`${this.version}.0`, '1.9.0')) {
+			unknown.float();
+		}
+		if (semver.gt(`${this.version}.0`, '1.10.0')) {
+			ws.byte(this.rating);
+		}
+		ws.byte(this.starCount);
+		ws.bool(this.tutorial);
+		ws.dword(this.guid);
+		unknown.repeat(5, u => u.dword());
+		ws.byte(this.mode === 'mayor' ? 1 : 0);
+		ws.string(this.name);
+		ws.string(this.formerName);
+		ws.string(this.mayorName);
+		ws.string(this.description);
+		ws.string(this.defaultMayor);
+		unknown.repeat(5, u => u.dword());
+		unknown.dword();
+		ws.array(this.currentInfo, info => {
+			ws.dword(info.occupantGroup);
+			ws.dword(info.population);
+		});
+		ws.array(this.maxInfo, info => {
+			ws.dword(info.occupantGroup);
+			ws.dword(info.population);
+		});
+		ws.array(this.limits, info => {
+			ws.dword(info.occupantGroup);
+			ws.dword(info.population);
+		});
+		ws.array(this.unknownFloats, ws.float);
+		ws.array(this.neighbourConnections);
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.dword();
+			unknown.bytes();
+		});
+		unknown.dword();
+		unknown.float();
+		unknown.dword();
+		unknown.float();
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.repeat(5, unknown => {
+				unknown.dword();
+				unknown.float();
+			});
+		});
+		unknown.array(unknown => unknown.bytes());
+		unknown.array(unknown => unknown.bytes());
+		unknown.array(unknown => {
+			unknown.dword();
+			unknown.array(unknown => {
+				unknown.float();
+				unknown.float();
+				unknown.float();
+			});
+		});
+		return ws.toUint8Array();
+	}
 }
 
 class NeighbourConnection {
@@ -135,6 +206,7 @@ class NeighbourConnection {
 	type: dword = 0x00000000;
 	connection: [dword, dword] = [0x00000000, 0x00000000];
 	destination: [dword, dword] = [0x00000000, 0x00000000];
+	byte = 0x00;
 	properties: Property[] = [];
 	propertyVersion: word = 2;
 	parse(rs: Stream) {
@@ -142,10 +214,19 @@ class NeighbourConnection {
 		this.type = rs.dword();
 		this.connection = [rs.dword(), rs.dword()];
 		this.destination = [rs.dword(), rs.dword()];
-		rs.byte();
+		this.byte = rs.byte();
 		this.propertyVersion = rs.word();
 		this.properties = rs.array(() => new Property().parse(rs));
 		return this;
+	}
+	write(ws: WriteBuffer) {
+		ws.version(this.version);
+		ws.dword(this.type);
+		ws.tuple(this.connection, ws.dword);
+		ws.tuple(this.destination, ws.dword);
+		ws.byte(this.byte);
+		ws.word(this.propertyVersion);
+		ws.array(this.properties);
 	}
 }
 
@@ -178,6 +259,22 @@ class Property {
 		}
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		let unknown = this.u.writer(ws);
+		ws.dword(this.id);
+		ws.dword(this.id2);
+		unknown.dword();
+		ws.byte(this.type);
+		ws.word(this.keyType);
+		unknown.byte();
+		const writer = getWriter(this.type);
+		let value = this.value as any;
+		if (this.keyType === 0x80) {
+			ws.array(value, x => writer(ws, x));
+		} else {
+			writer(ws, value);
+		}
+	}
 }
 
 function getReader(type: byte) {
@@ -189,6 +286,20 @@ function getReader(type: byte) {
 		case 0x08: return (rs: Stream) => rs.bigint64();
 		case 0x09: return (rs: Stream) => rs.float();
 		case 0x0b: return (rs: Stream) => rs.bool();
+		default:
+			throw new Error(`Unknown data type ${type}!`);
+	}
+}
+
+function getWriter(type: byte): any {
+	switch (type) {
+		case 0x01: return (ws: WriteBuffer, x: uint8) => ws.uint8(x);
+		case 0x02: return (ws: WriteBuffer, x: uint16) => ws.uint16(x);
+		case 0x03: return (ws: WriteBuffer, x: uint32) => ws.uint32(x);
+		case 0x07: return (ws: WriteBuffer, x: sint32) => ws.int32(x);
+		case 0x08: return (ws: WriteBuffer, x: sint64) => ws.bigint64(x);
+		case 0x09: return (ws: WriteBuffer, x: float) => ws.float(x);
+		case 0x0b: return (ws: WriteBuffer, x: boolean) => ws.bool(x);
 		default:
 			throw new Error(`Unknown data type ${type}!`);
 	}
