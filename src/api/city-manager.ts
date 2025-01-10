@@ -828,6 +828,7 @@ export default class CityManager {
 		// Clear both the lot and zone developer files as well.
 		city.lotDeveloper.clear();
 		city.zoneDeveloper.clear();
+		city.propDeveloper.clear();
 
 		// Clear some simgrids.
 		city.getSimGrid(SimGrid.ZoneData)?.clear();
@@ -868,7 +869,6 @@ function orient(
 		case 0x03:
 			[x, y] = [y, width-x];
 			break;
-
 	}
 
 	// If we didn't request bare coordinates explicitly, transform to city 

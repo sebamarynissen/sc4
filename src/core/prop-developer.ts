@@ -127,4 +127,15 @@ export default class PropDeveloper {
 		unknown.byte();
 		return ws.seal();
 	}
+
+	// ## clear()
+	clear() {
+		this.nightTimedProps = [];
+		this.array2 = [];
+		this.hourTimedProps = [];
+		this.dateTimedProps = [];
+		this.array5 = [];
+		return this;
+	}
+
 }
