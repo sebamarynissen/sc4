@@ -13,22 +13,22 @@ export default class ParkManager {
 	mem: dword = 0x00000000;
 	version = '2';
 	buildings: Pointer<Building>[] = [];
-	unknown: dword = 0x00000000;
+	buildings2: Pointer<Building>[] = [];
 	parse(rs: Stream) {
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
 		this.version = rs.version(1);
 		this.buildings = rs.array(() => rs.pointer()!);
-		this.unknown = rs.dword();
+		this.buildings2 = rs.array(() => rs.pointer()!);
 		rs.assert();
 	}
 	toBuffer() {
 		let ws = new WriteBuffer();
 		ws.dword(this.mem);
 		ws.version(this.version);
-		ws.array(this.buildings, ptr => ws.pointer(ptr));
-		ws.dword(this.unknown);
+		ws.array(this.buildings, ws.pointer);
+		ws.array(this.buildings2, ws.pointer);
 		return ws.seal();
 	}
 }

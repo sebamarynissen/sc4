@@ -17,6 +17,7 @@ import { readRecordsAsBuffers } from '../helpers.js';
 const files = [
 	'City - RCI.sc4',
 	'City - large developed.sc4',
+	'City - Wayside.sc4',
 	'God mode.sc4',
 ];
 

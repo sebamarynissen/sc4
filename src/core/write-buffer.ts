@@ -101,7 +101,7 @@ export default class WriteBuffer extends SmartBuffer {
 	array<T>(arr: T[], fn: (item: any) => any = (item => this.write(item))): void {
 		this.uint32(arr.length);
 		for (let item of arr) {
-			fn(item);
+			fn.call(this, item);
 		}
 	}
 

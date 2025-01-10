@@ -37,7 +37,6 @@ export default class PropDeveloper {
 	array3: Pointer[];
 	array4: Pointer[];
 	array5: Pointer[];
-	array6: Pointer[];
 	u = new Unknown()
 		.bytes([2, 1])
 		.dword()
@@ -102,8 +101,7 @@ export default class PropDeveloper {
 		unknown.dword();
 		unknown.dword();
 		unknown.dword();
-		unknown.dword();
-		unknown.dword();
+		ws.tuple(this.tractSize, ws.dword);
 		unknown.byte();
 		unknown.dword();
 		ws.pointer(this.wealthRequester);
@@ -125,7 +123,6 @@ export default class PropDeveloper {
 		ws.array(this.array3, ws.pointer);
 		ws.array(this.array4, ws.pointer);
 		ws.array(this.array5, ws.pointer);
-		ws.array(this.array6, ws.pointer);
 		unknown.dword();
 		unknown.byte();
 		return ws.seal();
