@@ -571,6 +571,7 @@ export default class CityManager {
 		let condition = 0x00;
 		let startMonthDay = exemplar.get('SimulatorDateStart');
 		let timeOfDay = exemplar.get('PropTimeOfDay');
+		let nightTimeStateChange = exemplar.get('NighttimeStateChange');
 		let timing = null;
 		let state = 0;
 		let start = 0;
@@ -640,6 +641,14 @@ export default class CityManager {
 				}
 			}
 
+		} else if (nightTimeStateChange) {
+
+			// Night time is apparently between 9pm and 4am. Could be random as 
+			// well, we don't really know. It isn't really relevant either.
+			let { clock } = this.dbpf;
+			let dayHour = (clock.secondOfDay) / 3600;
+			if (dayHour > 21 || dayHour < 3.75) state = 1;
+
 		}
 
 		// Create the prop & position correctly.
@@ -681,6 +690,8 @@ export default class CityManager {
 			dbpf.propDeveloper.dateTimedProps.push(new Pointer(prop));
 		} else if (timeOfDay) {
 			dbpf.propDeveloper.hourTimedProps.push(new Pointer(prop));
+		} else if (nightTimeStateChange) {
+			dbpf.propDeveloper.nightTimedProps.push(new Pointer(prop));
 		}
 
 		// Put the prop in the index.
