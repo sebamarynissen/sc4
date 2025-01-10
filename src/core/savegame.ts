@@ -44,6 +44,8 @@ export default class Savegame extends DBPF {
 	get lots() { return this.readByType(FileType.Lot); }
 	get buildings() { return this.readByType(FileType.Building); }
 	get props() { return this.readByType(FileType.Prop); }
+	get propDeveloper() { return this.readByType(FileType.PropDeveloper); }
+	get propManager() { return this.readByType(FileType.PropManager); }
 	get textures() { return this.readByType(FileType.BaseTexture); }
 	get flora() { return this.readByType(FileType.Flora); }
 	get itemIndex() { return this.readByType(FileType.ItemIndex); }
@@ -63,6 +65,9 @@ export default class Savegame extends DBPF {
 	get networkIndex() { return this.readByType(FileType.NetworkIndex); }
 	get networkManager() { return this.readByType(FileType.NetworkManager); }
 	get terrainFlags() { return this.readByType(FileType.TerrainFlags); }
+	get cityInfo() { return this.readByType(FileType.cSC4City); }
+	get date() { return this.readByType(FileType.cSC4Simulator); }
+	get clock() { return this.readByType(FileType.cSC424HourClock); }
 
 	// ## get regionView()
 	get regionView() { return this.readByType(FileType.RegionView); }

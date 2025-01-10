@@ -94,6 +94,13 @@ export function factory(program) {
 		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
 		.action(commands.plopAll);
 
+	city
+		.command('count <city>')
+		.description('Counts the amount of records in each subfile and lists it as a table. Useful when decoding subfiles')
+		.option('--min <nr>', 'The minimum amount of records needed to show it in the table', parsers.number)
+		.option('--sort', 'Sort the result from high to low amount')
+		.action(commands.cityCount);
+
 	// Command for looking for refs.
 	city
 		.command('refs <city>')

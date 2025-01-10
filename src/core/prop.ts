@@ -8,12 +8,13 @@ import type Stream from './stream.js';
 import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
+import type SimulatorDate from './simulator-date.js';
 
 type Timing = {
 	interval: number;
 	duration: number;
-	start: number;
-	end: number;
+	start: SimulatorDate;
+	end: SimulatorDate;
 };
 
 // # Prop
@@ -87,8 +88,8 @@ export default class Prop {
 			this.timing = {
 				interval: rs.dword(),
 				duration: rs.dword(),
-				start: rs.dword(),
-				end: rs.dword(),
+				start: rs.date(),
+				end: rs.date(),
 			};
 		}
 
@@ -129,8 +130,8 @@ export default class Prop {
 			let timing = this.timing;
 			ws.dword(timing.interval);
 			ws.dword(timing.duration);
-			ws.dword(timing.start);
-			ws.dword(timing.end);
+			ws.date(timing.start);
+			ws.date(timing.end);
 		}
 		ws.byte(this.chance);
 		ws.byte(this.lotType);

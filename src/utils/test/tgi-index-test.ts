@@ -182,8 +182,6 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 	});
 
-	describe.skip('#remove()', function() {});
-
 };
 
 describe('The TGI index', function() {

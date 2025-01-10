@@ -4,6 +4,7 @@ import { FileType } from './enums.js';
 import type Pointer from './pointer.js';
 import type Stream from './stream.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
+import WriteBuffer from './write-buffer.js';
 
 type Building = {
 	pointer: Pointer;
@@ -13,10 +14,8 @@ type Building = {
 // # DepartmentBudget
 // A JavaScript representation of a cSC4DepartmentBudget class.
 export default class DepartmentBudget {
-
 	static [kFileType] = FileType.DepartmentBudget;
 	static [kFileTypeArray] = true;
-
 	crc = 0x00000000;
 	mem = 0x00000000;
 	major = 0x000a;
@@ -32,7 +31,6 @@ export default class DepartmentBudget {
 	// ## parse(rs)
 	// Parses the department budget from a buffer wrapped in a readable stream.
 	parse(rs: Stream) {
-
 		rs.size();
 		this.crc = rs.dword();
 		this.mem = rs.dword();
@@ -43,25 +41,36 @@ export default class DepartmentBudget {
 		this.u3 = rs.read(21);
 
 		// Read in the pointers to our child line items.
-		let items = this.lineItems = new Array(rs.dword());
-		for (let i = 0; i < items.length; i++) {
-			items[i] = rs.pointer();
-		}
-
-		let buildings = this.buildings = new Array(rs.dword());
-		for (let i = 0; i < buildings.length; i++) {
-			let pointer = rs.pointer();
-			let purpose = rs.dword();
-			buildings[i] = {
-				pointer,
-				purpose,
+		this.lineItems = rs.array(() => rs.pointer()!);
+		this.buildings = rs.array(() => {
+			return {
+				pointer: rs.pointer()!,
+				purpose: rs.dword(),
 			};
-		}
+		});
 
 		// 8 bytes remaining, might be a pointer.
 		this.u4 = rs.dword();
 		this.u5 = rs.dword();
+		rs.assert();
 
+	}
+	toBuffer() {
+		let ws = new WriteBuffer();
+		ws.dword(this.mem);
+		ws.word(this.major);
+		ws.byte(this.u1);
+		ws.float(this.u2);
+		ws.string(this.name);
+		ws.write(this.u3);
+		ws.array(this.lineItems, ptr => ws.pointer(ptr));
+		ws.array(this.buildings, record => {
+			ws.pointer(record.pointer);
+			ws.dword(record.purpose);
+		});
+		ws.dword(this.u4);
+		ws.dword(this.u5);
+		return ws.seal();
 	}
 
 }

@@ -9,9 +9,9 @@ import type { ConstructorOptions, dword } from 'sc4/types';
 import type { SimGridSint8 } from './sim-grid-file.js';
 import type ItemIndex from './item-index.js';
 import type cSTETerrain from './cste-terrain.js';
+import type cSC4City from './csc4-city.js';
 
 // Some type ids. We should put them within the FileType's though!
-const cSC4City = 0x8990c372;
 const cSC4PollutionSimulator = 0x8990c065;
 const cSC4BudgetSimulator = 0xe990be01;
 
@@ -35,7 +35,7 @@ export default class ZoneManager {
 	u2 = hexToUint8Array(fixed);
 
 	// Pointers to other subfiles.
-	city = new Pointer(cSC4City);
+	city = new Pointer<cSC4City>(FileType.cSC4City);
 	occupantManager = new Pointer<ItemIndex>(FileType.ItemIndex);
 	terrain = new Pointer<cSTETerrain>(FileType.cSTETerrain);
 	pollutionSimulator = new Pointer(cSC4PollutionSimulator);

@@ -78,7 +78,10 @@ export default class CityManager {
 	// Sets up the city manager.
 	constructor(opts: CityManagerOptions = {}) {
 		let { dbpf, index } = opts;
-		if (dbpf) this.dbpf = dbpf;
+		if (dbpf) {
+			this.dbpf = dbpf;
+			this.ctx = dbpf.createContext();
+		}
 		if (index) this.index = index;
 	}
 
@@ -547,16 +550,106 @@ export default class CityManager {
 		// we'll check the families first.
 		let { OID, IIDs, orientation, y } = lotObject;
 		let IID = rand(IIDs);
-		let exemplar = this.findExemplarOfType(IID, 0x1e);
+		let exemplarEntry = this.findExemplarOfType(IID, 0x1e);
 
 		// Missing props? Just ignore them.
-		if (!exemplar) {
-			return;
+		if (!exemplarEntry) {
+			return 0;
 		}
 
 		// Get the dimensions of the prop bounding box.
-		let file = exemplar.read();
-		let [, height] = this.getPropertyValue(file, Property.OccupantSize)!;
+		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
+		let size = exemplar.get('OccupantSize');
+		if (!size) {
+			console.warn(`Prop ${exemplarEntry.tgi} is missing OccupantSize!`);
+			return 0;
+		}
+		let [, height] = size;
+
+		// If the prop is used with a start date, we'll check the current date 
+		// in the city to determine whether the prop should be active or not.
+		let condition = 0x00;
+		let startMonthDay = exemplar.get('SimulatorDateStart');
+		let timeOfDay = exemplar.get('PropTimeOfDay');
+		let nightTimeStateChange = exemplar.get('NighttimeStateChange');
+		let timing = null;
+		let state = 0;
+		let start = 0;
+		let stop = 0;
+		let powerNeeded = exemplar.get('RequiresPowerToAppear');
+		let powerFlag = powerNeeded ? 0x00 : 0x08;
+		if (startMonthDay) {
+
+			// Read in the current date of the city, and then we'll check if the 
+			// prop should be active during this interval.
+			let duration = exemplar.get('SimulatorDateDuration') ?? 0;
+			let interval = exemplar.get('SimulatorDateInterval') ?? 0;
+			let [startMonth, startDay] = startMonthDay;
+			let { date } = this.dbpf.date;
+			let start = date.with({ month: startMonth, day: startDay });
+			let end = start.add({ days: duration });
+			if (date <= end) {
+				if (date < start) {
+					state = 1;
+					condition = 0x05 | powerFlag;
+				} else {
+					start = start.add({ years: 1 });
+					state = 0;
+					condition = 0x0f;
+				}
+			} else {
+				start = start.add({ years: 1 });
+				end = end.add({ years: 1 });
+				if (date >= start) {
+					start = start.add({ years: 1 });
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x05 | powerFlag;
+				}
+			}
+			timing = {
+				interval,
+				duration,
+				start,
+				end,
+			};
+		} else if (timeOfDay) {
+			let [startHour, stopHour] = timeOfDay;
+			start = startHour*10;
+			stop = stopHour*10;
+
+			// Figure out whether the prop should be active or not.
+			let { clock } = this.dbpf;
+			let dayHour = (clock.secondOfDay) / 360;
+			if (start < stop) {
+				if (start < dayHour && dayHour < stop) {
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x06 | powerFlag;
+				}
+			} else {
+				if (dayHour > start || dayHour < stop) {
+					state = 0;
+					condition = 0x0f;
+				} else {
+					state = 1;
+					condition = 0x06 | powerFlag;
+				}
+			}
+
+		} else if (nightTimeStateChange) {
+
+			// Night time is apparently between 9pm and 4am. Could be random as 
+			// well, we don't really know. It isn't really relevant either.
+			let { clock } = this.dbpf;
+			let dayHour = (clock.secondOfDay) / 3600;
+			if (dayHour > 21 || dayHour < 3.75) state = 1;
+
+		}
 
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
@@ -568,14 +661,20 @@ export default class CityManager {
 			orientation: (orientation + lot.orientation) % 4,
 
 			// Store the TGI of the prop.
-			TID: exemplar.type,
-			GID: exemplar.group,
-			IID: exemplar.instance,
-			IID1: exemplar.instance,
+			TID: exemplarEntry.type,
+			GID: exemplarEntry.group,
+			IID: exemplarEntry.instance,
+			IID1: exemplarEntry.instance,
 			OID,
 
 			appearance: 5,
-			state: 0,
+
+			// Conditional configuration.
+			start,
+			stop,
+			state,
+			condition,
+			timing,
 
 		});
 		prop.tract.update(prop);
@@ -584,6 +683,16 @@ export default class CityManager {
 		let { dbpf } = this;
 		let { props } = dbpf;
 		props.push(prop);
+
+		// If it's a timed prop, we have to reference it in the prop developer 
+		// as well.
+		if (startMonthDay) {
+			dbpf.propDeveloper.dateTimedProps.push(new Pointer(prop));
+		} else if (timeOfDay) {
+			dbpf.propDeveloper.hourTimedProps.push(new Pointer(prop));
+		} else if (nightTimeStateChange) {
+			dbpf.propDeveloper.nightTimedProps.push(new Pointer(prop));
+		}
 
 		// Put the prop in the index.
 		this.addToItemIndex(prop, FileType.Prop);

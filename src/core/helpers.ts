@@ -6,7 +6,6 @@ import crc32 from './crc.js';
 import { kFileType, kFileTypeArray } from './symbols.js';
 import { FileType } from './enums.js';
 import { findPatternOffsets } from 'sc4/utils';
-import type Entry from './dbpf-entry.js';
 
 // # getClassType(object)
 // Inspects the object and returns its Type ID. If a class constructor is 
@@ -48,8 +47,7 @@ export function getTypeLabel(value: uint32): string | undefined {
 // array of raw buffers. Note that we return a shallow copy, so the underlying 
 // memory is the same! It can be used to modify values of subfiles of which the 
 // structure is not known yet.
-export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
-	let buffer = entry.decompress();
+export function readRecordsAsBuffers(buffer: Uint8Array): Uint8Array[] {
 
 	// If the buffer can't even hold SIZE CRC MEM, then we skip it.
 	if (buffer.byteLength < 12) return [];
@@ -91,7 +89,10 @@ export function readRecordsAsBuffers(entry: Entry): Uint8Array[] {
 // This is useful when comparing unknown savegame files where you want to make 
 // abstraction of the memory address, which can be different.
 let knownTypes: Uint8Array[];
-export function removePointers(record: Uint8Array): Uint8Array {
+export function removePointers(
+	record: Uint8Array,
+	replace: Uint8Array = new Uint8Array(4),
+): Uint8Array {
 	if (!knownTypes) {
 		knownTypes = Object.keys(cppClasses)
 			.map(type => new Uint32Array([+type]))
@@ -101,7 +102,7 @@ export function removePointers(record: Uint8Array): Uint8Array {
 		let offsets = findPatternOffsets(record, ptr);
 		for (let index of offsets) {
 			for (let i = 0; i < 4; i++) {
-				record[index-4+i] = 0;
+				record[index-4+i] = replace[i];
 			}
 		}
 	}

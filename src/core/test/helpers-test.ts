@@ -18,7 +18,7 @@ describe('The core helpers', function() {
 			let dbpf = new Savegame(resource('City - Large developed.sc4'));
 			let entry = dbpf.find({ type: FileType.Lot })!;
 			let raw = entry.decompress();
-			let buffers = readRecordsAsBuffers(entry);
+			let buffers = readRecordsAsBuffers(raw);
 			let lots = entry.read();
 			for (let i = 0; i < buffers.length; i++) {
 				let buffer = buffers[i];

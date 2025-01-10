@@ -33,6 +33,7 @@ export const SavegameFileType = {
 	Lot: 0xC9BD5D4A,
 	Building: 0xa9bd882d,
 	Prop: 0x2977AA47,
+	PropManager: 0xa990bd10,
 	Flora: 0xa9c05c85,
 	BaseTexture: 0xc97f987c,
 	Occupant: 0xa9bc9ab6,
@@ -56,6 +57,7 @@ export const SavegameFileType = {
 	PlumbingSimulator: 0x0990c075,
 	ZoneManager: 0x298f9b2d,
 	Thumbnail: 0x8a2482b9,
+	ParkManager: 0xaa3fe6bc,
 
 	// Terrain map is a bit special because it is also identified by group and 
 	// instance inside a Savegame, but obviously the type id is still needed 
@@ -68,6 +70,12 @@ export const SavegameFileType = {
 
 	// Render stuff
 	cSC43DRender: 0xe9c622d8,
+
+	// Other classes. Looks like they don't really hold much actual data, but 
+	// are simply a representation of the game's class structure.
+	cSC4City: 0x8990c372,
+	cSC4Simulator: 0x2990c1e5,
+	cSC424HourClock: 0xa7e7f929,
 
 } as const;
 

@@ -23,12 +23,12 @@ describe('A savegame context', function() {
 
 		});
 
-		it('dereferences pointers to uncdecoded subfiles', function() {
+		it('dereferences pointers to undecoded subfiles', function() {
 
 			let dbpf = new Savegame(resource('City - RCI.sc4'));
 			let entry = dbpf.find({ type: 0x8990c09a })!;
 			let ctx = dbpf.createContext();
-			let [buffer] = readRecordsAsBuffers(entry);
+			let [buffer] = readRecordsAsBuffers(entry.decompress());
 			let pointer = new Pointer<Uint8Array>(0x8990c09a, SmartBuffer.fromBuffer(buffer).readUInt32LE(8));
 			let deref = ctx.deref(pointer);
 			expect(compareUint8Arrays(deref, buffer)).to.equal(0);

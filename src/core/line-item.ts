@@ -50,6 +50,7 @@ export default class LineItem {
 		ws.qword(this.cost);
 		ws.qword(this.expense);
 		ws.qword(this.revenue);
+		ws.write(this.unknown2);
 		return ws.seal();
 	}
 

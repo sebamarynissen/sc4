@@ -15,7 +15,6 @@ import type {
 	sint32,
 	sint64,
 	sint8,
-    TGIArray,
     uint16,
     uint32,
     uint64,
@@ -29,6 +28,7 @@ import Vector3 from './vector-3.js';
 import Matrix3 from './matrix-3.js';
 import NetworkCrossing from './network-crossing.js';
 import TGI from './tgi.js';
+import SimulatorDate from './simulator-date.js';
 
 type StreamOptions = Uint8Array | ArrayBuffer | Stream | SmartBufferOptions;
 
@@ -144,6 +144,13 @@ export default class Stream extends SmartBuffer {
 		let type = this.dword();
 		let instance = this.dword();
 		return new TGI(type, group, instance);
+	}
+
+	// ## date()
+	// Reads in a date - as Julian date - and returns it as a simulator date 
+	// instance.
+	date() {
+		return SimulatorDate.fromJulian(this.dword());
 	}
 
 	// Helper function for reading a pointer. Those are given as [pointer, 

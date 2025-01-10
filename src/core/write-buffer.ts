@@ -24,6 +24,7 @@ import type { Box3, ParseOptions } from './box-3.js';
 import type TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
 import TGI from './tgi.js';
+import type SimulatorDate from './simulator-date.js';
 
 type HasWrite = { write: (arr: WriteBuffer) => any };
 type HasToBuffer = { toBuffer: () => Uint8Array };
@@ -100,7 +101,18 @@ export default class WriteBuffer extends SmartBuffer {
 	array<T>(arr: T[], fn: (item: any) => any = (item => this.write(item))): void {
 		this.uint32(arr.length);
 		for (let item of arr) {
-			fn(item);
+			fn.call(this, item);
+		}
+	}
+
+	// ## tuple(arr)
+	// Helper function for writing away a tuple, which is an array of *fixed* 
+	// length. The difference with "array" is that we don't prefix it with the 
+	// length.
+	tuple<T>(arr: T[], fn?: (item: T) => any): void;
+	tuple<T>(arr: T[], fn: (item: any) => any = (item => this.write(item))): void {
+		for (let item of arr) {
+			fn.call(this, item);
 		}
 	}
 
@@ -121,6 +133,12 @@ export default class WriteBuffer extends SmartBuffer {
 		this.dword(group);
 		this.dword(type);
 		this.dword(instance);
+	}
+
+	// ## date(date)
+	// Writes away a date again as julian date.
+	date(date: SimulatorDate) {
+		this.dword(date.toJulian());
 	}
 
 	// ## version(version)

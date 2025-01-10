@@ -14,6 +14,7 @@ export { getTypeLabel } from './helpers.js';
 export * from './file-classes.js';
 
 // Export more core data structures that third parties might use.
+export { default as SimulatorDate } from './simulator-date.js';
 export { default as Color } from './color.js';
 export { default as Vertex } from './vertex.js';
 export { default as Pointer } from './pointer.js';
