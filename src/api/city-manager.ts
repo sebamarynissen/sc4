@@ -1,5 +1,5 @@
 // # city-manager.ts
-import { path, fs, hex, getJulianFromUnix } from 'sc4/utils';
+import { path, fs, hex } from 'sc4/utils';
 import {
 	Savegame,
 	Lot,
