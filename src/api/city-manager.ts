@@ -645,7 +645,7 @@ export default class CityManager {
 		// If it's a timed prop, we have to reference it in the prop developer 
 		// as well.
 		if (startMonthDay) {
-			dbpf.propDeveloper.array5.push(new Pointer(prop));
+			dbpf.propDeveloper.dateTimedProps.push(new Pointer(prop));
 		}
 
 		// Put the prop in the index.

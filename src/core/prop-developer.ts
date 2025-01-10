@@ -32,10 +32,10 @@ export default class PropDeveloper {
 	count2: number = 0;
 	count3: number = 0;
 	count4: number = 0;
-	array1: Pointer[];
+	nightTimedProps: Pointer[];
 	array2: AdviceRecord[];
-	array3: Pointer[];
-	array4: Pointer[];
+	hourTimedProps: Pointer[];
+	dateTimedProps: Pointer[];
 	array5: Pointer[];
 	u = new Unknown()
 		.bytes([2, 1])
@@ -76,14 +76,14 @@ export default class PropDeveloper {
 		this.count3 = rs.dword();
 		this.count4 = rs.dword();
 		unknown.byte();
-		this.array1 = rs.array(() => rs.pointer()!);
+		this.nightTimedProps = rs.array(() => rs.pointer()!);
 		this.array2 = rs.array(() => {
 			let advice = rs.dword();
 			let pointers = rs.array(() => rs.pointer()!);
 			return { advice, pointers };
 		});
-		this.array3 = rs.array(() => rs.pointer()!);
-		this.array4 = rs.array(() => rs.pointer()!);
+		this.hourTimedProps = rs.array(() => rs.pointer()!);
+		this.dateTimedProps = rs.array(() => rs.pointer()!);
 		this.array5 = rs.array(() => rs.pointer()!);
 		unknown.dword();
 		unknown.byte();
@@ -115,13 +115,13 @@ export default class PropDeveloper {
 		ws.dword(this.count3);
 		ws.dword(this.count4);
 		unknown.byte();
-		ws.array(this.array1, ws.pointer);
+		ws.array(this.nightTimedProps, ws.pointer);
 		ws.array(this.array2, record => {
 			ws.dword(record.advice);
 			ws.array(record.pointers, ws.pointer);
 		});
-		ws.array(this.array3, ws.pointer);
-		ws.array(this.array4, ws.pointer);
+		ws.array(this.hourTimedProps, ws.pointer);
+		ws.array(this.dateTimedProps, ws.pointer);
 		ws.array(this.array5, ws.pointer);
 		unknown.dword();
 		unknown.byte();
