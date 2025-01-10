@@ -615,7 +615,6 @@ export default class CityManager {
 				end,
 			};
 		} else if (timeOfDay) {
-			timeOfDay = [14, 14.5];
 			let [startHour, stopHour] = timeOfDay;
 			start = startHour*10;
 			stop = stopHour*10;
