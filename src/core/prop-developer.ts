@@ -5,34 +5,11 @@ import Unknown from './unknown.js';
 import Stream from './stream.js';
 import type Pointer from './pointer.js';
 import WriteBuffer from './write-buffer.js';
-import { SmartBuffer } from 'smart-arraybuffer';
-import { cClass } from './enums.js';
 
-function readBackwards(buffer: Uint8Array) {
-
-	// As long as we encounter pointers, keep on going.
-	let count = 0;
-	let offset = buffer.byteLength-4;
-	let reader = SmartBuffer.fromBuffer(buffer);
-	let pointer = reader.readUInt32LE(offset);
-	while (pointer !== 0 && String(pointer) in cClass) {
-		offset -= 8;
-		count++;
-		pointer = reader.readUInt32LE(offset);
-	}
-	if (reader.readUInt32LE(offset) !== count) {
-		throw new Error('This is not a pointer array');
-	}
-	let slice = buffer.subarray(0, offset);
-	let rs = new Stream(buffer.subarray(offset));
-	let pointers = rs.array(() => rs.pointer()!);
-	return { slice, pointers };
-
-}
-
-function format(buffer: Uint8Array) {
-	return [...buffer].map(x => x.toString(16).padStart(2, '0')).join(' ');
-}
+type AdviceRecord = {
+	advice: dword;
+	pointers: Pointer[];
+};
 
 // # prop-developer.ts
 export default class PropDeveloper {
@@ -40,6 +17,11 @@ export default class PropDeveloper {
 	crc: dword = 0x00000000;
 	mem: dword = 0x00000000;
 	major: word = 0x0005;
+
+	// For some reason, this contains the city size in tracts (4x4 tiles), but 
+	// minus. This means that it is 0x07 for small tiles, 0x0f for medium tiles 
+	// and 0x1f for large tiles.
+	tractSize: [dword, dword] = [0x00000007, 0x00000007];
 	wealthRequester: Pointer;
 	crimeSimulator: Pointer;
 	pollutionSimulator: Pointer;
@@ -47,9 +29,11 @@ export default class PropDeveloper {
 	propManager: Pointer;
 	networkLotManager: Pointer;
 	count1: number = 0;
-	adviceArray: dword[];
+	count2: number = 0;
+	count3: number = 0;
+	count4: number = 0;
 	array1: Pointer[];
-	array2: Pointer[];
+	array2: AdviceRecord[];
 	array3: Pointer[];
 	array4: Pointer[];
 	array5: Pointer[];
@@ -61,10 +45,11 @@ export default class PropDeveloper {
 		.dword(1)
 		.dword(0)
 		.dword(0)
-		.dword()
-		.dword()
 		.byte(1)
-		.dword(3);
+		.dword(3)
+		.byte(0)
+		.dword(1)
+		.byte(0);
 	parse(rs: Stream) {
 		this.u = new Unknown();
 		let unknown = this.u.reader(rs);
@@ -78,8 +63,7 @@ export default class PropDeveloper {
 		unknown.dword();
 		unknown.dword();
 		unknown.dword();
-		unknown.dword();
-		unknown.dword();
+		this.tractSize = [rs.dword(), rs.dword()];
 		unknown.byte();
 		unknown.dword();
 		this.wealthRequester = rs.pointer()!;
@@ -89,43 +73,22 @@ export default class PropDeveloper {
 		this.propManager = rs.pointer()!;
 		this.networkLotManager = rs.pointer()!;
 		this.count1 = rs.dword();
-		let header = rs.read(17);
-
-		// Next we'll do something fancy. We don't really know the structure 
-		// yet, of what follows, but we *do* know the structure at the end. 
-		// Hence we'll consume the buffer *from the back*.
-		let slice = rs.read(rs.remaining()-5);
-		({ slice } = readBackwards(slice));
-		({ slice } = readBackwards(slice));
-		({ slice } = readBackwards(slice));
-		({ slice } = readBackwards(slice));
-		let rest = slice;
-
-		// unknown.dword();
-		// unknown.dword();
-		// unknown.byte();
-		// this.array1 = rs.array(() => rs.pointer()!);
-		// if (this.count1 > 0) {
-		// 	this.array2 = rs.array(() => rs.pointer()!);
-		// } else {
-		// 	this.array2 = [];
-		// }
-		// rs.array(() => rs.dword());
-		// this.array3 = rs.array(() => rs.pointer()!);
-		// this.array4 = rs.array(() => rs.pointer()!);
-		// this.array5 = rs.array(() => rs.pointer()!);
-		// this.array6 = rs.array(() => rs.pointer()!);
-		// unknown.dword();
-		// unknown.byte();
-		// rs.assert();
-		// let rest = rs.read();
-		let postfix = rest.length > 64 ? '...' : '   ';
-		console.log(
-			String(this.count1).padEnd(8, ' '),
-			format(header),
-			postfix,
-			format(rest.subarray(-64)),
-		);
+		this.count2 = rs.dword();
+		this.count3 = rs.dword();
+		this.count4 = rs.dword();
+		unknown.byte();
+		this.array1 = rs.array(() => rs.pointer()!);
+		this.array2 = rs.array(() => {
+			let advice = rs.dword();
+			let pointers = rs.array(() => rs.pointer()!);
+			return { advice, pointers };
+		});
+		this.array3 = rs.array(() => rs.pointer()!);
+		this.array4 = rs.array(() => rs.pointer()!);
+		this.array5 = rs.array(() => rs.pointer()!);
+		unknown.dword();
+		unknown.byte();
+		rs.assert();
 		return this;
 	}
 	toBuffer() {
@@ -150,18 +113,19 @@ export default class PropDeveloper {
 		ws.pointer(this.propManager);
 		ws.pointer(this.networkLotManager);
 		ws.dword(this.count1);
-		if (this.count1 > 0) {
-			unknown.dword();
-		}
-		unknown.dword();
-		unknown.dword();
+		ws.dword(this.count2);
+		ws.dword(this.count3);
+		ws.dword(this.count4);
 		unknown.byte();
-		ws.array(this.array1, x => ws.pointer(x));
-		ws.array(this.adviceArray, x => ws.dword(x));
-		ws.array(this.array3, x => ws.pointer(x));
-		ws.array(this.array4, x => ws.pointer(x));
-		ws.array(this.array5, x => ws.pointer(x));
-		ws.array(this.array6, x => ws.pointer(x));
+		ws.array(this.array1, ws.pointer);
+		ws.array(this.array2, record => {
+			ws.dword(record.advice);
+			ws.array(record.pointers, ws.pointer);
+		});
+		ws.array(this.array3, ws.pointer);
+		ws.array(this.array4, ws.pointer);
+		ws.array(this.array5, ws.pointer);
+		ws.array(this.array6, ws.pointer);
 		unknown.dword();
 		unknown.byte();
 		return ws.seal();

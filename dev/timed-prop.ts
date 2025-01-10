@@ -10,10 +10,16 @@ run(new Savegame(resource('City - CP before.sc4')));
 run(new Savegame(resource('City - CP after.sc4')));
 run(new Savegame(resource('City - Conditional.sc4')));
 run(new Savegame(resource('City - RCI.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'suburb/City - spamtown.sc4')));
 run(new Savegame(resource('City - Large developed.sc4')));
 run(new Savegame(resource('city.sc4')));
 run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Sebastia - 2016-07-25 15.15/City - Sebastia (2).sc4')));
 run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Sebastia - 2016-07-25 15.15/City - Maybeline.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Sebastia - 2016-07-25 15.15/City - Hector A. Leto International Airport.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Sebastia - 2016-07-25 15.15/City - Western Sebastia.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Delphina/City - New Delphina.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Delphina/City - Nirwana.sc4')));
+run(new Savegame(path.join(process.env.SC4_REGIONS!, 'New Delphina/City - Wayside.sc4')));
 
 function run(dbpf: Savegame) {
 
