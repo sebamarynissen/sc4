@@ -22,6 +22,7 @@ import {
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import type { TGIArray, TGIQuery } from 'sc4/types';
+import getOrientedPosition from './get-oriented-position.js';
 
 const INSET = 0.1;
 
@@ -304,12 +305,13 @@ export default class CityManager {
 						exemplar: building,
 					});
 					break;
-				case 0x01:
+				case 0x01: {
 					this.createProp({
 						lot,
 						lotObject,
 					});
 					break;
+				}
 				case 0x02:
 
 					// Note: We can't handle textures right away because they 
@@ -548,7 +550,7 @@ export default class CityManager {
 		// Note: in contrast to the building, we don't know yet what prop 
 		// we're going to insert if we're dealing with a prop family. As such 
 		// we'll check the families first.
-		let { OID, IIDs, orientation, y } = lotObject;
+		let { OID, IIDs, orientation } = lotObject;
 		let IID = rand(IIDs);
 		let exemplarEntry = this.findExemplarOfType(IID, 0x1e);
 
@@ -564,7 +566,7 @@ export default class CityManager {
 			console.warn(`Prop ${exemplarEntry.tgi} is missing OccupantSize!`);
 			return 0;
 		}
-		let [, height] = size;
+		let [width, height, depth] = size;
 
 		// If the prop is used with a start date, we'll check the current date 
 		// in the city to determine whether the prop should be active or not.
@@ -651,14 +653,25 @@ export default class CityManager {
 
 		}
 
+		// Calculate the oriented position of the prop based on the lot's 
+		// orientation, and then add the lot's offset to it.
+		let { minX, minZ } = lot;
+		let west = 16*minX;
+		let north = 16*minZ;
+		let position = getOrientedPosition({ lot, lotObject })
+			.add([west, 0, north]);
+
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
-		let { minX, maxX, minZ, maxZ } = position(lotObject, lot);
-		let yPos = terrain!.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
+		let yPos = terrain!.query(0.5*position.x, 0.5*position.z);
+		let y = position.y + yPos;
 		let prop = new Prop({
 			mem: this.mem(),
-			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
-			orientation: (orientation + lot.orientation) % 4,
+			bbox: new Box3(
+				[position.x-0.5*width, y, position.z-0.5*depth],
+				[position.x+0.5*width, y+height, position.z+0.5*depth],
+			),
+			orientation: (lot.orientation + lotObject.orientation) % 4,
 
 			// Store the TGI of the prop.
 			TID: exemplarEntry.type,
