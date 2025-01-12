@@ -693,9 +693,14 @@ export default class CityManager {
 
 		}
 
+		// The bounding box of the prop depends on its orientation of course.
+		if (orientation % 4 === 1) {
+			[width, depth] = [depth, width];
+		}
+
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
-		let yPos = terrain!.query(0.5*position.x, 0.5*position.z);
+		let yPos = terrain!.query(position.x, *position.z);
 		let y = position.y + yPos;
 		let prop = new Prop({
 			mem: this.mem(),
@@ -704,23 +709,14 @@ export default class CityManager {
 				[position.x+0.5*width, y+height, position.z+0.5*depth],
 			),
 			orientation,
-
-			// Store the TGI of the prop.
-			TID: tgi.type,
-			GID: tgi.group,
-			IID: tgi.instance,
-			IID1: tgi.instance,
+			tgi,
 			OID,
-
 			appearance: 5,
-
-			// Conditional configuration.
 			start,
 			stop,
 			state,
 			condition,
 			timing,
-
 		});
 		prop.tract.update(prop);
 
