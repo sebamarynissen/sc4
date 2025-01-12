@@ -700,7 +700,7 @@ export default class CityManager {
 
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
-		let yPos = terrain!.query(position.x, *position.z);
+		let yPos = terrain!.query(position.x, position.z);
 		let y = position.y + yPos;
 		let prop = new Prop({
 			mem: this.mem(),
