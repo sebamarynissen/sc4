@@ -9,6 +9,7 @@ import Box3 from './box-3.js';
 import TractInfo from './tract-info.js';
 import type { Vector3Like } from './vector-3.js';
 import type SimulatorDate from './simulator-date.js';
+import TGI from './tgi.js';
 
 type Timing = {
 	interval: number;
@@ -32,9 +33,7 @@ export default class Prop {
 	unknown2 = 0xA823821E;
 	tract = new TractInfo();
 	sgprops: SGProp[] = [];
-	GID = 0x00000000;
-	TID = 0x00000000;
-	IID = 0x00000000;
+	tgi = new TGI();
 	IID1 = 0x00000000;
 	bbox = new Box3();
 	orientation = 0x00;
@@ -72,17 +71,13 @@ export default class Prop {
 		this.unknown2 = rs.dword();
 		this.tract = rs.tract();
 		this.sgprops = rs.sgprops();
-		this.GID = rs.dword();
-		this.TID = rs.dword();
-		this.IID = rs.dword();
+		this.tgi = rs.gti();
 		this.IID1 = rs.dword();
 		this.bbox = rs.bbox();
 		this.orientation = rs.byte();
 		this.state = rs.byte();
 		this.start = rs.byte();
 		this.stop = rs.byte();
-
-		// Parse interal.
 		let count = rs.byte();
 		if (count) {
 			this.timing = {
@@ -92,7 +87,6 @@ export default class Prop {
 				end: rs.date(),
 			};
 		}
-
 		this.chance = rs.byte();
 		this.lotType = rs.byte();
 		this.OID = rs.dword();
@@ -116,9 +110,7 @@ export default class Prop {
 		ws.dword(this.unknown2);
 		ws.tract(this.tract);
 		ws.array(this.sgprops);
-		ws.dword(this.GID);
-		ws.dword(this.TID);
-		ws.dword(this.IID);
+		ws.gti(this.tgi);
 		ws.dword(this.IID1);
 		ws.bbox(this.bbox);
 		ws.byte(this.orientation);
