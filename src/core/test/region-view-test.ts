@@ -20,7 +20,7 @@ describe('The RegionView subfile', function() {
 		expect(view.neighbourConnections).to.have.length(0);
 	});
 
-	it.only('parses a large developed tile', function() {
+	it('parses a large developed tile', function() {
 		let dbpf = new Savegame(resource('City - Large developed.sc4'));
 		let entry = dbpf.find({ type: FileType.RegionView })!;
 		let view = entry.read();

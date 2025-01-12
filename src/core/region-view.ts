@@ -3,9 +3,10 @@ import semver from 'semver';
 import Stream from './stream.js';
 import { FileType } from './enums.js';
 import { kFileType } from './symbols.js';
-import type { byte, dword, float, sint32, sint64, uint16, uint32, uint8, word } from 'sc4/types';
+import type { byte, dword, float, word } from 'sc4/types';
 import Unknown from './unknown.js';
 import WriteBuffer from './write-buffer.js';
+import type SGProp from './sgprop.js';
 
 type OccupantGroupInfo = {
 	occupantGroup: dword;
@@ -207,7 +208,7 @@ class NeighbourConnection {
 	connection: [dword, dword] = [0x00000000, 0x00000000];
 	destination: [dword, dword] = [0x00000000, 0x00000000];
 	byte = 0x00;
-	properties: Property[] = [];
+	sgprops: SGProp[] = [];
 	propertyVersion: word = 2;
 	parse(rs: Stream) {
 		this.version = rs.version(1);
@@ -216,7 +217,7 @@ class NeighbourConnection {
 		this.destination = [rs.dword(), rs.dword()];
 		this.byte = rs.byte();
 		this.propertyVersion = rs.word();
-		this.properties = rs.array(() => new Property().parse(rs));
+		this.sgprops = rs.sgprops();
 		return this;
 	}
 	write(ws: WriteBuffer) {
@@ -226,81 +227,6 @@ class NeighbourConnection {
 		ws.tuple(this.destination, ws.dword);
 		ws.byte(this.byte);
 		ws.word(this.propertyVersion);
-		ws.array(this.properties);
-	}
-}
-
-// # Property
-// The structure of a property as it appears in the region view file is similar 
-// to the Exemplar property format.
-class Property {
-	id: dword = 0x00000000;
-	id2: dword = this.id;
-	type: byte = 0x00;
-	keyType: byte = 0x80;
-	value: unknown;
-	u = new Unknown()
-		.dword(0x00000000)
-		.byte(0x00);
-	parse(rs: Stream) {
-		this.u = new Unknown();
-		const unknown = this.u.reader(rs);
-		this.id = rs.dword();
-		this.id2 = rs.dword();
-		unknown.dword(0x00000000);
-		this.type = rs.byte();
-		this.keyType = rs.word();
-		unknown.byte();
-		const reader = getReader(this.type);
-		if (this.keyType === 0x80) {
-			this.value = rs.array(() => reader(rs));
-		} else {
-			this.value = reader(rs);
-		}
-		return this;
-	}
-	write(ws: WriteBuffer) {
-		let unknown = this.u.writer(ws);
-		ws.dword(this.id);
-		ws.dword(this.id2);
-		unknown.dword();
-		ws.byte(this.type);
-		ws.word(this.keyType);
-		unknown.byte();
-		const writer = getWriter(this.type);
-		let value = this.value as any;
-		if (this.keyType === 0x80) {
-			ws.array(value, x => writer(ws, x));
-		} else {
-			writer(ws, value);
-		}
-	}
-}
-
-function getReader(type: byte) {
-	switch (type) {
-		case 0x01: return (rs: Stream) => rs.uint8();
-		case 0x02: return (rs: Stream) => rs.uint16();
-		case 0x03: return (rs: Stream) => rs.uint32();
-		case 0x07: return (rs: Stream) => rs.int32();
-		case 0x08: return (rs: Stream) => rs.bigint64();
-		case 0x09: return (rs: Stream) => rs.float();
-		case 0x0b: return (rs: Stream) => rs.bool();
-		default:
-			throw new Error(`Unknown data type ${type}!`);
-	}
-}
-
-function getWriter(type: byte): any {
-	switch (type) {
-		case 0x01: return (ws: WriteBuffer, x: uint8) => ws.uint8(x);
-		case 0x02: return (ws: WriteBuffer, x: uint16) => ws.uint16(x);
-		case 0x03: return (ws: WriteBuffer, x: uint32) => ws.uint32(x);
-		case 0x07: return (ws: WriteBuffer, x: sint32) => ws.int32(x);
-		case 0x08: return (ws: WriteBuffer, x: sint64) => ws.bigint64(x);
-		case 0x09: return (ws: WriteBuffer, x: float) => ws.float(x);
-		case 0x0b: return (ws: WriteBuffer, x: boolean) => ws.bool(x);
-		default:
-			throw new Error(`Unknown data type ${type}!`);
+		ws.array(this.sgprops);
 	}
 }
