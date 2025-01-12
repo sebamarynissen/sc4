@@ -672,6 +672,7 @@ class Property<K extends Key = Key> {
 // # cast(type, value)
 // Ensures a value specified for a property matches its specified type.
 function cast(type: PropertyValueType, value: ValueType): ValueType {
+	if (typeof value === 'undefined') return value;
 	if (Array.isArray(value)) {
 		return value.map(value => cast(type, value)) as Primitive[];
 	}
