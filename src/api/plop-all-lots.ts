@@ -73,7 +73,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 
 	// Now loop all files
 	const { bbox } = opts;
-	if (opts.lots) {
+	if (opts.lots !== false) {
 		logger?.progress.start('Plopped 0 lots');
 		let i = 0;
 		for (let file of lots) {
