@@ -10,6 +10,8 @@ describe('The RegionView subfile', function() {
 		let dbpf = new Savegame(resource('City - Empty small tile.sc4'));
 		let entry = dbpf.find({ type: FileType.RegionView })!;
 		let view = entry.read();
+		expect(view.xSize).to.equal(1);
+		expect(view.xSize).to.equal(1);
 		expect(view.population).to.eql({
 			residential: 0,
 			commercial: 0,
@@ -24,6 +26,8 @@ describe('The RegionView subfile', function() {
 		let dbpf = new Savegame(resource('City - Large developed.sc4'));
 		let entry = dbpf.find({ type: FileType.RegionView })!;
 		let view = entry.read();
+		expect(view.xSize).to.equal(4);
+		expect(view.xSize).to.equal(4);
 		expect(view.population).to.eql({
 			residential: 34639,
 			commercial: 5541,

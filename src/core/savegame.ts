@@ -93,13 +93,13 @@ export default class Savegame extends DBPF {
 	// Getter for easily accessing the width of the city. We read this from the 
 	// terrain map.
 	get width() {
-		return this.regionView.xSize;
+		return 64*this.regionView.xSize;
 	}
 
 	// ## get depth()
 	// Same for the city depth.
 	get depth() {
-		return this.regionView.zSize;
+		return 64*this.regionView.zSize;
 	}
 
 	// ## createContext()
@@ -166,7 +166,7 @@ export default class Savegame extends DBPF {
 	static create(opts: SavegameCreateOptions) {
 
 		// The first file we'll add is the region view.
-		let size = ({ small: 64, medium: 128, large: 256 })[opts.size];
+		let size = ({ small: 1, medium: 2, large: 4 })[opts.size];
 		let group = randomId();
 		let dbpf = new Savegame();
 		let regionView = new RegionView();
