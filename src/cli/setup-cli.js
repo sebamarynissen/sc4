@@ -92,6 +92,7 @@ export function factory(program) {
 		.option('--clear', 'Clears the existing items in the city')
 		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
 		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
+		.option('--no-lots', 'Don\'t plop any lots. Useful in combination with --props')
 		.option('--props', 'Plops all props instead of lots')
 		.action(commands.plopAll);
 

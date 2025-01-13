@@ -10,7 +10,7 @@ import type { Logger } from 'sc4/types';
 // it finds in those files
 type folder = string;
 type PlopAllLotsOptions = {
-	lots?: string | string[];
+	pattern?: string | string[];
 	directory?: folder;
 	installation?: folder;
 	plugins?: folder;
@@ -19,6 +19,7 @@ type PlopAllLotsOptions = {
 	city: string;
 	clear?: boolean;
 	bbox?: number[];
+	lots?: boolean;
 	props?: boolean;
 	save?: boolean;
 	backup?: Function;
@@ -30,13 +31,13 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 
 	// First thing we'll do is looking up all lot files with a file scanner.
 	let {
-		lots: pattern = '**/*',
+		pattern = '**/*',
 		directory = process.env.SC4_PLUGINS ?? process.cwd(),
 		logger,
 	} = opts;
 	let lots = await new FileScanner(pattern, { cwd: directory }).walk();
 	if (lots.length === 0) {
-		logger?.warn(`No lots found in files that match the pattern ${pattern} in ${directory}.`);
+		logger?.warn(`No files found that match the pattern ${pattern} in ${directory}.`);
 	}
 
 	// Check if we have to plop the lots in random order.
@@ -72,7 +73,7 @@ export default async function plopAllLots(opts: PlopAllLotsOptions)
 
 	// Now loop all files
 	const { bbox } = opts;
-	if (!opts.props) {
+	if (opts.lots) {
 		logger?.progress.start('Plopped 0 lots');
 		let i = 0;
 		for (let file of lots) {

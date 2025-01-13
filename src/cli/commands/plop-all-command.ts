@@ -10,13 +10,14 @@ type PlopAllCommandOptions = {
 	clear?: boolean;
 	random?: string;
 	bbox?: string;
+	lots?: boolean;
 	props?: boolean;
 };
 
 // # plopAll()
 export async function plopAll(
 	city: string,
-	lots: string[],
+	pattern: string[],
 	options: PlopAllCommandOptions = {},
 ) {
 
@@ -26,6 +27,7 @@ export async function plopAll(
 		random = undefined,
 		bbox: bboxString,
 		props,
+		lots,
 	} = options;
 
 	// The bbox still needs to be parsed it is given.
@@ -34,12 +36,13 @@ export async function plopAll(
 		bbox = parseList(bboxString.replaceAll(/[[\]]/g, '')).map(x => +x);
 	}
 	await plop({
-		lots,
+		pattern,
 		directory,
 		city: path.resolve(process.env.SC4_REGIONS ?? process.cwd(), city),
 		clear,
 		bbox,
 		random,
+		lots,
 		props,
 		save: true,
 		logger,
