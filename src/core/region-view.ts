@@ -42,10 +42,19 @@ export default class RegionView {
 	unknownFloats: float[] = [];
 	neighbourConnections: NeighbourConnection[] = [];
 	u = new Unknown()
-		.dword(0x00000000)
+		.float(0)
 		.repeat(5, u => u.dword(0x00000000))
 		.repeat(5, u => u.dword(0x00000000))
-		.dword(0xffffffff);
+		.dword(0xffffffff)
+		.array()
+		.dword()
+		.float(0)
+		.dword()
+		.float(0)
+		.array()
+		.array()
+		.array()
+		.array();
 
 	// ## parse(buff)
 	// Partially read in. This stuff is pretty much read-only for now, no 

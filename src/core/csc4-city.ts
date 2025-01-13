@@ -26,7 +26,7 @@ export default class cSC4City {
 	physicalSize = [1024, 1024];
 	physicalTileSize = [16, 16];
 	tilesPerMeter: [float, float] = [1/16, 1/16];
-	size: [number, number] = [0x40, 0x40];
+	size: [number, number] = [64, 64];
 	pointers: Pointer[] = [];
 	u = new Unknown()
 		.dword(0x00000000)

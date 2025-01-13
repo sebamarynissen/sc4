@@ -32,11 +32,11 @@ export default class PropDeveloper {
 	count2: number = 0;
 	count3: number = 0;
 	count4: number = 0;
-	nightTimedProps: Pointer[];
-	array2: AdviceRecord[];
-	hourTimedProps: Pointer[];
-	dateTimedProps: Pointer[];
-	array5: Pointer[];
+	nightTimedProps: Pointer[] = [];
+	array2: AdviceRecord[] = [];
+	hourTimedProps: Pointer[] = [];
+	dateTimedProps: Pointer[] = [];
+	array5: Pointer[] = [];
 	u = new Unknown()
 		.bytes([2, 1])
 		.dword()

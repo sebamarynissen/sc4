@@ -379,6 +379,7 @@ export default class CityManager {
 			position,
 			orientation: (lot.orientation+lotObject.orientation) % 4,
 			OID,
+			lotType: 0x02,
 		});
 
 	}
@@ -597,7 +598,8 @@ export default class CityManager {
 		position,
 		orientation = 0,
 		OID = 1,
-	}: AddObjectOptions) {
+		lotType = 0x01,
+	}: AddObjectOptions & { lotType?: number }) {
 
 		// Get the dimensions of the prop bounding box.
 		let size = exemplar.get('OccupantSize');
@@ -700,7 +702,7 @@ export default class CityManager {
 
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
-		let yPos = terrain!.query(position.x, position.z);
+		let yPos = terrain?.query(position.x, position.z) ?? 270;
 		let y = position.y + yPos;
 		let prop = new Prop({
 			mem: this.mem(),
@@ -717,6 +719,7 @@ export default class CityManager {
 			state,
 			condition,
 			timing,
+			lotType,
 		});
 		prop.tract.update(prop);
 

@@ -16,6 +16,8 @@ import type {
 } from './sim-grid-file.js';
 import type { EntryFromType } from './dbpf-entry.js';
 import SavegameContext from './savegame-context.js';
+import RegionView from './region-view.js';
+import { randomId } from 'sc4/utils';
 
 type SimGrid =
 	| SimGridUint8
@@ -29,6 +31,10 @@ type SimGrid =
 // type id.
 type Result<T extends DecodedFileTypeId> = ReturnType<EntryFromType<T>['read']>;
 
+type SavegameCreateOptions = {
+	size: 'small' | 'medium' | 'large';
+};
+
 // # Savegame()
 // A class specifically designed for some Savegame functionality. Obviously 
 // extends the DBPF class because savegames are dbpf files.
@@ -38,7 +44,7 @@ export default class Savegame extends DBPF {
 	// Every savegame has a group id apparently, which is for all entries the 
 	// same. Not sure what this is used for.
 	get GID() {
-		return this.entries[0].group;
+		return this.entries[0]?.group ?? 0;
 	}
 
 	get lots() { return this.readByType(FileType.Lot); }
@@ -75,25 +81,25 @@ export default class Savegame extends DBPF {
 	// ## get terrain()
 	// The terrain is a bit special because there are multiple instances of - 
 	// probably used for the neighbour connections.
-	get terrain(): TerrainMap {
+	get terrain(): TerrainMap | undefined {
 		let entry = this.find({
 			type: FileType.TerrainMap,
 			instance: 0x01,
 		});
-		return entry!.read();
+		return entry?.read();
 	}
 
 	// ## get width()
 	// Getter for easily accessing the width of the city. We read this from the 
 	// terrain map.
 	get width() {
-		return (this.terrain?.xSize ?? 1) - 1;
+		return this.regionView.xSize;
 	}
 
 	// ## get depth()
 	// Same for the city depth.
 	get depth() {
-		return (this.terrain?.zSize ?? 1) - 1;
+		return this.regionView.zSize;
 	}
 
 	// ## createContext()
@@ -149,6 +155,33 @@ export default class Savegame extends DBPF {
 	// Helper function that reads an entry when it can be returned.
 	readByType<T extends DecodedFileTypeId>(type: T): Result<T> {
 		return this.getByType(type).read();
+	}
+
+	// ## static create(opts)
+	// This static method generates an entire new savegame from scratch with 
+	// only the bare minimum needed for the game to read it.
+	// Note: this doesn't work yet! We only implemented the bare minimum to be 
+	// able to test the city manager without loading an existing city. In order 
+	// for the game to correctly recognize this city, much more is needed!
+	static create(opts: SavegameCreateOptions) {
+
+		// The first file we'll add is the region view.
+		let size = ({ small: 64, medium: 128, large: 256 })[opts.size];
+		let group = randomId();
+		let dbpf = new Savegame();
+		let regionView = new RegionView();
+		regionView.xSize = regionView.zSize = size;
+		regionView.population = {
+			residential: 0,
+			commercial: 0,
+			industrial: 0,
+		};
+		regionView.mode = 'mayor';
+		regionView.name = 'North West';
+		regionView.mayorName = 'Sebastiaan';
+		dbpf.add([FileType.RegionView, group, 0], regionView);
+		return dbpf;
+
 	}
 
 }

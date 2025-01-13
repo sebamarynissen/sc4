@@ -57,6 +57,7 @@ export default class ItemIndex {
 
 	// ## get(x: number, z: number)
 	get(x: number, z: number): Cell | undefined {
+		this.ensure();
 		let column = this.elements[x];
 		if (!column) return undefined;
 		return column.at(z);
@@ -121,6 +122,12 @@ export default class ItemIndex {
 		return this;
 	}
 
+	// ## ensure()
+	ensure() {
+		if (this.elements.length === 0) this.fill();
+		return this;
+	}
+
 	// ## clear()
 	clear() {
 		this.fill();
@@ -132,6 +139,7 @@ export default class ItemIndex {
 	// item needs to expose min and max tract coordinates, but they do so 
 	// quite often!
 	add(item: SavegameObject, type = getClassType(item)) {
+		this.ensure();
 		let { tract } = item;
 		for (let x = tract.minX; x <= tract.maxX; x++) {
 			for (let z = tract.minZ; z <= tract.maxZ; z++) {
