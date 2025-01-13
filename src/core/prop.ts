@@ -49,8 +49,8 @@ export default class Prop {
 	// ## constructor(opts)
 	constructor(opts: ConstructorOptions<Prop> = {}) {
 		let {
-			tgi = new TGI(),
-			IID1 = tgi.instance ?? 0x00000000,
+			tgi = this.tgi,
+			IID1 = tgi.instance,
 			...rest
 		} = opts;
 		Object.assign(this, rest);

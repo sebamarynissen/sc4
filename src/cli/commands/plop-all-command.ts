@@ -5,19 +5,33 @@ import logger from '#cli/logger.js';
 import backup from '#cli/backup.js';
 import parseList from '#cli/helpers/parse-list.js';
 
+type PlopAllCommandOptions = {
+	directory?: string;
+	clear?: boolean;
+	random?: string;
+	bbox?: string;
+	props?: boolean;
+};
+
 // # plopAll()
-export async function plopAll(city, lots, options = {}) {
+export async function plopAll(
+	city: string,
+	lots: string[],
+	options: PlopAllCommandOptions = {},
+) {
 
 	let {
 		directory,
 		clear = false,
 		random = undefined,
-		bbox,
+		bbox: bboxString,
+		props,
 	} = options;
 
 	// The bbox still needs to be parsed it is given.
-	if (bbox) {
-		bbox = parseList(bbox.replaceAll(/[[\]]/g, '')).map(x => +x);
+	let bbox: number[] | undefined;
+	if (bboxString) {
+		bbox = parseList(bboxString.replaceAll(/[[\]]/g, '')).map(x => +x);
 	}
 	await plop({
 		lots,
@@ -26,6 +40,7 @@ export async function plopAll(city, lots, options = {}) {
 		clear,
 		bbox,
 		random,
+		props,
 		save: true,
 		logger,
 		backup,

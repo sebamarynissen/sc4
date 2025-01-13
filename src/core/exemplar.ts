@@ -23,6 +23,10 @@ import TGI from './tgi.js';
 
 type ExemplarId = 'EQZB1###' | 'EQZT1###' | 'CQZB1###' | 'CQZT###';
 
+export type ExemplarLike = {
+	get<K extends Key = Key>(key: K): Value<K> | undefined;
+};
+
 export type ExemplarOptions = {
 	id?: ExemplarId;
 	parent?: TGILike;

@@ -89,9 +89,10 @@ export function factory(program) {
 		.command('plop <city> [patterns...]')
 		.description(`Plops all lots that match the patterns in the city. DO NOT use this on established cities!`)
 		.option('--bbox <bbox>', 'The bounding box to plop the lots in, given as minX,minZ,maxX,maxZ. Defaults to the entire city.')
-		.option('--clear', 'Clears the existing lots in the city')
+		.option('--clear', 'Clears the existing items in the city')
 		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to you configured plugins folder')
 		.option('--random [seed]', 'Plops the lots in random order, optionally with a seed for reproducability')
+		.option('--props', 'Plops all props instead of lots')
 		.action(commands.plopAll);
 
 	city

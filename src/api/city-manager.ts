@@ -79,7 +79,7 @@ type AddObjectOptions = {
 	exemplar: ExemplarLike;
 	tgi: TGI;
 	position: Vector3;
-	orientation: number;
+	orientation?: number;
 	OID?: number;
 };
 
@@ -595,7 +595,7 @@ export default class CityManager {
 		exemplar,
 		tgi,
 		position,
-		orientation,
+		orientation = 0,
 		OID = 1,
 	}: AddObjectOptions) {
 
