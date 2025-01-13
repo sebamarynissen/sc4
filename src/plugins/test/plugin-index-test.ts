@@ -28,9 +28,9 @@ describe('The plugin index', function() {
 		expect(file.prop(0x88EDC900)).to.be.ok;
 
 		let building = file.lotObjects.find(x => x.type === 0x00)!;
-		expect(building.x).to.equal(1);
+		expect(building.x).to.equal(16);
 		expect(building.y).to.equal(0);
-		expect(building.z).to.equal(1.5);
+		expect(building.z).to.equal(24);
 
 	});
 

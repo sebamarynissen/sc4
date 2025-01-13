@@ -23,7 +23,7 @@ export default class Unknown extends Array<UnknownType> {
 		}
 		return this;
 	}
-	array(value: UnknownType[]) { this.push(value); return this; }
+	array(value: UnknownType[] = []) { this.push(value); return this; }
 
 	// ## repeat()
 	// Helper for repeating a certain pattern a few times.

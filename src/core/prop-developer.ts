@@ -32,11 +32,11 @@ export default class PropDeveloper {
 	count2: number = 0;
 	count3: number = 0;
 	count4: number = 0;
-	nightTimedProps: Pointer[];
-	array2: AdviceRecord[];
-	hourTimedProps: Pointer[];
-	dateTimedProps: Pointer[];
-	array5: Pointer[];
+	nightTimedProps: Pointer[] = [];
+	array2: AdviceRecord[] = [];
+	hourTimedProps: Pointer[] = [];
+	dateTimedProps: Pointer[] = [];
+	array5: Pointer[] = [];
 	u = new Unknown()
 		.bytes([2, 1])
 		.dword()
@@ -127,4 +127,15 @@ export default class PropDeveloper {
 		unknown.byte();
 		return ws.seal();
 	}
+
+	// ## clear()
+	clear() {
+		this.nightTimedProps = [];
+		this.array2 = [];
+		this.hourTimedProps = [];
+		this.dateTimedProps = [];
+		this.array5 = [];
+		return this;
+	}
+
 }

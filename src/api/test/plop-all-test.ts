@@ -14,7 +14,7 @@ describe('The plopall api function', function() {
 		let diego = resource('DiegoDL-432ParkAvenue-LM-DN');
 		let dbpf = await plopAll({
 			city,
-			lots: '*.SC4Lot',
+			pattern: '*.SC4Lot',
 			directory: diego,
 			plugins: diego,
 			save: false,

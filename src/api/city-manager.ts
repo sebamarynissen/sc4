@@ -18,10 +18,15 @@ import {
     type SavegameObject,
     type ArrayFileTypeId,
     type SavegameFileTypeId,
-    SavegameContext,
+    type SavegameContext,
+    type ExemplarLike,
+    ExemplarProperty,
+    Vector3,
+    TGI,
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
 import type { TGIArray, TGIQuery } from 'sc4/types';
+import getOrientedPosition from './get-oriented-position.js';
 
 const INSET = 0.1;
 
@@ -63,6 +68,19 @@ type ZoneOptions = {
 	depth?: number;
 	orientation?: Orientation;
 	zoneType?: number;
+};
+
+type AddLotObjectOptions = {
+	lot: Lot;
+	lotObject: LotObject;
+};
+
+type AddObjectOptions = {
+	exemplar: ExemplarLike;
+	tgi: TGI;
+	position: Vector3;
+	orientation?: number;
+	OID?: number;
 };
 
 // # CityManager
@@ -304,12 +322,10 @@ export default class CityManager {
 						exemplar: building,
 					});
 					break;
-				case 0x01:
-					this.createProp({
-						lot,
-						lotObject,
-					});
+				case 0x01: {
+					this.addLotObject({ lot, lotObject });
 					break;
+				}
 				case 0x02:
 
 					// Note: We can't handle textures right away because they 
@@ -329,6 +345,42 @@ export default class CityManager {
 		// At last return the created lot so that the calling function can 
 		// modify the properties such as capcity, zoneWealth, zoneDensity etc.
 		return lot;
+
+	}
+
+	// ## addLotObject()
+	// Carries out the logic of adding the most general type of lot objects: 
+	// buildings, props and flora.
+	addLotObject({ lot, lotObject }: AddLotObjectOptions) {
+
+		// If this is a prop or building family, then there will be multiple 
+		// instance ids in the lotobject. Hence we'll first pick a random one.
+		let { OID, IIDs } = lotObject;
+		let instance = rand(IIDs);
+
+		// Look up the exemplar with the given instance. If it doesn't exist, 
+		// it's a missing dependency, so we return "null".
+		let exemplarEntry = this.findExemplarOfType(
+			instance,
+			ExemplarProperty.ExemplarType.Prop,
+		);
+		if (!exemplarEntry) return null;
+
+		// Calculate the city position of the object by using the position on 
+		// the lot, orienting it and then adding the city offset to it.
+		let position = getOrientedPosition({ lot, lotObject })
+			.add([16*lot.minX, 0, 16*lot.minZ]);
+		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
+
+		// At last insert the prop as well.
+		return this.createProp({
+			exemplar,
+			tgi: new TGI(exemplarEntry.tgi),
+			position,
+			orientation: (lot.orientation+lotObject.orientation) % 4,
+			OID,
+			lotType: 0x02,
+		});
 
 	}
 
@@ -540,31 +592,23 @@ export default class CityManager {
 	// ## createProp(opts)
 	// Creates a new prop record in and inserts it into the save game. Takes 
 	// into account the position it should take up in a lot.
-	createProp({ lot, lotObject }: {
-		lot: Lot;
-		lotObject: LotObject;
-	}) {
-
-		// Note: in contrast to the building, we don't know yet what prop 
-		// we're going to insert if we're dealing with a prop family. As such 
-		// we'll check the families first.
-		let { OID, IIDs, orientation, y } = lotObject;
-		let IID = rand(IIDs);
-		let exemplarEntry = this.findExemplarOfType(IID, 0x1e);
-
-		// Missing props? Just ignore them.
-		if (!exemplarEntry) {
-			return 0;
-		}
+	createProp({
+		exemplar,
+		tgi,
+		position,
+		orientation = 0,
+		OID = 1,
+		lotType = 0x01,
+	}: AddObjectOptions & { lotType?: number }) {
 
 		// Get the dimensions of the prop bounding box.
-		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
 		let size = exemplar.get('OccupantSize');
 		if (!size) {
-			console.warn(`Prop ${exemplarEntry.tgi} is missing OccupantSize!`);
-			return 0;
+			let name = exemplar.get('ExemplarName');
+			console.warn(`Prop ${name} is missing OccupantSize!`);
+			size = [0, 0, 0];
 		}
-		let [, height] = size;
+		let [width, height, depth] = size;
 
 		// If the prop is used with a start date, we'll check the current date 
 		// in the city to determine whether the prop should be active or not.
@@ -651,31 +695,31 @@ export default class CityManager {
 
 		}
 
+		// The bounding box of the prop depends on its orientation of course.
+		if (orientation % 4 === 1) {
+			[width, depth] = [depth, width];
+		}
+
 		// Create the prop & position correctly.
 		let { terrain } = this.dbpf;
-		let { minX, maxX, minZ, maxZ } = position(lotObject, lot);
-		let yPos = terrain!.query(0.5*(minX + maxX), 0.5*(minZ + maxZ));
+		let yPos = terrain?.query(position.x, position.z) ?? 270;
+		let y = position.y + yPos;
 		let prop = new Prop({
 			mem: this.mem(),
-			bbox: new Box3([minX, yPos+y, minZ], [maxX, yPos+y+height, maxZ]),
-			orientation: (orientation + lot.orientation) % 4,
-
-			// Store the TGI of the prop.
-			TID: exemplarEntry.type,
-			GID: exemplarEntry.group,
-			IID: exemplarEntry.instance,
-			IID1: exemplarEntry.instance,
+			bbox: new Box3(
+				[position.x-0.5*width, y, position.z-0.5*depth],
+				[position.x+0.5*width, y+height, position.z+0.5*depth],
+			),
+			orientation,
+			tgi,
 			OID,
-
 			appearance: 5,
-
-			// Conditional configuration.
 			start,
 			stop,
 			state,
 			condition,
 			timing,
-
+			lotType,
 		});
 		prop.tract.update(prop);
 
@@ -700,7 +744,7 @@ export default class CityManager {
 		// Update the COM serializer and we're done.
 		let com = dbpf.COMSerializer;
 		com.set(FileType.Prop, props.length);
-		return props;
+		return prop;
 
 	}
 
@@ -828,6 +872,7 @@ export default class CityManager {
 		// Clear both the lot and zone developer files as well.
 		city.lotDeveloper.clear();
 		city.zoneDeveloper.clear();
+		city.propDeveloper.clear();
 
 		// Clear some simgrids.
 		city.getSimGrid(SimGrid.ZoneData)?.clear();
@@ -868,7 +913,6 @@ function orient(
 		case 0x03:
 			[x, y] = [y, width-x];
 			break;
-
 	}
 
 	// If we didn't request bare coordinates explicitly, transform to city 

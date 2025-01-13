@@ -1,5 +1,4 @@
 // # lot-object.js
-const scale = 0x00100000;
 import type { ConstructorOptions, MinLengthArray, uint32 } from 'sc4/types';
 import { inspect } from 'sc4/utils';
 import type { ValueOf } from 'type-fest';
@@ -8,6 +7,9 @@ export type LotObjectTypeId = ValueOf<typeof LotObjectType>;
 export type LotObjectArray = [LotObjectTypeId, ...MinLengthArray<uint32, 11>];
 export type LotObjectOptions = ConstructorOptions<LotObject> | LotObjectArray;
 
+// The scale is used to transform the coordinates as stored in the exemplar to 
+// **meters**. That's the most intuitive to work with.
+const scale = 0x00010000;
 const LotObjectType = {
 	Building: 0x00,
 	Prop: 0x01,
@@ -75,10 +77,10 @@ export default class LotObject {
 				x: x/scale,
 				y: y/scale,
 				z: z/scale,
-				minX: 16*signed(minX)/scale,
-				minZ: 16*signed(minZ)/scale,
-				maxX: 16*signed(maxX)/scale,
-				maxZ: 16*signed(maxZ)/scale,
+				minX: signed(minX)/scale,
+				minZ: signed(minZ)/scale,
+				maxX: signed(maxX)/scale,
+				maxZ: signed(maxZ)/scale,
 				usage,
 				OID,
 				IIDs: rest,
@@ -114,10 +116,10 @@ export default class LotObject {
 			Math.round(scale*x),
 			Math.round(scale*y),
 			Math.round(scale*z),
-			uint(scale*minX/16),
-			uint(scale*minZ/16),
-			uint(scale*maxX/16),
-			uint(scale*maxZ/16),
+			uint(scale*minX),
+			uint(scale*minZ),
+			uint(scale*maxX),
+			uint(scale*maxZ),
 			usage,
 			OID,
 		];

@@ -23,6 +23,10 @@ import TGI from './tgi.js';
 
 type ExemplarId = 'EQZB1###' | 'EQZT1###' | 'CQZB1###' | 'CQZT###';
 
+export type ExemplarLike = {
+	get<K extends Key = Key>(key: K): Value<K> | undefined;
+};
+
 export type ExemplarOptions = {
 	id?: ExemplarId;
 	parent?: TGILike;
@@ -672,6 +676,7 @@ class Property<K extends Key = Key> {
 // # cast(type, value)
 // Ensures a value specified for a property matches its specified type.
 function cast(type: PropertyValueType, value: ValueType): ValueType {
+	if (typeof value === 'undefined') return value;
 	if (Array.isArray(value)) {
 		return value.map(value => cast(type, value)) as Primitive[];
 	}

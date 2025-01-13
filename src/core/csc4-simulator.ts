@@ -10,7 +10,7 @@ import SimulatorDate from './simulator-date.js';
 export default class cSC4Simulator {
 	static [kFileType] = FileType.cSC4Simulator;
 	crc: dword = 0x00000000;
-	mem:dword = 0x00000000;
+	mem: dword = 0x00000000;
 	version = '4';
 	hoursPerDay: dword = 24;
 	dayOfYear: dword = 1;
