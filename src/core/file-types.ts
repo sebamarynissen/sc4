@@ -59,6 +59,10 @@ export const SavegameFileType = {
 	Thumbnail: 0x8a2482b9,
 	ParkManager: 0xaa3fe6bc,
 
+	// Savegame meta files.
+	CityPointer: 0x49dd6f4c,
+	Version: 0xea3ff4f5,
+
 	// Terrain map is a bit special because it is also identified by group and 
 	// instance inside a Savegame, but obviously the type id is still needed 
 	// sometimes.

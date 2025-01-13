@@ -36,6 +36,10 @@ export { default as cSC43DRender } from './csc4-3drender.js';
 export { default as cSC4City } from './csc4-city.js';
 export { default as cSC4Simulator } from './csc4-simulator.js';
 export { default as cSC424HourClock } from './csc4-24hour-clock.js';
+export { default as CityPointer } from './city-pointer.js';
+export {
+	default as SC4ReadAppLoadSaveVersion,
+} from './sc4-read-app-load-save-version.js';
 export {
 	SimGridFloat32,
 	SimGridUint32,
