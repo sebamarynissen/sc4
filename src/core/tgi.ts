@@ -1,6 +1,6 @@
 // # tgi.ts
 import type { TGIArray, TGILiteral, uint32 } from 'sc4/types'
-import { randomId, inspect } from 'sc4/utils';
+import { hex, randomId, inspect } from 'sc4/utils';
 
 export default class TGI<T extends uint32 = uint32> {
 	type: T = 0x00000000 as T;
@@ -38,6 +38,10 @@ export default class TGI<T extends uint32 = uint32> {
 			.map(nr => nodeInspect(inspect.hex(nr), opts))
 			.join(', ');
 		return `TGI(${str})`;
+	}
+
+	toString() {
+		return [...this].map(nr => hex(nr)).join(',');
 	}
 
 	toArray(): TGIArray {
