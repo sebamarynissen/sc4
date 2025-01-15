@@ -25,7 +25,7 @@ import {
     TGI,
 } from 'sc4/core';
 import type { PluginIndex } from 'sc4/plugins';
-import type { TGIArray, TGIQuery } from 'sc4/types';
+import type { TGILike } from 'sc4/types';
 import getOrientedPosition from './get-oriented-position.js';
 
 const INSET = 0.1;
@@ -37,7 +37,7 @@ type CityManagerOptions = {
 
 type Orientation = number;
 type PlopOptions = {
-	tgi?: TGIQuery | TGIArray;
+	tgi?: TGILike;
 	building?: Entry<Exemplar>;
 	x: number;
 	z: number;
@@ -45,7 +45,7 @@ type PlopOptions = {
 };
 
 type GrowOptions = {
-	tgi?: TGIQuery | TGIArray;
+	tgi?: TGILike;
 	lot?: Entry<Exemplar>;
 	building?: Entry<Exemplar>;
 	x: number;
@@ -241,7 +241,7 @@ export default class CityManager {
 		} = opts;
 		if (!lot) {
 			throw new Error(
-				`Exemplar ${ JSON.stringify(opts.tgi) } not found!`,
+				`Exemplar ${new TGI(opts.tgi!)} not found!`,
 			);
 		}
 

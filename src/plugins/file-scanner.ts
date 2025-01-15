@@ -81,6 +81,7 @@ export default class FileScanner extends Glob<GlobOptions & { withFileTypes: fal
 			absolute: true,
 			nodir: true,
 			nocase: true,
+			follow: true,
 			...rest,
 			withFileTypes: false,
 		});
