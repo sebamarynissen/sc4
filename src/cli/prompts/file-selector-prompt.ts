@@ -1,4 +1,5 @@
 import path from 'node:path';
+import os from 'node:os';
 import {
 	createPrompt,
 	isBackspaceKey,
@@ -17,6 +18,16 @@ import {
 } from '@inquirer/core';
 import figures from '@inquirer/figures';
 import chalk from 'chalk';
+import checkUnicode from 'is-unicode-supported';
+
+function checkWindowsUnicode() {
+	const [major,, build] = os.release().split('.');
+	return +major > 10 || (+major === 10 && +build >= 22000);
+}
+
+// Windows 11 supports unicode in the terminal, which can be detected by the 
+// build number being above 22000
+const isUnicodeSupported = checkUnicode() || checkWindowsUnicode();
 
 // Utils.ts
 import fs, { Stats } from 'node:fs';
@@ -77,8 +88,12 @@ const fileSelectorTheme = {
 		canceled: chalk.red(figures.cross),
 	},
 	icon: {
-		linePrefix: (isLast: boolean) => {
-			return isLast ? `${figures.lineUpRight}${figures.line.repeat(2)} ` : `${figures.lineUpDownRight}${figures.line.repeat(2)} `;
+		linePrefix: (item: FileInfo, isLast: boolean) => {
+			let lines = isLast ? `${figures.lineUpRight}${figures.line.repeat(2)} ` : `${figures.lineUpDownRight}${figures.line.repeat(2)} `;
+			if (isUnicodeSupported && item.isDirectory()) {
+				lines += '📁 ';
+			}
+			return lines;
 		},
 	},
 	style: {
@@ -179,7 +194,7 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 		active,
 		renderItem({ item, index, isActive }) {
 			const isLast = index === items.length - 1;
-			const linePrefix = theme.icon.linePrefix(isLast);
+			const linePrefix = theme.icon.linePrefix(item, isLast);
 			const line = item.isDirectory() ? `${linePrefix}${ensureTrailingSlash(item.name)}` : `${linePrefix}${item.name}`;
 			if (item.isDisabled) {
 				return theme.style.disabled(`${line}${disabledLabel}`);
