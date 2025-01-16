@@ -7,6 +7,7 @@ import * as prompts from '#cli/prompts';
 import * as flows from '#cli/flows';
 import config from '#cli/config.js';
 import args from '#cli/args.js';
+import version from '#cli/version.js';
 
 // The default command when the program is used without any options. In this 
 // case we fire up an inquirer session to ask the user what they want to do. 
@@ -96,6 +97,13 @@ async function start(n) {
 			},
 		},
 		{
+			name: 'Track dependencies',
+			type: 'dat',
+			async value() {
+				await flows.pluginsTrack();
+			},
+		},
+		{
 			name: 'Plop all lots of a collection',
 			type: 'city',
 			async value() {
@@ -125,6 +133,7 @@ async function start(n) {
 	}
 
 	if (n === 0) {
+		console.log(chalk.greenBright(`sc4 ${version}`)+'\n');
 		choices.push(new prompts.Separator());
 		choices.push({ name: 'Quit', value: 'quit' });
 	} else {
