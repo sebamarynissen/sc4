@@ -1,7 +1,8 @@
 // # plugins-track-flow.ts
 import * as prompts from '#cli/prompts';
-import { DependencyTracker } from 'sc4/plugins';
+import { DependencyTracker, folderToPackageId } from 'sc4/plugins';
 import logger from '#cli/logger.js';
+import type { FileInfo } from '#cli/prompts/file-selector-prompt.js';
 
 export async function pluginsTrack() {
 	let plugins = process.env.SC4_PLUGINS;
@@ -9,6 +10,11 @@ export async function pluginsTrack() {
 		type: 'file+directory',
 		basePath: plugins,
 		message: 'Select the file or directory you want to track plugins for',
+		transform(info: FileInfo) {
+			if (!info.isDirectory) return info.name;
+			let id = folderToPackageId(info.path, { strict: true });
+			return id ?? info.name;
+		},
 	});
 	let tracker = new DependencyTracker({ plugins, logger });
 	let result = await tracker.track(files);

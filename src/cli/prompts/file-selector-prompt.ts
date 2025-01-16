@@ -110,9 +110,9 @@ const fileSelectorTheme = {
 	},
 };
 
-type FileInfo = Stats & { name: string; path: string; isDisabled: boolean; }
+export type FileInfo = Stats & { name: string; path: string; isDisabled: boolean; }
 
-type FileSelectorConfig = {
+export type FileSelectorConfig = {
 	message: string;
 	basePath?: string;
 	type?: 'file' | 'directory' | 'file+directory';
@@ -125,6 +125,7 @@ type FileSelectorConfig = {
 	emptyText?: string;
 	theme?: Theme;
 	filter?: (file: FileInfo) => boolean;
+	transform: (item: FileInfo) => string;
 };
 
 export const fileSelector = createPrompt((config: FileSelectorConfig, done: any) => {
@@ -137,6 +138,7 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 		allowCancel = false,
 		cancelText = 'Canceled.',
 		emptyText = 'Directory is empty.',
+		transform = (item: FileInfo) => item.name,
 	} = config;
 	const [status, setStatus] = useState('idle');
 	const theme = makeTheme(fileSelectorTheme, config.theme);
@@ -151,6 +153,7 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 		}
 		return sortFiles(files, showExcluded);
 	}, [currentDir]) as FileInfo[];
+	const map = useMemo(() => ({}) as any, []);
 	const bounds = useMemo(() => {
 		const first = items.findIndex((item) => !item.isDisabled);
 		const last = items.findLastIndex((item) => !item.isDisabled);
@@ -168,34 +171,40 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 			}
 			setStatus('done');
 			done(activeItem.path);
-		} else if (isSpaceKey(key) && activeItem.isDirectory()) {
+		} else if ((key.name === 'right' || isSpaceKey(key)) && activeItem.isDirectory()) {
 			setCurrentDir(activeItem.path);
-			setActive(bounds.first);
+			setActive(map[activeItem.path] ?? bounds.first);
 		} else if (isUpKey(key) || isDownKey(key)) {
 			rl.clearLine(0);
 			if (loop || isUpKey(key) && active !== bounds.first || isDownKey(key) && active !== bounds.last) {
 				const offset = isUpKey(key) ? -1 : 1;
+				map[currentDir] = active+offset;
 				let next = active;
 				do {
 					next = (next + offset + items.length) % items.length;
 				} while (items[next].isDisabled);
 				setActive(next);
 			}
-		} else if (isBackspaceKey(key)) {
-			setCurrentDir(path.resolve(currentDir, '..'));
-			setActive(bounds.first);
+		} else if (isBackspaceKey(key) || key.name === 'left') {
+			let up = path.resolve(currentDir, '..');
+			setCurrentDir(up);
+			setActive(map[up] ?? bounds.first);
 		} else if (isEscapeKey(key) && allowCancel) {
 			setStatus('canceled');
 			done('canceled');
 		}
 	});
+
+	// The `usePagination` function is used to actually render the items on the 
+	// screen and make pagination possible.
 	const page = usePagination({
 		items,
 		active,
 		renderItem({ item, index, isActive }) {
 			const isLast = index === items.length - 1;
 			const linePrefix = theme.icon.linePrefix(item, isLast);
-			const line = item.isDirectory() ? `${linePrefix}${ensureTrailingSlash(item.name)}` : `${linePrefix}${item.name}`;
+			const name = transform(item);
+			const line = item.isDirectory() ? `${linePrefix}${ensureTrailingSlash(name)}` : `${linePrefix}${name}`;
 			if (item.isDisabled) {
 				return theme.style.disabled(`${line}${disabledLabel}`);
 			}
@@ -206,6 +215,8 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 		pageSize,
 		loop,
 	});
+
+	// Render the rest of the information.
 	const message = theme.style.message(config.message, status);
 	if (status === 'canceled') {
 		return `${prefix} ${message} ${theme.style.cancelText(cancelText)}`;
@@ -217,13 +228,15 @@ export const fileSelector = createPrompt((config: FileSelectorConfig, done: any)
 	const helpTip = useMemo(() => {
 		const helpTipLines = [
 			`${theme.style.key(figures.arrowUp + figures.arrowDown)} navigate, ${theme.style.key('<enter>')} select${allowCancel ? `, ${theme.style.key('<esc>')} cancel` : ''}`,
-			`${theme.style.key('<space>')} open directory, ${theme.style.key('<backspace>')} go back`,
+			`${theme.style.key(figures.arrowRight)} open directory, ${theme.style.key(figures.arrowLeft)} go back`,
 		];
 		const helpTipMaxLength = getMaxLength(helpTipLines);
 		const delimiter = figures.lineBold.repeat(helpTipMaxLength);
 		return `${delimiter}
 ${helpTipLines.join('\n')}`;
 	}, []);
+
+	// At last, join everything together.
 	return `${prefix} ${message}
 ${header}
 ${!page.length ? theme.style.emptyText(emptyText) : page}
