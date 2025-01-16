@@ -738,9 +738,11 @@ class DependencyTrackingResult {
 				})
 				.map(fullPath => path.relative(this.plugins, fullPath));
 
-			console.log(bold('Other dependencies:'));
-			for (let dep of deps) {
-				console.log(`  - ${cyan(dep)}`);
+			if (deps.length > 0) {
+				console.log(bold('Other dependencies:'));
+				for (let dep of deps) {
+					console.log(`  - ${cyan(dep)}`);
+				}
 			}
 
 		}

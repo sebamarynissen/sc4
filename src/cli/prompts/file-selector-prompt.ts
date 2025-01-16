@@ -1,4 +1,5 @@
 import path from 'node:path';
+import os from 'node:os';
 import {
 	createPrompt,
 	isBackspaceKey,
@@ -12,30 +13,42 @@ import {
 	usePagination,
 	usePrefix,
 	useState,
+    type KeypressEvent,
+    type Theme,
 } from '@inquirer/core';
 import figures from '@inquirer/figures';
 import chalk from 'chalk';
+import checkUnicode from 'is-unicode-supported';
+
+function checkWindowsUnicode() {
+	const [major,, build] = os.release().split('.');
+	return +major > 10 || (+major === 10 && +build >= 22000);
+}
+
+// Windows 11 supports unicode in the terminal, which can be detected by the 
+// build number being above 22000
+const isUnicodeSupported = checkUnicode() || checkWindowsUnicode();
 
 // Utils.ts
-import fs from 'node:fs';
+import fs, { Stats } from 'node:fs';
 const CURSOR_HIDE = '\x1B[?25l';
-function isEscapeKey(key) {
+function isEscapeKey(key: KeypressEvent) {
 	return key.name === 'escape';
 }
-function ensureTrailingSlash(dir) {
+function ensureTrailingSlash(dir: string) {
 	return dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`;
 }
-function stripAnsiCodes(str) {
+function stripAnsiCodes(str: string) {
 	// eslint-disable-next-line no-control-regex
 	return str.replace(/\x1B\[\d+m/g, '');
 }
-function getMaxLength(arr) {
+function getMaxLength(arr: string[]) {
 	return arr.reduce(
 		(max, item) => Math.max(max, stripAnsiCodes(item).length),
 		0,
 	);
 }
-function getDirFiles(dir) {
+function getDirFiles(dir: string) {
 	return fs.readdirSync(dir).map((filename) => {
 		try {
 			const filepath = path.join(dir, filename);
@@ -48,9 +61,9 @@ function getDirFiles(dir) {
 		} catch {
 			return null;
 		}
-	}).filter(Boolean);
+	}).filter(Boolean) as FileInfo[];
 }
-function sortFiles(files, showExcluded) {
+function sortFiles(files: FileInfo[], showExcluded: boolean) {
 	return files.sort((a, b) => {
 		if (a.isDisabled && !b.isDisabled) {
 			return 1;
@@ -75,24 +88,47 @@ const fileSelectorTheme = {
 		canceled: chalk.red(figures.cross),
 	},
 	icon: {
-		linePrefix: (isLast) => {
-			return isLast ? `${figures.lineUpRight}${figures.line.repeat(2)} ` : `${figures.lineUpDownRight}${figures.line.repeat(2)} `;
+		linePrefix: (item: FileInfo, isLast: boolean) => {
+			let lines = isLast ? `${figures.lineUpRight}${figures.line.repeat(2)} ` : `${figures.lineUpDownRight}${figures.line.repeat(2)} `;
+			if (isUnicodeSupported && item.isDirectory()) {
+				lines += '📁 ';
+			}
+			return lines;
 		},
 	},
 	style: {
-		disabled: (text) => chalk.dim(text),
-		active: (text) => chalk.cyan(text),
-		cancelText: (text) => chalk.red(text),
-		emptyText: (text) => chalk.red(text),
-		directory: (text) => chalk.yellow(text),
-		file: (text) => chalk.white(text),
-		currentDir: (text) => chalk.magenta(text),
-		message: (text, _status) => chalk.bold(text),
-		help: (text) => chalk.white(text),
-		key: (text) => chalk.cyan(text),
+		disabled: (text: string) => chalk.dim(text),
+		active: (text: string) => chalk.cyan(text),
+		cancelText: (text: string) => chalk.red(text),
+		emptyText: (text: string) => chalk.red(text),
+		directory: (text: string) => chalk.yellow(text),
+		file: (text: string) => chalk.white(text),
+		currentDir: (text: string) => chalk.magenta(text),
+		message: (text: string, _status: string) => chalk.bold(text),
+		help: (text: string) => chalk.white(text),
+		key: (text: string) => chalk.cyan(text),
 	},
 };
-export const fileSelector = createPrompt((config, done) => {
+
+export type FileInfo = Stats & { name: string; path: string; isDisabled: boolean; }
+
+export type FileSelectorConfig = {
+	message: string;
+	basePath?: string;
+	type?: 'file' | 'directory' | 'file+directory';
+	pageSize?: number;
+	loop?: boolean;
+	showExcluded?: boolean;
+	disabledLabel?: string;
+	allowCancel?: boolean;
+	cancelText?: string;
+	emptyText?: string;
+	theme?: Theme;
+	filter?: (file: FileInfo) => boolean;
+	transform: (item: FileInfo) => string;
+};
+
+export const fileSelector = createPrompt((config: FileSelectorConfig, done: any) => {
 	const {
 		type = 'file',
 		pageSize = 10,
@@ -102,6 +138,7 @@ export const fileSelector = createPrompt((config, done) => {
 		allowCancel = false,
 		cancelText = 'Canceled.',
 		emptyText = 'Directory is empty.',
+		transform = (item: FileInfo) => item.name,
 	} = config;
 	const [status, setStatus] = useState('idle');
 	const theme = makeTheme(fileSelectorTheme, config.theme);
@@ -112,10 +149,11 @@ export const fileSelector = createPrompt((config, done) => {
 	const items = useMemo(() => {
 		const files = getDirFiles(currentDir);
 		for (const file of files) {
-			file.isDisabled = config.filter ? !config.filter(file) : false;
+			file!.isDisabled = config.filter ? !config.filter(file!) : false;
 		}
 		return sortFiles(files, showExcluded);
-	}, [currentDir]);
+	}, [currentDir]) as FileInfo[];
+	const map = useMemo(() => ({}) as any, []);
 	const bounds = useMemo(() => {
 		const first = items.findIndex((item) => !item.isDisabled);
 		const last = items.findLastIndex((item) => !item.isDisabled);
@@ -133,34 +171,40 @@ export const fileSelector = createPrompt((config, done) => {
 			}
 			setStatus('done');
 			done(activeItem.path);
-		} else if (isSpaceKey(key) && activeItem.isDirectory()) {
+		} else if ((key.name === 'right' || isSpaceKey(key)) && activeItem.isDirectory()) {
 			setCurrentDir(activeItem.path);
-			setActive(bounds.first);
+			setActive(map[activeItem.path] ?? bounds.first);
 		} else if (isUpKey(key) || isDownKey(key)) {
 			rl.clearLine(0);
 			if (loop || isUpKey(key) && active !== bounds.first || isDownKey(key) && active !== bounds.last) {
 				const offset = isUpKey(key) ? -1 : 1;
+				map[currentDir] = active+offset;
 				let next = active;
 				do {
 					next = (next + offset + items.length) % items.length;
 				} while (items[next].isDisabled);
 				setActive(next);
 			}
-		} else if (isBackspaceKey(key)) {
-			setCurrentDir(path.resolve(currentDir, '..'));
-			setActive(bounds.first);
+		} else if (isBackspaceKey(key) || key.name === 'left') {
+			let up = path.resolve(currentDir, '..');
+			setCurrentDir(up);
+			setActive(map[up] ?? bounds.first);
 		} else if (isEscapeKey(key) && allowCancel) {
 			setStatus('canceled');
 			done('canceled');
 		}
 	});
+
+	// The `usePagination` function is used to actually render the items on the 
+	// screen and make pagination possible.
 	const page = usePagination({
 		items,
 		active,
 		renderItem({ item, index, isActive }) {
 			const isLast = index === items.length - 1;
-			const linePrefix = theme.icon.linePrefix(isLast);
-			const line = item.isDirectory() ? `${linePrefix}${ensureTrailingSlash(item.name)}` : `${linePrefix}${item.name}`;
+			const linePrefix = theme.icon.linePrefix(item, isLast);
+			const name = transform(item);
+			const line = item.isDirectory() ? `${linePrefix}${ensureTrailingSlash(name)}` : `${linePrefix}${name}`;
 			if (item.isDisabled) {
 				return theme.style.disabled(`${line}${disabledLabel}`);
 			}
@@ -171,6 +215,8 @@ export const fileSelector = createPrompt((config, done) => {
 		pageSize,
 		loop,
 	});
+
+	// Render the rest of the information.
 	const message = theme.style.message(config.message, status);
 	if (status === 'canceled') {
 		return `${prefix} ${message} ${theme.style.cancelText(cancelText)}`;
@@ -182,13 +228,15 @@ export const fileSelector = createPrompt((config, done) => {
 	const helpTip = useMemo(() => {
 		const helpTipLines = [
 			`${theme.style.key(figures.arrowUp + figures.arrowDown)} navigate, ${theme.style.key('<enter>')} select${allowCancel ? `, ${theme.style.key('<esc>')} cancel` : ''}`,
-			`${theme.style.key('<space>')} open directory, ${theme.style.key('<backspace>')} go back`,
+			`${theme.style.key(figures.arrowRight)} open directory, ${theme.style.key(figures.arrowLeft)} go back`,
 		];
 		const helpTipMaxLength = getMaxLength(helpTipLines);
 		const delimiter = figures.lineBold.repeat(helpTipMaxLength);
 		return `${delimiter}
 ${helpTipLines.join('\n')}`;
 	}, []);
+
+	// At last, join everything together.
 	return `${prefix} ${message}
 ${header}
 ${!page.length ? theme.style.emptyText(emptyText) : page}
