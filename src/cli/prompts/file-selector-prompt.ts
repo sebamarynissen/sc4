@@ -12,30 +12,32 @@ import {
 	usePagination,
 	usePrefix,
 	useState,
+    type KeypressEvent,
+    type Theme,
 } from '@inquirer/core';
 import figures from '@inquirer/figures';
 import chalk from 'chalk';
 
 // Utils.ts
-import fs from 'node:fs';
+import fs, { Stats } from 'node:fs';
 const CURSOR_HIDE = '\x1B[?25l';
-function isEscapeKey(key) {
+function isEscapeKey(key: KeypressEvent) {
 	return key.name === 'escape';
 }
-function ensureTrailingSlash(dir) {
+function ensureTrailingSlash(dir: string) {
 	return dir.endsWith(path.sep) ? dir : `${dir}${path.sep}`;
 }
-function stripAnsiCodes(str) {
+function stripAnsiCodes(str: string) {
 	// eslint-disable-next-line no-control-regex
 	return str.replace(/\x1B\[\d+m/g, '');
 }
-function getMaxLength(arr) {
+function getMaxLength(arr: string[]) {
 	return arr.reduce(
 		(max, item) => Math.max(max, stripAnsiCodes(item).length),
 		0,
 	);
 }
-function getDirFiles(dir) {
+function getDirFiles(dir: string) {
 	return fs.readdirSync(dir).map((filename) => {
 		try {
 			const filepath = path.join(dir, filename);
@@ -48,9 +50,9 @@ function getDirFiles(dir) {
 		} catch {
 			return null;
 		}
-	}).filter(Boolean);
+	}).filter(Boolean) as FileInfo[];
 }
-function sortFiles(files, showExcluded) {
+function sortFiles(files: FileInfo[], showExcluded: boolean) {
 	return files.sort((a, b) => {
 		if (a.isDisabled && !b.isDisabled) {
 			return 1;
@@ -75,24 +77,42 @@ const fileSelectorTheme = {
 		canceled: chalk.red(figures.cross),
 	},
 	icon: {
-		linePrefix: (isLast) => {
+		linePrefix: (isLast: boolean) => {
 			return isLast ? `${figures.lineUpRight}${figures.line.repeat(2)} ` : `${figures.lineUpDownRight}${figures.line.repeat(2)} `;
 		},
 	},
 	style: {
-		disabled: (text) => chalk.dim(text),
-		active: (text) => chalk.cyan(text),
-		cancelText: (text) => chalk.red(text),
-		emptyText: (text) => chalk.red(text),
-		directory: (text) => chalk.yellow(text),
-		file: (text) => chalk.white(text),
-		currentDir: (text) => chalk.magenta(text),
-		message: (text, _status) => chalk.bold(text),
-		help: (text) => chalk.white(text),
-		key: (text) => chalk.cyan(text),
+		disabled: (text: string) => chalk.dim(text),
+		active: (text: string) => chalk.cyan(text),
+		cancelText: (text: string) => chalk.red(text),
+		emptyText: (text: string) => chalk.red(text),
+		directory: (text: string) => chalk.yellow(text),
+		file: (text: string) => chalk.white(text),
+		currentDir: (text: string) => chalk.magenta(text),
+		message: (text: string, _status: string) => chalk.bold(text),
+		help: (text: string) => chalk.white(text),
+		key: (text: string) => chalk.cyan(text),
 	},
 };
-export const fileSelector = createPrompt((config, done) => {
+
+type FileInfo = Stats & { name: string; path: string; isDisabled: boolean; }
+
+type FileSelectorConfig = {
+	message: string;
+	basePath?: string;
+	type?: 'file' | 'directory' | 'file+directory';
+	pageSize?: number;
+	loop?: boolean;
+	showExcluded?: boolean;
+	disabledLabel?: string;
+	allowCancel?: boolean;
+	cancelText?: string;
+	emptyText?: string;
+	theme?: Theme;
+	filter?: (file: FileInfo) => boolean;
+};
+
+export const fileSelector = createPrompt((config: FileSelectorConfig, done: any) => {
 	const {
 		type = 'file',
 		pageSize = 10,
@@ -112,10 +132,10 @@ export const fileSelector = createPrompt((config, done) => {
 	const items = useMemo(() => {
 		const files = getDirFiles(currentDir);
 		for (const file of files) {
-			file.isDisabled = config.filter ? !config.filter(file) : false;
+			file!.isDisabled = config.filter ? !config.filter(file!) : false;
 		}
 		return sortFiles(files, showExcluded);
-	}, [currentDir]);
+	}, [currentDir]) as FileInfo[];
 	const bounds = useMemo(() => {
 		const first = items.findIndex((item) => !item.isDisabled);
 		const last = items.findLastIndex((item) => !item.isDisabled);
