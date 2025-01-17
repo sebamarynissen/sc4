@@ -16,15 +16,15 @@ export default {
 			prefix = '\r';
 		},
 		update: (text: string) => void (spinner.text = text),
-		succeed: (text: string) => {
+		succeed: (text?: string) => {
 			spinner.succeed(text);
 			prefix = '';
 		},
-		fail: (text: string) => {
+		fail: (text?: string) => {
 			spinner.fail(text);
 			prefix = '';
 		},
-		warn: (text: string) => {
+		warn: (text?: string) => {
 			spinner.warn(text);
 			prefix = '';
 		},

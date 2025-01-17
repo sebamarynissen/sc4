@@ -169,6 +169,13 @@ export function factory(program) {
 		.option('--tree', 'Shows the entire dependency tree')
 		.action(commands.track);
 
+	// Command for finding duplicate files in a plugin folder.
+	plugins
+		.command('duplicates')
+		.description('Finds all duplicate files in a folder by comparing their contents')
+		.option('-d, --directory <dir>', 'The directory to look for duplicates in. Defaults to your configured plugins folder')
+		.action(commands.pluginsDuplicates);
+
 	// Commands that operate specifically on dbpfs, such as extracting a DBPF.
 	const dbpf = program
 		.command('dbpf')
@@ -532,17 +539,6 @@ export function factory(program) {
 			opts.info(`Saving to ${ output }`);
 			await dbpf.save({ file: output });
 
-		});
-
-	// Command for finding duplicate files in a plugin folder.
-	misc
-		.command('duplicates <folder>')
-		.storeOptionsAsProperties()
-		.action(function(folder) {
-			api.duplicates({
-				...baseOptions(),
-				folder,
-			});
 		});
 
 	const config = program

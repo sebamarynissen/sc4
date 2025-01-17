@@ -2,7 +2,7 @@
 // Contains the JavaScript api of the cli. This separates concerns nicely: the 
 // api does the actual job, while the cli is merely responsible for the 
 // options parsing.
-import { fs, path, crypto } from 'sc4/utils';
+import { fs } from 'sc4/utils';
 import { Savegame, SimGrid } from 'sc4/core';
 
 // # historical(opts)
@@ -129,47 +129,6 @@ export async function growify(opts = {}) {
 
 }
 
-// # duplicates(opts)
-// Finds duplicates files in a plugin folder.
-export function duplicates(opts) {
-	let {
-		logger = defaultLogger,
-		folder,
-	} = opts;
-	let start = path.resolve(process.cwd(), folder);
-	let map = new Map();
-
-	function dive(dir) {
-		let contents = fs.readdirSync(dir);
-		for (let entry of contents) {
-			entry = path.join(dir, entry);
-			let stat = fs.statSync(entry);
-			if (stat.isDirectory()) {
-				dive(entry);
-			} else {
-				let buffer = fs.readFileSync(entry);
-				let sha = hash(buffer);
-				if (map.has(sha)) {
-					let arr = map.get(sha);
-					arr.push(entry);
-				} else {
-					map.set(sha, [entry]);
-				}
-			}
-		}
-	}
-	logger.info('Reading plugins folder');
-	dive(start);
-
-	// Now log all duplicates.
-	for (let files of map.values()) {
-		if (files.length === 1) continue;
-		let out = files.map(full => path.relative(start, full));
-		console.log(out);
-	}
-
-}
-
 // An object containing some default options, such as the logging functions 
 // etc.
 const defaultLogger = {
@@ -192,11 +151,3 @@ function open(dbpf) {
 // # noop()
 // Does nothing.
 function noop() {}
-
-// # hash(buffer)
-// Returns the sha256 hash of a buffer.
-function hash(buffer) {
-	const hash = crypto.createHash('sha256');
-	hash.update(buffer);
-	return hash.digest('hex');
-}
