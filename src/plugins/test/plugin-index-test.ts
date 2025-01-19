@@ -108,7 +108,7 @@ describe('The plugin index', function() {
 
 	});
 
-	it('keeps overridden files in the inde', async function() {
+	it('keeps overridden files in the index', async function() {
 
 		let index = new Index({
 			plugins: resource('overrides'),
