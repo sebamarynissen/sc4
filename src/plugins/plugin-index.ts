@@ -2,7 +2,7 @@
 import { os } from 'sc4/utils';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType, TGI } from 'sc4/core';
 import { TGIIndex, hex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
 import WorkerPool from './worker-pool.js';
@@ -49,12 +49,12 @@ type CacheJSON = {
 	dbpfs: number[][];
 	entries: EntryJSON[];
 	index: TGIIndexJSON;
-	families: { [id: string]: number[] };
+	families: { [id: string]: [number, number, number][] };
 };
 
 type ExemplarEntry = Entry<Exemplar>;
 type FamilyIndex = {
-	[id: string]: ExemplarEntry[];
+	[id: string]: TGI[];
 };
 
 // # PluginIndex
@@ -236,7 +236,7 @@ export default class PluginIndex {
 						if (family) {
 							let key = h(family as number);
 							this.families[key] ??= [];
-							this.families[key].push(entry);
+							this.families[key].push(new TGI(entry.tgi));
 						}
 					}
 				} catch (e) {
@@ -249,6 +249,24 @@ export default class PluginIndex {
 			});
 		}
 		await queue.onIdle();
+
+		// We're not done yet. If a prop pack adds props to a Maxis family, then 
+		// multiple of the *same* tgi might be present in the family array. We 
+		// have to avoid this, so we need to filter the tgi's again to be unique.
+		for (let key of Object.keys(this.families)) {
+			let family = this.families[key];
+			let had = new Set();
+			this.families[key] = family.filter(tgi => {
+				let id = hash(tgi);
+				if (!had.has(id)) {
+					had.add(id);
+					return true;
+				} else {
+					return false;
+				}
+			});
+		}
+
 	}
 
 	// ## load(cache)
@@ -286,13 +304,7 @@ export default class PluginIndex {
 		this.families = Object.create(null);
 		for (let key of Object.keys(families)) {
 			let pointers = families[key];
-			this.families[key] = pointers.map(ptr => {
-
-				// TypeScript can't infer that families are always found in 
-				// Exemplar enries, but we can obviously, so we use as here.
-				return this.entries[ptr] as ExemplarEntry;
-
-			});
+			this.families[key] = pointers.map(ptr => new TGI(...ptr));
 		}
 		return this;
 
@@ -334,7 +346,7 @@ export default class PluginIndex {
 	// if so returns the family array.
 	family(id: uint32): ExemplarEntry[] | null {
 		let arr = this.families[h(id)];
-		return arr || null;
+		return arr?.map(tgi => this.find(tgi)!) as ExemplarEntry[] || null;
 	}
 
 	// ## getHierarchicExemplar(exemplar)
@@ -427,15 +439,12 @@ export default class PluginIndex {
 
 		// Serialize our built up families as well, as this one also takes a lot 
 		// of time to read.
-		let families: { [id: string]: number[] } = {};
+		let families: { [id: string]: TGIArray[] } = {};
 		for (let id of Object.keys(this.families)) {
 			let family = this.families[id];
 			let pointers = [];
-			for (let entry of family) {
-				let ptr = entryToKey.get(entry);
-				if (ptr !== undefined) {
-					pointers.push(ptr);
-				}
+			for (let tgi of family) {
+				pointers.push([...tgi] as TGIArray);
 			}
 			families[id] = pointers;
 		}
@@ -458,15 +467,13 @@ export default class PluginIndex {
 
 }
 
-// # hash(entry)
-// Calculates a unique hash for the given entry. This function should be 
-// optimized for maximum speed.
-function hash(entry: Entry) {
-	return `${entry.type},${entry.group},${entry.instance}`;
-}
-
 // # compare(a, b)
 // The comparator function that determines the load order of the files.
 function compare(a: string, b: string) {
 	return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
+}
+
+// # hash(tgi)
+function hash(tgi: TGI) {
+	return `${tgi.type},${tgi.group},${tgi.instance}`;
 }
