@@ -17,7 +17,7 @@ import PluginIndex from './plugin-index.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
-import type { Entry } from 'sc4/core';
+import type { Entry, TGI } from 'sc4/core';
 import type { Logger, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
 
@@ -35,6 +35,10 @@ const RKT = [
 	0x27812924,
 	0x27812925,
 ];
+
+const Groups = {
+	LotConfigurations: 0xa8fbd372,
+};
 
 const kIndex = Symbol('index');
 const kPackageIndex = Symbol('packageIndex');
@@ -234,6 +238,23 @@ class DependencyTrackingContext {
 
 	}
 
+	// ## findWithCorePriority(query, filter)
+	// See #77. When querying a file by TGI, by default the plugin index will 
+	// return the latest file, which could be an override of a Maxis builtin. 
+	// When tracking dependencies, we don't want these overrides to be listed, 
+	// as everything will work fine with just the Maxis builtins. This function 
+	// automates this.
+	findWithCorePriority(
+		query: TGIQuery,
+		filter?: (entry: Entry) => boolean,
+	) {
+		let entries = this.index.findAll(query);
+		if (filter) {
+			entries = entries.filter(filter);
+		}
+		return entries[0];
+	}
+
 	// ## track()
 	// Starts the tracking operation. For now we perform it *sequentially*, but 
 	// in the future we might want to do this in parallel!
@@ -408,54 +429,31 @@ class DependencyTrackingContext {
 
 		// If we're dealing with a building, prop or flora, then it's possible 
 		// that the idd actually refers to a family id.
-		let tasks: Promise<Dep.Dependency>[] = [];
-		let entries: Entry[] = [];
-		let family: number = 0;
 		switch (lotObject.type) {
 			case LotObjectType.Building:
 			case LotObjectType.Prop:
 			case LotObjectType.Flora:
-				let familyEntries = this.index.family(iid);
-				if (familyEntries) {
-					entries = familyEntries;
-					family = iid;
+				let tgis = this.index.getFamilyTGIs(iid);
+				if (tgis.length > 0) {
+					return await this.readFamily(tgis, iid);
 				}
 		}
-		if (entries.length === 0) {
-			entries = this.index.findAll({
-				type: getFileTypeByLotObject(lotObject),
-				instance: iid,
-			});
-		}
 
-		// IMPORTANT! If we're reading the building of the lot, then our 
-		// `findAll` might return the lot config exemplar *itself* as well!
-		if (lotObject.type === LotObjectType.Building) {
-			entries = entries.filter(entry => entry.id !== lotEntry.id);
-		}
+		// If we reach this point, we know for sure that we're not dealing with 
+		// a family. Now find the file that is referenced then by this iid - 
+		// giving priority to core files, see #77 - where we make sure that we 
+		// don't track ourselves if reading the building of the lot, as the 
+		// LotConfigurations exemplar typically has the same IID!
+		let entry = this.findWithCorePriority({
+			type: getFileTypeByLotObject(lotObject),
+			instance: iid,
+		}, entry => entry.group !== Groups.LotConfigurations);
 
-		// We've noticed that sometimes prop packs add props to families that 
-		// are already defined in SimCity_1.dat as well. What this means is that 
-		// if a family already contains props from SimCity_1.dat, then the other 
-		// items in the family are actually optional! We need to reflect this 
-		// somehow.
-		if (family > 0) {
-			let core = entries.filter(entry => {
-				return entry.dbpf.file?.match(/SimCity_\d\.dat$/i);
-			});
-			if (core.length > 0) entries = core;
-		}
-
-		// Cool, now read in the resource and then go on.
-		for (let entry of entries) {
-			tasks.push(this.readResource(entry));
-		}
-
-		// If nothing was found with this instance, we have a missing dependency 
-		// and we'll label it like that. Note however that water and land 
+		// No entry found? Then we have a missing depnednecy and we'll label it 
+		// like that. Note however that water and land 
 		// constraint tiles, as well as network nodes don't need to be labeled 
 		// as a missing dependency.
-		if (tasks.length === 0) {
+		if (!entry) {
 			let kind = Object.keys(LotObjectType)[lotObject.type];
 			this.missing.push({
 				kind,
@@ -463,18 +461,26 @@ class DependencyTrackingContext {
 				instance: iid,
 			});
 			return new Dep.Missing({ instance: iid });
-		}
-
-		// Now wait for everything to be read in and then return the dep. Could 
-		// be a family as well by the way.
-		let result = await Promise.all(tasks);
-		if (family > 0) {
-			let dep = new Dep.Family(result, family);
-			return dep;
 		} else {
-			return result[0];
+			return await this.readResource(entry);
 		}
 
+	}
+
+	// ## readFamily(tgis, family)
+	// Tracks all dependencies of a family.
+	async readFamily(tgis: TGI[], family: number) {
+		let tasks = [];
+		for (let tgi of tgis) {
+			let entry = this.findWithCorePriority(tgi);
+			if (!entry) {
+				tasks.push(Promise.resolve(new Dep.Missing({ ...tgi })));
+			} else {
+				tasks.push(this.readResource(entry));
+			}
+		}
+		let result = await Promise.all(tasks);
+		return new Dep.Family(result, family);
 	}
 
 	// ## readLotObjectNetwork(lotObject, entry)
@@ -535,7 +541,7 @@ class DependencyTrackingContext {
 			// an `.sc4model` file. Note that we only have to report missing 
 			// dependencies when the model is not set to 0x00 - which is 
 			// something that can happen apparently.
-			let model = this.index.find({ type, group, instance });
+			let model = this.findWithCorePriority({ type, group, instance });
 			if (model) {
 				await this.readResource(model);
 				modelMap.set(model.id, new Dep.Model({ entry: model }));

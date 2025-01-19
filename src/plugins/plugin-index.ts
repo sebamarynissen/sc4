@@ -2,7 +2,7 @@
 import { os } from 'sc4/utils';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
+import { DBPF, Exemplar, ExemplarProperty, FileType, TGI } from 'sc4/core';
 import { TGIIndex, hex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
 import WorkerPool from './worker-pool.js';
@@ -49,12 +49,12 @@ type CacheJSON = {
 	dbpfs: number[][];
 	entries: EntryJSON[];
 	index: TGIIndexJSON;
-	families: { [id: string]: number[] };
+	families: { [id: string]: [number, number, number][] };
 };
 
 type ExemplarEntry = Entry<Exemplar>;
 type FamilyIndex = {
-	[id: string]: ExemplarEntry[];
+	[id: string]: TGI[];
 };
 
 // # PluginIndex
@@ -154,6 +154,9 @@ export default class PluginIndex {
 		if (plugins) {
 			let task = new FileScanner(this.options.scan, { cwd: plugins })
 				.walk()
+				.then(files => files.filter(file => {
+					return !file.includes('staging-process');
+				}))
 				.then(files => sourceFiles = files);
 			tasks.push(task);
 		}
@@ -192,44 +195,28 @@ export default class PluginIndex {
 		// here to maintain the sort order, so when a file is read in, we don't 
 		// just put it in the queue, but we put it in the queue *at the right 
 		// position*!
-		const queue: DBPF[] = new Array(files.length).fill(undefined);
+		const queue: Entry[][] = new Array(files.length).fill(undefined);
 		let tasks: Promise<DBPF>[] = [];
 		for (let i = 0; i < files.length; i++) {
 			let file = files[i];
 			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
 				let dbpf = new DBPF({ ...json, parse: false });
-				queue[i] = dbpf;
+				queue[i] = [...dbpf];
 			}) as Promise<DBPF>;
 			tasks.push(task);
 		}
 		await Promise.all(tasks);
 		pool.close();
 
-		// Reverse the array so that files that were seen last are the ones that 
-		// are kept. This is faster than using "unshift" apparently.
-		queue.reverse();
-		let unique: Entry[] = [];
-		let seen = new Set();
-		for (let dbpf of queue) {
-			for (let entry of dbpf) {
-				let id = hash(entry);
-				if (!seen.has(id)) {
-					seen.add(id);
-					unique.push(entry);
-				}
-			}
-		}
-		unique.reverse();
-
 		// Get all entries again in a flat array and then create our index from 
 		// it. **IMPORTANT**! We can't create the index with new 
 		// TGIIndex(...values) because there might be a *ton* of entries, 
 		// causing a stack overflow - JS can only handle that many function 
 		// arguments!
-		let { length } = unique;
-		let entries = this.entries = new TGIIndex(length);
-		for (let i = 0; i < length; i++) {
-			entries[i] = unique[i];
+		let flat = queue.flat();
+		let entries = this.entries = new TGIIndex(flat.length);
+		for (let i = 0; i < flat.length; i++) {
+			entries[i] = flat[i];
 		}
 		entries.build();
 
@@ -252,7 +239,7 @@ export default class PluginIndex {
 						if (family) {
 							let key = h(family as number);
 							this.families[key] ??= [];
-							this.families[key].push(entry);
+							this.families[key].push(new TGI(entry.tgi));
 						}
 					}
 				} catch (e) {
@@ -265,6 +252,24 @@ export default class PluginIndex {
 			});
 		}
 		await queue.onIdle();
+
+		// We're not done yet. If a prop pack adds props to a Maxis family, then 
+		// multiple of the *same* tgi might be present in the family array. We 
+		// have to avoid this, so we need to filter the tgi's again to be unique.
+		for (let key of Object.keys(this.families)) {
+			let family = this.families[key];
+			let had = new Set();
+			this.families[key] = family.filter(tgi => {
+				let id = hash(tgi);
+				if (!had.has(id)) {
+					had.add(id);
+					return true;
+				} else {
+					return false;
+				}
+			});
+		}
+
 	}
 
 	// ## load(cache)
@@ -302,13 +307,7 @@ export default class PluginIndex {
 		this.families = Object.create(null);
 		for (let key of Object.keys(families)) {
 			let pointers = families[key];
-			this.families[key] = pointers.map(ptr => {
-
-				// TypeScript can't infer that families are always found in 
-				// Exemplar enries, but we can obviously, so we use as here.
-				return this.entries[ptr] as ExemplarEntry;
-
-			});
+			this.families[key] = pointers.map(ptr => new TGI(...ptr));
 		}
 		return this;
 
@@ -345,12 +344,17 @@ export default class PluginIndex {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
 	}
 
+	// ## getFamilyTGIs(family)
+	getFamilyTGIs(family: uint32) {
+		return this.families[h(family)] ?? [];
+	}
+
 	// ## family(id)
 	// Checks if the a prop or building family exists with the given IID and 
 	// if so returns the family array.
-	family(id: uint32): ExemplarEntry[] | null {
-		let arr = this.families[h(id)];
-		return arr || null;
+	family(family: uint32): ExemplarEntry[] | null {
+		let arr = this.getFamilyTGIs(family).map(tgi => this.find(tgi)!) as ExemplarEntry[];
+		return arr.length > 0 ? arr : null;
 	}
 
 	// ## getHierarchicExemplar(exemplar)
@@ -443,15 +447,12 @@ export default class PluginIndex {
 
 		// Serialize our built up families as well, as this one also takes a lot 
 		// of time to read.
-		let families: { [id: string]: number[] } = {};
+		let families: { [id: string]: TGIArray[] } = {};
 		for (let id of Object.keys(this.families)) {
 			let family = this.families[id];
 			let pointers = [];
-			for (let entry of family) {
-				let ptr = entryToKey.get(entry);
-				if (ptr !== undefined) {
-					pointers.push(ptr);
-				}
+			for (let tgi of family) {
+				pointers.push([...tgi] as TGIArray);
 			}
 			families[id] = pointers;
 		}
@@ -474,15 +475,13 @@ export default class PluginIndex {
 
 }
 
-// # hash(entry)
-// Calculates a unique hash for the given entry. This function should be 
-// optimized for maximum speed.
-function hash(entry: Entry) {
-	return `${entry.type},${entry.group},${entry.instance}`;
-}
-
 // # compare(a, b)
 // The comparator function that determines the load order of the files.
 function compare(a: string, b: string) {
 	return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
+}
+
+// # hash(tgi)
+function hash(tgi: TGI) {
+	return `${tgi.type},${tgi.group},${tgi.instance}`;
 }

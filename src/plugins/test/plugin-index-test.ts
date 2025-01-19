@@ -1,4 +1,5 @@
 // # file-index-test.js
+import path from 'node:path';
 import { expect } from 'chai';
 import Index from '../plugin-index.js';
 import { FileType } from 'sc4/core';
@@ -104,6 +105,29 @@ describe('The plugin index', function() {
 			expect(eq.group).to.equal(entry.group);
 			expect(eq.instance).to.equal(entry.instance);
 		}
+
+	});
+
+	it('keeps overridden files in the index', async function() {
+
+		let index = new Index({
+			plugins: resource('overrides'),
+			core: false,
+		});
+		await index.build();
+
+		let entries = index.findAll({
+			type: FileType.Exemplar,
+			group: 0x947da1d3,
+			instance: 0x59668597,
+		});
+		expect(entries).to.have.length(2);
+		let last = index.find({
+			type: FileType.Exemplar,
+			group: 0x947da1d3,
+			instance: 0x59668597,
+		})!;
+		expect(path.basename(last.dbpf.file!)).to.equal('z_override.SC4Desc');
 
 	});
 
