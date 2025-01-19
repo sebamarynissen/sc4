@@ -234,6 +234,17 @@ class DependencyTrackingContext {
 
 	}
 
+	// ## findWithCorePriority(query)
+	// See #77. When querying a file by TGI, by default the plugin index will 
+	// return the latest file, which could be an override of a Maxis builtin. 
+	// When tracking dependencies, we don't want these overrides to be listed, 
+	// as everything will work fine with just the Maxis builtins. This function 
+	// automates this.
+	findWithCorePriority(query: TGIQuery) {
+		let entries = this.index.findAll(query);
+		return entries[0];
+	}
+
 	// ## track()
 	// Starts the tracking operation. For now we perform it *sequentially*, but 
 	// in the future we might want to do this in parallel!
@@ -534,7 +545,7 @@ class DependencyTrackingContext {
 			// an `.sc4model` file. Note that we only have to report missing 
 			// dependencies when the model is not set to 0x00 - which is 
 			// something that can happen apparently.
-			let model = this.index.find({ type, group, instance });
+			let model = this.findWithCorePriority({ type, group, instance });
 			if (model) {
 				await this.readResource(model);
 				modelMap.set(model.id, new Dep.Model({ entry: model }));
