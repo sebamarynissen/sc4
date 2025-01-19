@@ -434,12 +434,11 @@ class DependencyTrackingContext {
 			entries = entries.filter(entry => entry.id !== lotEntry.id);
 		}
 
-		// We've noticed that sometimes prop packs add props to families that 
-		// are already defined in SimCity_1.dat as well. What this means is that 
-		// if a family already contains props from SimCity_1.dat, then the other 
-		// items in the family are actually optional! We need to reflect this 
-		// somehow.
-		if (family > 0) {
+		// Somtimes prop packs *override* Maxis props, or they add props to 
+		// existing Maxis prop families. This means that in that case, those 
+		// overriding props are actually *optional*, so we filter them out.
+		// In the future we might create a separate category for them though.
+		if (entries.length > 0) {
 			let core = entries.filter(entry => {
 				return entry.dbpf.file?.match(/SimCity_\d\.dat$/i);
 			});
