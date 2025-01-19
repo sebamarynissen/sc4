@@ -466,15 +466,28 @@ class DependencyTrackingContext {
 	// ## readFamily(tgis, family)
 	// Tracks all dependencies of a family.
 	async readFamily(tgis: TGI[], family: number) {
-		let tasks = [];
+		let missing = [];
+		let entries: Entry[] = [];
+		let core: Entry[] = [];
 		for (let tgi of tgis) {
 			let entry = this.findWithCorePriority(tgi);
 			if (!entry) {
-				tasks.push(Promise.resolve(new Dep.Missing({ ...tgi })));
+				missing.push(new Dep.Missing({ ...tgi }));
 			} else {
-				tasks.push(this.readResource(entry));
+				let { file } = entry.dbpf;
+				if (file?.match(/SimCity_\d\.dat/)) {
+					core.push(entry);
+				}
+				entries.push(entry);
 			}
 		}
+
+		// See #77. If this family contains both Maxis and non-Maxis props, then
+		// we only need to track the Maxis props.
+		if (entries.length !== core.length) {
+			entries = core;
+		}
+		let tasks = entries.map(entry => this.readResource(entry));
 		let result = await Promise.all(tasks);
 		return new Dep.Family(result, family);
 	}
