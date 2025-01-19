@@ -192,44 +192,28 @@ export default class PluginIndex {
 		// here to maintain the sort order, so when a file is read in, we don't 
 		// just put it in the queue, but we put it in the queue *at the right 
 		// position*!
-		const queue: DBPF[] = new Array(files.length).fill(undefined);
+		const queue: Entry[][] = new Array(files.length).fill(undefined);
 		let tasks: Promise<DBPF>[] = [];
 		for (let i = 0; i < files.length; i++) {
 			let file = files[i];
 			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
 				let dbpf = new DBPF({ ...json, parse: false });
-				queue[i] = dbpf;
+				queue[i] = [...dbpf];
 			}) as Promise<DBPF>;
 			tasks.push(task);
 		}
 		await Promise.all(tasks);
 		pool.close();
 
-		// Reverse the array so that files that were seen last are the ones that 
-		// are kept. This is faster than using "unshift" apparently.
-		queue.reverse();
-		let unique: Entry[] = [];
-		let seen = new Set();
-		for (let dbpf of queue) {
-			for (let entry of dbpf) {
-				let id = hash(entry);
-				if (!seen.has(id)) {
-					seen.add(id);
-					unique.push(entry);
-				}
-			}
-		}
-		unique.reverse();
-
 		// Get all entries again in a flat array and then create our index from 
 		// it. **IMPORTANT**! We can't create the index with new 
 		// TGIIndex(...values) because there might be a *ton* of entries, 
 		// causing a stack overflow - JS can only handle that many function 
 		// arguments!
-		let { length } = unique;
-		let entries = this.entries = new TGIIndex(length);
-		for (let i = 0; i < length; i++) {
-			entries[i] = unique[i];
+		let flat = queue.flat();
+		let entries = this.entries = new TGIIndex(flat.length);
+		for (let i = 0; i < flat.length; i++) {
+			entries[i] = flat[i];
 		}
 		entries.build();
 
