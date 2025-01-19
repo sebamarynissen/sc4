@@ -341,12 +341,17 @@ export default class PluginIndex {
 		return this.entries.findAll(...args as Parameters<TGIIndex<Entry>['findAll']>);
 	}
 
+	// ## getFamilyTGIs(family)
+	getFamilyTGIs(family: uint32) {
+		return this.families[h(family)] ?? [];
+	}
+
 	// ## family(id)
 	// Checks if the a prop or building family exists with the given IID and 
 	// if so returns the family array.
-	family(id: uint32): ExemplarEntry[] | null {
-		let arr = this.families[h(id)];
-		return arr?.map(tgi => this.find(tgi)!) as ExemplarEntry[] || null;
+	family(family: uint32): ExemplarEntry[] | null {
+		let arr = this.getFamilyTGIs(family).map(tgi => this.find(tgi)!) as ExemplarEntry[];
+		return arr.length > 0 ? arr : null;
 	}
 
 	// ## getHierarchicExemplar(exemplar)
