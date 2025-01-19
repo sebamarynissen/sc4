@@ -320,9 +320,9 @@ class DependencyTrackingContext {
 	async readExemplar(entry: ExemplarEntry) {
 		let exemplar = await entry.readAsync();
 		this.touch(entry);
-		let [type] = [exemplar.get(0x10)].flat();
+		let exemplarType = exemplar.get('ExemplarType');
 		let tasks = [];
-		if (type === ExemplarProperty.ExemplarType.LotConfigurations) {
+		if (exemplarType === ExemplarProperty.ExemplarType.LotConfigurations) {
 			tasks.push(this.readLotExemplar(exemplar, entry));
 		} else {
 			tasks.push(this.readRktExemplar(exemplar, entry));
@@ -330,17 +330,13 @@ class DependencyTrackingContext {
 
 		// If a parent cohort exists, we'll read this one in as well. It means 
 		// it gets marked as a dependency, which is what we want!
-		let [t, g, i] = exemplar.parent;
-		if (t+g+i !== 0) {
-			let entry = this.index.find(t, g, i);
+		let [type, group, instance] = exemplar.parent;
+		if (type+group+instance !== 0) {
+			let entry = this.findWithCorePriority({ type, group, instance });
 			if (entry) {
 				tasks.push(this.readResource(entry));
 			} else {
-				tasks.push(new Dep.Missing({
-					type: t,
-					group: g,
-					instance: i,
-				}));
+				tasks.push(new Dep.Missing({ type, group, instance }));
 			}
 		}
 		let [dep, parent] = await Promise.all(tasks);
@@ -369,7 +365,7 @@ class DependencyTrackingContext {
 		// Lots can also have a foundation exemplar. Read this as well.
 		const fid = exemplar.get(ExemplarProperty.BuildingFoundation);
 		if (fid) {
-			let entry = this.index.find({ instance: fid });
+			let entry = this.findWithCorePriority({ instance: fid });
 			if (entry) {
 				tasks.push(
 					this.readResource(entry).then(x => lot.foundation = x),
@@ -603,7 +599,7 @@ class DependencyTrackingContext {
 			if (query.instance === 0x00) continue;
 
 			// If nothing was found, we have a missing dependency.
-			entry = this.index.find(query) as ExemplarEntry;
+			entry = this.findWithCorePriority(query) as ExemplarEntry;
 			if (!entry) {
 				dep.props.push([prop, new Dep.Missing(query)]);
 			} else {
