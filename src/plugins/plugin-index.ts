@@ -154,6 +154,9 @@ export default class PluginIndex {
 		if (plugins) {
 			let task = new FileScanner(this.options.scan, { cwd: plugins })
 				.walk()
+				.then(files => files.filter(file => {
+					return !file.includes('staging-process');
+				}))
 				.then(files => sourceFiles = files);
 			tasks.push(task);
 		}
