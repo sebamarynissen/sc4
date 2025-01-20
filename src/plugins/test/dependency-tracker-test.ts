@@ -65,6 +65,54 @@ describe('#DependencyTracker', function() {
 
 	});
 
+	it('handles QueryExemplarGUID with the same IID as the building exemplar', async function() {
+
+		let { installation, plugins } = await setup();
+		let model = new DBPF();
+		let modelTGI = TGI.random(FileType.S3D);
+		model.add(modelTGI, new Uint8Array());
+		model.save(path.join(plugins, 'model.SC4Model'));
+
+		let building = new DBPF();
+		let buildingExemplar = new Exemplar();
+		let tgi = TGI.random(FileType.Exemplar)
+		buildingExemplar.addProperty('ExemplarType', ExemplarProperty.ExemplarType.Buildings);
+		buildingExemplar.addProperty('ResourceKeyType0', [...modelTGI]);
+		buildingExemplar.addProperty('ExemplarName', 'Building name');
+		buildingExemplar.addProperty('QueryExemplarGUID', tgi.instance);
+		building.add(tgi, buildingExemplar);
+		building.save(path.join(plugins, 'building.SC4Desc'));
+
+		let lot = new DBPF();
+		let lotExemplar = new Exemplar();
+		lotExemplar.addProperty('ExemplarType', ExemplarProperty.ExemplarType.LotConfigurations);
+		lotExemplar.addProperty('ExemplarName', 'Lot name');
+		lotExemplar.lotObjects.push(
+			new LotObject({
+				type: LotObject.Building,
+				IID: building.entries[0]!.instance,
+			}),
+		);
+		lot.add(TGI.random(FileType.Exemplar, 0xa8fbd372), lotExemplar);
+		lot.save(path.join(plugins, 'lot.SC4Lot'));
+
+		let tracker = new DependencyTracker({
+			installation,
+			plugins,
+		});
+		let result = await tracker.track(plugins) as any;
+		let { tree } = result;
+		expect(tree).to.have.length(1);
+		expect(tree[0].kind).to.equal('lot');
+		expect(tree[0].entry.instance).to.equal(lot.entries[0].instance);
+		expect(tree[0].building.kind).to.equal('exemplar');
+		expect(tree[0].building.name).to.equal('Building name');
+		expect(tree[0].building.models).to.have.length(1);
+		expect(tree[0].building.models[0].kind).to.equal('model');
+		expect(tree[0].building.props[0][1].kind).to.equal('missing');
+
+	});
+
 	it('does not track props added to a Maxis family as dependencies (#77)', async function() {
 
 		let { installation, plugins } = await setup();
