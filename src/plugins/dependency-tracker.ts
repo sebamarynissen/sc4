@@ -234,19 +234,31 @@ class DependencyTrackingContext {
 
 	}
 
-	// ## findWithCorePriority(query, filter)
+	// ## findWithPriority(query, filter)
 	// See #77. When querying a file by TGI, by default the plugin index will 
 	// return the latest file, which could be an override of a Maxis builtin. 
 	// When tracking dependencies, we don't want these overrides to be listed, 
 	// as everything will work fine with just the Maxis builtins. This function 
 	// automates this.
-	findWithCorePriority(
+	// Note: there's another case where the priority can change! We've noticed 
+	// that sometimes textures are included in a plugin that override other 
+	// textures. Sometimes those textures are just included "just in case" 
+	// apparently. So, any dependencies that are contained within our "input 
+	// files" should get priority over external dependencies!
+	findWithPriority(
 		query: TGIQuery,
 		filter?: (entry: Entry) => boolean,
 	) {
 		let entries = this.index.findAll(query);
 		if (filter) {
 			entries = entries.filter(filter);
+		}
+		if (entries.length > 0) {
+			entries.sort((a, b) => {
+				let hasA = this.files.includes(a.dbpf.file!) ? -1 : 1;
+				let hasB = this.files.includes(b.dbpf.file!) ? -1 : 1;
+				return hasA - hasB;
+			});
 		}
 		return entries[0];
 	}
@@ -324,7 +336,7 @@ class DependencyTrackingContext {
 		// it gets marked as a dependency, which is what we want!
 		let [type, group, instance] = exemplar.parent;
 		if (type+group+instance !== 0) {
-			let entry = this.findWithCorePriority({ type, group, instance });
+			let entry = this.findWithPriority({ type, group, instance });
 			if (entry) {
 				tasks.push(this.readResource(entry));
 			} else {
@@ -357,7 +369,7 @@ class DependencyTrackingContext {
 		// Lots can also have a foundation exemplar. Read this as well.
 		const fid = exemplar.get(ExemplarProperty.BuildingFoundation);
 		if (fid) {
-			let entry = this.findWithCorePriority({ instance: fid });
+			let entry = this.findWithPriority({ instance: fid });
 			if (entry) {
 				tasks.push(
 					this.readResource(entry).then(x => lot.foundation = x),
@@ -432,7 +444,7 @@ class DependencyTrackingContext {
 		// giving priority to core files, see #77 - where we make sure that we 
 		// don't track ourselves if reading the building of the lot, as the 
 		// LotConfigurations exemplar typically has the same IID!
-		let entry = this.findWithCorePriority({
+		let entry = this.findWithPriority({
 			type: getFileTypeByLotObject(lotObject),
 			instance: iid,
 		}, entry => entry.group !== Groups.LotConfigurations);
@@ -462,7 +474,7 @@ class DependencyTrackingContext {
 		let entries: Entry[] = [];
 		let core: Entry[] = [];
 		for (let tgi of tgis) {
-			let entry = this.findWithCorePriority(tgi);
+			let entry = this.findWithPriority(tgi);
 			if (!entry) {
 				missing.push(new Dep.Missing({ ...tgi }));
 			} else {
@@ -542,7 +554,7 @@ class DependencyTrackingContext {
 			// an `.sc4model` file. Note that we only have to report missing 
 			// dependencies when the model is not set to 0x00 - which is 
 			// something that can happen apparently.
-			let model = this.findWithCorePriority({ type, group, instance });
+			let model = this.findWithPriority({ type, group, instance });
 			if (model) {
 				await this.readResource(model);
 				modelMap.set(model.id, new Dep.Model({ entry: model }));
@@ -604,7 +616,7 @@ class DependencyTrackingContext {
 			if (query.instance === 0x00) continue;
 
 			// If nothing was found, we have a missing dependency.
-			entry = this.findWithCorePriority(query) as ExemplarEntry;
+			entry = this.findWithPriority(query) as ExemplarEntry;
 			if (!entry) {
 				dep.props.push([prop, new Dep.Missing(query)]);
 			} else {
@@ -722,15 +734,16 @@ class DependencyTrackingResult {
 
 		// Show the installation and plugins folder.
 		const { bold, cyan, red } = chalk;
-		console.log('');
 		console.log(bold('Installation folder:'), cyan(this.installation));
 		console.log(bold('Plugins folder:'), cyan(this.plugins));
 
 		// Show the dependencies in sc4pac format.
 		if (format === 'sc4pac') {
-			console.log(bold('sc4pac dependencies:'));
-			for (let pkg of this.packages) {
-				console.log(`  - ${cyan(pkg)}`);
+			if (this.packages.length > 0) {
+				console.log(bold('sc4pac dependencies:'));
+				for (let pkg of this.packages) {
+					console.log(`  - ${cyan(pkg)}`);
+				}
 			}
 
 			// Log all the non-sc4pac dependencies as well, but make sure that 
@@ -776,6 +789,7 @@ class DependencyTrackingResult {
 				console.log(String(dep));
 			}
 		}
+		console.log('');
 
 	}
 
