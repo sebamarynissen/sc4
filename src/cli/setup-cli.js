@@ -167,7 +167,8 @@ export function factory(program) {
 		.description('Finds all dependencies for the files that match the given patterns')
 		.option('-d, --directory <dir>', 'The directory to match the patterns against. Defaults to your configured plugins folder')
 		.option('--tree', 'Shows the entire dependency tree')
-		.action(commands.track);
+		.option('--dependencies <dependencies...>', 'A list of explicit dependencies that should be prioritized')
+		.action(commands.pluginsTrack);
 
 	// Command for finding duplicate files in a plugin folder.
 	plugins

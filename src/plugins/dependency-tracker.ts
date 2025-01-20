@@ -56,6 +56,10 @@ type PackageIndex = {
 type ExemplarLike = Exemplar | Cohort;
 type ExemplarEntry = Entry<ExemplarLike>;
 
+type TrackOptions = {
+	dependencies?: string[];
+};
+
 // # DependencyTracker
 // Small helper class that allows us to easily pass context around without 
 // having to inject it constantly in the functions.
@@ -181,7 +185,7 @@ export default class DependencyTracker {
 	// ## track(patterns)
 	// Performs the actual dependency tracking. Returns an array of filenames 
 	// that are needed by the source files.
-	async track(patterns: string | string[] = []) {
+	async track(patterns: string | string[] = [], opts: TrackOptions = {}) {
 
 		// If the index hasn't been built yet, we'll do this first. The index is 
 		// stored per instance so that we can track dependencies multiple times 
@@ -201,7 +205,7 @@ export default class DependencyTracker {
 		]);
 
 		// Now actually start tracking, but do it in a separate context.
-		let ctx = new DependencyTrackingContext(this, sourceFiles);
+		let ctx = new DependencyTrackingContext(this, sourceFiles, opts);
 		return await ctx.track();
 
 	}
@@ -214,6 +218,7 @@ export default class DependencyTracker {
 // recursive walk.
 type MaybePromise<T> = T | Promise<T>;
 class DependencyTrackingContext {
+	explicitDependencies: Set<string>;
 	tracker: DependencyTracker;
 	index: PluginIndex;
 	files: string[];
@@ -223,10 +228,11 @@ class DependencyTrackingContext {
 	queue: PQueue;
 
 	// ## constructor(tracker, files)
-	constructor(tracker: DependencyTracker, files: string[]) {
+	constructor(tracker: DependencyTracker, files: string[], opts: TrackOptions) {
 		this.tracker = tracker;
 		this.index = tracker.index;
 		this.files = files;
+		this.explicitDependencies = new Set(opts.dependencies);
 
 		// Setup up a promise queue so that we're able to easily throttle the 
 		// amount of read operations.
@@ -250,14 +256,26 @@ class DependencyTrackingContext {
 		filter?: (entry: Entry) => boolean,
 	) {
 		let entries = this.index.findAll(query);
-		if (filter) {
-			entries = entries.filter(filter);
-		}
-		if (entries.length > 0) {
+		if (filter) entries = entries.filter(filter);
+		if (entries.length > 1) {
 			entries.sort((a, b) => {
-				let hasA = this.files.includes(a.dbpf.file!) ? -1 : 1;
-				let hasB = this.files.includes(b.dbpf.file!) ? -1 : 1;
-				return hasA - hasB;
+				let fileA = a.dbpf.file!;
+				let fileB = b.dbpf.file!;
+				let hasA = this.files.includes(fileA) ? -1 : 1;
+				let hasB = this.files.includes(fileB) ? -1 : 1;
+				let diff = hasA - hasB;
+				if (diff !== 0) return diff;
+
+				// If haven't made a decision yet, we'll also check the 
+				// *explicit* dependencies that might be specified. That way we 
+				// don't report dependencies outside of the explicit 
+				// dependencies, that only causes confusion.
+				let pkgA = folderToPackageId(fileA) || fileA;
+				let pkgB = folderToPackageId(fileB) || fileB;
+				let explicitA = this.explicitDependencies.has(pkgA) ? -1 : 1;
+				let explicitB = this.explicitDependencies.has(pkgB) ? -1 : 1;
+				return explicitA - explicitB;
+
 			});
 		}
 		return entries[0];
@@ -267,8 +285,7 @@ class DependencyTrackingContext {
 	// Starts the tracking operation. For now we perform it *sequentially*, but 
 	// in the future we might want to do this in parallel!
 	async track() {
-		let tasks = this.files
-			.map(file => this.read(file));
+		let tasks = this.files.map(file => this.read(file));
 		await Promise.all(tasks);
 		return new DependencyTrackingResult(this);
 	}
