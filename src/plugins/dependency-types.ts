@@ -368,7 +368,11 @@ export class Exemplar extends Dependency {
 			));
 		}
 		if (this.parent) {
-			lines.push(...this.parent.toLines({ width, level: level+1 }));
+			let s = ' '.repeat(2*(level+1));
+			lines.push(
+				`${s}${chalk.green('Parent')}`,
+				...this.parent.toLines({ width, level: level+1, root: false }),
+			);
 		}
 		if (root) lines.push('');
 		return lines;
