@@ -229,12 +229,8 @@ class DependencyTrackingContext {
 		this.files = files;
 
 		// Setup up a promise queue so that we're able to easily throttle the 
-		// amount of read operations, and even make it possible to do it all 
-		// sequentially with no parallelization - which is useful for debugging 
-		// purposes as it guaranteeds deterministic read order!
-		this.queue = new PQueue({
-			concurrency: 500,
-		});
+		// amount of read operations.
+		this.queue = new PQueue({ concurrency: 500 });
 
 	}
 
@@ -279,7 +275,7 @@ class DependencyTrackingContext {
 	// Parses the given file as a dbpf file and tracks down all dependencies.
 	async read(file: string) {
 		let dbpf = new DBPF({ file, parse: false });
-		await dbpf.parseAsync();
+		await this.queue.add(() => dbpf.parseAsync());
 		let tasks = [...dbpf].map(async entry => {
 			switch (entry.type) {
 				case FileType.DIR: return;
@@ -300,13 +296,9 @@ class DependencyTrackingContext {
 			switch (entry.type) {
 				case FileType.Exemplar:
 				case FileType.Cohort:
-					return await this.queue.add(() => {
-						return this.readExemplar(entry as ExemplarEntry);
-					}) as Dep.Dependency;
+					return await this.readExemplar(entry as ExemplarEntry);
 				case FileType.FSH:
-					return await this.queue.add(() => {
-						return this.readTexture(entry);
-					}) as Dep.Dependency;
+					return await this.readTexture(entry);
 				default:
 					return new Dep.Raw({ entry });
 			}
@@ -318,7 +310,7 @@ class DependencyTrackingContext {
 	// Reads & processes the exemplar file identified by the given entry. Note 
 	// that the exemplar.
 	async readExemplar(entry: ExemplarEntry) {
-		let exemplar = await entry.readAsync();
+		let exemplar = await this.queue.add(() => entry.readAsync()) as ExemplarLike;
 		this.touch(entry);
 		let exemplarType = exemplar.get('ExemplarType');
 		let tasks = [];
