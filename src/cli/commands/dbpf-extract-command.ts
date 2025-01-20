@@ -197,7 +197,29 @@ function getExtension(entry: Entry): string {
 		case FileType.BMP: return '.bmp';
 		case FileType.JFIF: return '.jfif';
 		case FileType.SC4Path: return '.sc4path';
+		case 0x00000000: {
+
+			// Ini files have fixed TGI's apparently, so we'll handle those 
+			// first.
+			let { group: gid, instance: iid } = entry;
+			if (gid === 0x4a87bfe8 && iid === 0x2a87bffc) {
+				return '.ini';
+			} else if (gid === 0x8a5971c5) {
+				if (
+					iid === 0x2b563701 ||
+					iid === 0x8a5993b9 ||
+					iid === 0xaa597172 ||
+					iid === 0xea8a1115
+				) return '.ini';
+			}
+
+			// UI files have Type ID 0x00000000 and can have a resolution as GID.
+			if (gid !== 0x8a5971c5 && gid !== 0x4a87bfe8) {
+				return '.xml';
+			}
+		}
 		default: return '';
+
 	}
 }
 
