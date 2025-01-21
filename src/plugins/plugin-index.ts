@@ -1,4 +1,5 @@
 // # file-index.js
+import debugModule from 'debug';
 import { os } from 'sc4/utils';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
@@ -17,6 +18,10 @@ import type {
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
 const Family = ExemplarProperty.BuildingpropFamily;
+const debug = debugModule('sc4:plugins:index');
+debugModule.formatters.h = (array: number | number[]) => {
+	return [array].flat().map(x => '0x'+x.toString(16)).join(', ');
+}
 
 // The amount of files we need to scan before we're going to use multithreading.
 const MULTITHREAD_LIMIT = 1_000;
@@ -186,10 +191,12 @@ export default class PluginIndex {
 		// large amount of files.
 		const { plugins = this.options.plugins } = opts;
 		const files = await this.getFilesToScan({ plugins });
+		debug('Found %d files to scan', files.length);
 		let {
 			threads = (files.length > MULTITHREAD_LIMIT ? undefined : 0),
 		} = this.options;
 		const pool = new WorkerPool({ n: threads });
+		debug('Using %d threads', threads);
 
 		// Loop all files and then parse them one by one. Note that it's crucial 
 		// here to maintain the sort order, so when a file is read in, we don't 
@@ -199,26 +206,32 @@ export default class PluginIndex {
 		let tasks: Promise<DBPF>[] = [];
 		for (let i = 0; i < files.length; i++) {
 			let file = files[i];
+			debug('Start parsing %s', file);
 			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
 				let dbpf = new DBPF({ ...json, parse: false });
 				queue[i] = [...dbpf];
 			}) as Promise<DBPF>;
 			tasks.push(task);
+			task.then(() => debug('Done parsing %s', file))
 		}
 		await Promise.all(tasks);
 		pool.close();
+		debug('Worker pool closed');
 
 		// Get all entries again in a flat array and then create our index from 
 		// it. **IMPORTANT**! We can't create the index with new 
 		// TGIIndex(...values) because there might be a *ton* of entries, 
 		// causing a stack overflow - JS can only handle that many function 
 		// arguments!
+		debug('Adding entries to index');
 		let flat = queue.flat();
 		let entries = this.entries = new TGIIndex(flat.length);
 		for (let i = 0; i < flat.length; i++) {
 			entries[i] = flat[i];
 		}
+		debug('Building index');
 		entries.build();
+		debug('Index built');
 
 	}
 
@@ -226,15 +239,19 @@ export default class PluginIndex {
 	// Builds up the index of all building & prop families by reading in all 
 	// exemplars.
 	async buildFamilies(opts: GeneralBuildOptions = {}) {
+		debug('Start indexing families');
 		let { concurrency = 512 } = opts;
 		let exemplars = this.findAll({ type: FileType.Exemplar });
+		debug('Scanning %d exemplars for families', exemplars.length);
 		let queue = new PQueue({ concurrency });
 		for (let entry of exemplars) {
 			queue.add(async () => {
 				try {
+					debug('Looking for families in %h', entry.tgi);
 					let exemplar = await entry.readAsync();
 					let families = this.getPropertyValue(exemplar, Family);
 					if (!families) return;
+					debug('Found %d families in %h', families.length, entry.tgi);
 					for (let family of families) {
 						if (family) {
 							let key = h(family as number);
@@ -247,6 +264,7 @@ export default class PluginIndex {
 					// Some exemplars fail to parse apparently, ignore this for 
 					// now.
 					console.warn(`Failed to parse exemplar ${entry.id}: ${e.message}`);
+					throw e;
 
 				}
 			});
@@ -256,6 +274,7 @@ export default class PluginIndex {
 		// We're not done yet. If a prop pack adds props to a Maxis family, then 
 		// multiple of the *same* tgi might be present in the family array. We 
 		// have to avoid this, so we need to filter the tgi's again to be unique.
+		debug('Filtering unique families');
 		for (let key of Object.keys(this.families)) {
 			let family = this.families[key];
 			let had = new Set();
@@ -269,6 +288,7 @@ export default class PluginIndex {
 				}
 			});
 		}
+		debug('Done indexing families');
 
 	}
 
