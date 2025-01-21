@@ -1,4 +1,5 @@
 // # track.js
+import createDebug from 'debug';
 import chalk from 'chalk';
 import { Glob } from 'glob';
 import path from 'node:path';
@@ -20,6 +21,7 @@ import * as Dep from './dependency-types.js';
 import type { Entry, TGI } from 'sc4/core';
 import type { Logger, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
+const debug = createDebug('sc4:plugins:tracker');
 
 // Constants
 const RKT = [
@@ -120,7 +122,9 @@ export default class DependencyTracker {
 			plugins,
 			installation,
 		});
+		debug('Building plugin index');
 		await index.build();
+		debug('Indexing building & prop families');
 		logger?.progress.update('Indexing building & prop families');
 		await index.buildFamilies();
 		logger?.progress.succeed();
@@ -131,6 +135,7 @@ export default class DependencyTracker {
 			await fs.promises.writeFile(cache, JSON.stringify(index.toJSON()));
 			logger?.progress.succeed();
 		}
+		debug('Index built');
 
 	}
 
@@ -205,6 +210,7 @@ export default class DependencyTracker {
 		]);
 
 		// Now actually start tracking, but do it in a separate context.
+		debug('Going to track %d source files', sourceFiles.length);
 		let ctx = new DependencyTrackingContext(this, sourceFiles, opts);
 		return await ctx.track();
 
@@ -304,7 +310,11 @@ class DependencyTrackingContext {
 	// Parses the given file as a dbpf file and tracks down all dependencies.
 	async read(file: string) {
 		let dbpf = new DBPF({ file, parse: false });
-		await this.queue.add(() => dbpf.parseAsync());
+		await this.queue.add(async () => {
+			debug('Reading %s', dbpf.file);
+			await dbpf.parseAsync();
+			debug('Read %s', dbpf.file);
+		});
 		let tasks = [...dbpf].map(async entry => {
 			switch (entry.type) {
 				case FileType.DIR: return;
@@ -322,6 +332,7 @@ class DependencyTrackingContext {
 	async readResource(entry: Entry): Promise<Dep.Dependency> {
 		this.touch(entry);
 		return await this.once(entry, async () => {
+			debug('Reading entry %h', entry.tgi);
 			switch (entry.type) {
 				case FileType.Exemplar:
 				case FileType.Cohort:
