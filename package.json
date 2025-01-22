@@ -116,6 +116,7 @@
     "qfs-compression": "^0.2.3",
     "semver": "^7.3.5",
     "smart-arraybuffer": "^1.0.0-alpha.2",
+    "supports-color": "^10.0.0",
     "tar": "^6.1.8",
     "uint8array-extras": "^1.4.0",
     "yaml": "^2.6.0"

@@ -761,7 +761,7 @@ class DependencyTrackingResult {
 	dump({ format = 'sc4pac' }: DependencyTrackingResultDumpOptions = {}) {
 
 		// Show the installation and plugins folder.
-		const { bold, cyan, red } = chalk;
+		const { bold, cyan, red, green } = chalk;
 		console.log(bold('Installation folder:'), cyan(this.installation));
 		console.log(bold('Plugins folder:'), cyan(this.plugins));
 
@@ -791,6 +791,11 @@ class DependencyTrackingResult {
 				for (let dep of deps) {
 					console.log(`  - ${cyan(dep)}`);
 				}
+			}
+
+			// If there are no dependencies at all, make sure to log it too.
+			if (this.packages.length + deps.length + this.missing.length === 0) {
+				console.log(green('No external dependencies'));
 			}
 
 		}
