@@ -794,7 +794,7 @@ class DependencyTrackingResult {
 			}
 
 			// If there are no dependencies at all, make sure to log it too.
-			if (this.packages.length + deps.length === 0) {
+			if (this.packages.length + deps.length + this.missing.length === 0) {
 				console.log(green('No external dependencies'));
 			}
 
