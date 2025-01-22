@@ -70,7 +70,11 @@ export default class WorkerPool extends EventEmitter {
 		this.url = url ? String(url) : undefined;
 		this.ts = ts;
 		this.script = script;
-		this.numThreads = numThreads;
+
+		// IMPORTANT! If we're running as sea, we'll *always* run in separate 
+		// threads, because in that case we have a script, which is can only be 
+		// run in a separate thread anyway.
+		this.numThreads = Math.max(numThreads, this.script ? 1 : 0);
 		this.workers = [];
 		this.freeWorkers = [];
 		this.tasks = [];
