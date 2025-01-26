@@ -146,23 +146,8 @@ class AddOperation {
 		this.spinner?.update(`Adding ${file}`);
 		let dbpf = new DBPF({ file, parse: false });
 		await dbpf.parseAsync();
-		for (let entry of dbpf) {
-
-			// Skip the dir entry of course, the destination DBPF will create 
-			// its own dir entry.
-			if (entry.type === FileType.DIR) continue;
-
-			// Don't parse or decompress the entry, we'll just keep it as is: a 
-			// potentially compressed buffer read from the filesystem.
-			let buffer = await entry.readRawAsync();
-			await this.stream.add(entry.tgi, buffer, {
-				compressed: entry.compressed,
-				compressedSize: entry.compressedSize,
-				fileSize: entry.fileSize,
-			});
-			this.counter++;
-
-		}
+		await this.stream.addDbpf(dbpf);
+		this.counter += dbpf.length;
 	}
 
 }

@@ -7,6 +7,8 @@ import Header from './dbpf-header.js';
 import { compress } from 'qfs-compression';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
+import FileType from './file-types.js';
+import type DBPF from './dbpf.js';
 
 type BufferAddOptions = {
 	compressed?: boolean;
@@ -102,6 +104,27 @@ export default class DBPFStream {
 			this.dir.push({ ...tgi, size: fileSize });
 		}
 
+	}
+
+	// ## addDbpf(dbpf)
+	// Adds an entire dbpf to the stream - also known as datpacking. Note that 
+	// the dbpf should already have been parsed!
+	async addDbpf(dbpf: DBPF) {
+		for (let entry of dbpf) {
+
+			// Obviously DIR files don't need to be copied
+			if (entry.type === FileType.DIR) continue;
+
+			// Don't parse or decompress the entry. We'll just keep it as is: a 
+			// potentially compressed buffer read from the filesystem.
+			let buffer = await entry.readRawAsync();
+			await this.add(entry.tgi, buffer, {
+				compressed: entry.compressed,
+				compressedSize: entry.compressedSize,
+				fileSize: entry.fileSize,
+			});
+
+		}
 	}
 
 	// ## seal()

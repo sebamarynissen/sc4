@@ -15,3 +15,4 @@ export * from './dbpf-add-command.js';
 export * from './city-count-command.js';
 export * from './plugins-duplicates-command.js';
 export * from './plugins-track-command.js';
+export * from './plugins-datpack-command.js';
