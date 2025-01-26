@@ -605,6 +605,7 @@ class DependencyTrackingContext {
 		// ItemIcon, ...
 		const props = {
 			UserVisibleNameKey: { type: FileType.LTEXT },
+			ItemDescriptionKey: { type: FileType.LTEXT },
 			ItemIcon: { type: FileType.PNG, group: 0x6a386d26 },
 			QueryExemplarGUID: { type: 0x00000000 },
 			SFXQuerySound: { type: 0x0b8d821a },
