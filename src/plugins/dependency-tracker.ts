@@ -19,8 +19,9 @@ import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
 import type { Entry, TGI } from 'sc4/core';
-import type { Logger, TGIQuery } from 'sc4/types';
+import type { Logger, TGIArray, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
+import { styleText } from 'node:util';
 const debug = createDebug('sc4:plugins:tracker');
 
 // Constants
@@ -230,7 +231,7 @@ class DependencyTrackingContext {
 	files: string[];
 	entries: Map<string, MaybePromise<Dep.Dependency>> = new Map();
 	touched: Set<string> = new Set();
-	missing: object[] = [];
+	missing: Dep.Missing[] = [];
 	queue: PQueue;
 
 	// ## constructor(tracker, files)
@@ -364,11 +365,17 @@ class DependencyTrackingContext {
 		// it gets marked as a dependency, which is what we want!
 		let [type, group, instance] = exemplar.parent;
 		if (type+group+instance !== 0) {
-			let entry = this.findWithPriority({ type, group, instance });
-			if (entry) {
-				tasks.push(this.readResource(entry));
+			let child = this.findWithPriority({ type, group, instance });
+			if (child) {
+				tasks.push(this.readResource(child));
 			} else {
-				tasks.push(new Dep.Missing({ type, group, instance }));
+				tasks.push(this.addMissing({
+					resource: 'cohort',
+					type,
+					group,
+					instance,
+					parent: entry,
+				}));
 			}
 		}
 		let [dep, parent] = await Promise.all(tasks);
@@ -397,13 +404,17 @@ class DependencyTrackingContext {
 		// Lots can also have a foundation exemplar. Read this as well.
 		const fid = exemplar.get(ExemplarProperty.BuildingFoundation);
 		if (fid) {
-			let entry = this.findWithPriority({ instance: fid });
-			if (entry) {
+			let child = this.findWithPriority({ instance: fid });
+			if (child) {
 				tasks.push(
-					this.readResource(entry).then(x => lot.foundation = x),
+					this.readResource(child).then(x => lot.foundation = x),
 				);
 			} else {
-				lot.foundation = new Dep.Missing({ instance: fid });
+				lot.foundation = this.addMissing({
+					resource: 'foundation',
+					instance: fid,
+					parent: entry,
+				});
 			}
 		}
 		await Promise.all(tasks);
@@ -483,12 +494,11 @@ class DependencyTrackingContext {
 		// as a missing dependency.
 		if (!entry) {
 			let kind = Object.keys(LotObjectType)[lotObject.type];
-			this.missing.push({
-				kind,
-				file: lotEntry.dbpf.file,
+			return this.addMissing({
+				resource: kind,
 				instance: iid,
+				parent: lotEntry,
 			});
-			return new Dep.Missing({ instance: iid });
 		} else {
 			return await this.readResource(entry);
 		}
@@ -498,14 +508,11 @@ class DependencyTrackingContext {
 	// ## readFamily(tgis, family)
 	// Tracks all dependencies of a family.
 	async readFamily(tgis: TGI[], family: number) {
-		let missing = [];
 		let entries: Entry[] = [];
 		let core: Entry[] = [];
 		for (let tgi of tgis) {
 			let entry = this.findWithPriority(tgi);
-			if (!entry) {
-				missing.push(new Dep.Missing({ ...tgi }));
-			} else {
+			if (entry) {
 				let { file } = entry.dbpf;
 				if (file?.match(/SimCity_\d\.dat/)) {
 					core.push(entry);
@@ -587,15 +594,14 @@ class DependencyTrackingContext {
 				await this.readResource(model);
 				modelMap.set(model.id, new Dep.Model({ entry: model }));
 			} else if (instance !== 0x00) {
-				let missing = new Dep.Missing({ type, group, instance });
-				modelMap.set(missing.id, missing);
-				this.missing.push({
-					kind: 'model',
-					file: entry.dbpf.file,
+				let missing = this.addMissing({
+					resource: 'model',
 					type,
 					group,
 					instance,
-				});
+					parent: entry,
+				})
+				modelMap.set(missing.id, missing);
 			}
 
 		});
@@ -605,6 +611,7 @@ class DependencyTrackingContext {
 		// ItemIcon, ...
 		const props = {
 			UserVisibleNameKey: { type: FileType.LTEXT },
+			ItemDescriptionKey: { type: FileType.LTEXT },
 			ItemIcon: { type: FileType.PNG, group: 0x6a386d26 },
 			QueryExemplarGUID: { type: 0x00000000 },
 			SFXQuerySound: { type: 0x0b8d821a },
@@ -644,16 +651,20 @@ class DependencyTrackingContext {
 			if (query.instance === 0x00) continue;
 
 			// If nothing was found, we have a missing dependency.
-			entry = this.findWithPriority(query) as ExemplarEntry;
-			if (!entry) {
-				dep.props.push([prop, new Dep.Missing(query)]);
+			let resource = this.findWithPriority(query) as ExemplarEntry;
+			if (!resource) {
+				dep.props.push([prop, this.addMissing({
+					resource: prop,
+					parent: entry,
+					...query,
+				})]);
 			} else {
 				let index = dep.props.length;
 
 				// TypeScript complains that we can't add null, but that's only 
 				// temporary, so make it work.
 				dep.props.push(null as unknown as Dep.ExemplarProp);
-				let task = this.readResource(entry).then(obj => {
+				let task = this.readResource(resource).then(obj => {
 					dep.props[index] = [prop, obj];
 				});
 				tasks.push(task);
@@ -673,6 +684,15 @@ class DependencyTrackingContext {
 	// ## readTexture(entry)
 	async readTexture(entry: Entry) {
 		return new Dep.Texture({ entry });
+	}
+
+	// ## addMissing()
+	// Creates a new missing dependency and registers it in our array of missing 
+	// dependencies along the way.
+	addMissing(opts: Dep.MissingOptions) {
+		let dep = new Dep.Missing(opts);
+		this.missing.push(dep);
+		return dep;
 	}
 
 	// ## once(entry)
@@ -708,7 +728,7 @@ class DependencyTrackingResult {
 	tree: Dep.Dependency[];
 	files: string[];
 	packages: string[];
-	missing: object[];
+	missing: Dep.Missing[];
 
 	// ## constructor(ctx)
 	constructor(ctx: DependencyTrackingContext) {
@@ -750,7 +770,8 @@ class DependencyTrackingResult {
 			.filter(pkg => !!pkg);
 		this.packages = [...new Set(packages)].sort() as string[];
 
-		// Storate the information about the missing dependencies.
+		// Filter out the missing dependencies so that we can easily list them 
+		// as well.
 		this.missing = ctx.missing;
 
 	}
@@ -803,16 +824,60 @@ class DependencyTrackingResult {
 		// Always report any missing dependencies.
 		if (format === 'sc4pac' && this.missing.length > 0) {
 			console.log(red('The following dependencies were not found:'));
-			let mapped = this.missing.map((row: any) => {
-				let clone = { ...row };
-				let u = void 0;
-				row.type !== u && (clone.type = new Hex(row.type));
-				row.group !== u && (clone.group = new Hex(row.group));
-				row.instance !== u && (clone.instance = new Hex(row.instance));
-				if (row.file) clone.file = new File(row.file);
-				return clone;
+
+			// We'll filter out duplicate missing dependencies based on a hash. 
+			// That way, if a lot uses a missing prop 500 times, you won't get 
+			// to see the missing dependency 500 times, but only *once* per lot.
+			let hashes = new Set();
+			let missing = [...this.missing]
+				.sort((a, b) => {
+					return a.resource < b.resource ? -1 : 1;
+				})
+				.filter(dep => {
+					let { type = -1, group = -1, instance = -1 } = dep.entry;
+					let { parent } = dep;
+					let hash = [
+						dep.resource,
+						type,
+						group,
+						instance,
+						parent.id,
+					].join('/');
+					if (hashes.has(hash)) {
+						return false;
+					} else {
+						hashes.add(hash);
+						return true;
+					}
+				});
+
+			// Next we'll group the missing dependencies again based on another 
+			// hash so that we can filter out duplicate references when 
+			// generating the rows to be included in the table.
+			let grouped = Object.groupBy(missing, dep => {
+				let { type = -1, group = -1, instance = -1 } = dep.entry;
+				return [dep.resource, type, group, instance].join('/');
 			});
-			console.table(mapped);
+			let flat = [];
+			for (let hash of Object.keys(grouped)) {
+				let deps = grouped[hash]!;
+				for (let i = 0; i < deps.length; i++) {
+					let missing = deps[i];
+					let { entry } = missing;
+					let row: any = {};
+					let u = void 0;
+					if (i === 0) {
+						row.kind = new Resource(missing.resource);
+						entry.type !== u && (row.type = new Hex(entry.type));
+						entry.group !== u && (row.group = new Hex(entry.group));
+						entry.instance !== u && (row.instance = new Hex(entry.instance));
+					}
+					row['referenced by'] = new TableTGI(missing.parent.tgi);
+					if (missing.parent.dbpf.file) row.file = new File(missing.parent.dbpf.file);
+					flat.push(row);
+				}
+			}
+			console.table(flat);
 		}
 
 		// If we're dealing with the tree format, log it here. Note that we will 
@@ -850,11 +915,27 @@ class Hex extends Number {
 }
 class File extends String {
 	[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: any) {
-		let max = 100;
+		let max = 64;
 		let value = String(this);
 		if (value.length > max) {
-			value = '...'+value.slice(value.length-97);
+			value = '...'+value.slice(value.length-(max-3));
 		}
 		return opts.stylize(value, 'special');
+	}
+}
+class TableTGI {
+	tgi: TGIArray;
+	constructor(tgi: TGIArray) {
+		this.tgi = tgi;
+	}
+	[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: any) {
+		return this.tgi.map(nr => {
+			return opts.stylize(hex(+nr), 'number');
+		}).join('-');
+	}
+}
+class Resource extends String {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		return styleText('green', String(this));
 	}
 }
