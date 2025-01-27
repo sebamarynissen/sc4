@@ -125,10 +125,10 @@ export type FileSelectorConfig = {
 	emptyText?: string;
 	theme?: Theme;
 	filter?: (file: FileInfo) => boolean;
-	transform: (item: FileInfo) => string;
+	transform?: (item: FileInfo) => string;
 };
 
-export const fileSelector = createPrompt((config: FileSelectorConfig, done: any) => {
+export const fileSelector = createPrompt<string, FileSelectorConfig>((config: FileSelectorConfig, done: any) => {
 	const {
 		type = 'file',
 		pageSize = 10,

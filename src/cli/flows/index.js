@@ -7,3 +7,4 @@ export * from './scan-for-menus-flow.js';
 export * from './change-icon-flow.js';
 export * from './plop-all-flow.js';
 export * from './plugins-track-flow.js';
+export * from './datpack-flow.js';

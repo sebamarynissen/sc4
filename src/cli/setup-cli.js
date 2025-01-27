@@ -177,6 +177,14 @@ export function factory(program) {
 		.option('-d, --directory <dir>', 'The directory to look for duplicates in. Defaults to your configured plugins folder')
 		.action(commands.pluginsDuplicates);
 
+	// Command for sc4pac-aware datpacking of a users plugins folder.
+	plugins
+		.command('datpack')
+		.description('Optimizes your plugins folder by datpacking every sc4pac package')
+		.argument('[dir]', 'The plugins folder to datpack. Defaults to your configured plugins folder')
+		.option('--limit <limit>', 'The minimum amount of files required in a folder before datpacking will be performed. Defaults to 10', parsers.number)
+		.action(commands.pluginsDatpack);
+
 	// Commands that operate specifically on dbpfs, such as extracting a DBPF.
 	const dbpf = program
 		.command('dbpf')
