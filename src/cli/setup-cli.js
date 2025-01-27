@@ -181,7 +181,7 @@ export function factory(program) {
 	plugins
 		.command('datpack')
 		.description('Optimizes your plugins folder by datpacking every sc4pac package')
-		.option('-d, --directory <dir>', 'The plugins folder to datpack. Defaults to your configured plugins folder')
+		.argument('[dir]', 'The plugins folder to datpack. Defaults to your configured plugins folder')
 		.option('--limit <limit>', 'The minimum amount of files required in a folder before datpacking will be performed. Defaults to 10', parsers.number)
 		.action(commands.pluginsDatpack);
 

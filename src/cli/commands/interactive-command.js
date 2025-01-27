@@ -104,6 +104,14 @@ async function start(n) {
 			},
 		},
 		{
+			name: 'Datpack sc4pac plugins',
+			async value() {
+				let args = await flows.datpack();
+				if (!args) return;
+				await commands.pluginsDatpack(...args);
+			},
+		},
+		{
 			name: 'Plop all lots of a collection',
 			type: 'city',
 			async value() {

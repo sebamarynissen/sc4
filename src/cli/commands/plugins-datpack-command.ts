@@ -13,13 +13,11 @@ type DatPackCommandOptions = {
 	limit?: number;
 };
 
-export async function pluginsDatpack(opts: DatPackCommandOptions) {
-	const {
-		directory = process.env.SC4_PLUGINS ?? process.cwd(),
-		limit,
-	} = opts;
+export async function pluginsDatpack(directory?: string, opts: DatPackCommandOptions = {}) {
+	const { limit } = opts;
+	const plugins = path.resolve(process.cwd(), directory ?? process.env.SC4_PLUGINS ?? '.');
 	const packer = new Datpacker({ limit });
-	await packer.scan(directory);
+	await packer.scan(plugins);
 }
 
 type DatpackerOptions = {
@@ -43,7 +41,7 @@ class Datpacker {
 	// ## constructor()
 	constructor(opts: DatpackerOptions = {}) {
 		const { limit = 10 } = opts;
-		this.limit = limit;
+		this.limit = Math.max(2, limit);
 	}
 
 	// ## scan(directory)
