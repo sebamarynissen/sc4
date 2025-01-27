@@ -824,25 +824,60 @@ class DependencyTrackingResult {
 		// Always report any missing dependencies.
 		if (format === 'sc4pac' && this.missing.length > 0) {
 			console.log(red('The following dependencies were not found:'));
-			const missing = [...this.missing].sort((a, b) => a.resource < b.resource ? -1 : 1);
-			let mapped = missing.map(missing => {
-				let { entry } = missing;
-				let row: any = {
-					kind: {
-						[Symbol.for('nodejs.util.inspect.custom')]() {
-							return styleText('green', missing.resource);
-						}
-					},
-				};
-				let u = void 0;
-				entry.type !== u && (row.type = new Hex(entry.type));
-				entry.group !== u && (row.group = new Hex(entry.group));
-				entry.instance !== u && (row.instance = new Hex(entry.instance));
-				row['referenced by'] = new TableTGI(missing.parent.tgi);
-				if (missing.parent.dbpf.file) row.file = new File(missing.parent.dbpf.file);
-				return row;
+
+			// We'll filter out duplicate missing dependencies based on a hash. 
+			// That way, if a lot uses a missing prop 500 times, you won't get 
+			// to see the missing dependency 500 times, but only *once* per lot.
+			let hashes = new Set();
+			let missing = [...this.missing]
+				.sort((a, b) => {
+					return a.resource < b.resource ? -1 : 1;
+				})
+				.filter(dep => {
+					let { type = -1, group = -1, instance = -1 } = dep.entry;
+					let { parent } = dep;
+					let hash = [
+						dep.resource,
+						type,
+						group,
+						instance,
+						parent.id,
+					].join('/');
+					if (hashes.has(hash)) {
+						return false;
+					} else {
+						hashes.add(hash);
+						return true;
+					}
+				});
+
+			// Next we'll group the missing dependencies again based on another 
+			// hash so that we can filter out duplicate references when 
+			// generating the rows to be included in the table.
+			let grouped = Object.groupBy(missing, dep => {
+				let { type = -1, group = -1, instance = -1 } = dep.entry;
+				return [dep.resource, type, group, instance].join('/');
 			});
-			console.table(mapped);
+			let flat = [];
+			for (let hash of Object.keys(grouped)) {
+				let deps = grouped[hash]!;
+				for (let i = 0; i < deps.length; i++) {
+					let missing = deps[i];
+					let { entry } = missing;
+					let row: any = {};
+					let u = void 0;
+					if (i === 0) {
+						row.kind = new Resource(missing.resource);
+						entry.type !== u && (row.type = new Hex(entry.type));
+						entry.group !== u && (row.group = new Hex(entry.group));
+						entry.instance !== u && (row.instance = new Hex(entry.instance));
+					}
+					row['referenced by'] = new TableTGI(missing.parent.tgi);
+					if (missing.parent.dbpf.file) row.file = new File(missing.parent.dbpf.file);
+					flat.push(row);
+				}
+			}
+			console.table(flat);
 		}
 
 		// If we're dealing with the tree format, log it here. Note that we will 
@@ -897,5 +932,10 @@ class TableTGI {
 		return this.tgi.map(nr => {
 			return opts.stylize(hex(+nr), 'number');
 		}).join('-');
+	}
+}
+class Resource extends String {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		return styleText('green', String(this));
 	}
 }
