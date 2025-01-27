@@ -414,12 +414,27 @@ export class Raw extends Dependency {
 	}
 }
 
+export type MissingOptions = {
+	type?: number;
+	group?: number;
+	instance: number;
+	resource: string;
+	parent: Entry;
+};
+
 // # Missing
 // Represents a mising dependency
 export class Missing extends Dependency {
 	kind = 'missing';
-	constructor(entry: EntryLike) {
-		super({ entry });
+	resource: string;
+	parent: Entry;
+	constructor(opts: MissingOptions) {
+		let { type, group, instance, resource, parent } = opts;
+		super({
+			entry: { type, group, instance },
+		});
+		this.resource = resource;
+		this.parent = parent;
 	}
 	toLines({ width = DEFAULT_WIDTH, level = 0 }: ToLinesOptions = {}) {
 		const { type, group, instance } = this.entry;
