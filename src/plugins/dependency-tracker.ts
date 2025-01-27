@@ -494,11 +494,6 @@ class DependencyTrackingContext {
 		// as a missing dependency.
 		if (!entry) {
 			let kind = Object.keys(LotObjectType)[lotObject.type];
-			this.missing.push({
-				kind,
-				file: lotEntry.dbpf.file,
-				instance: iid,
-			});
 			return this.addMissing({
 				resource: kind,
 				instance: iid,
