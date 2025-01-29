@@ -42,35 +42,62 @@ function clear(canvas) {
 // default we apply the icon template to it - meaning drawing the image four 
 // times and applying the grayscale, but you can also choose to just rawdog it 
 // onto the canvas - useful for existing icons!
-async function draw(canvas, img, overlay, templated) {
+async function draw(canvas, { image, overlay, templated, withIcon, color }) {
 
 	// Rawdog if possible.
 	const ctx = canvas.getContext('2d');
 	clear(canvas);
 	if (!templated) {
-		ctx.drawImage(img, 0, 0);
+		ctx.drawImage(image, 0, 0);
+		if (withIcon) {
+			for (let i = 0; i < 4; i++) {
+				drawMenuIcon(ctx, 44*i, color);
+			}
+		}
 		return;
 	}
 
 	// Draw the image four times. Note that the first time we have to apply the 
 	// grayscaling.
-	const offsets = getSourceOffset(img);
+	const offsets = getSourceOffset(image);
 	for (let i = 0; i < 4; i++) {
 		let x = 44*i;
 		ctx.save();
 		let region = new Path2D();
 		region.roundRect(x, 0, 44, 44, 7);
 		ctx.clip(region);
-		ctx.drawImage(img, ...offsets, x, 0, 44, 44);
+		ctx.drawImage(image, ...offsets, x, 0, 44, 44);
+
+		// Apply the menu icon if specified.
+		if (withIcon) {
+			drawMenuIcon(ctx, x, color);
+		}
+
 		if (i === 0) {
 			applyGrayscale(ctx);
 		}
 		ctx.restore();
+
 	}
 
 	// At last draw the overlay.
 	ctx.drawImage(overlay, 0, 0, 176, 44);
 
+}
+
+function drawMenuIcon(ctx, x, color) {
+	let w = 6;
+	let dx = 6;
+	let dy = 7;
+	ctx.save();
+	ctx.strokeStyle = color;
+	ctx.strokeWidth = '1px';
+	for (let i = 0; i < 3; i++) {
+		ctx.moveTo(x+dx, dy+2*i-0.5);
+		ctx.lineTo(x+dx+w, dy+2*i-0.5);
+		ctx.stroke();
+	}
+	ctx.restore();
 }
 
 // # openIcon(file)
@@ -137,6 +164,8 @@ let sourceImage = null;
 let overlayImage = null;
 let message = '';
 let templated = true;
+let withIcon = false;
+let color = '#ffffff';
 
 // # setFile(file)
 async function setFile(file) {
@@ -169,6 +198,8 @@ function set() {
 // function, except that we now have to call it manually.
 const input = document.querySelector('input[type="file"]');
 const $templated = document.querySelector('input[name="templated"]');
+const $withIcon = document.querySelector('input[name="with-icon"]');
+const $color = document.querySelector('input[type="color"]');
 const canvas = document.querySelector('canvas');
 const form = document.querySelector('form');
 const h1 = document.querySelector('h1');
@@ -178,11 +209,17 @@ function render() {
 	// source image did not change, we don't constantly rerender.
 	useMemo(() => {
 		if (sourceImage && overlayImage) {
-			draw(canvas, sourceImage, overlayImage, templated);
+			draw(canvas, {
+				image: sourceImage,
+				overlay: overlayImage,
+				templated,
+				color,
+				withIcon,
+			});
 		} else {
 			clear(canvas);
 		}
-	}, [sourceImage, overlayImage, templated]);
+	}, [sourceImage, overlayImage, templated, withIcon, color]);
 
 	// Update the heading text.
 	h1.textContent = message;
@@ -211,6 +248,18 @@ form.addEventListener('submit', async event => {
 	});
 	window.close();
 });
+
+document.querySelector('button#download')
+	.addEventListener('click', async event => {
+		event.preventDefault();
+		let buffer = await toBuffer(canvas);
+		let blob = new Blob([buffer], { type: 'image/png' });
+		let url = URL.createObjectURL(blob);
+		let a = document.createElement('a');
+		a.href = url;
+		a.download = 'icon.png';
+		a.click();
+	});
 
 // Setup the drag/drop behavior.
 const dropArea = document.body;
@@ -251,6 +300,12 @@ window.addEventListener('paste', e => {
 // Listen to the raw being checked or not.
 $templated.addEventListener('input', event => {
 	set(templated = event.target.checked);
+});
+$withIcon.addEventListener('input', event => {
+	set(withIcon = event.target.checked);
+});
+$color.addEventListener('input', event => {
+	set(color = event.target.value);
 });
 
 // Get the configuration data.

@@ -22,6 +22,7 @@ export const menuIcon = createPrompt((config, done) => {
 	const theme = makeTheme(config.theme);
 	const [url, setUrl] = useState('');
 	const [status, setStatus] = useState('idle');
+	const [address, setAddress] = useState('');
 	const prefix = usePrefix({ status, theme });
 	useMemo(() => {
 		const { default: file, ...rest } = config;
@@ -29,14 +30,17 @@ export const menuIcon = createPrompt((config, done) => {
 			...file && { default: defaultToUrl(file) },
 			...rest,
 		});
-		server.promises.listening().then(url => setUrl(url));
+		server.promises.listening().then(url => {
+			setUrl(url);
+			setAddress(theme.style.help(`(Visit ${url} if the browser doesn't open)`));
+		});
 		server.promises.ready().then(buffer => {
 			done(buffer);
 			setStatus('done');
 		});
 		return server;
 	}, []);
-	return url ? `${prefix} ${message} ${status === 'done' ? theme.style.answer('<icon>') : ''}` : '';
+	return url ? `${prefix} ${message} ${status === 'done' ? theme.style.answer('<icon>') : address }` : '';
 });
 
 // # defaultToUrl(file)

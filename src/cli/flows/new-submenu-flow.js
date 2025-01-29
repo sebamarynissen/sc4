@@ -25,7 +25,7 @@ export async function newSubmenu() {
 		message: 'Select the icon to be used for the button:',
 	});
 	let order = +await prompts.uint32({
-		message: 'Enter the item order:',
+		message: 'Enter the item order: (number between -2,147,483,648 and 2,147,483,647):',
 		default: 0,
 	});
 	return [icon, { name, description, parent, order }];
