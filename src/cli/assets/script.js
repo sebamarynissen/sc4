@@ -63,18 +63,21 @@ async function draw(canvas, img, overlay, templated) {
 		ctx.clip(region);
 		ctx.drawImage(img, ...offsets, x, 0, 44, 44);
 
-		let w = 6;
-		let dx = 7;
-		let dy = 7;
-		ctx.save();
-		ctx.strokeStyle = 'white';
-		ctx.strokeWidth = '1px';
-		for (let i = 0; i < 3; i++) {
-			ctx.moveTo(x+dx, dy+2*i-0.5);
-			ctx.lineTo(x+dx+w, dy+2*i-0.5);
-			ctx.stroke();
+		// Apply the menu icon if specified.
+		if (withIcon) {
+			let w = 6;
+			let dx = 7;
+			let dy = 7;
+			ctx.save();
+			ctx.strokeStyle = 'white';
+			ctx.strokeWidth = '1px';
+			for (let i = 0; i < 3; i++) {
+				ctx.moveTo(x+dx, dy+2*i-0.5);
+				ctx.lineTo(x+dx+w, dy+2*i-0.5);
+				ctx.stroke();
+			}
+			ctx.restore();
 		}
-		ctx.restore();
 
 		if (i === 0) {
 			applyGrayscale(ctx);
@@ -152,6 +155,7 @@ let sourceImage = null;
 let overlayImage = null;
 let message = '';
 let templated = true;
+let withIcon = false;
 
 // # setFile(file)
 async function setFile(file) {
@@ -184,6 +188,7 @@ function set() {
 // function, except that we now have to call it manually.
 const input = document.querySelector('input[type="file"]');
 const $templated = document.querySelector('input[name="templated"]');
+const $withIcon = document.querySelector('input[name="with-icon"]');
 const canvas = document.querySelector('canvas');
 const form = document.querySelector('form');
 const h1 = document.querySelector('h1');
@@ -197,11 +202,12 @@ function render() {
 		} else {
 			clear(canvas);
 		}
-	}, [sourceImage, overlayImage, templated]);
+	}, [sourceImage, overlayImage, templated, withIcon]);
 
 	// Update the heading text.
 	h1.textContent = message;
 	$templated.checked = templated;
+	$withIcon.disabled = !templated;
 
 }
 
@@ -266,6 +272,9 @@ window.addEventListener('paste', e => {
 // Listen to the raw being checked or not.
 $templated.addEventListener('input', event => {
 	set(templated = event.target.checked);
+});
+$withIcon.addEventListener('input', event => {
+	set(withIcon = event.target.checked);
 });
 
 // Get the configuration data.
