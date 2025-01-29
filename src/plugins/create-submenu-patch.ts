@@ -2,7 +2,7 @@
 import { fs, path } from 'sc4/utils';
 import chalk from 'chalk';
 import { Glob } from 'glob';
-import { DBPF, Cohort, FileType } from 'sc4/core';
+import { DBPF, Cohort, FileType, ExemplarProperty, TGI } from 'sc4/core';
 import type { Logger } from 'sc4/types';
 
 // # random()
@@ -12,9 +12,13 @@ function random() {
 	return Math.floor(Math.random() * 0xffffffff) + 1;
 }
 
+type TargetInfo = {
+	lots: number[];
+	flora: number[];
+};
 type CreateMenuPatchOptions = {
 	menu: number;
-	targets?: number[];
+	targets?: number[] | Partial<TargetInfo>;
 	dbpfs?: DBPF[];
 	files?: string[];
 	save?: boolean;
@@ -38,24 +42,37 @@ export default async function createMenuPatch(options: CreateMenuPatchOptions) {
 	let targets = await findGroupInstancePairs(options);
 
 	// If nothing was found, log a warning.
-	if (targets.length === 0) {
+	let { lots, flora } = targets;
+	if (lots.length + flora.length === 0) {
 		const { logger } = options;
-		logger?.warn('No lots found to put in a submenu');
+		logger?.warn('No lots or flora found to put in a submenu');
 		return null;
 	}
 
 	// Create a fresh Cohort file and add the Exemplar Patch Targets 
 	// (0x0062e78a) and Building Submenus (0xAA1DD399)
-	let cohort = new Cohort();
-	cohort.addProperty(0x0062e78a, targets);
-	cohort.addProperty(0xAA1DD399, [menu]);
-
-	// Create an empty dbpf and add the cohort to it, assigning it a random 
-	// instance id by default.
 	let dbpf = new DBPF();
-	let { instance = random() } = options;
-	dbpf.add([FileType.Cohort, 0xb03697d1, instance], cohort);
+	if (lots.length > 0) {
+		let cohort = new Cohort();
+		cohort.addProperty('ExemplarPatchTargets', lots);
+		cohort.addProperty('BuildingSubmenus', [menu]);
+		let { instance = random() } = options;
+		dbpf.add([FileType.Cohort, 0xb03697d1, instance], cohort);
+	}
 	
+	// Do the same for Flora.
+	if (flora.length > 0) {
+		let cohort = new Cohort();
+		cohort.addProperty('ExemplarPatchTargets', flora);
+		cohort.addProperty('ItemSubmenuParentId', menu);
+		cohort.addProperty(
+			'ItemButtonClass',
+			ExemplarProperty.ItemButtonClass.FloraItemInSubmenu,
+		);
+		let tgi = TGI.random(FileType.Cohort, 0xb03697d1);
+		dbpf.add(tgi, cohort);
+	}
+
 	// Serialize and write away if the save option is set.
 	if (options.save) {
 		let buffer = dbpf.toBuffer();
@@ -73,12 +90,23 @@ export default async function createMenuPatch(options: CreateMenuPatchOptions) {
 // various sources.
 async function findGroupInstancePairs(
 	options: CreateMenuPatchOptions,
-): Promise<number[]> {
+): Promise<TargetInfo> {
 
 	// If the group/instance pairs are directly specified as "targets" array, 
-	// then we return it as is.
+	// then we return it as is, and assume it's a "lots" array.
 	if (options.targets) {
-		return options.targets;
+		if (Array.isArray(options.targets)) {
+			return {
+				lots: options.targets,
+				flora: [],
+			};
+		} else {
+			return {
+				lots: [],
+				flora: [],
+				...options.targets
+			};
+		}
 	}
 
 	// Check if a list of dbpfs was specified. If not, then we'll try to read in 
@@ -144,9 +172,14 @@ async function findGroupInstancePairs(
 
 	// Now that we have the list of dbpfs to read the lots from, actually 
 	// collect the targets list.
-	let targets = [];
+	let targets: { lots: number[], flora: number []} = {
+		lots: [],
+		flora: [],
+	};
 	for (let dbpf of dbpfs) {
-		targets.push(...collect(dbpf, logger));
+		let { lots = [], flora = [] } = collect(dbpf, logger);
+		targets.lots.push(...lots);
+		targets.flora.push(...flora);
 	}
 	return targets;
 
@@ -158,30 +191,41 @@ async function findGroupInstancePairs(
 // might actually be stored in a parent cohort. We'll hence look for the 
 // LotResourceKey, which is more or less guaranteed to not be stored in a parent 
 // cohort - though it technically could be.
-function collect(dbpf: DBPF, logger?: Logger) {
-	let gis = [];
+function collect(dbpf: DBPF, logger?: Logger): TargetInfo {
+	let lots: number[] = [];
+	let flora: number[] = [];
 	let entries = dbpf.findAll({ type: FileType.Exemplar });
 	for (let entry of entries) {
-		
-		// Check if the LotResourceKey exists.
+		let exemplar;
 		try {
-			let ex = entry.read();
-			let hasLotResourceKey = ex.properties.some(prop => prop.id === 0xea260589);
-			if (!hasLotResourceKey) continue;
-
-			// Cool, this is an item that appears in a menu, grab its tgi and add
-			// the group and instance to what we're collecting.
-			let [, group, instance] = entry.tgi;
-			gis.push(group, instance);
-
-			// In this case we'll also log the name of the lot we're adding.
-			let nameProp = ex.properties.find(prop => prop.id === 0x20);
-			let name = nameProp?.value || 'Lot without a name';
-			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
+			exemplar = entry.read();
 		} catch (e) {
 			logger?.warn(`Failed to parse exemplar ${entry.id} from ${dbpf.file}: ${e.message}`);
+			continue;
+		}
+
+		// If this is a flora exemplar, we'll put it in the flora list obviously.
+		let [, group, instance] = entry.tgi;
+		let type = exemplar.get('ExemplarType');
+		if (type === ExemplarProperty.ExemplarType.Flora) {
+			flora.push(group, instance);
+			let name = exemplar.get('ExemplarName') ?? 'Nameless flora';
+			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
+			continue;
+		}
+
+		// Check if the LotResourceKey exists.
+		let lrk = exemplar.get('LotResourceKey');
+		if (lrk) {
+			lots.push(group, instance);
+			let name = exemplar.get('ExemplarName') ?? 'Nameless lot';
+			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
+			continue;
 		}
 
 	}
-	return gis;
+	return {
+		lots,
+		flora,
+	};
 }
