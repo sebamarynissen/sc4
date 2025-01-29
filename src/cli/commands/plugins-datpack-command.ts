@@ -6,6 +6,7 @@ import { DBPF, DBPFStream } from 'sc4/core';
 import path from 'node:path';
 import fs from 'node:fs';
 import PQueue from 'p-queue';
+import createComparator from 'src/plugins/compare-load-order.js';
 
 // # plugins-datpack-command.ts
 type DatPackCommandOptions = {
@@ -63,6 +64,8 @@ class Datpacker {
 				let glob = new FileScanner('**/*', { cwd });
 				let files = await glob.walk();
 				if (files.length < this.limit) return;
+				const compare = createComparator();
+				files.sort((a, b) => -compare(a, b));
 				jobs.push({
 					folder: cwd,
 					files,
