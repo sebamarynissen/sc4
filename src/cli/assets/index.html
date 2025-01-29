@@ -74,6 +74,8 @@
 		label > input {
 			margin-right: 0.5rem;
 		}
+		.flex { display: flex; }
+		.ml-2 { margin-left: 0.5rem; }
 	</style>
 	<script type="module" src="./script.js"></script>
 </head>
@@ -90,11 +92,14 @@
 				Apply icon template
 			</label>
 		</div>
-		<div>
+		<div class="flex">
 			<label>
 				<input type="checkbox" name="with-icon">
 				Add menu icon
 			</label>
+			<div class="ml-2">
+				<input type="color" name="icon-color" value="#ffffff">
+			</div>
 		</div>
 		<p>
 			Select an image to be used as icon. You can also drag & drop a file, or paste a url or raw image.

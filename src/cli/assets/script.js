@@ -42,26 +42,26 @@ function clear(canvas) {
 // default we apply the icon template to it - meaning drawing the image four 
 // times and applying the grayscale, but you can also choose to just rawdog it 
 // onto the canvas - useful for existing icons!
-async function draw(canvas, img, overlay, templated) {
+async function draw(canvas, { image, overlay, templated }) {
 
 	// Rawdog if possible.
 	const ctx = canvas.getContext('2d');
 	clear(canvas);
 	if (!templated) {
-		ctx.drawImage(img, 0, 0);
+		ctx.drawImage(image, 0, 0);
 		return;
 	}
 
 	// Draw the image four times. Note that the first time we have to apply the 
 	// grayscaling.
-	const offsets = getSourceOffset(img);
+	const offsets = getSourceOffset(image);
 	for (let i = 0; i < 4; i++) {
 		let x = 44*i;
 		ctx.save();
 		let region = new Path2D();
 		region.roundRect(x, 0, 44, 44, 7);
 		ctx.clip(region);
-		ctx.drawImage(img, ...offsets, x, 0, 44, 44);
+		ctx.drawImage(image, ...offsets, x, 0, 44, 44);
 
 		// Apply the menu icon if specified.
 		if (withIcon) {
@@ -69,7 +69,7 @@ async function draw(canvas, img, overlay, templated) {
 			let dx = 7;
 			let dy = 7;
 			ctx.save();
-			ctx.strokeStyle = 'white';
+			ctx.strokeStyle = color;
 			ctx.strokeWidth = '1px';
 			for (let i = 0; i < 3; i++) {
 				ctx.moveTo(x+dx, dy+2*i-0.5);
@@ -156,6 +156,7 @@ let overlayImage = null;
 let message = '';
 let templated = true;
 let withIcon = false;
+let color = '#ffffff';
 
 // # setFile(file)
 async function setFile(file) {
@@ -189,6 +190,7 @@ function set() {
 const input = document.querySelector('input[type="file"]');
 const $templated = document.querySelector('input[name="templated"]');
 const $withIcon = document.querySelector('input[name="with-icon"]');
+const $color = document.querySelector('input[type="color"]');
 const canvas = document.querySelector('canvas');
 const form = document.querySelector('form');
 const h1 = document.querySelector('h1');
@@ -198,11 +200,16 @@ function render() {
 	// source image did not change, we don't constantly rerender.
 	useMemo(() => {
 		if (sourceImage && overlayImage) {
-			draw(canvas, sourceImage, overlayImage, templated);
+			draw(canvas, {
+				image: sourceImage,
+				overlay: overlayImage,
+				templated,
+				color,
+			});
 		} else {
 			clear(canvas);
 		}
-	}, [sourceImage, overlayImage, templated, withIcon]);
+	}, [sourceImage, overlayImage, templated, withIcon, color]);
 
 	// Update the heading text.
 	h1.textContent = message;
@@ -275,6 +282,9 @@ $templated.addEventListener('input', event => {
 });
 $withIcon.addEventListener('input', event => {
 	set(withIcon = event.target.checked);
+});
+$color.addEventListener('input', event => {
+	set(color = event.target.value);
 });
 
 // Get the configuration data.
