@@ -170,8 +170,8 @@ export default class PluginIndex {
 
 		// Sort both the core files and the plugins, but do it separately so 
 		// that the plugins *always* override the core files.
-		coreFiles.sort(compare);
-		sourceFiles.sort(compare);
+		coreFiles.sort(createComparator());
+		sourceFiles.sort(createComparator());
 		return [...coreFiles, ...sourceFiles];
 
 	}
@@ -495,10 +495,6 @@ export default class PluginIndex {
 	}
 
 }
-
-// # compare(a, b)
-// The comparator function that determines the load order of the files.
-const compare = createComparator();
 
 // # hash(tgi)
 function hash(tgi: TGI) {
