@@ -42,13 +42,18 @@ function clear(canvas) {
 // default we apply the icon template to it - meaning drawing the image four 
 // times and applying the grayscale, but you can also choose to just rawdog it 
 // onto the canvas - useful for existing icons!
-async function draw(canvas, { image, overlay, templated }) {
+async function draw(canvas, { image, overlay, templated, withIcon, color }) {
 
 	// Rawdog if possible.
 	const ctx = canvas.getContext('2d');
 	clear(canvas);
 	if (!templated) {
 		ctx.drawImage(image, 0, 0);
+		if (withIcon) {
+			for (let i = 0; i < 4; i++) {
+				drawMenuIcon(ctx, 44*i, color);
+			}
+		}
 		return;
 	}
 
@@ -65,18 +70,7 @@ async function draw(canvas, { image, overlay, templated }) {
 
 		// Apply the menu icon if specified.
 		if (withIcon) {
-			let w = 6;
-			let dx = 7;
-			let dy = 7;
-			ctx.save();
-			ctx.strokeStyle = color;
-			ctx.strokeWidth = '1px';
-			for (let i = 0; i < 3; i++) {
-				ctx.moveTo(x+dx, dy+2*i-0.5);
-				ctx.lineTo(x+dx+w, dy+2*i-0.5);
-				ctx.stroke();
-			}
-			ctx.restore();
+			drawMenuIcon(ctx, x, color);
 		}
 
 		if (i === 0) {
@@ -89,6 +83,21 @@ async function draw(canvas, { image, overlay, templated }) {
 	// At last draw the overlay.
 	ctx.drawImage(overlay, 0, 0, 176, 44);
 
+}
+
+function drawMenuIcon(ctx, x, color) {
+	let w = 6;
+	let dx = 6;
+	let dy = 7;
+	ctx.save();
+	ctx.strokeStyle = color;
+	ctx.strokeWidth = '1px';
+	for (let i = 0; i < 3; i++) {
+		ctx.moveTo(x+dx, dy+2*i-0.5);
+		ctx.lineTo(x+dx+w, dy+2*i-0.5);
+		ctx.stroke();
+	}
+	ctx.restore();
 }
 
 // # openIcon(file)
@@ -205,6 +214,7 @@ function render() {
 				overlay: overlayImage,
 				templated,
 				color,
+				withIcon,
 			});
 		} else {
 			clear(canvas);
@@ -214,8 +224,6 @@ function render() {
 	// Update the heading text.
 	h1.textContent = message;
 	$templated.checked = templated;
-	$withIcon.disabled = !templated;
-	$color.style.display = !templated || !withIcon ? 'none' : 'block';
 
 }
 
