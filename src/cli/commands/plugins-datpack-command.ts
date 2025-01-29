@@ -1,7 +1,11 @@
 import { Glob } from 'glob';
 import { styleText } from 'node:util';
 import logger from '#cli/logger.js';
-import { FileScanner, folderToPackageId } from 'sc4/plugins';
+import {
+	FileScanner,
+	folderToPackageId,
+	createLoadComparator as createComparator,
+} from 'sc4/plugins';
 import { DBPF, DBPFStream } from 'sc4/core';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -63,6 +67,8 @@ class Datpacker {
 				let glob = new FileScanner('**/*', { cwd });
 				let files = await glob.walk();
 				if (files.length < this.limit) return;
+				const compare = createComparator();
+				files.sort((a, b) => -compare(a, b));
 				jobs.push({
 					folder: cwd,
 					files,
