@@ -52,15 +52,11 @@
 		button, input[type="file"] {
 			font-size: inherit;
 		}
-		button.save {
-			padding-left: 4px;
-			padding-right: 4px;
-		}
-		button.save svg {
+		.size-3 {
 			width: 12px;
 			height: 12px;
 		}
-		form:has(input[type="file"]:invalid) button.save {
+		form:has(input[type="file"]:invalid) button {
 			visibility: hidden;
 		}
 		div.cta {
@@ -76,6 +72,8 @@
 		}
 		.flex { display: flex; }
 		.ml-2 { margin-left: 0.5rem; }
+		.leading-6 { line-height: 1.5rem; }
+		.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
 	</style>
 	<script type="module" src="./script.js"></script>
 </head>
@@ -86,13 +84,13 @@
 		<div>
 			<input type="file" name="icon" accept="image/png, image/jpeg" required>
 		</div>
-		<div>
+		<div class="leading-6 flex">
 			<label>
 				<input type="checkbox" name="templated">
 				Apply icon template
 			</label>
 		</div>
-		<div class="flex">
+		<div class="leading-6 flex">
 			<label>
 				<input type="checkbox" name="with-icon">
 				Add menu icon
@@ -105,11 +103,17 @@
 			Select an image to be used as icon. You can also drag & drop a file, or paste a url or raw image.
 		</p>
 		<div class="cta">
-			<button id="choose" class="save">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+			<button id="choose" class="px-2">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
  					<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
 				</svg>
 				Use as icon
+			</button>
+			<button id="download" type="button" class="ml-2 px-2">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+					<path stroke-linecap="round" stroke-linejoin="round" d="m9 13.5 3 3m0 0 3-3m-3 3v-6m1.06-4.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+				</svg>
+				Save as .png
 			</button>
 		</div>
 	</form>

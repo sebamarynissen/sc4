@@ -215,6 +215,7 @@ function render() {
 	h1.textContent = message;
 	$templated.checked = templated;
 	$withIcon.disabled = !templated;
+	$color.style.display = !templated || !withIcon ? 'none' : 'block';
 
 }
 
@@ -239,6 +240,18 @@ form.addEventListener('submit', async event => {
 	});
 	window.close();
 });
+
+document.querySelector('button#download')
+	.addEventListener('click', async event => {
+		event.preventDefault();
+		let buffer = await toBuffer(canvas);
+		let blob = new Blob([buffer], { type: 'image/png' });
+		let url = URL.createObjectURL(blob);
+		let a = document.createElement('a');
+		a.href = url;
+		a.download = 'icon.png';
+		a.click();
+	});
 
 // Setup the drag/drop behavior.
 const dropArea = document.body;
