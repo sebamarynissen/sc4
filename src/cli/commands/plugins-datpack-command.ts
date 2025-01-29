@@ -1,12 +1,15 @@
 import { Glob } from 'glob';
 import { styleText } from 'node:util';
 import logger from '#cli/logger.js';
-import { FileScanner, folderToPackageId } from 'sc4/plugins';
+import {
+	FileScanner,
+	folderToPackageId,
+	createLoadComparator as createComparator,
+} from 'sc4/plugins';
 import { DBPF, DBPFStream } from 'sc4/core';
 import path from 'node:path';
 import fs from 'node:fs';
 import PQueue from 'p-queue';
-import createComparator from 'src/plugins/compare-load-order.js';
 
 // # plugins-datpack-command.ts
 type DatPackCommandOptions = {

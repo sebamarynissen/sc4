@@ -17,7 +17,7 @@ import type {
 } from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import type { TGIFindParameters, TGIIndexJSON } from 'sc4/utils';
-import createComparator from './compare-load-order.js';
+import createLoadComparator from './create-load-comparator.js';
 const Family = ExemplarProperty.BuildingpropFamily;
 const debug = debugModule('sc4:plugins:index');
 debugModule.formatters.h = (array: number | number[]) => {
@@ -170,8 +170,8 @@ export default class PluginIndex {
 
 		// Sort both the core files and the plugins, but do it separately so 
 		// that the plugins *always* override the core files.
-		coreFiles.sort(createComparator());
-		sourceFiles.sort(createComparator());
+		coreFiles.sort(createLoadComparator());
+		sourceFiles.sort(createLoadComparator());
 		return [...coreFiles, ...sourceFiles];
 
 	}

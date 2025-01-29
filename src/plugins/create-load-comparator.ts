@@ -1,6 +1,6 @@
 // # sort-load-order.js
-// # createComparator()
-export default function createComparator() {
+// # createLoadComparator()
+export default function createLoadComparator() {
 	const table = new HashTable();
 	return function compare(a: string, b: string): number {
 		let ha = table.getHash(a);

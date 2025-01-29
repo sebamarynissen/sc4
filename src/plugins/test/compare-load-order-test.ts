@@ -1,8 +1,8 @@
 // # compare-load-order-test.ts
 import { expect } from 'chai';
-import createComparator from '../compare-load-order.js';
+import createComparator from '../create-load-comparator.js';
 
-describe('#createComparator()', function() {
+describe('#createLoadComparator()', function() {
 
 	it('loads .SC4Lot, then .dat', function() {
 
