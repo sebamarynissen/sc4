@@ -62,10 +62,25 @@ async function draw(canvas, img, overlay, templated) {
 		region.roundRect(x, 0, 44, 44, 7);
 		ctx.clip(region);
 		ctx.drawImage(img, ...offsets, x, 0, 44, 44);
+
+		let w = 6;
+		let dx = 7;
+		let dy = 7;
+		ctx.save();
+		ctx.strokeStyle = 'white';
+		ctx.strokeWidth = '1px';
+		for (let i = 0; i < 3; i++) {
+			ctx.moveTo(x+dx, dy+2*i-0.5);
+			ctx.lineTo(x+dx+w, dy+2*i-0.5);
+			ctx.stroke();
+		}
+		ctx.restore();
+
 		if (i === 0) {
 			applyGrayscale(ctx);
 		}
 		ctx.restore();
+
 	}
 
 	// At last draw the overlay.
