@@ -1,9 +1,9 @@
 // # create-submenu-patch.js
 import { fs, path } from 'sc4/utils';
 import chalk from 'chalk';
-import { Glob } from 'glob';
 import { DBPF, Cohort, FileType, ExemplarProperty, TGI } from 'sc4/core';
 import type { Logger } from 'sc4/types';
+import FileScanner from './file-scanner.js';
 
 // # random()
 // Returns a random number between 0x00000001 and 0xffffffff. Useful for 
@@ -116,39 +116,16 @@ async function findGroupInstancePairs(
 		dbpfs,
 		files: globsOrFiles,
 		directory = process.cwd(),
-		recursive = false,
 	} = options;
 	if (!dbpfs) {
 		if (!globsOrFiles) {
 			throw new TypeError(`No patch targets found. Neither files, dbfs or targets list was specified!`);
 		}
-		let files = new Set<string>();
-		for (let pattern of globsOrFiles) {
-			let fullPath = path.resolve(directory, pattern);
-			if (fs.existsSync(fullPath)) {
-				let info = fs.statSync(fullPath);
-				if (info.isDirectory()) {
-					let localPattern = (recursive ? '**/*' : '*')+'.{dat,sc4*}';
-					for await (let file of new Glob(localPattern, {
-						nodir: true,
-						absolute: true,
-						cwd: fullPath,
-						nocase: true,
-					})) files.add(file);
-				} else {
-					files.add(fullPath);
-				}
-			} else {
-				for await (let file of new Glob(pattern, {
-					nodir: true,
-					absolute: true,
-					cwd: directory,
-				})) files.add(file);
-			}
-		}
 
 		// Read in all dbpfs from the files that we've collected.
 		dbpfs = [];
+		let glob = new FileScanner(globsOrFiles, { cwd: directory });
+		let files = await glob.walk();
 		for (let file of files) {
 
 			// We won't try to read in anything else than .dat or .sc4lot files.
