@@ -146,7 +146,7 @@ export class SubmenuPatcher {
 		} = options;
 		if (!dbpfs) {
 			if (!directory) {
-				throw new TypeError(`No patch targets found. Neither files, dbpfs or targets list was specified!`);
+				throw new TypeError(`No patch targets found. Neither a directory, dbpfs or targets list was specified!`);
 			}
 
 			// Read in all dbpfs from the files that we've collected.
