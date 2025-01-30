@@ -12,9 +12,14 @@ function random() {
 	return Math.floor(Math.random() * 0xffffffff) + 1;
 }
 
+type PatchTarget = {
+	tgi: TGI;
+	name?: string;
+};
+
 type TargetInfo = {
-	lots: number[];
-	flora: number[];
+	lots: PatchTarget[];
+	flora: PatchTarget[];
 };
 type CreateMenuPatchOptions = {
 	menu: number;
@@ -31,134 +36,158 @@ type CreateMenuPatchOptions = {
 
 // # createMenuPatch(menu, globsOrFiles, options = {})
 export default async function createMenuPatch(options: CreateMenuPatchOptions) {
-
-	// We'll first find the files to read in. This is a bit complicated because 
-	// we support both globbing, or specifying files and directories explicitly.
-	let {
-		menu,
-		directory = process.cwd(),
-		logger,
-	} = options;
-	let targets = await findGroupInstancePairs(options);
-
-	// If nothing was found, log a warning.
-	let { lots, flora } = targets;
-	if (lots.length + flora.length === 0) {
-		const { logger } = options;
-		logger?.warn('No lots or flora found to put in a submenu');
-		return null;
-	}
-
-	// Create a fresh Cohort file and add the Exemplar Patch Targets 
-	// (0x0062e78a) and Building Submenus (0xAA1DD399)
-	let dbpf = new DBPF();
-	if (lots.length > 0) {
-		let cohort = new Cohort();
-		cohort.addProperty('ExemplarPatchTargets', lots);
-		cohort.addProperty('BuildingSubmenus', [menu]);
-		let { instance = random() } = options;
-		dbpf.add([FileType.Cohort, 0xb03697d1, instance], cohort);
-	}
-	
-	// Do the same for Flora.
-	if (flora.length > 0) {
-		let cohort = new Cohort();
-		cohort.addProperty('ExemplarPatchTargets', flora);
-		cohort.addProperty('ItemSubmenuParentId', menu);
-		cohort.addProperty(
-			'ItemButtonClass',
-			ExemplarProperty.ItemButtonClass.FloraItemInSubmenu,
-		);
-		let tgi = TGI.random(FileType.Cohort, 0xb03697d1);
-		dbpf.add(tgi, cohort);
-	}
-
-	// Serialize and write away if the save option is set.
-	if (options.save) {
-		let buffer = dbpf.toBuffer();
-		let { output = 'Submenu patch.dat' } = options;
-		let outputPath = path.resolve(directory, output);
-		await fs.promises.writeFile(outputPath, buffer);
-		logger?.ok(`Saved to ${outputPath}`);
-	}
-	return dbpf;
-
+	const patcher = new SubmenuPatcher();
+	return await patcher.createPatch(options);
 }
 
-// # findGroupInstancePairs(opts)
-// Finds all group/instance pairs that have to be added to the patch from 
-// various sources.
-async function findGroupInstancePairs(
-	options: CreateMenuPatchOptions,
-): Promise<TargetInfo> {
+// # getPatchList(targets)
+function getPatchList(targets: PatchTarget[]) {
+	return targets.flatMap(({ tgi }) => [tgi.group, tgi.instance]);
+}
 
-	// If the group/instance pairs are directly specified as "targets" array, 
-	// then we return it as is, and assume it's a "lots" array.
-	if (options.targets) {
-		if (Array.isArray(options.targets)) {
-			return {
-				lots: options.targets,
-				flora: [],
-			};
-		} else {
-			return {
-				lots: [],
-				flora: [],
-				...options.targets
-			};
-		}
+export class SubmenuPatcher {
+	directory = process.cwd();
+	constructor(opts: { directory?: string } = {}) {
+		if (opts.directory) this.directory = opts.directory;
 	}
 
-	// Check if a list of dbpfs was specified. If not, then we'll try to read in 
-	// from files instead.
-	let {
-		logger,
-		dbpfs,
-		files: globsOrFiles,
-		directory = process.cwd(),
-	} = options;
-	if (!dbpfs) {
-		if (!globsOrFiles) {
-			throw new TypeError(`No patch targets found. Neither files, dbfs or targets list was specified!`);
+	// ## createPatch(options)
+	async createPatch(options: CreateMenuPatchOptions) {
+		// We'll first find the files to read in. This is a bit complicated because 
+		// we support both globbing, or specifying files and directories explicitly.
+		let {
+			menu,
+			directory = this.directory,
+			logger,
+		} = options;
+		let patcher = new SubmenuPatcher();
+		let targets = await patcher.findPatchTargets(options);
+
+		// If nothing was found, log a warning.
+		let { lots, flora } = targets;
+		if (lots.length + flora.length === 0) {
+			const { logger } = options;
+			logger?.warn('No lots or flora found to put in a submenu');
+			return null;
 		}
 
-		// Read in all dbpfs from the files that we've collected.
-		dbpfs = [];
-		let glob = new FileScanner(globsOrFiles, { cwd: directory });
-		let files = await glob.walk();
-		for (let file of files) {
+		// Create a fresh Cohort file and add the Exemplar Patch Targets 
+		// (0x0062e78a) and Building Submenus (0xAA1DD399)
+		let dbpf = new DBPF();
+		if (lots.length > 0) {
+			let cohort = new Cohort();
+			cohort.addProperty('ExemplarPatchTargets', getPatchList(lots));
+			cohort.addProperty('BuildingSubmenus', [menu]);
+			let { instance = random() } = options;
+			dbpf.add([FileType.Cohort, 0xb03697d1, instance], cohort);
+		}
+		
+		// Do the same for Flora.
+		if (flora.length > 0) {
+			let cohort = new Cohort();
+			cohort.addProperty('ExemplarPatchTargets', getPatchList(flora));
+			cohort.addProperty('ItemSubmenuParentId', menu);
+			cohort.addProperty(
+				'ItemButtonClass',
+				ExemplarProperty.ItemButtonClass.FloraItemInSubmenu,
+			);
+			let tgi = TGI.random(FileType.Cohort, 0xb03697d1);
+			dbpf.add(tgi, cohort);
+		}
 
-			// We won't try to read in anything else than .dat or .sc4lot files.
-			let fullPath = path.resolve(process.cwd(), file);
-			let basePath = path.relative(process.cwd(), fullPath);
-			let ext = path.extname(fullPath).toLowerCase();
-			if (!(ext === '.dat' || ext.startsWith('.sc4'))) {
-				logger?.info(`Skipping ${basePath}`);
-				continue;
+		// Serialize and write away if the save option is set.
+		if (options.save) {
+			let buffer = dbpf.toBuffer();
+			let { output = 'Submenu patch.dat' } = options;
+			let outputPath = path.resolve(directory, output);
+			await fs.promises.writeFile(outputPath, buffer);
+			logger?.ok(`Saved to ${outputPath}`);
+		}
+		return dbpf;
+	}
+
+	// ## findPatchTargets(opts)
+	// Finds all exemplar patch targets as their tgi and exemplar name and 
+	// report them as lots and flora.
+	async findPatchTargets(
+		options: CreateMenuPatchOptions
+	): Promise<TargetInfo> {
+
+		// If the group/instance pairs are directly specified as "targets" 
+		// array, then we return it as is, and assume it's a "lots" array.
+		if (options.targets) {
+			if (Array.isArray(options.targets)) {
+				let { targets } = options;
+				return {
+					lots: Array.from({ length: targets.length / 2 }, (_, i) => {
+						return targets!.slice(2*i, 2*i+2);
+					}).map(([group, instance]) => {
+						return {
+							tgi: new TGI(FileType.Exemplar, group, instance),
+						};
+					}),
+					flora: [],
+				};
+			} else {
+				return {
+					lots: [],
+					flora: [],
+					...options.targets
+				};
+			}
+		}
+
+		// Check if a list of dbpfs was specified. If not, then we'll try to 
+		// read in from files instead.
+		let {
+			logger,
+			dbpfs,
+			files: globsOrFiles,
+			directory = this.directory,
+		} = options;
+		if (!dbpfs) {
+			if (!globsOrFiles) {
+				throw new TypeError(`No patch targets found. Neither files, dbpfs or targets list was specified!`);
 			}
 
-			// Read in as dbpf and collect the relevant exemplars.
-			logger?.info(chalk.gray(`Reading ${basePath}`));
-			let buffer = await fs.promises.readFile(fullPath);
-			let dbpf = new DBPF({ buffer, file: fullPath });
-			dbpfs.push(dbpf);
+			// Read in all dbpfs from the files that we've collected.
+			dbpfs = [];
+			let glob = new FileScanner(globsOrFiles, { cwd: directory });
+			let files = await glob.walk();
+			for (let file of files) {
+
+				// We won't try to read in anything else than .dat or .sc4lot 
+				// files.
+				let basePath = path.relative(process.cwd(), file);
+				let ext = path.extname(file).toLowerCase();
+				if (!(ext === '.dat' || ext.startsWith('.sc4'))) {
+					logger?.info(`Skipping ${basePath}`);
+					continue;
+				}
+
+				// Read in as dbpf and collect the relevant exemplars.
+				logger?.info(chalk.gray(`Reading ${basePath}`));
+				let buffer = await fs.promises.readFile(file);
+				let dbpf = new DBPF({ buffer, file });
+				dbpfs.push(dbpf);
+
+			}
 
 		}
 
+		// Now that we have the list of dbpfs to read the lots from, actually 
+		// collect the targets list.
+		let targets: { lots: PatchTarget[], flora: PatchTarget []} = {
+			lots: [],
+			flora: [],
+		};
+		for (let dbpf of dbpfs) {
+			let { lots = [], flora = [] } = collect(dbpf, logger);
+			targets.lots.push(...lots);
+			targets.flora.push(...flora);
+		}
+		return targets;
 	}
-
-	// Now that we have the list of dbpfs to read the lots from, actually 
-	// collect the targets list.
-	let targets: { lots: number[], flora: number []} = {
-		lots: [],
-		flora: [],
-	};
-	for (let dbpf of dbpfs) {
-		let { lots = [], flora = [] } = collect(dbpf, logger);
-		targets.lots.push(...lots);
-		targets.flora.push(...flora);
-	}
-	return targets;
 
 }
 
@@ -169,8 +198,8 @@ async function findGroupInstancePairs(
 // LotResourceKey, which is more or less guaranteed to not be stored in a parent 
 // cohort - though it technically could be.
 function collect(dbpf: DBPF, logger?: Logger): TargetInfo {
-	let lots: number[] = [];
-	let flora: number[] = [];
+	let lots: PatchTarget[] = [];
+	let flora: PatchTarget[] = [];
 	let entries = dbpf.findAll({ type: FileType.Exemplar });
 	for (let entry of entries) {
 		let exemplar;
@@ -182,21 +211,30 @@ function collect(dbpf: DBPF, logger?: Logger): TargetInfo {
 		}
 
 		// If this is a flora exemplar, we'll put it in the flora list obviously.
-		let [, group, instance] = entry.tgi;
 		let type = exemplar.get('ExemplarType');
 		if (type === ExemplarProperty.ExemplarType.Flora) {
-			flora.push(group, instance);
-			let name = exemplar.get('ExemplarName') ?? 'Nameless flora';
-			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
+			let name = exemplar.get('ExemplarName');
+			logger?.info(
+				chalk.gray(`Using ${name ?? 'Nameless flora'} (${entry.id})`),
+			);
+			flora.push({
+				tgi: new TGI(entry.tgi),
+				name,
+			});
 			continue;
 		}
 
 		// Check if the LotResourceKey exists.
 		let lrk = exemplar.get('LotResourceKey');
 		if (lrk) {
-			lots.push(group, instance);
-			let name = exemplar.get('ExemplarName') ?? 'Nameless lot';
-			logger?.info(chalk.gray(`Using ${name} (${entry.id})`));
+			let name = exemplar.get('ExemplarName');
+			logger?.info(
+				chalk.gray(`Using ${name ?? 'Nameless lot'} (${entry.id})`),
+			);
+			lots.push({
+				tgi: new TGI(entry.tgi),
+				name,
+			});
 			continue;
 		}
 
