@@ -10,7 +10,6 @@ describe('#createSubmenuPatch()', function() {
 
 		let directory = resource('submenu-patch-test');
 		let dbpf = await createSubmenuPatch({
-			files: ['**/*'],
 			directory,
 			menu: 0x12345678,
 		});

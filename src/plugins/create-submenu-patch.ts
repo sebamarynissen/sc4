@@ -31,7 +31,6 @@ type CreateMenuPatchOptions = {
 	output?: string;
 	directory?: string;
 	instance?: number | undefined;
-	recursive?: boolean;
 };
 
 // # createMenuPatch(menu, globsOrFiles, options = {})
@@ -46,7 +45,7 @@ function getPatchList(targets: PatchTarget[]) {
 }
 
 export class SubmenuPatcher {
-	directory = process.cwd();
+	directory: string;
 	constructor(opts: { directory?: string } = {}) {
 		if (opts.directory) this.directory = opts.directory;
 	}
@@ -142,11 +141,11 @@ export class SubmenuPatcher {
 		let {
 			logger,
 			dbpfs,
-			files: globsOrFiles,
+			files: globsOrFiles = ['**/*'],
 			directory = this.directory,
 		} = options;
 		if (!dbpfs) {
-			if (!globsOrFiles) {
+			if (!directory) {
 				throw new TypeError(`No patch targets found. Neither files, dbpfs or targets list was specified!`);
 			}
 
