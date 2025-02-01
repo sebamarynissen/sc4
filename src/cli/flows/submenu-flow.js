@@ -38,7 +38,6 @@ export async function submenu() {
 	return [[directory], {
 		menu: +menu,
 		output,
-		recursive: true,
 	}];
 
 }

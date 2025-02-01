@@ -7,7 +7,6 @@ type AddToSubmenuOptions = {
 	output: string;
 	directory: string;
 	instance?: number;
-	recursive: boolean;
 };
 
 export async function submenu(
@@ -22,8 +21,7 @@ export async function submenu(
 		save: true,
 		logger,
 		output: options.output || './submenu_patch.dat',
-		directory: options.directory,
+		directory: options.directory ?? process.cwd(),
 		instance: options.instance ?? undefined,
-		recursive: options.recursive,
 	});
 }
