@@ -22,7 +22,7 @@ type TargetInfo = {
 	flora: PatchTarget[];
 };
 type CreateMenuPatchOptions = {
-	menu: number;
+	menu: number | number[];
 	targets?: number[] | Partial<TargetInfo>;
 	dbpfs?: DBPF[];
 	files?: string[];
@@ -76,7 +76,7 @@ export class SubmenuPatcher {
 		if (lots.length > 0) {
 			let cohort = new Cohort();
 			cohort.addProperty('ExemplarPatchTargets', getPatchList(lots));
-			cohort.addProperty('BuildingSubmenus', [menu]);
+			cohort.addProperty('BuildingSubmenus', [menu].flat());
 			let { instance = random() } = options;
 			dbpf.add([FileType.Cohort, 0xb03697d1, instance], cohort);
 		}
@@ -85,7 +85,7 @@ export class SubmenuPatcher {
 		if (flora.length > 0) {
 			let cohort = new Cohort();
 			cohort.addProperty('ExemplarPatchTargets', getPatchList(flora));
-			cohort.addProperty('ItemSubmenuParentId', menu);
+			cohort.addProperty('ItemSubmenuParentId', [menu].flat().at(0)!);
 			cohort.addProperty(
 				'ItemButtonClass',
 				ExemplarProperty.ItemButtonClass.FloraItemInSubmenu,
