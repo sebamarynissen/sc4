@@ -2,6 +2,7 @@
 export { Exemplar, Cohort } from './exemplar.js';
 export { default as DIR } from './dir.js';
 export { default as LTEXT } from './ltext.js';
+export { default as S3D } from './s3d.js';
 export { default as Lot } from './lot.js';
 export { default as Building } from './building.js';
 export { default as Prop } from './prop.js';
