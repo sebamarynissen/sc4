@@ -4,12 +4,12 @@ import FileType from './file-types.js';
 import Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Vector3 from './vector-3.js';
+import WriteBuffer from './write-buffer.js';
 
 // # S3D
 // An implementation of the SimGlide (S3D) format.
 export default class S3D {
 	static [kFileType] = FileType.S3D;
-	headers: any = {};
 	version = '1.5';
 	vertexGroups: VertexGroup[] = [];
 	indexGroups: number[][] = [];
@@ -19,7 +19,6 @@ export default class S3D {
 	properties: PropGroup[] = [];
 	regpGroups: RegpGroup[] = [];
 	parse(rs: Stream) {
-		this.headers = {};
 		section(rs, '3DMD');
 		section(rs, 'HEAD');
 		this.version = rs.version(2);
@@ -50,15 +49,46 @@ export default class S3D {
 		section(rs, 'REGP');
 		this.regpGroups = rs.array(() => new RegpGroup().parse(rs));
 		rs.assert();
-		console.log(this.headers);
 		return this;
 	}
 
 	// # toBuffer()
 	toBuffer() {
-
+		return wrap('3DMD', ws => {
+			ws.writeBuffer(wrap('HEAD', ws => ws.version(this.version)));
+			ws.writeBuffer(wrap('VERT', ws => ws.array(this.vertexGroups)));
+			ws.writeBuffer(wrap('INDX', ws => {
+				ws.array(this.indexGroups, group => {
+					ws.uint16(0);
+					ws.uint16(0x0002);
+					ws.uint16(group.length);
+					ws.tuple(group, ws.uint16);
+				});
+			}));
+			ws.writeBuffer(wrap('PRIM', ws => {
+				ws.array(this.primGroups, group => {
+					ws.uint16(group.length);
+					ws.tuple(group);
+				});
+			}));
+			ws.writeBuffer(wrap('MATS', ws => ws.array(this.materialGroups)));
+			ws.writeBuffer(wrap('ANIM', ws => ws.write(this.animations)));
+			ws.writeBuffer(wrap('PROP', ws => ws.array(this.properties)));
+			ws.writeBuffer(wrap('REGP', ws => ws.array(this.regpGroups)));
+		});
 	}
 
+}
+
+const encoder = new TextEncoder();
+function wrap(signature: string, fn: (ws: WriteBuffer) => any) {
+	let bytes = encoder.encode(signature);
+	let ws = new WriteBuffer();
+	ws.writeBuffer(bytes);
+	ws.zeroes(4);
+	fn(ws);
+	ws.writeUInt32LE(ws.length, 4);
+	return ws.toUint8Array();
 }
 
 // # section(rs, signature)
@@ -68,7 +98,8 @@ function section(rs: Stream, signature: string) {
 	if (id !== signature) {
 		throw new Error(`${signature} signature was ${id}`);
 	}
-	return rs.size();
+	let size = rs.size();
+	return size;
 }
 
 const VERTEX_FORMAT = 0x80004001;
@@ -82,6 +113,12 @@ class VertexGroup {
 		this.format = rs.uint32();
 		this.vertices = rs.array(() => new Vertex().parse(rs), numVertices);
 		return this;
+	}
+	write(ws: WriteBuffer) {
+		ws.uint16(this.flags);
+		ws.uint16(this.vertices.length);
+		ws.uint32(this.format);
+		ws.tuple(this.vertices);
 	}
 }
 
@@ -99,6 +136,13 @@ class Vertex {
 		this.v = rs.float();
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.float(this.x);
+		ws.float(this.y);
+		ws.float(this.z);
+		ws.float(this.u);
+		ws.float(this.v);
+	}
 }
 
 class PrimGroup {
@@ -110,6 +154,11 @@ class PrimGroup {
 		this.first = rs.uint32();
 		this.numIndex = rs.uint32();
 		return this;
+	}
+	write(ws: WriteBuffer) {
+		ws.uint32(this.type);
+		ws.uint32(this.first);
+		ws.uint32(this.numIndex);
 	}
 }
 
@@ -139,9 +188,22 @@ class MaterialGroup {
 		}, rs.byte());
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.uint32(this.flags);
+		ws.byte(this.alphaFunc);
+		ws.byte(this.depthFunc);
+		ws.byte(this.sourceBlend);
+		ws.byte(this.destBlend);
+		ws.uint16(this.alphaThreshold);
+		ws.uint32(this.matClass);
+		ws.byte(this.reserved);
+		ws.byte(this.textures.length);
+		ws.tuple(this.textures);
+	}
 }
 
 class MaterialGroupTexture {
+	minor = 3;
 	id = 0;
 	wrapU = 0;
 	wrapV = 0;
@@ -151,16 +213,29 @@ class MaterialGroupTexture {
 	animMode = 0;
 	name = '';
 	parse(rs: Stream, version: [number, number]) {
-		let [, minor] = version;
+		[, this.minor] = version;
 		this.id = rs.uint32();
 		this.wrapU = rs.byte();
 		this.wrapV = rs.byte();
-		this.magFilter = minor < 5 ? 0 : rs.byte();
-		this.minFilter = minor < 5 ? 0 : rs.byte();
+		this.magFilter = this.minor < 5 ? 0 : rs.byte();
+		this.minFilter = this.minor < 5 ? 0 : rs.byte();
 		this.animRate = rs.uint16();
 		this.animMode = rs.uint16();
-		this.name = rs.string(rs.byte()).slice(0, -1);
+		this.name = rs.string(rs.byte());
 		return this;
+	}
+	write(ws: WriteBuffer) {
+		ws.uint32(this.id);
+		ws.byte(this.wrapU);
+		ws.byte(this.wrapV);
+		if (this.minor >= 5) {
+			ws.byte(this.magFilter);
+			ws.byte(this.minFilter);
+		}
+		ws.uint16(this.animRate);
+		ws.uint16(this.animMode);
+		ws.byte(this.name.length);
+		ws.writeString(this.name);
 	}
 }
 
@@ -183,6 +258,15 @@ class AnimationSection {
 		);
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.uint16(this.numFrames);
+		ws.uint16(this.frameRate);
+		ws.uint16(this.playMode);
+		ws.uint32(this.flags);
+		ws.float(this.displacement);
+		ws.uint16(this.groups.length);
+		ws.tuple(this.groups);
+	}
 }
 
 type BlockIndex = [number, number, number, number];
@@ -199,6 +283,14 @@ class AnimationGroup {
 		}, section.numFrames);
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.byte(this.name.length);
+		ws.byte(this.flags);
+		ws.writeString(this.name);
+		ws.tuple(this.blockIndices, arr => {
+			ws.tuple(arr, ws.uint16);
+		});
+	}
 }
 
 class PropGroup {
@@ -213,6 +305,14 @@ class PropGroup {
 		this.assignedValue = rs.string(rs.byte());
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.uint16(this.meshIndex);
+		ws.uint16(this.frameIndex);
+		ws.byte(this.assignmentType.length);
+		ws.writeString(this.assignmentType);
+		ws.byte(this.assignedValue.length);
+		ws.writeString(this.assignedValue);
+	}
 }
 
 class RegpGroup {
@@ -223,6 +323,11 @@ class RegpGroup {
 		this.groups = rs.array(() => new RegpSubgroup().parse(rs), rs.uint16());
 		return this;
 	}
+	write(ws: WriteBuffer) {
+		ws.byte(this.name.length);
+		ws.uint16(this.groups.length);
+		ws.tuple(this.groups);
+	}
 }
 
 class RegpSubgroup {
@@ -232,5 +337,9 @@ class RegpSubgroup {
 		this.translation = rs.vector3();
 		this.orientation = [rs.float(), rs.float(), rs.float(), rs.float()];
 		return this;
+	}
+	write(ws: WriteBuffer) {
+		ws.vector3(this.translation);
+		ws.tuple(this.orientation, ws.float);
 	}
 }
