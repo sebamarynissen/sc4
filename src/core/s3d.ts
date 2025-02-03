@@ -1,13 +1,15 @@
 // # s3d.ts
-// An implementation of the SimGlide (S3D) format.
 import { hex } from 'sc4/utils';
 import FileType from './file-types.js';
 import Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import Vector3 from './vector-3.js';
 
+// # S3D
+// An implementation of the SimGlide (S3D) format.
 export default class S3D {
 	static [kFileType] = FileType.S3D;
+	headers: any = {};
 	version = '1.5';
 	vertexGroups: VertexGroup[] = [];
 	indexGroups: number[][] = [];
@@ -17,40 +19,56 @@ export default class S3D {
 	properties: PropGroup[] = [];
 	regpGroups: RegpGroup[] = [];
 	parse(rs: Stream) {
-
-		// Read the S3D signature and then the HEAD signature, which are both 
-		// followed immediately by the size. We do nothing with this.
-		decodeCommonHead(rs, '3DMD');
-		decodeCommonHead(rs, 'HEAD');
+		this.headers = {};
+		section(rs, '3DMD');
+		section(rs, 'HEAD');
 		this.version = rs.version(2);
 		let [major, minor] = this.version.split('.').map(Number);
-		let size = decodeCommon(rs, 'VERT');
-		this.vertexGroups = rs.array(() => new VertexGroup().parse(rs), size);
+		section(rs, 'VERT');
+		this.vertexGroups = rs.array(() => new VertexGroup().parse(rs));
+		section(rs, 'INDX')
 		this.indexGroups = rs.array(() => {
 			let flags = rs.uint16();
 			if (flags !== 0) throw new Error(`Unknown flags were not 0: ${hex(flags, 4)}`);
 			rs.uint16();
 			return rs.array(() => rs.uint16(), rs.uint16());
-		}, decodeCommon(rs, 'INDX'));
+		});
+		section(rs, 'PRIM');
 		this.primGroups = rs.array(() => {
 			return rs.array(() => new PrimGroup().parse(rs), rs.uint16());
-		}, decodeCommon(rs, 'PRIM'));
+		});
+		section(rs, 'MATS');
 		this.materialGroups = rs.array(() => {
 			let group = new MaterialGroup();
 			group.parse(rs, [major, minor]);
 			return group;
-		}, decodeCommon(rs, 'MATS'));
+		});
+		section(rs, 'ANIM');
 		this.animations = new AnimationSection().parse(rs);
-		this.properties = rs.array(
-			() => new PropGroup().parse(rs),
-			decodeCommon(rs, 'PROP'),
-		);
-		this.regpGroups = rs.array(
-			() => new RegpGroup().parse(rs),
-			decodeCommon(rs, 'REGP'),
-		);
+		section(rs, 'PROP');
+		this.properties = rs.array(() => new PropGroup().parse(rs));
+		section(rs, 'REGP');
+		this.regpGroups = rs.array(() => new RegpGroup().parse(rs));
+		rs.assert();
+		console.log(this.headers);
 		return this;
 	}
+
+	// # toBuffer()
+	toBuffer() {
+
+	}
+
+}
+
+// # section(rs, signature)
+// Parses a section identifier & size. We don't do anything with it though.
+function section(rs: Stream, signature: string) {
+	let id = rs.string(4);
+	if (id !== signature) {
+		throw new Error(`${signature} signature was ${id}`);
+	}
+	return rs.size();
 }
 
 const VERTEX_FORMAT = 0x80004001;
@@ -154,7 +172,6 @@ class AnimationSection {
 	displacement = 0.0;
 	groups: AnimationGroup[] = [];
 	parse(rs: Stream) {
-		decodeCommonHead(rs, 'ANIM');
 		this.numFrames = rs.uint16();
 		this.frameRate = rs.uint16();
 		this.playMode = rs.uint16();
@@ -216,21 +233,4 @@ class RegpSubgroup {
 		this.orientation = [rs.float(), rs.float(), rs.float(), rs.float()];
 		return this;
 	}
-}
-
-function decodeCommonHead(rs: Stream, signature: string): number {
-	let id = rs.string(4);
-	if (id !== signature) {
-		throw new Error(`${signature} signature was ${id}`);
-	}
-	return rs.size();
-}
-
-function decodeCommon(rs: Stream, signature: string) {
-	decodeCommonHead(rs, signature);
-	let numGroups = rs.int32();
-	if (numGroups < 0) {
-		throw new Error(`${signature} group number was negative ${numGroups}`);
-	}
-	return numGroups;
 }
