@@ -98,8 +98,7 @@ function section(rs: Stream, signature: string) {
 	if (id !== signature) {
 		throw new Error(`${signature} signature was ${id}`);
 	}
-	let size = rs.size();
-	return size;
+	return rs.size();
 }
 
 const VERTEX_FORMAT = 0x80004001;
