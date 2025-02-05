@@ -62,11 +62,24 @@ class FSHEntry {
 	height = 0;
 	center = [0, 0];
 	offset = [0, 0];
-	image: FSHImageData;
 	mipmaps: FSHImageData[] = [];
 	constructor(opts: FSHEntryOptions) {
 		this.name = opts.name ?? '0000';
 	}
+
+	// ## get image()
+	// Image is just an alias for the first image data in the mipmaps array, 
+	// which is normally always present.
+	get image() {
+		return this.mipmaps[0];
+	}
+
+	// ## *[Symbol.iterator]()
+	*[Symbol.iterator]() {
+		yield* this.mipmaps;
+	}
+
+	// ## parse(rs)
 	parse(rs: Stream) {
 		this.id = rs.byte();
 		this.size = rs.byte() + (rs.byte() << 8) + (rs.byte() << 16);
@@ -80,7 +93,7 @@ class FSHEntry {
 		// The size of the image data that follows depends on the id of the 
 		// entry.
 		let code = this.id & 0x7f;
-		this.image = new FSHImageData({
+		let image = new FSHImageData({
 			code,
 			width,
 			height,
@@ -89,7 +102,7 @@ class FSHEntry {
 
 		// Read in all mipmaps too.
 		let numMipMaps = oy >>> 24;
-		this.mipmaps = [];
+		this.mipmaps = [image];
 		for (let i = 0; i < numMipMaps; i++) {
 			let factor = 2**(i+1);
 			let width = this.width/factor;

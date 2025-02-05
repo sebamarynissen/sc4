@@ -14,10 +14,11 @@ describe('The FSH file type', function() {
 		for (let entry of entries) {
 			let fsh = entry.read();
 			for (let fshEntry of fsh) {
-				let img = fshEntry.image;
-				let { width, height } = img;
-				let buffer = img.decompress();
-				expect(buffer).to.have.length(width*height*4);
+				for (let mipmap of fshEntry) {
+					let { width, height } = mipmap;
+					let buffer = mipmap.decompress();
+					expect(buffer).to.have.length(width*height*4);
+				}
 			}
 		}
 
