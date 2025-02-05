@@ -12,7 +12,7 @@ import {
 // images contained in it. We only parse all "entries" in the FSH, and if you 
 // want to get the raw decompressed data, you'll have to call the `decompress()` 
 // method on this.
-export default class FSH {
+export class FSH {
 	static [kFileType] = FileType.FSH;
 	size = 0;
 	directoryId = '';
@@ -49,12 +49,13 @@ export default class FSH {
 		yield* this.entries;
 	}
 }
+export default FSH;
 
 type FSHEntryOptions = {
 	name?: string;
 };
 
-class FSHEntry {
+export class FSHEntry {
 	name = '0000';
 	id = 0x00;
 	size = 0;
@@ -72,6 +73,11 @@ class FSHEntry {
 	// which is normally always present.
 	get image() {
 		return this.mipmaps[0];
+	}
+
+	// ## get code()
+	get code() {
+		return this.id & 0x7f;
 	}
 
 	// ## *[Symbol.iterator]()
@@ -92,7 +98,7 @@ class FSHEntry {
 
 		// The size of the image data that follows depends on the id of the 
 		// entry.
-		let code = this.id & 0x7f;
+		let { code } = this;
 		let image = new FSHImageData({
 			code,
 			width,

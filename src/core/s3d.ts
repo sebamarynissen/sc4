@@ -275,17 +275,27 @@ class AnimationSection {
 	}
 }
 
-type BlockIndex = [number, number, number, number];
+type BlockIndex = {
+	vertex: number;
+	index: number;
+	prim: number;
+	material: number;
+};
 class AnimationGroup {
 	flags = 0;
 	name = '';
-	blockIndices: BlockIndex[] = [];
+	blocks: BlockIndex[] = [];
 	parse(rs: Stream, section: AnimationSection) {
 		let nameLength = rs.byte();
 		this.flags = rs.byte();
 		this.name = rs.string(nameLength);
-		this.blockIndices = rs.array(() => {
-			return rs.array(() => rs.uint16(), 4) as BlockIndex;
+		this.blocks = rs.array(() => {
+			return {
+				vertex: rs.uint16(),
+				index: rs.uint16(),
+				prim: rs.uint16(),
+				material: rs.uint16(),
+			};
 		}, section.numFrames);
 		return this;
 	}
@@ -293,8 +303,11 @@ class AnimationGroup {
 		ws.byte(this.name.length);
 		ws.byte(this.flags);
 		ws.writeString(this.name);
-		ws.tuple(this.blockIndices, arr => {
-			ws.tuple(arr, ws.uint16);
+		ws.tuple(this.blocks, block => {
+			ws.uint16(block.vertex);
+			ws.uint16(block.index);
+			ws.uint16(block.prim);
+			ws.uint16(block.material);
 		});
 	}
 }
