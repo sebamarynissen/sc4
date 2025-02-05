@@ -123,8 +123,9 @@ class FSHEntry {
 function readBufferByCode(rs: Stream, code: number, width: number, height: number) {
 	switch (code) {
 		case 0x60:
-		case 0x61:
 			return rs.readUint8Array(width*height/2);
+		case 0x61:
+			return rs.readUint8Array(width*height);
 		default:
 			throw new Error(`Unknown FSH code 0x${code.toString(16)}!`);
 	}
