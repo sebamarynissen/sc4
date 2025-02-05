@@ -2,6 +2,10 @@
 import FileType from './file-types.js';
 import Stream from './stream.js';
 import { kFileType } from './symbols.js';
+import {
+	decompressDXT1,
+	decompressDXT3,
+} from './bitmap-decompression.js';
 
 // # FSH
 // A parser for the FSH format. Note that by default we don't decompress the 
@@ -40,6 +44,9 @@ export default class FSH {
 		}
 		return this;
 
+	}
+	*[Symbol.iterator]() {
+		yield* this.entries;
 	}
 }
 
@@ -80,7 +87,7 @@ class FSHEntry {
 			data: readBufferByCode(rs, code, width, height),
 		});
 
-		// Read in all mimmaps too.
+		// Read in all mipmaps too.
 		let numMipMaps = oy >>> 24;
 		this.mipmaps = [];
 		for (let i = 0; i < numMipMaps; i++) {
@@ -114,21 +121,38 @@ type FSHImageDataOptions = {
 	code: number;
 	width: number;
 	height: number;
-	data: Uint8Array;
+	data?: Uint8Array;
+	bitmap?: Uint8Array;
 };
 
 // # FSHImageData
 // The FSHImageData class contains the raw, encoded and potentially compressed 
-// image data. This is the entry point for actually
+// image data. This is the entry point for actually getting the raw bitmap.
+// Note: if we're rendering a texture with Three.js, we don't need to decompress 
+// it to a bitmap first because Three.js has support for decompressing textures 
+// on the GPU. This can be done by creating a CompressedTexture in Three.js!
 class FSHImageData {
 	code = 0x00;
-	data: Uint8Array;
 	width = 0;
 	height = 0;
+	data?: Uint8Array;
+	bitmap?: Uint8Array;
 	constructor(opts: FSHImageDataOptions) {
 		this.code = opts.code;
 		this.width = opts.width;
 		this.height = opts.height;
 		this.data = opts.data;
+		this.bitmap = opts.bitmap;
+	}
+	decompress(): Uint8Array {
+		let { width, height, data } = this;
+		if (this.bitmap) return this.bitmap;
+		switch (this.code) {
+			case 0x60:
+				return this.bitmap = decompressDXT1(data!, width, height);
+			case 0x61:
+				return this.bitmap = decompressDXT3(data!, width, height);
+		}
+		return new Uint8Array();
 	}
 }
