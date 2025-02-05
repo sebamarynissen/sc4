@@ -2,6 +2,7 @@
 import DBPF from '../dbpf.js';
 import { resource } from '#test/files.js';
 import FileType from '../file-types.js';
+import { expect } from 'chai';
 
 describe('The FSH file type', function() {
 
@@ -13,7 +14,10 @@ describe('The FSH file type', function() {
 		for (let entry of entries) {
 			let fsh = entry.read();
 			for (let fshEntry of fsh) {
-				fshEntry.image.decompress();
+				let img = fshEntry.image;
+				let { width, height } = img;
+				let buffer = img.decompress();
+				expect(buffer).to.have.length(width*height*4);
 			}
 		}
 
