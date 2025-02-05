@@ -100,11 +100,12 @@ export class FSHEntry {
 		// The size of the image data that follows depends on the id of the 
 		// entry.
 		let { code } = this;
+		let sizeFactor = getSizeFactor(code);
 		let image = new FSHImageData({
 			code,
 			width,
 			height,
-			data: readBufferByCode(rs, code, width, height),
+			data: rs.readUint8Array(width*height*sizeFactor),
 		});
 
 		// Read in all mipmaps too.
@@ -118,7 +119,7 @@ export class FSHEntry {
 				code,
 				width,
 				height,
-				data: readBufferByCode(rs, code, width, height),
+				data: rs.readUint8Array(width*height*sizeFactor),
 			});
 			this.mipmaps.push(mipmap);
 		}
@@ -127,17 +128,15 @@ export class FSHEntry {
 	}
 }
 
-function readBufferByCode(rs: Stream, code: number, width: number, height: number) {
+function getSizeFactor(code: number) {
 	switch (code) {
-		case 0x7b:
-			return rs.readUint8Array(width*height);
-		case 0x60:
-			return rs.readUint8Array(width*height/2);
-		case 0x61:
-			return rs.readUint8Array(width*height);
-		default:
-			throw new Error(`Unknown FSH code 0x${code.toString(16)}!`);
+		case 0x7b: return 1;
+		case 0x7d: return 4;
+		case 0x7f: return 3;
+		case 0x60: return 0.5;
+		case 0x61: return 1;
 	}
+	throw new Error(`Unknown FSH code 0x${code.toString(16)}`);
 }
 
 type FSHImageDataOptions = {

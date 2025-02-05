@@ -28,7 +28,7 @@ describe('The FSH file type', function() {
 
 	});
 
-	it.only('decompresses a grayscale 8-bit FSH', async function() {
+	it('decompresses a grayscale 8-bit FSH', async function() {
 
 		let file = resource('fsh/0x7b.fsh');
 		let buffer = await fs.readFile(file);
@@ -61,7 +61,7 @@ describe('The FSH file type', function() {
 			} catch (e) {
 
 				let buffer = entry.decompress();
-				await fs.writeFile('0x7b.fsh', buffer);
+				await fs.writeFile('0x7e.fsh', buffer);
 				console.log(buffer);
 				console.log(entry.id);
 				console.log(entry.dbpf.file);
