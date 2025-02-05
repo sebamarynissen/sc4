@@ -217,8 +217,11 @@ export default class Stream extends SmartBuffer {
 	// Helper function for reading in an array. We first read in the length 
 	// and then fill up the array. It's important that the function passed 
 	// properly consumers the readable stream though!
-	array<T>(fn: (this: this, rs?: this, i?: number) => T): T[] {
-		let arr = new Array(this.dword());
+	array<T>(
+		fn: (this: this, rs?: this, i?: number) => T,
+		size: number = this.dword(),
+	): T[] {
+		let arr = new Array(size);
 		for (let i = 0; i < arr.length; i++) {
 			arr[i] = fn.call(this, this, i);
 		}
