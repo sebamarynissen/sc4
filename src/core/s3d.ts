@@ -80,6 +80,13 @@ export default class S3D {
 
 }
 
+// # wrap()
+// This is a helper function that will wrap a buffer - that is dynamically 
+// constructed within the specified callback - by prepending the given signature 
+// to it and inserting the size of the buffer. Note that the size seems to be 
+// ignored by SimCity actually because the sizes that we found don't really 
+// correspond to the sizes if the actual buffers, so we could've just randomly 
+// inserted it as well apparently.
 const encoder = new TextEncoder();
 function wrap(signature: string, fn: (ws: WriteBuffer) => any) {
 	let bytes = encoder.encode(signature);
