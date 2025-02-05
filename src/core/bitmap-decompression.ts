@@ -1,4 +1,22 @@
 // # bitmap-compression.ts
+// # decompress8bit(data)
+// Decompresses an 8-bit encoded bitmap. Note that for now we don't use color 
+// palettes and just assume grayscale. That's probably what SimCity 4 uses them 
+// for anyway.
+export function decompress8bit(
+	data: Uint8Array,
+	width: number,
+	height: number,
+) {
+	const output = new Uint8Array(width*height*4);
+	for (let i = 0; i < data.length; i++) {
+		let value = data[i];
+		let j = 4*i;
+		output[j+2] = output[j+1] = output[j] = value;
+		output[j+3] = 0xff;
+	}
+	return output;
+}
 
 // # decompressDXT3()
 // Decompresses an image compressed in the DXT3 format to a bitmap (a Uint8Array 

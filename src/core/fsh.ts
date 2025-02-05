@@ -3,6 +3,7 @@ import FileType from './file-types.js';
 import Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import {
+	decompress8bit,
 	decompressDXT1,
 	decompressDXT3,
 } from './bitmap-decompression.js';
@@ -128,6 +129,8 @@ export class FSHEntry {
 
 function readBufferByCode(rs: Stream, code: number, width: number, height: number) {
 	switch (code) {
+		case 0x7b:
+			return rs.readUint8Array(width*height);
 		case 0x60:
 			return rs.readUint8Array(width*height/2);
 		case 0x61:
@@ -168,11 +171,14 @@ class FSHImageData {
 		let { width, height, data } = this;
 		if (this.bitmap) return this.bitmap;
 		switch (this.code) {
+			case 0x07b:
+				return this.bitmap = decompress8bit(data!, width, height);
 			case 0x60:
 				return this.bitmap = decompressDXT1(data!, width, height);
 			case 0x61:
 				return this.bitmap = decompressDXT3(data!, width, height);
 		}
+		throw new Error(`Code ${this.code.toString(16)}`);
 		return new Uint8Array();
 	}
 }
