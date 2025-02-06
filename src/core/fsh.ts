@@ -4,8 +4,13 @@ import Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import {
 	decompress8bit,
+	decompress32bit,
+	decompress24bit,
 	decompressDXT1,
 	decompressDXT3,
+    decompress1555,
+    decompress565,
+    decompress444,
 } from './bitmap-decompression.js';
 
 // # FSH
@@ -18,7 +23,8 @@ export class FSH {
 	size = 0;
 	directoryId = '';
 	entries: FSHEntry[] = [];
-	parse(rs: Stream) {
+	parse(streamOrBuffer: Stream | Uint8Array) {
+		let rs = new Stream(streamOrBuffer);
 		const id = rs.string(4);
 		if (id !== 'SHPI') {
 			throw new Error('Invalid FSH file');
@@ -167,17 +173,19 @@ class FSHImageData {
 		this.bitmap = opts.bitmap;
 	}
 	decompress(): Uint8Array {
-		let { width, height, data } = this;
+		let { width, height } = this;
 		if (this.bitmap) return this.bitmap;
+		let data = this.data!;
 		switch (this.code) {
-			case 0x07b:
-				return this.bitmap = decompress8bit(data!, width, height);
-			case 0x60:
-				return this.bitmap = decompressDXT1(data!, width, height);
-			case 0x61:
-				return this.bitmap = decompressDXT3(data!, width, height);
+			case 0x07b: return this.bitmap = decompress8bit(data);
+			case 0x07d: return this.bitmap = decompress32bit(data);
+			case 0x07f: return this.bitmap = decompress24bit(data);
+			case 0x07e: return this.bitmap = decompress1555(data);
+			case 0x78: return this.bitmap = decompress565(data);
+			case 0x6d: return this.bitmap = decompress444(data);
+			case 0x60: return this.bitmap = decompressDXT1(data, width, height);
+			case 0x61: return this.bitmap = decompressDXT3(data, width, height);
 		}
-		throw new Error(`Code ${this.code.toString(16)}`);
-		return new Uint8Array();
+		throw new Error(`Unknown bitmap code ${this.code.toString(16)}`);
 	}
 }

@@ -3,17 +3,104 @@
 // Decompresses an 8-bit encoded bitmap. Note that for now we don't use color 
 // palettes and just assume grayscale. That's probably what SimCity 4 uses them 
 // for anyway.
-export function decompress8bit(
-	data: Uint8Array,
-	width: number,
-	height: number,
-) {
-	const output = new Uint8Array(width*height*4);
+export function decompress8bit(data: Uint8Array) {
+	const output = new Uint8Array(data.byteLength*4);
 	for (let i = 0; i < data.length; i++) {
 		let value = data[i];
 		let j = 4*i;
 		output[j+2] = output[j+1] = output[j] = value;
 		output[j+3] = 0xff;
+	}
+	return output;
+}
+
+// # decompress32bit(data)
+// Decompresses a 32-bit encoded bitmap - which actually is no decompressing at 
+// all. The only thing that changes is the order because alpha goes first here.
+export function decompress32bit(data: Uint8Array) {
+	const output = new Uint8Array(data.byteLength);
+	for (let i = 0; i < data.length; i += 4) {
+		let a = data[i];
+		let r = data[i+1];
+		let g = data[i+2];
+		let b = data[i+3];
+		output[i] = r;
+		output[i+1] = g;
+		output[i+2] = b;
+		output[i+3] = a;
+	}
+	return output;
+}
+
+// # decompress24bit(data)
+// Decompresses a 24-bit encoded bitmap, meaning a bitmap without alpha channel.
+export function decompress24bit(data: Uint8Array) {
+	const colors = data.byteLength / 3;
+	const output = new Uint8Array(4*colors);
+	for (let i = 0; i < colors; i++) {
+		let sourceIndex = 3*i;
+		let outputIndex = 4*i;
+		let r = data[sourceIndex];
+		let g = data[sourceIndex+1];
+		let b = data[sourceIndex+2];
+		output[outputIndex] = r;
+		output[outputIndex+1] = g;
+		output[outputIndex+2] = b;
+		output[outputIndex+3] = 0xff;
+	}
+	return output;
+}
+
+// # decompress1555(data)
+// Decompress a 16-bit bitmap of the A1R5G5B5 format.
+export function decompress1555(data: Uint8Array) {
+	const colors = data.byteLength / 2;
+	const output = new Uint8Array(4*colors);
+	for (let i = 0; i < colors; i++) {
+		let sourceIndex = 2*i;
+		let number = (data[sourceIndex] << 8) | data[sourceIndex+1];
+		let [r, g, b, a] = unpack1555(number);
+		let outputIndex = 4*i;
+		output[outputIndex] = r;
+		output[outputIndex+1] = g;
+		output[outputIndex+2] = b;
+		output[outputIndex+3] = a;
+	}
+	return output;
+}
+
+// # decompress0565(data)
+// Decompress a 16-bit bitmap of the R5G5B5 format.
+export function decompress565(data: Uint8Array) {
+	const colors = data.byteLength / 2;
+	const output = new Uint8Array(4*colors);
+	for (let i = 0; i < colors; i++) {
+		let sourceIndex = 2*i;
+		let number = (data[sourceIndex] << 8) | data[sourceIndex+1];
+		let [r, g, b, a] = unpack565(number);
+		let outputIndex = 4*i;
+		output[outputIndex] = r;
+		output[outputIndex+1] = g;
+		output[outputIndex+2] = b;
+		output[outputIndex+3] = a;
+	}
+	return output;
+}
+
+// # decompress0565(data)
+// Decompress a 16-bit bitmap of the A4R4G4B4 format.
+export function decompress444(data: Uint8Array) {
+	const colors = data.byteLength / 2;
+	const output = new Uint8Array(4*colors);
+	for (let i = 0; i < colors; i++) {
+		let sourceIndex = 2*i;
+		let number = (data[sourceIndex] << 8) | data[sourceIndex+1];
+		let [r, g, b, a] = unpack4444(number);
+		let outputIndex = 4*i;
+		output[outputIndex] = r;
+		output[outputIndex+1] = g;
+		output[outputIndex+2] = b;
+		output[outputIndex+3] = a;
 	}
 	return output;
 }
@@ -145,8 +232,24 @@ export function decompressDXT1(
 }
 
 function unpack565(rgb565: number) {
-	const r = ((rgb565 >> 11) & 0x1F) * (255 / 31);
-	const g = ((rgb565 >> 5) & 0x3F) * (255 / 63);
-	const b = (rgb565 & 0x1F) * (255 / 31);
+	const r = ((rgb565 >> 11) & 0b11111) * (255/31);
+	const g = ((rgb565 >> 5) & 0b111111) * (255/63);
+	const b = (rgb565 & 0b11111) * (255/31);
 	return [r, g, b, 0];
+}
+
+function unpack1555(rgb1555: number) {
+	const a = ((rgb1555 >> 15) & 0b1) * 255;
+	const r = ((rgb1555 >> 10) & 0b11111) * (255/31);
+	const g = ((rgb1555 >> 5) & 0b11111) * (255/31);
+	const b = (rgb1555 & 0b11111) * (255/31);
+	return [r, g, b, a];
+}
+
+function unpack4444(rgb444: number) {
+	const a = ((rgb444 >> 12) & 0b1111) * (255/15);
+	const r = ((rgb444 >> 8) & 0b1111) * (255/15);
+	const g = ((rgb444 >> 4) & 0b1111) * (255/15);
+	const b = (rgb444 & 0b1111) * (255/15);
+	return [r, g, b, a];
 }

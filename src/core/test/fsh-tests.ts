@@ -4,8 +4,6 @@ import DBPF from '../dbpf.js';
 import { resource } from '#test/files.js';
 import FileType from '../file-types.js';
 import { expect } from 'chai';
-import { PluginIndex } from 'sc4/plugins';
-import Stream from '../stream.js';
 import FSH from '../fsh.js';
 
 describe('The FSH file type', function() {
@@ -32,7 +30,7 @@ describe('The FSH file type', function() {
 
 		let file = resource('fsh/0x7b.fsh');
 		let buffer = await fs.readFile(file);
-		let fsh = new FSH().parse(new Stream(buffer));
+		let fsh = new FSH().parse(buffer);
 		let data = fsh.entries[0].image.decompress();
 		for (let i = 0; i < data.length; i += 4) {
 			expect(data[i]).to.equal(data[i+1]);
@@ -42,32 +40,33 @@ describe('The FSH file type', function() {
 
 	});
 
-	it.skip('looks for FSHs', async function() {
-		this.timeout(0);
+	it('decompresses a 32-bit A8R8G8B8 bitmap', async function() {
 
-		let index = new PluginIndex({
-			plugins: undefined,
-		});
-		await index.build();
-		let textures = index.findAll({ type: FileType.FSH });
-		for (let entry of textures) {
-			try {
-				let fsh = entry.read();
-				for (let fshEntry of fsh) {
-					for (let mipmap of fshEntry) {
-						// mipmap.decompress();
-					}
-				}
-			} catch (e) {
+		let file = resource('fsh/0x7d.fsh');
+		let buffer = await fs.readFile(file);
+		let fsh = new FSH().parse(buffer);
+		let bitmap = fsh.entries[0].image.decompress();
+		expect(bitmap).to.eql(new Uint8Array([
+			0, 0, 0xff, 0,
+			0, 0, 0xff, 0,
+			0, 0, 0xff, 0,
+			0, 0, 0xff, 0,
+		]));
 
-				let buffer = entry.decompress();
-				await fs.writeFile('0x7e.fsh', buffer);
-				console.log(buffer);
-				console.log(entry.id);
-				console.log(entry.dbpf.file);
-				throw e;
-			}
-		}
+	});
+
+	it('decompresses a 24-bit R8G8B8 bitmap', async function() {
+
+		let file = resource('fsh/0x7f.fsh');
+		let buffer = await fs.readFile(file);
+		let fsh = new FSH().parse(buffer);
+		let bitmap = fsh.entries[0].image.decompress();
+		expect(bitmap).to.eql(new Uint8Array([
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
+		]));
 
 	});
 
