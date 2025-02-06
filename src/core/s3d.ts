@@ -273,6 +273,12 @@ class AnimationSection {
 		ws.uint16(this.groups.length);
 		ws.tuple(this.groups);
 	}
+	*[Symbol.iterator]() {
+		yield* this.groups;
+	}
+	map(...args: Parameters<Array<AnimationGroup>['map']>) {
+		return this.groups.map(...args);
+	}
 }
 
 type BlockIndex = {
