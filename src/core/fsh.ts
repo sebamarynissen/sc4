@@ -96,6 +96,12 @@ export class FSHEntry {
 		return this.id & 0x7f;
 	}
 
+	// ## get format()
+	// Alias for .code
+	get format() {
+		return this.code;
+	}
+
 	// ## *[Symbol.iterator]()
 	*[Symbol.iterator]() {
 		yield* this.mipmaps;
@@ -151,7 +157,7 @@ function getSizeFactor(code: number) {
 		case 0x60: return 0.5;
 		case 0x61: return 1;
 	}
-	throw new Error(`Unknown FSH code 0x${code.toString(16)}`);
+	throw new Error(`Unknown FSH format 0x${code.toString(16)}`);
 }
 
 type FSHImageDataOptions = {
@@ -181,6 +187,9 @@ class FSHImageData {
 		this.data = opts.data;
 		this.bitmap = opts.bitmap;
 	}
+	get format() {
+		return this.code;
+	}
 	decompress(): Uint8Array {
 		let { width, height } = this;
 		if (this.bitmap) return this.bitmap;
@@ -195,6 +204,6 @@ class FSHImageData {
 			case 0x60: return this.bitmap = decompressDXT1(data, width, height);
 			case 0x61: return this.bitmap = decompressDXT3(data, width, height);
 		}
-		throw new Error(`Unknown bitmap code ${this.code.toString(16)}`);
+		throw new Error(`Unknown bitmap format 0x${this.code.toString(16)}`);
 	}
 }
