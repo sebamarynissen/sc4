@@ -1,7 +1,7 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
-import type { uint32 } from 'sc4/types';
+import type { TGILike, uint32 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
@@ -28,9 +28,7 @@ import TGI from './tgi.js';
 export type EntryFromType<T extends DecodedFileTypeId> = Entry<TypeIdToFile<T>>;
 
 export type EntryJSON = {
-	type: uint32;
-	group: uint32;
-	instance: uint32;
+	tgi: uint32[];
 	fileSize: number;
 	compressedSize: number;
 	offset: number;
@@ -39,6 +37,11 @@ export type EntryJSON = {
 
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
+	tgi?: TGILike;
+	fileSize?: number;
+	compressedSize?: number;
+	offset?: number;
+	compressed?: number;
 };
 type EntryParseOptions = {
     minor?: number;
@@ -81,12 +84,17 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 
 	// ## constructor(opts)
 	constructor(opts: EntryConstructorOptions = {}) {
-		let { dbpf, ...rest } = opts;
+		let {
+			dbpf,
+			tgi,
+			...rest
+		} = opts;
 		Object.defineProperty(this, 'dbpf', {
 			value: dbpf,
 			enumerable: false,
 			writable: false,
 		});
+		if (tgi) this.tgi = new TGI(tgi);
 		Object.assign(this, rest);
 	}
 
@@ -269,18 +277,14 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// threads.
 	toJSON(): EntryJSON {
 		let {
-			type,
-			group,
-			instance,
+			tgi,
 			fileSize,
 			compressedSize,
 			offset,
 			compressed,
 		} = this;
 		return {
-			type,
-			group,
-			instance,
+			tgi: [...tgi],
 			fileSize,
 			compressedSize,
 			offset,

@@ -54,7 +54,9 @@ export default class TGI<T extends uint32 = uint32> {
 	}
 
 	*[Symbol.iterator]() {
-		yield* this.toArray();
+		yield this.type;
+		yield this.group;
+		yield this.instance;
 	}
 
 }
