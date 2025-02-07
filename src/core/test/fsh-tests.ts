@@ -22,6 +22,7 @@ describe('The FSH file type', function() {
 					expect(buffer).to.have.length(width*height*4);
 				}
 			}
+			expect(fsh.image).to.equal(fsh.entries[0].mipmaps[0]);
 		}
 
 	});

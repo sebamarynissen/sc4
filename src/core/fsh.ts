@@ -52,6 +52,15 @@ export class FSH {
 		return this;
 
 	}
+
+	// ## get image()
+	// For convenience, the `.image` accessor can be used to read the image 
+	// ata. Note that an FSH can contain multiple images though, in which case 
+	// you can read them with `entries`.
+	get image() {
+		return this.entries[0].image;
+	}
+
 	*[Symbol.iterator]() {
 		yield* this.entries;
 	}
