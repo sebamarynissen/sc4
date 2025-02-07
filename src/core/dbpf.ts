@@ -15,7 +15,7 @@ import type { DBPFFile, DecodedFileTypeId, FileTypeId } from './types.js';
 import TGI from './tgi.js';
 
 export type DBPFOptions = {
-	file?: string;
+	file?: string | File;
 	buffer?: Uint8Array;
 	parse?: boolean;
 	header?: HeaderOptions;
@@ -38,12 +38,20 @@ type FileAddOptions = {
 	fileSize?: number;
 };
 
+// Older Node version (which we don't actually officially support though) might 
+// not have a file global available.
+const hasGlobalFileClass = typeof File === 'function';
+function isFileObject(file: any): file is File {
+	return hasGlobalFileClass && file instanceof File;
+}
+
 // # DBPF()
 // A class that represents a DBPF file. A DBPF file is basically just a custom 
 // file archive format, a bit like .zip etc. as it contains other files that 
 // might be compressed etc.
 export default class DBPF {
 	file: string | null = null;
+	fileObject: File | null = null;
 	buffer: Uint8Array | null = null;
 	header: Header;
 	entries: TGIIndex<Entry>;
@@ -56,7 +64,7 @@ export default class DBPF {
 	// from files, **not** from buffers. As such we don't have to keep the 
 	// entire buffer in memory and we can read the required parts of the file 
 	// "on the fly". That's what the DBPF format was designed for!
-	constructor(opts: DBPFOptions | string | Uint8Array = {}) {
+	constructor(opts: DBPFOptions | string | Uint8Array | File = {}) {
 
 		// If the file specified is actually a buffer, store that we don't 
 		// have a file. Note that this is not recommended: we need to be able 
@@ -70,10 +78,19 @@ export default class DBPF {
 			this.file = opts;
 			this.buffer = null;
 			opts = {};
+		} else if (isFileObject(opts)) {
+			this.fileObject = opts;
+			opts = {};
 		} else {
 			let { file = null, buffer = null } = opts;
-			this.file = file;
 			this.buffer = buffer;
+			if (hasGlobalFileClass && file instanceof File) {
+				this.file = null;
+				this.fileObject = file;
+			} else if (typeof file === 'string') {
+				this.file = file;
+				this.fileObject = null;
+			}
 		}
 
 		// Create an empty header.
@@ -93,7 +110,7 @@ export default class DBPF {
 
 		// If the user initialize the DBPF with either a file or a buffer, then 
 		// parse immediately.
-		let { parse = true } = opts;
+		let { parse = this.fileObject ? false : true } = opts;
 		if (parse && (this.buffer || this.file)) {
 			this.parse();
 		}
@@ -216,6 +233,15 @@ export default class DBPF {
 			return buffer;
 		}
 
+		// If we don't have a file, neither a buffer, but we *do* have a HTML5 
+		// file object, we'll notify the user that a file object is set, but 
+		// that reading synchronously is not possible.
+		if (this.fileObject) {
+			throw new Error(
+				`DBPF file has a HTML5 file object set, which only allows async reading. Either user async reading, or read in the full buffer instead.`,
+			);
+		}
+
 		// No file or buffer set? Then we can't read.
 		throw new Error(`DBPF file has no buffer, neither file set.`);
 
@@ -227,7 +253,11 @@ export default class DBPF {
 	// parallel.
 	async readBytesAsync(offset: number, length: number) {
 		if (this.buffer) return this.buffer.subarray(offset, offset+length);
-		else if (this.file) {
+		else if (this.fileObject) {
+			let slice = this.fileObject.slice(offset, offset+length);
+			let arrayBuffer = await slice.arrayBuffer();
+			return new Uint8Array(arrayBuffer);
+		} else if (this.file) {
 			let buffer = new Uint8Array(length);
 			let fh = await fs!.promises.open(this.file);
 			await fh.read(buffer, 0, length, offset);
@@ -451,7 +481,8 @@ const parse = duplicateAsync(function* parse(read) {
 	// this we can derive where to find the index so that we can parse the 
 	// entries from it.
 	let header = this.header = new Header();
-	header.parse(new Stream(this.readBytes(0, 96)));
+	let headerBytes = yield read(0, 96);
+	header.parse(new Stream(headerBytes as Uint8Array));
 
 	// Header is parsed which means we now know the offset of the index. 
 	// Read in the bytes of the index and then build up the index.

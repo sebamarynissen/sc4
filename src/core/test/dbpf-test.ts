@@ -1,5 +1,6 @@
 // # dbpf-test.ts
 import { expect } from 'chai';
+import { File, Blob } from 'node:buffer';
 import fs from '#test/fs.js';
 import { compareUint8Arrays, uint8ArrayToString } from 'uint8array-extras';
 import { resource, output } from '#test/files.js';
@@ -29,6 +30,25 @@ describe('A DBPF file', function() {
 		});
 		let exemplar = entry?.read();
 		expect(exemplar!.get(0x10)).to.equal(0x10);
+
+	});
+
+	it('parses from a file object', async function() {
+
+		let filePath = resource('cement.sc4lot');
+		let buffer = fs.readFileSync(resource('cement.sc4lot'));
+		let blob = new Blob([buffer]);
+		let file = new File([blob], filePath);
+		let dbpf = new DBPF(file);
+		await dbpf.parseAsync();
+
+		let entry = dbpf.find({
+			type: 0x6534284a,
+			group: 0xa8fbd372,
+			instance: 0x8a73e853,
+		})!;
+		let exemplar = await entry.readAsync();
+		expect(exemplar.get('ExemplarType')).to.equal(0x10);
 
 	});
 
