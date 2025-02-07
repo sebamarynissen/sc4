@@ -24,25 +24,44 @@ export class Glob {
 		});
 	}
 
+	// ## *[Symbol.asyncIterator]()
+	async *[Symbol.asyncIterator]() {
+		yield* this.stream();
+	}
+
+	// ## stream()
+	// Loops over all the files as a stream. This is the base for all of our 
+	// async functions.
+	stream() {
+		const glob = this;
+		const info = new FileInfo(this.cwd, '/');
+		return new ReadableStream<File>({
+			async start(controller) {
+				const tasks: Promise<any>[] = [];
+				await readdir(info, (info) => {
+					if (!glob.match(info.path)) return;
+					const { handle, kind } = info;
+					if (kind === 'file') {
+						const task = (handle as FileSystemFileHandle)
+							.getFile()
+							.then((src) => {
+								controller.enqueue(new File([src], info.path));
+							});
+						tasks.push(task);
+					}
+				});
+				await Promise.all(tasks);
+				controller.close();
+			},
+		});
+	}
+
 	// ## async walk()
 	async walk() {
-		const info = new FileInfo(this.cwd, '/');
 		const files: File[] = [];
-		const tasks: Promise<any>[] = [];
-		await readdir(info, (info) => {
-			if (this.match(info.path)) {
-				if (info.kind === 'directory') return;
-				const { handle } = info;
-				const task = (handle as FileSystemFileHandle)
-					.getFile()
-					.then((src) => {
-						let file = new File([src], info.path);
-						files.push(file);
-					});
-				tasks.push(task);
-			}
-		});
-		await Promise.all(tasks);
+		for await (let file of this) {
+			files.push(file);
+		}
 		return files;
 	}
 
