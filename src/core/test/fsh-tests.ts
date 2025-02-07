@@ -48,10 +48,10 @@ describe('The FSH file type', function() {
 		let fsh = new FSH().parse(buffer);
 		let bitmap = fsh.entries[0].image.decompress();
 		expect(bitmap).to.eql(new Uint8Array([
-			0, 0, 0xff, 0,
-			0, 0, 0xff, 0,
-			0, 0, 0xff, 0,
-			0, 0, 0xff, 0,
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
+			0, 0, 0, 0xff,
 		]));
 
 	});

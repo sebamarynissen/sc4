@@ -16,20 +16,9 @@ export function decompress8bit(data: Uint8Array) {
 
 // # decompress32bit(data)
 // Decompresses a 32-bit encoded bitmap - which actually is no decompressing at 
-// all. The only thing that changes is the order because alpha goes first here.
+// all.
 export function decompress32bit(data: Uint8Array) {
-	const output = new Uint8Array(data.byteLength);
-	for (let i = 0; i < data.length; i += 4) {
-		let a = data[i];
-		let r = data[i+1];
-		let g = data[i+2];
-		let b = data[i+3];
-		output[i] = r;
-		output[i+1] = g;
-		output[i+2] = b;
-		output[i+3] = a;
-	}
-	return output;
+	return data;
 }
 
 // # decompress24bit(data)
