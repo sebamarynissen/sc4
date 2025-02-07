@@ -23,8 +23,8 @@ export function decompress32bit(data: Uint8Array) {
 	for (let i = 0; i < data.length; i += 4) {
 		let b = data[i];
 		let r = data[i+2];
-		data[i] = r;
-		data[i+2] = b;
+		output[i] = r;
+		output[i+2] = b;
 	}
 	return output;
 }
