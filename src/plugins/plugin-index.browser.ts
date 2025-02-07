@@ -2,6 +2,7 @@
 import { DBPF, type Entry } from 'sc4/core';
 import CorePluginIndex from './core-plugin-index.js';
 import { Glob } from './glob.browser.js';
+import createLoadComparator from './create-load-comparator.js';
 import { TGIIndex } from 'sc4/utils';
 
 type BuildOptions = {
@@ -12,6 +13,10 @@ type BuildOptions = {
 // # PluginIndex()
 export default class PluginIndex extends CorePluginIndex {
 
+	// ## build()
+	// Entry point for actually building up the plugin index in the browser. 
+	// Note that it may take a lot of time, so that'd why there is a 
+	// "BuildProgress" object.
 	async build(opts: BuildOptions) {
 		const all = [];
 		const ops = [];
@@ -90,9 +95,8 @@ class DirectoryScanOperation {
 		// If we reach this point, all dbpfs have been added to the queue and 
 		// they have started loading. This means that we can sort them now based 
 		// on the load order that is required!
-		this.queue.sort(
-			(a, b) => a.dbpf.fileObject!.name < b.dbpf.fileObject!.name ? -1 : 1,
-		);
+		const compare = createLoadComparator();
+		this.queue.sort((a, b) => compare(a.dbpf.filename, b.dbpf.filename));
 
 		// Cool, now wait for the entries to be finished parsing as well. Once 
 		// that's done, the queue is properly sorted and contain all entries. 

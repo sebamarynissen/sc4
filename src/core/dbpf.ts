@@ -130,6 +130,16 @@ export default class DBPF {
 		return entry ? entry.read() : null;
 	}
 
+	// ## get filename()
+	// Looks up the filename of the dbpf in an agnostic way - meaning that we 
+	// don't care about whether it's a file object dbpf or no. We just always 
+	// return a string, which is useful for sorting.
+	get filename(): string {
+		if (this.file) return this.file;
+		else if (this.fileObject) return this.fileObject.name;
+		else return '';
+	}
+
 	// ## find(...args)
 	// Proxies to entries.find().
 	find<T extends DecodedFileTypeId>(query: TGIQuery<T>): EntryFromType<T> | undefined;
