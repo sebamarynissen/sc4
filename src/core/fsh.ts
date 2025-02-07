@@ -8,9 +8,9 @@ import {
 	decompress24bit,
 	decompressDXT1,
 	decompressDXT3,
-    decompress1555,
-    decompress565,
-    decompress444,
+	decompress1555,
+	decompress565,
+	decompress444,
 } from './bitmap-decompression.js';
 
 // # FSH
