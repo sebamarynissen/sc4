@@ -19,7 +19,7 @@ import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
 import type { Entry, TGI } from 'sc4/core';
-import type { Logger, TGIArray, TGIQuery } from 'sc4/types';
+import type { Logger, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
 import { styleText } from 'node:util';
 const debug = createDebug('sc4:plugins:tracker');
