@@ -45,7 +45,6 @@ type BuildOptions = GeneralBuildOptions & {
 // **on the disk**. Note: we should make use of node's async nature here so 
 // that we can read in as much files as possible in parallel!
 export default class PluginIndex extends CorePluginIndex {
-	scan: string[] = [];
 	options: {
 		core: boolean;
 		installation: folder | undefined;
@@ -109,7 +108,7 @@ export default class PluginIndex extends CorePluginIndex {
 		// might cause an enormous amount of files to be scanned when running 
 		// inside the user's homedir or something. In that case, we simply don't 
 		// scan any plugins!
-		let { plugins } = opts;
+		let { plugins = this.options.plugins } = opts;
 		if (plugins) {
 			let task = new FileScanner(this.scan, { cwd: plugins })
 				.walk()
