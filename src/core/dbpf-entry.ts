@@ -18,7 +18,6 @@ import type {
     ReadResult,
 } from './types.js';
 import TGI from './tgi.js';
-import { SmartBuffer } from 'smart-arraybuffer';
 
 /**
  * Returns a DBPF Entry type where the file type pointed to by the entry is 
@@ -65,7 +64,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// where "undefined" means that it's not known whether the entry is 
 	// compressed or not. This means that upon saving, we will have to actually 
 	// read tje buffer to figure out whether it's compressed or not.
-	compressed: boolean | undefined = false;
+	compressed: boolean | undefined = undefined;
 
 	// This property is rebound as non-enumerable in the constructor, but it is 
 	// needed for TypeScript to properly handle it.
@@ -336,8 +335,10 @@ const dual = {
 		const { raw } = this;
 		const info = getCompressionInfo(raw);
 		if (info.compressed) {
+			this.compressed = true;
 			this.buffer = decompress(raw.subarray(4));
 		} else {
+			this.compressed = false;
 			this.buffer = raw;
 		}
 		return this.buffer;

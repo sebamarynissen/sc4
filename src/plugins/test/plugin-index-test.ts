@@ -20,7 +20,6 @@ describe('The plugin index', function() {
 
 		let record = index.find(0x6534284a, 0xa8fbd372, 0xe001a291)!;
 		expect(record.size).to.equal(2378);
-		expect(record.compressed).to.be.false;
 
 		// Read the file. Should be an exemplar.
 		let file = record.read();

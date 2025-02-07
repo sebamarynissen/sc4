@@ -9,19 +9,16 @@ import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import FileType from './file-types.js';
 import type DBPF from './dbpf.js';
+import { getCompressionInfo } from 'sc4/utils';
 
 type BufferAddOptions = {
-	compressed?: boolean;
-	fileSize?: number;
-	compressedSize?: number;
 	compress?: boolean;
 };
 
 type IndexEntry = {
 	tgi: TGI;
-	compressed: boolean;
 	offset: number;
-	compressedSize: number;
+	size: number;
 };
 
 // A DBPFStream can be used to write a DBPF file to disk without having to load 
@@ -66,42 +63,34 @@ export default class DBPFStream {
 		// Check if we still have to compress. Note that we'll do this in 
 		// parallel with aquiring the handle.
 		let promise = this.getHandle();
+		let info: ReturnType<typeof getCompressionInfo>;
 		if (opts.compress) {
+			let size = buffer.byteLength;
 			buffer = compress(buffer, { includeSize: true });
+			info = { compressed: true, size };
+		} else {
+			info = getCompressionInfo(buffer);
 		}
-		let { compressed = opts.compress || false } = opts;
 
 		// Get the file handle.
 		let fh = await promise;
 		let offset = this.byteLength;
 		let { bytesWritten } = await fh.write(buffer);
 		this.byteLength += bytesWritten;
-		let {
-			fileSize = (
-				// Note we've prefixed the *compressed size* in the buffer, 
-				// which means when reading the uncompressd size from the 
-				// buffer, we have to truncate this again.
-				compressed ?
-					readFileSizeFromCompressedBuffer(buffer.subarray(4)) :
-					bytesWritten
-			),
-			compressedSize = bytesWritten,
-		} = opts;
 
 		// Add this file to the entries written.
 		let tgi = new TGI(tgiLike);
 		let entry = {
 			tgi,
-			compressed,
-			compressedSize,
 			offset,
+			size: bytesWritten,
 		};
 		this.entries.push(entry);
 
 		// If the entry was compressed, we have to store it in our DIR entry as 
 		// well.
-		if (entry.compressed) {
-			this.dir.push({ ...tgi, size: fileSize });
+		if (info.compressed) {
+			this.dir.push({ tgi, size: info.size });
 		}
 
 	}
@@ -118,11 +107,7 @@ export default class DBPFStream {
 			// Don't parse or decompress the entry. We'll just keep it as is: a 
 			// potentially compressed buffer read from the filesystem.
 			let buffer = await entry.readRawAsync();
-			await this.add(entry.tgi, buffer, {
-				compressed: entry.compressed,
-				compressedSize: entry.compressedSize,
-				fileSize: entry.fileSize,
-			});
+			await this.add(entry.tgi, buffer);
 
 		}
 	}
@@ -135,8 +120,7 @@ export default class DBPFStream {
 		// First of all we'll serialize the DIR entry and write it away, but 
 		// only if there are any compressed entries.
 		let fh = await this.getHandle();
-		let hasCompressed = this.entries.some(entry => entry.compressed);
-		if (hasCompressed) {
+		if (this.dir.length > 0) {
 			let offset = this.byteLength;
 			let buffer = this.dir.toBuffer();
 			let { bytesWritten } = await fh.write(buffer)
@@ -145,9 +129,8 @@ export default class DBPFStream {
 			// Put it in our array containing all index tables entries too.
 			this.entries.push({
 				tgi: new TGI(0xE86B1EEF, 0xE86B1EEF, 0x286B1F03),
-				compressed: false,
-				compressedSize: buffer.byteLength,
 				offset,
+				size: bytesWritten,
 			});
 		}
 
@@ -158,7 +141,7 @@ export default class DBPFStream {
 		for (let entry of this.entries) {
 			table.tgi(entry.tgi);
 			table.uint32(entry.offset);
-			table.uint32(entry.compressedSize);
+			table.uint32(entry.size);
 		}
 		let tableBuffer = table.toUint8Array();
 		let { bytesWritten } = await fh.write(tableBuffer);
@@ -176,11 +159,4 @@ export default class DBPFStream {
 
 	}
 
-}
-
-// # readFileSizeFromCompressedBuffer(buffer)
-// QFS compression always stores the *uncompressed* size in byte 2, 3 and 4, so 
-// we can read it from there. Interestingly, it's stored as BE.
-function readFileSizeFromCompressedBuffer(buffer: Uint8Array) {
-	return 0x10000*buffer[2] + 0x100*buffer[3] + buffer[4];
 }
