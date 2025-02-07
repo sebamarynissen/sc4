@@ -1,6 +1,6 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
-import { tgi, inspect, duplicateAsync } from 'sc4/utils';
+import { tgi, inspect, duplicateAsync, getCompressionInfo } from 'sc4/utils';
 import type { TGILike, uint32 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
@@ -333,14 +333,9 @@ const dual = {
 		// IMPORTANT! We no longer rely on the DIR file to figure out whether 
 		// the entry is compressed, but we'll use the buffer *itself* for this 
 		// and check for the combination of magic number and size.
-		let isCompressed;
 		const { raw } = this;
-		if (!isCompressed && raw.byteLength > 9) {
-			const reader = SmartBuffer.fromBuffer(raw);
-			const nr = reader.readUInt16BE(4);
-			isCompressed = nr === 0x10fb;
-		}
-		if (isCompressed) {
+		const info = getCompressionInfo(raw);
+		if (info.compressed) {
 			this.buffer = decompress(raw.subarray(4));
 		} else {
 			this.buffer = raw;
