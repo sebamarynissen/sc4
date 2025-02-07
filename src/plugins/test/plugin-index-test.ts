@@ -19,9 +19,7 @@ describe('The plugin index', function() {
 		await index.build();
 
 		let record = index.find(0x6534284a, 0xa8fbd372, 0xe001a291)!;
-		expect(record.fileSize).to.equal(2378);
-		expect(record.compressedSize).to.equal(2378);
-		expect(record.compressed).to.be.false;
+		expect(record.size).to.equal(2378);
 
 		// Read the file. Should be an exemplar.
 		let file = record.read();
@@ -128,6 +126,18 @@ describe('The plugin index', function() {
 			instance: 0x59668597,
 		})!;
 		expect(path.basename(last.dbpf.file!)).to.equal('z_override.SC4Desc');
+
+	});
+
+	it('properly handles compressed/non-compressed duplicates', async function() {
+
+		let index = new Index({
+			plugins: resource('duplicates'),
+			core: false,
+		});
+		await index.build();
+		await index.buildFamilies();
+		expect(index.entries).to.have.length(2);
 
 	});
 

@@ -7,7 +7,7 @@ import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
 import Stream from './stream.js';
 import { cClass, FileType } from './enums.js';
-import { fs, TGIIndex, duplicateAsync } from 'sc4/utils';
+import { fs, TGIIndex, duplicateAsync, getCompressionInfo } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
@@ -144,8 +144,7 @@ export default class DBPF {
 		if (!fileOrBuffer) {
 			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
 		}
-		let entry = new Entry({ dbpf: this });
-		entry.tgi = new TGI(tgi);
+		let entry = new Entry({ dbpf: this, tgi });
 		this.entries.add(entry);
 		if (isUint8Array(fileOrBuffer)) {
 
@@ -243,16 +242,9 @@ export default class DBPF {
 	// testing stuff out, but for bulk reading you should use the async 
 	// reading.
 	parse() {
-		// const dirs = fn => this.findAll({ type: FileType.DIR }).map(entry => {
-		// 	fn(entry!.read());
-		// });
-		const dirs = (fn: DirCallback) => this.findAll({ type: FileType.DIR }).map(entry => {
-			fn(entry.read());
-		});
 		return parse.sync.call(
 			this,
 			(...args: Parameters<DBPF['readBytes']>) => this.readBytes(...args),
-			dirs,
 		);
 	}
 
@@ -267,7 +259,6 @@ export default class DBPF {
 		return await parse.async.call(
 			this,
 			(...args: Parameters<DBPF['readBytesAsync']>) => this.readBytesAsync(...args),
-			dirs,
 		);
 	}
 
@@ -285,7 +276,6 @@ export default class DBPF {
 			throw new TypeError('No file given to save the DBPF to!');
 		}
 		return fs!.writeFileSync(file, buff);
-		// return fs.promises.writeFile(opts.file, buff);
 	}
 
 	// ## toBuffer()
@@ -301,7 +291,7 @@ export default class DBPF {
 
 		// Prepare a list of stuff that needs to be serialized along with its 
 		// info, along with the list of compressed entries - the DIR file.
-		let list = [];
+		let list: { tgi: TGI, buffer: Uint8Array }[] = [];
 		let dir = new DIR();
 		let major = this.header.indexMajor;
 		let minor = this.header.indexMinor;
@@ -316,39 +306,28 @@ export default class DBPF {
 			// If the entry was already read, it means it might have been 
 			// modified, so we can't reuse the raw - potentially uncompressed - 
 			// buffer in any case.
-			let tgi = {
-				type: entry.type,
-				group: entry.group,
-				instance: entry.instance,
-			};
+			let { tgi } = entry;
 			if (entry.file || entry.buffer) {
 				let buffer = entry.toBuffer();
-				let fileSize = buffer.byteLength;
-				if (entry.compressed) {
+				let size = buffer.byteLength;
+
+				// We will only compress the entry if explicitly stored that the 
+				// entry should be compressed. This means that false and 
+				// undefined mean no compression.
+				if (entry.compressed === true) {
 					buffer = compress(buffer, { includeSize: true });
-					dir.push({ ...tgi, size: fileSize });
+					dir.push({ tgi, size });
 				}
-				list.push({
-					...tgi,
-					buffer,
-					compressed: entry.compressed,
-					fileSize,
-					compressedSize: buffer.byteLength,
-				});
+				list.push({ tgi, buffer });
 			} else {
 
-				// If the entry has never been read, we just reuse it as is.
+				// If the entry has never been read, we just reuse it as is. 
 				let raw = entry.raw || entry.readRaw();
-				if (entry.compressed) {
-					dir.push({ ...tgi, size: entry.fileSize });
+				let info = getCompressionInfo(raw);
+				if (info.compressed) {
+					dir.push({ tgi, size: info.size });
 				}
-				list.push({
-					...tgi,
-					buffer: raw,
-					compressed: entry.compressed,
-					fileSize: entry.fileSize,
-					compressedSize: entry.compressedSize,
-				});
+				list.push({ tgi, buffer: raw });
 
 			}
 
@@ -359,13 +338,8 @@ export default class DBPF {
 		if (dir.length > 0) {
 			let buffer = dir.toBuffer({ major, minor });
 			list.push({
-				type: 0xE86B1EEF,
-				group: 0xE86B1EEF,
-				instance: 0x286B1F03,
+				tgi: new TGI(0xE86B1EEF, 0xE86B1EEF, 0x286B1F03),
 				buffer,
-				compressed: false,
-				fileSize: buffer.byteLength,
-				compressedSize: buffer.byteLength,
 			});
 		}
 
@@ -373,12 +347,9 @@ export default class DBPF {
 		// header.
 		let offset = header.length;
 		let table = new WriteBuffer({ size: 20*list.length });
-		for (let entry of list) {
-			let buffer = entry.buffer;
+		for (let { tgi, buffer } of list) {
 			chunks.push(buffer);
-			table.uint32(entry.type);
-			table.uint32(entry.group);
-			table.uint32(entry.instance);
+			table.tgi(tgi);
 			table.uint32(offset);
 			table.uint32(buffer.byteLength);
 
@@ -474,7 +445,7 @@ export default class DBPF {
 // Parsing a DBPF can be done both in a sync and async way, but the underlying 
 // logic is the same.
 type DirCallback = (dir: DIR) => void;
-const parse = duplicateAsync(function* parse(read, readDirs) {
+const parse = duplicateAsync(function* parse(read) {
 
 	// First of all we need to read the header, and only the header. From 
 	// this we can derive where to find the index so that we can parse the 
@@ -486,10 +457,6 @@ const parse = duplicateAsync(function* parse(read, readDirs) {
 	// Read in the bytes of the index and then build up the index.
 	let index = yield read(header.indexOffset, header.indexSize);
 	fillIndex(this, index as Uint8Array);
-
-	// We're not done yet. The last thing we need to do is read in all the 
-	// DIR files to mark which entries in the DBPF are compressed.
-	yield readDirs((dir: DIR) => handleDir(this, dir));
 	return this;
 
 });
@@ -504,34 +471,4 @@ function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
 		entry.parse(rs);
 	}
 	index.build();
-}
-
-// # handleDir(dbpf, dir)
-// Handles the given dir file and marks the entries in it as compressed. 
-// IMPORTANT! It's possible that a dbpf contains duplicate entries. We don't 
-// really know what the spec says about this, but it doesn't seem like the DIR 
-// has to be in a fixed order. Hence we'll assume that the *duplicate* entries 
-// have to appear in order.
-function handleDir(dbpf: DBPF, dir: DIR) {
-	let counters: Record<string, number> = {};
-	for (let { type, group, instance, size } of dir) {
-		let entries = dbpf.findAll({ type, group, instance });
-		if (entries.length === 0) continue;
-		else if (entries.length === 1) {
-			let [entry] = entries;
-			entry.compressed = true;
-			entry.fileSize = size;
-		} else {
-
-			// Only when there are multiple entries will we keep track of how 
-			// often we already encountered this one!
-			let [{ id }] = entries;
-			let nr = counters[id] ??= 0;
-			counters[id]++;
-			let entry = entries[nr];
-			entry.compressed = true;
-			entry.fileSize = size;
-
-		}
-	}
 }

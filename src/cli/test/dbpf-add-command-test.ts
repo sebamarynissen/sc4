@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { output, resource } from '#test/files.js';
 import { DBPF, Exemplar, ExemplarProperty, FileType } from 'sc4/core';
-import { randomId } from 'sc4/utils';
+import { getCompressionInfo, randomId } from 'sc4/utils';
 import { dbpfAdd } from '../commands/dbpf-add-command.js';
 import { compareUint8Arrays } from 'uint8array-extras';
 import { expect } from 'chai';
@@ -71,9 +71,7 @@ describe('The dbpfAdd() command', function() {
 			if (entry.type === FileType.DIR) continue;
 			let sibling = result.find(entry.tgi)!;
 			expect(sibling).to.be.ok;
-			expect(sibling.compressed).to.equal(entry.compressed);
-			expect(sibling.fileSize).to.equal(entry.fileSize);
-			expect(sibling.compressedSize).to.equal(entry.compressedSize);
+			expect(sibling.size).to.equal(entry.size);
 			expect(compareUint8Arrays(
 				sibling.readRaw(),
 				entry.readRaw(),
@@ -161,9 +159,10 @@ describe('The dbpfAdd() command', function() {
 		});
 		let result = new DBPF(path.join(cwd, 'output.dat'));
 		let icon = result.find({ type: FileType.PNG })!;
-		expect(icon.compressed).to.be.false;
+		expect(getCompressionInfo(icon.readRaw()).compressed).to.be.false;
 		let exemplar = result.find({ type: FileType.Exemplar })!;
-		expect(exemplar.compressed).to.be.true;
+		expect(getCompressionInfo(exemplar.readRaw()).compressed).to.be.true;
+		
 
 	});
 

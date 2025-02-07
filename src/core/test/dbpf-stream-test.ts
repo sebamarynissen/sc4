@@ -6,6 +6,7 @@ import DBPF from '../dbpf.js';
 import FileType from '../file-types.js';
 import TGI from '../tgi.js';
 import { compareUint8Arrays } from 'uint8array-extras';
+import { compress } from 'qfs-compression';
 
 describe('A DBPF stream', function() {
 
@@ -22,9 +23,7 @@ describe('A DBPF stream', function() {
 		let dbpf = new DBPF(file);
 		let entry = dbpf.find(tgi)!;
 		expect(entry).to.be.ok;
-		expect(entry.compressed).to.be.false;
-		expect(entry.fileSize).to.equal(100);
-		expect(entry.compressedSize).to.equal(100);
+		expect(entry.size).to.equal(100);
 		expect(compareUint8Arrays(entry.readRaw(), buffer)).to.equal(0);
 
 	});
@@ -42,8 +41,8 @@ describe('A DBPF stream', function() {
 		let dbpf = new DBPF(file);
 		let entry = dbpf.find(tgi)!;
 		expect(entry).to.be.ok;
-		expect(entry.compressed).to.be.true;
-		expect(entry.fileSize).to.equal(buffer.byteLength);
+		expect(entry.size).to.be.below(buffer.byteLength);
+		expect(entry.size).to.equal(compress(buffer, { includeSize: true }).byteLength);
 		expect(compareUint8Arrays(entry.readRaw(), buffer)).to.not.equal(0);
 		expect(compareUint8Arrays(entry.decompress(), buffer)).to.equal(0);
 
@@ -56,18 +55,13 @@ describe('A DBPF stream', function() {
 
 		let tgi = TGI.random();
 		let buffer = crypto.getRandomValues(new Uint8Array(100));
-		await stream.add(tgi, buffer, {
-			compressed: true,
-			fileSize: 400,
-		});
+		await stream.add(tgi, buffer);
 		await stream.seal();
 
 		let dbpf = new DBPF(file);
 		let entry = dbpf.find(tgi)!;
 		expect(entry).to.be.ok;
-		expect(entry.compressed).to.be.true;
-		expect(entry.compressedSize).to.equal(100);
-		expect(entry.fileSize).to.equal(400);
+		expect(entry.size).to.equal(100);
 		expect(compareUint8Arrays(entry.readRaw(), buffer)).to.equal(0);
 
 	});

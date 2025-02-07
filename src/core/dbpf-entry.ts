@@ -1,6 +1,6 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
-import { tgi, inspect, duplicateAsync } from 'sc4/utils';
+import { tgi, inspect, duplicateAsync, getCompressionInfo } from 'sc4/utils';
 import type { TGILike, uint32 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
@@ -29,19 +29,16 @@ export type EntryFromType<T extends DecodedFileTypeId> = Entry<TypeIdToFile<T>>;
 
 export type EntryJSON = {
 	tgi: uint32[];
-	fileSize: number;
-	compressedSize: number;
+	size: number;
 	offset: number;
-	compressed: boolean;
 };
 
 type EntryConstructorOptions = {
 	dbpf?: DBPF;
 	tgi?: TGILike;
-	fileSize?: number;
-	compressedSize?: number;
+	size?: number;
 	offset?: number;
-	compressed?: number;
+	compressed?: boolean;
 };
 type EntryParseOptions = {
     minor?: number;
@@ -56,10 +53,18 @@ type EntryParseOptions = {
 type AllowedEntryType = DecodedFile | Uint8Array;
 export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	tgi: TGI = new TGI();
-	fileSize = 0;
-	compressedSize = 0;
+	size = 0;
 	offset = 0;
-	compressed = false;
+
+	// Whether an entry is compressed or not is no longer derived from the DIR 
+	// file. That's because we need to be able to handle duplicates. Instead, 
+	// you can check if an entry is compressed by checking whether its file 
+	// header contains the 0x10fb magic number. This means that the "compressed" 
+	// field now has a slightly different meaning. It now has three states, 
+	// where "undefined" means that it's not known whether the entry is 
+	// compressed or not. This means that upon saving, we will have to actually 
+	// read tje buffer to figure out whether it's compressed or not.
+	compressed: boolean | undefined = undefined;
 
 	// This property is rebound as non-enumerable in the constructor, but it is 
 	// needed for TypeScript to properly handle it.
@@ -183,17 +188,11 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 			rs.uint32();
 		}
 		let offset = this.offset = rs.uint32();
-		this.compressedSize = rs.uint32();
-
-		// Temporarilly set the fileSize to compressedSize. If the file is 
-		// compressed though, we'll read this from the dir entry and update 
-		// the file size accordingly. For non-compressed files, the fileSize 
-		// remains ok.
-		this.fileSize = this.compressedSize;
+		this.size = rs.size();
 
 		// If a dbpf buffer was specified, extract the raw entry from it. 
 		if (buffer) {
-			this.raw = buffer.subarray(offset, offset+this.compressedSize);
+			this.raw = buffer.subarray(offset, offset+this.size);
 		}
 		return this;
 
@@ -203,7 +202,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// **Synchronously** reads the entry's raw buffer and stores it in the 
 	// "raw" property.
 	readRaw() {
-		return this.dbpf.readBytes(this.offset, this.compressedSize);
+		return this.dbpf.readBytes(this.offset, this.size);
 	}
 
 	// ## decompress()
@@ -225,7 +224,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// Asynchronously reads the entry's raw buffer and stores it in the raw 
 	// property.
 	async readRawAsync() {
-		return await this.dbpf.readBytesAsync(this.offset, this.compressedSize);
+		return await this.dbpf.readBytesAsync(this.offset, this.size);
 	}
 
 	// ## decompressAsync()
@@ -278,17 +277,13 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	toJSON(): EntryJSON {
 		let {
 			tgi,
-			fileSize,
-			compressedSize,
+			size,
 			offset,
-			compressed,
 		} = this;
 		return {
 			tgi: [...tgi],
-			fileSize,
-			compressedSize,
+			size,
 			offset,
-			compressed,
 		};
 	}
 
@@ -305,8 +300,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 			dbpf: this.dbpf.file,
 			type: inspect.type(label) ?? inspect.hex(this.type),
 			tgi: this.tgi,
-			fileSize: this.fileSize,
-			compressedSize: this.compressedSize,
+			size: this.size,
 			offset: this.offset,
 			compressed: this.compressed,
 			file: this.file,
@@ -335,13 +329,18 @@ const dual = {
 			this.raw = (yield readRaw()) as Uint8Array;
 		}
 
-		// If the entry is compressed, decompress it.
-		if (this.compressed) {
-			this.buffer = decompress(this.raw.subarray(4));
+		// IMPORTANT! We no longer rely on the DIR file to figure out whether 
+		// the entry is compressed, but we'll use the buffer *itself* for this 
+		// and check for the combination of magic number and size.
+		const { raw } = this;
+		const info = getCompressionInfo(raw);
+		if (info.compressed) {
+			this.compressed = true;
+			this.buffer = decompress(raw.subarray(4));
 		} else {
-			this.buffer = this.raw;
+			this.compressed = false;
+			this.buffer = raw;
 		}
-
 		return this.buffer;
 
 	}),
@@ -377,7 +376,13 @@ const dual = {
 		} else {
 			const Constructor = this.fileConstructor;
 			let file = this.file = new Constructor();
-			file.parse(new Stream(this.buffer!), { entry: this });
+			try {
+				file.parse(new Stream(this.buffer!), { entry: this });
+			} catch (e) {
+				console.log(this);
+				console.log(this.buffer, this.raw);
+				throw e;
+			}
 		}
 		return this.file;
 
