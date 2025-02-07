@@ -250,3 +250,20 @@ export async function attempt(fn: () => any) {
 		return [e, null];
 	}
 }
+
+// # getCompressionInfo(buffer)
+// Returns some information about whether the buffer is QFS compressed or not. 
+// It will also read in the uncompressed size if compressed.
+export function getCompressionInfo(buffer: Uint8Array) {
+	if (
+		buffer.byteLength > 9 &&
+		buffer.byteLength <= 0xffffff &&
+		buffer[4] === 0x10 &&
+		buffer[5] === 0xfb
+	) {
+		let size = (buffer[6] << 16) + (buffer[7] << 8) + buffer[8];
+		return { compressed: true, size };
+	} else {
+		return { compressed: false, size: buffer.byteLength };
+	}
+}
