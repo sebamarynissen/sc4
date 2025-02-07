@@ -7,6 +7,7 @@ export { default as Savegame } from './savegame.js';
 export { default as SavegameContext } from './savegame-context.js';
 export { default as TGI } from './tgi.js';
 export { default as LotObject } from './lot-object.js';
+export * from './fsh.js';
 export { getTypeLabel } from './helpers.js';
 
 // Export all file classes. Third parties need to be able to use them all 
