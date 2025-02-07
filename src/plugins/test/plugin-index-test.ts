@@ -131,4 +131,16 @@ describe('The plugin index', function() {
 
 	});
 
+	it('properly handles compressed/non-compressed duplicates', async function() {
+
+		let index = new Index({
+			plugins: resource('duplicates'),
+			core: false,
+		});
+		await index.build();
+		await index.buildFamilies();
+		expect(index.entries).to.have.length(2);
+
+	});
+
 });

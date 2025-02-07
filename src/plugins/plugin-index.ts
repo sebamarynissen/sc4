@@ -210,7 +210,10 @@ export default class PluginIndex {
 			debug('Start parsing %s', file);
 			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
 				let dbpf = new DBPF({ ...json, parse: false });
-				queue[i] = [...dbpf];
+				let entries: Entry[] = queue[i] = [];
+				for (let entry of dbpf) {
+					if (entry.tgi.type !== FileType.DIR) entries.push(entry);
+				}
 			}) as Promise<DBPF>;
 			tasks.push(task);
 			task.then(() => debug('Done parsing %s', file))
@@ -245,8 +248,9 @@ export default class PluginIndex {
 		let exemplars = this.findAll({ type: FileType.Exemplar });
 		debug('Scanning %d exemplars for families', exemplars.length);
 		let queue = new PQueue({ concurrency });
+		let tasks: Promise<any>[] = [];
 		for (let entry of exemplars) {
-			queue.add(async () => {
+			let task = queue.add(async () => {
 				try {
 					debug('Looking for families in %h', entry.tgi);
 					let exemplar = await entry.readAsync();
@@ -269,8 +273,10 @@ export default class PluginIndex {
 
 				}
 			});
+			tasks.push(task);
 		}
-		await queue.onIdle();
+		await Promise.allSettled(tasks);
+		await Promise.all(tasks);
 
 		// We're not done yet. If a prop pack adds props to a Maxis family, then 
 		// multiple of the *same* tgi might be present in the family array. We 

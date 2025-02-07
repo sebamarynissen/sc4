@@ -18,6 +18,7 @@ import type {
     ReadResult,
 } from './types.js';
 import TGI from './tgi.js';
+import { SmartBuffer } from 'smart-arraybuffer';
 
 /**
  * Returns a DBPF Entry type where the file type pointed to by the entry is 
@@ -335,13 +336,22 @@ const dual = {
 			this.raw = (yield readRaw()) as Uint8Array;
 		}
 
-		// If the entry is compressed, decompress it.
-		if (this.compressed) {
-			this.buffer = decompress(this.raw.subarray(4));
-		} else {
-			this.buffer = this.raw;
+		// IMPORTANT! We no longer rely on the DIR file to figure out whether 
+		// the entry is compressed, but we'll use the buffer *itself* for this 
+		// and check for the combination of magic number and size.
+		let isCompressed;
+		const { raw } = this;
+		if (!isCompressed && raw.byteLength > 9) {
+			const reader = SmartBuffer.fromBuffer(raw);
+			const maybeSize = reader.readUInt32LE();
+			const nr = reader.readUInt16BE();
+			isCompressed = nr === 0x10fb && maybeSize === raw.byteLength;
 		}
-
+		if (isCompressed) {
+			this.buffer = decompress(raw.subarray(4));
+		} else {
+			this.buffer = raw;
+		}
 		return this.buffer;
 
 	}),

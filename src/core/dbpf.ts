@@ -316,20 +316,16 @@ export default class DBPF {
 			// If the entry was already read, it means it might have been 
 			// modified, so we can't reuse the raw - potentially uncompressed - 
 			// buffer in any case.
-			let tgi = {
-				type: entry.type,
-				group: entry.group,
-				instance: entry.instance,
-			};
+			let { tgi } = entry;
 			if (entry.file || entry.buffer) {
 				let buffer = entry.toBuffer();
 				let fileSize = buffer.byteLength;
 				if (entry.compressed) {
 					buffer = compress(buffer, { includeSize: true });
-					dir.push({ ...tgi, size: fileSize });
+					dir.push({ tgi, size: fileSize });
 				}
 				list.push({
-					...tgi,
+					tgi,
 					buffer,
 					compressed: entry.compressed,
 					fileSize,
@@ -340,10 +336,10 @@ export default class DBPF {
 				// If the entry has never been read, we just reuse it as is.
 				let raw = entry.raw || entry.readRaw();
 				if (entry.compressed) {
-					dir.push({ ...tgi, size: entry.fileSize });
+					dir.push({ tgi, size: entry.fileSize });
 				}
 				list.push({
-					...tgi,
+					tgi,
 					buffer: raw,
 					compressed: entry.compressed,
 					fileSize: entry.fileSize,
@@ -359,9 +355,7 @@ export default class DBPF {
 		if (dir.length > 0) {
 			let buffer = dir.toBuffer({ major, minor });
 			list.push({
-				type: 0xE86B1EEF,
-				group: 0xE86B1EEF,
-				instance: 0x286B1F03,
+				tgi: new TGI(0xE86B1EEF, 0xE86B1EEF, 0x286B1F03),
 				buffer,
 				compressed: false,
 				fileSize: buffer.byteLength,
@@ -373,12 +367,9 @@ export default class DBPF {
 		// header.
 		let offset = header.length;
 		let table = new WriteBuffer({ size: 20*list.length });
-		for (let entry of list) {
-			let buffer = entry.buffer;
+		for (let { tgi, buffer } of list) {
 			chunks.push(buffer);
-			table.uint32(entry.type);
-			table.uint32(entry.group);
-			table.uint32(entry.instance);
+			table.tgi(tgi);
 			table.uint32(offset);
 			table.uint32(buffer.byteLength);
 
