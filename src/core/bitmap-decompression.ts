@@ -16,9 +16,17 @@ export function decompress8bit(data: Uint8Array) {
 
 // # decompress32bit(data)
 // Decompresses a 32-bit encoded bitmap - which actually is no decompressing at 
-// all.
+// all. The bitmap is stored in LE format, meaning BGRA, which we have to 
+// transform to RGBA.
 export function decompress32bit(data: Uint8Array) {
-	return data;
+	let output = new Uint8Array(data);
+	for (let i = 0; i < data.length; i += 4) {
+		let b = data[i];
+		let r = data[i+2];
+		data[i] = r;
+		data[i+2] = b;
+	}
+	return output;
 }
 
 // # decompress24bit(data)
