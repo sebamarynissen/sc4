@@ -47,7 +47,6 @@ type BuildOptions = GeneralBuildOptions & {
 export default class PluginIndex extends CorePluginIndex {
 	scan: string[] = [];
 	options: {
-		scan: string[];
 		core: boolean;
 		installation: folder | undefined;
 		plugins: folder | undefined;
@@ -72,14 +71,12 @@ export default class PluginIndex extends CorePluginIndex {
 		// Store some constructor options so we can read them in later again, 
 		// most notably when building the index.
 		const {
-			scan = '**/*',
 			core = true,
 			installation = process.env.SC4_INSTALLATION,
 			plugins = process.env.SC4_PLUGINS,
 			threads,
 		} = opts;
 		this.options = {
-			scan: [scan].flat(),
 			core,
 			installation,
 			plugins,
@@ -114,7 +111,7 @@ export default class PluginIndex extends CorePluginIndex {
 		// scan any plugins!
 		let { plugins } = opts;
 		if (plugins) {
-			let task = new FileScanner(this.options.scan, { cwd: plugins })
+			let task = new FileScanner(this.scan, { cwd: plugins })
 				.walk()
 				.then(files => files.filter(file => {
 					return !file.includes('staging-process');

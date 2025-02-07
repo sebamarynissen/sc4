@@ -61,6 +61,11 @@ export default abstract class CorePluginIndex {
 	cache: LRUCache<string, Entry>;
 	constructor(opts: PluginIndexOptions) {
 
+		// By default we will look for .dat and .sc4* files. Nothing else need 
+		// to be handled.
+		const { scan = '**/*.{dat,sc4*}' } = opts;
+		this.scan = [scan].flat();
+
 		// Set up the cache that we'll use to free up memory of DBPF files 
 		// that are not read often.
 		const { mem = 4*1024**3 } = opts;
