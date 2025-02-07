@@ -304,8 +304,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 		return 'DBPF Entry '+defaultInspect({
 			dbpf: this.dbpf.file,
 			type: inspect.type(label) ?? inspect.hex(this.type),
-			group: inspect.hex(this.group),
-			instance: inspect.hex(this.instance),
+			tgi: this.tgi,
 			fileSize: this.fileSize,
 			compressedSize: this.compressedSize,
 			offset: this.offset,
@@ -317,7 +316,6 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	}
 
 }
-
 
 // Typing the code below is extremely hard, lol. It shouldn't be, so we 
 // shamelessly use "any". It's internal code anyway.
