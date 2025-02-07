@@ -1,15 +1,13 @@
 // # dir.ts
-import type { uint32 } from 'sc4/types';
 import type Entry from './dbpf-entry.js';
 import { FileType } from './enums.js';
 import type Stream from './stream.js';
 import { kFileType } from './symbols.js';
 import WriteBuffer from './write-buffer.js';
+import type TGI from './tgi.js';
 
 type DirRecord = {
-	type: uint32,
-	group: uint32,
-	instance: uint32,
+	tgi: TGI;
 	size: number,
 };
 
@@ -32,12 +30,10 @@ export default class DIR extends Array<DirRecord> {
 		// Reset our length and then read in the entire DIR record.
 		this.length = 0;
 		while (rs.remaining() > 0) {
-			let type = rs.uint32();
-			let group = rs.uint32();
-			let instance = rs.uint32();
+			let tgi = rs.tgi();
 			let size = rs.uint32();
 			if (shouldSkip) rs.skip(4);
-			this.push({ type, group, instance, size });
+			this.push({ tgi, size });
 		}
 		return this;
 
@@ -49,9 +45,7 @@ export default class DIR extends Array<DirRecord> {
 		let byteLength = major === 7 && minor > 1 ? 20 : 16;
 		let ws = new WriteBuffer({ size: this.length*byteLength });
 		for (let row of this) {
-			ws.uint32(row.type);
-			ws.uint32(row.group);
-			ws.uint32(row.instance);
+			ws.tgi(row.tgi);
 			ws.uint32(row.size);
 			if (byteLength === 20) ws.uint32(0);
 		}

@@ -514,8 +514,8 @@ function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
 // have to appear in order.
 function handleDir(dbpf: DBPF, dir: DIR) {
 	let counters: Record<string, number> = {};
-	for (let { type, group, instance, size } of dir) {
-		let entries = dbpf.findAll({ type, group, instance });
+	for (let { tgi, size } of dir) {
+		let entries = dbpf.findAll(tgi);
 		if (entries.length === 0) continue;
 		else if (entries.length === 1) {
 			let [entry] = entries;
