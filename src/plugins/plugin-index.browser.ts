@@ -20,6 +20,15 @@ export default class PluginIndex extends CorePluginIndex {
 	async build(opts: BuildOptions) {
 		const all = [];
 		const ops = [];
+
+		// If the installation folder is specified, read it in.
+		if (opts.installation) {
+			let op = new DirectoryScanOperation(this, opts.installation);
+			all.push(op.start());
+			ops.push(op);
+		}
+
+		// Same for the user plugins folder.
 		if (opts.plugins) {
 			let op = new DirectoryScanOperation(this, opts.plugins);
 			all.push(op.start());
