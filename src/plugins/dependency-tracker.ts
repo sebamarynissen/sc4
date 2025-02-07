@@ -924,8 +924,8 @@ class File extends String {
 	}
 }
 class TableTGI {
-	tgi: TGIArray;
-	constructor(tgi: TGIArray) {
+	tgi: TGI;
+	constructor(tgi: TGI) {
 		this.tgi = tgi;
 	}
 	[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: any) {
