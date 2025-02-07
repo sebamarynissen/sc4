@@ -12,6 +12,7 @@ import { SmartBuffer } from 'smart-arraybuffer';
 import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
 import type { DBPFFile, DecodedFileTypeId, FileTypeId } from './types.js';
+import TGI from './tgi.js';
 
 export type DBPFOptions = {
 	file?: string;
@@ -144,7 +145,7 @@ export default class DBPF {
 			throw new TypeError(`Added file with tgi ${tgi} is undefined!`);
 		}
 		let entry = new Entry({ dbpf: this });
-		entry.tgi = tgi;
+		entry.tgi = new TGI(tgi);
 		this.entries.add(entry);
 		if (isUint8Array(fileOrBuffer)) {
 

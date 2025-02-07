@@ -48,6 +48,11 @@ export default class TGI<T extends uint32 = uint32> {
 		return [this.type, this.group, this.instance];
 	}
 
+	// ## map()
+	map(...args: Parameters<Array<number>['map']>) {
+		return this.toArray().map(...args);
+	}
+
 	*[Symbol.iterator]() {
 		yield* this.toArray();
 	}

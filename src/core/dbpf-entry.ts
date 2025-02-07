@@ -1,7 +1,7 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
 import { tgi, inspect, duplicateAsync } from 'sc4/utils';
-import type { uint32, TGILiteral, TGIArray } from 'sc4/types';
+import type { uint32 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
 import WriteBuffer from './write-buffer.js';
@@ -17,6 +17,7 @@ import type {
     DecodedFile,
     ReadResult,
 } from './types.js';
+import TGI from './tgi.js';
 
 /**
  * Returns a DBPF Entry type where the file type pointed to by the entry is 
@@ -51,9 +52,7 @@ type EntryParseOptions = {
 // it will be parsed appropriately.
 type AllowedEntryType = DecodedFile | Uint8Array;
 export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
-	type: uint32;
-	group: uint32 = 0;
-	instance: uint32 = 0;
+	tgi: TGI = new TGI();
 	fileSize = 0;
 	compressedSize = 0;
 	offset = 0;
@@ -113,21 +112,15 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 		return kFileTypeArray in this.fileConstructor;
 	}
 
+	get type() { return this.tgi.type; }
+	get group() { return this.tgi.group; }
+	get instance() { return this.tgi.instance; }
+
 	// ## get id()
+	// The "id" returns a stringified version of the tgi of the entry, which is 
+	// useful for indexing it.
 	get id() {
 		return tgi(this.type, this.group, this.instance);
-	}
-
-	// ## get tgi()
-	get tgi(): TGIArray { return [this.type, this.group, this.instance]; }
-	set tgi(tgi: [uint32, uint32, uint32] | TGILiteral) {
-		if (Array.isArray(tgi)) {
-			[this.type, this.group, this.instance] = tgi;
-		} else {
-			this.type = tgi.type;
-			this.group = tgi.group;
-			this.instance = tgi.instance;
-		}
 	}
 
 	// ## get isRead()
@@ -177,9 +170,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 			minor = 0,
 			buffer = null,
 		} = opts;
-		this.type = rs.uint32();
-		this.group = rs.uint32();
-		this.instance = rs.uint32();
+		this.tgi = rs.tgi();
 		if (minor > 0) {
 			rs.uint32();
 		}
