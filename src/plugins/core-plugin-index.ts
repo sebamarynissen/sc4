@@ -98,7 +98,7 @@ export default abstract class CorePluginIndex {
 			queue.add(async () => {
 				try {
 					let exemplar = await entry.readAsync();
-					let families = this.getPropertyValue(exemplar, Family);
+					let families = await this.getPropertyValueAsync(exemplar, Family);
 					if (!families) return;
 					for (let family of families) {
 						if (family) {
@@ -232,6 +232,9 @@ export default abstract class CorePluginIndex {
 			get: <K extends Key = Key>(key: K) => {
 				return this.getPropertyValue(exemplar, key);
 			},
+			getAsync: async <K extends Key = Key>(key: K) => {
+				return await this.getPropertyValueAsync(exemplar, key);
+			},
 		};
 	}
 
@@ -272,6 +275,48 @@ export default abstract class CorePluginIndex {
 	// it doesn't exist, looks it up in the parent cohort.
 	getPropertyValue<K extends Key = Key>(exemplar: Exemplar, key: K) {
 		let prop = this.getProperty(exemplar, key);
+		return prop ? prop.getSafeValue() : undefined;
+	}
+
+	// ## getPropertyAsync()
+	// Same as .getProperty(), but in an async way, because we might need to 
+	// look up a parent cohort.
+	async getPropertyAsync<K extends Key = Key>(exemplar: Exemplar, key: K) {
+		let prop = exemplar.prop(key);
+		while (!prop && exemplar.parent.type) {
+			let { parent } = exemplar;
+			let entry = this.find(parent);
+			if (!entry) {
+				break;
+			};
+
+			// Apparently Exemplar files can specify non-Cohort files as their 
+			// parent cohorts. This happens for example with the NAM. We need to 
+			// handle this gracefully.
+			if (!(
+				entry.isType(FileType.Exemplar) ||
+				entry.isType(FileType.Cohort)
+			)) {
+				break;
+			}
+			exemplar = await entry.readAsync();
+			if (typeof exemplar.prop !== 'function') {
+				console.log('Something wrong', entry.dbpf.file, entry);
+				console.log('-'.repeat(100));
+			}
+			prop = exemplar.prop(key);
+		}
+		return prop;
+	}
+
+	// ## getPropertyValueAsync()
+	// Same as getPropertyValue(), but in an async way, which is required in the
+	// browser, but also speeds up indexing the building families sometimes.
+	async getPropertyValueAsync<K extends Key = Key>(
+		exemplar: Exemplar,
+		key: K,
+	) {
+		let prop = await this.getPropertyAsync(exemplar, key);
 		return prop ? prop.getSafeValue() : undefined;
 	}
 
