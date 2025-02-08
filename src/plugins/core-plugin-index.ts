@@ -91,11 +91,17 @@ export default abstract class CorePluginIndex {
 	// Builds up the index of all building & prop families by reading in all 
 	// exemplars.
 	async buildFamilies(opts: { concurrency?: number } = {}) {
-		let { concurrency = 512 } = opts;
+		let { concurrency = 4096 } = opts;
 		let exemplars = this.findAll({ type: FileType.Exemplar });
 		let queue = new PQueue({ concurrency });
+		let tasks: Promise<any>[] = new Array(exemplars.length);
+		let i = 0;
 		for (let entry of exemplars) {
-			queue.add(async () => {
+
+			// If the entry has group id 0xa8fbd372, then we can tell it's a lot 
+			// configurations exemplar, so no need to parse it in that case.
+			if (entry.group === 0xa8fbd372) continue;
+			let task = queue.add(async () => {
 				try {
 					let exemplar = await entry.readAsync();
 					let families = await this.getPropertyValueAsync(exemplar, Family);
@@ -116,8 +122,10 @@ export default abstract class CorePluginIndex {
 
 				}
 			});
+			tasks[i++] = task;
 		}
-		await queue.onIdle();
+		tasks.length = i;
+		await Promise.all(tasks);
 
 		// We're not done yet. If a prop pack adds props to a Maxis family, then 
 		// multiple of the *same* tgi might be present in the family array. We 

@@ -289,17 +289,29 @@ export default class DBPF {
 	}
 
 	// ## parseAsync()
-	// Same as parse, but in an async way.
+	// Parses the DBPF in an async way. Note that we no longer share logic with 
+	// the sync parse() method because this we can make things go 
+	// *significantly* faster this way.
 	async parseAsync() {
-		const dirs = async (fn: DirCallback) => await Promise.all(
-			this.findAll({ type: FileType.DIR }).map(async entry => {
-				fn(await entry.readAsync());
-			}),
-		);
-		return await parse.async.call(
-			this,
-			(...args: Parameters<DBPF['readBytesAsync']>) => this.readBytesAsync(...args),
-		);
+
+		// First we'll read in the header, but crucially, we keep the file 
+		// handle open. That way we avoid the cost of having to close and open 
+		// it again in quick succession!
+		const handle = await fs.promises.open(this.file!);
+		const header = new DataView(new ArrayBuffer(96));
+		await handle.read(new Uint8Array(header.buffer), 0, 96, 0);
+		const offset = header.getUint32(40, true);
+		const size = header.getUint32(44, true);
+
+		// Now jump to reading the index with all the entry information. Once we 
+		// have that, we can close the file handle again.
+		const index = new DataView(new ArrayBuffer(size));
+		await handle.read(index, 0, size, offset);
+		const promise = handle.close();
+		this.entries = parseEntries(this, header, index);
+		await promise;
+		return this;
+
 	}
 
 	// ## save(opts)
@@ -481,10 +493,37 @@ export default class DBPF {
 
 }
 
+// # parseEntries(header, index)
+// The function that will actually parse all entries once we got the raw header 
+// & index buffers.
+function parseEntries(dbpf: DBPF, header: DataView, index: DataView) {
+	const count = header.getUint32(36, true);
+	const minor = header.getUint32(8, true);
+	const locationOffset = 12 + (minor > 0 ? 4 : 0);
+	const sizeOffset = locationOffset + 4;
+	const rowSize = sizeOffset + 4;
+	const entries = new TGIIndex<Entry>(count);
+	for (let i = 0, di = 0; i < count; i++) {
+		const type = index.getUint32(di, true);
+		const group = index.getUint32(di+4, true);
+		const instance = index.getUint32(di+8, true);
+		const offset = index.getUint32(di+locationOffset, true);
+		const size = index.getUint32(di+sizeOffset, true);
+		const entry = new Entry({
+			dbpf,
+			tgi: [type, group, instance],
+			offset,
+			size,
+		});
+		entries[i] = entry;
+		di += rowSize;
+	}
+	return entries;
+}
+
 // # parse()
 // Parsing a DBPF can be done both in a sync and async way, but the underlying 
 // logic is the same.
-type DirCallback = (dir: DIR) => void;
 const parse = duplicateAsync(function* parse(read) {
 
 	// First of all we need to read the header, and only the header. From 
@@ -511,5 +550,4 @@ function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
 		let entry = index[i] = new Entry({ dbpf });
 		entry.parse(rs);
 	}
-	index.build();
 }

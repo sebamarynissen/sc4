@@ -1,23 +1,12 @@
 // # file-index.js
-import debugModule from 'debug';
 import os from 'node:os';
 import { DBPF, FileType } from 'sc4/core';
 import { TGIIndex } from 'sc4/utils';
 import FileScanner from './file-scanner.js';
-import WorkerPool from './worker-pool.js';
-import type {
-	DBPFJSON,
-	Entry,
-} from 'sc4/core';
+import type { Entry } from 'sc4/core';
 import createLoadComparator from './create-load-comparator.js';
 import CorePluginIndex from './core-plugin-index.js';
-const debug = debugModule('sc4:plugins:index');
-debugModule.formatters.h = (array: number | number[]) => {
-	return [array].flat().map(x => '0x'+x.toString(16)).join(', ');
-}
-
-// The amount of files we need to scan before we're going to use multithreading.
-const MULTITHREAD_LIMIT = 1_000;
+import PQueue from 'p-queue';
 
 type folder = string;
 type PluginIndexOptions = {
@@ -144,50 +133,41 @@ export default class PluginIndex extends CorePluginIndex {
 		// large amount of files.
 		const { plugins = this.options.plugins } = opts;
 		const files = await this.getFilesToScan({ plugins });
-		debug('Found %d files to scan', files.length);
-		let {
-			threads = (files.length > MULTITHREAD_LIMIT ? undefined : 0),
-		} = this.options;
-		const pool = new WorkerPool({ n: threads });
-		debug('Using %d threads', threads);
 
 		// Loop all files and then parse them one by one. Note that it's crucial 
 		// here to maintain the sort order, so when a file is read in, we don't 
 		// just put it in the queue, but we put it in the queue *at the right 
 		// position*!
-		const queue: Entry[][] = new Array(files.length).fill(undefined);
-		let tasks: Promise<DBPF>[] = [];
+		const queue: Entry[][] = new Array(files.length);
+		const pq = new PQueue({ concurrency: 4096 });
+		let tasks: Promise<any>[] = [];
 		for (let i = 0; i < files.length; i++) {
 			let file = files[i];
-			debug('Start parsing %s', file);
-			let task = pool.run({ name: 'index', file }).then((json: DBPFJSON) => {
-				let dbpf = new DBPF({ ...json, parse: false });
-				let entries: Entry[] = queue[i] = [];
+			let arr: Entry[] = queue[i] = [];
+			let dbpf = new DBPF({ file, parse: false });
+			let task = pq.add(async () => {
+				await dbpf.parseAsync();
 				for (let entry of dbpf) {
-					if (entry.tgi.type !== FileType.DIR) entries.push(entry);
+					if (entry.type !== FileType.DIR) {
+						arr.push(entry);
+					}
 				}
-			}) as Promise<DBPF>;
+			});
 			tasks.push(task);
-			task.then(() => debug('Done parsing %s', file))
 		}
 		await Promise.all(tasks);
-		pool.close();
-		debug('Worker pool closed');
 
 		// Get all entries again in a flat array and then create our index from 
 		// it. **IMPORTANT**! We can't create the index with new 
 		// TGIIndex(...values) because there might be a *ton* of entries, 
 		// causing a stack overflow - JS can only handle that many function 
 		// arguments!
-		debug('Adding entries to index');
 		let flat = queue.flat();
 		let entries = this.entries = new TGIIndex(flat.length);
 		for (let i = 0; i < flat.length; i++) {
 			entries[i] = flat[i];
 		}
-		debug('Building index');
 		entries.build();
-		debug('Index built');
 
 	}
 

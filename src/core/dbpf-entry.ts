@@ -34,8 +34,8 @@ export type EntryJSON = {
 };
 
 type EntryConstructorOptions = {
-	dbpf?: DBPF;
 	tgi?: TGILike;
+	dbpf?: DBPF;
 	size?: number;
 	offset?: number;
 	compressed?: boolean;
@@ -52,7 +52,7 @@ type EntryParseOptions = {
 // it will be parsed appropriately.
 type AllowedEntryType = DecodedFile | Uint8Array;
 export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
-	tgi: TGI = new TGI();
+	tgi: TGI;
 	size = 0;
 	offset = 0;
 
@@ -88,19 +88,15 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	file: ReadResult<T> | null = null;
 
 	// ## constructor(opts)
+	// Constructor for the entry. Note that we might have millions and millions 
+	// of entries in very large plugin folders, so we optimize this as much as 
+	// possible, which makes the code look a little bit uglier.
 	constructor(opts: EntryConstructorOptions = {}) {
-		let {
-			dbpf,
-			tgi,
-			...rest
-		} = opts;
-		Object.defineProperty(this, 'dbpf', {
-			value: dbpf,
-			enumerable: false,
-			writable: false,
-		});
-		if (tgi) this.tgi = new TGI(tgi);
-		Object.assign(this, rest);
+		this.tgi = opts.tgi ? new TGI(opts.tgi) : new TGI();
+		if (opts.dbpf) this.dbpf = opts.dbpf;
+		if (opts.offset) this.offset = opts.offset;
+		if (opts.size) this.size = opts.size;
+		if (opts.compressed !== undefined) this.compressed = opts.compressed;
 	}
 
 	// ## isType()
