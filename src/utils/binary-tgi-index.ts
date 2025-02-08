@@ -1,4 +1,4 @@
-// # hash-map.ts
+// # binary-tgi-index.ts
 import { SmartBuffer } from 'smart-arraybuffer';
 
 // Parameters below are tuned for optimal balance between the probability of 
