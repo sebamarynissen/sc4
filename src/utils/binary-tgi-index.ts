@@ -2,9 +2,11 @@
 import { SmartBuffer } from 'smart-arraybuffer';
 
 // Parameters below are tuned for optimal balance between the probability of 
-// hash collisions and memory consumption.
-const HASH_MASK_TYPE = 0xffff;
-const HASH_MASK_TGI = 0x3fffff;
+// hash collisions and memory consumption. For the type mask, it turns out that
+// if we go down to 0x3ff, then collisions appear in the TypeIDs used by SC4, 
+// but not with 0x7ff, so that's what we'll use.
+const HASH_MASK_TYPE = 0x7ff;
+const HASH_MASK_TGI = 0x1ffff;
 
 type i32 = number;
 type i16 = number;
@@ -21,7 +23,6 @@ type Node = {
 	next: Node | null;
 };
 
-let collisions = 0;
 function generateMap(
 	entries: Uint32Array,
 	mask: i32,
@@ -67,7 +68,6 @@ function generateMap(
 				head.hasCollision === 0 &&
 				!equals(entries, iii, 3*head.first!.index)
 			) {
-				collisions++;
 				head.hasCollision = 1;
 			}
 
@@ -125,7 +125,7 @@ function find(buffer: ArrayBuffer, hash: i32) {
 	return { pointers, collisions: collisions > 0 };
 }
 
-export class Index {
+export default class Index {
 	entries: Uint32Array;
 	t: ArrayBuffer;
 	tgi: ArrayBuffer;
@@ -194,10 +194,19 @@ function equalsType(entries: Uint32Array, a: i32, b: i32): boolean {
 // # hashTGI(t, g, i)
 // Hashes 3 32-bit integers to a 32-bit integer.
 function hash96to32(t: i32, g: i32, i: i32): i32 {
-	let hash = t ^ g;
-	hash = hash + i;
-	hash = (hash << 5) | (hash >>> 27);
-	return (hash >>> 0);
+	const PRIME1 = 0x85ebca6b;
+	const PRIME2 = 0xc2b2ae35;
+	g = Math.imul(g, PRIME1) >>> 0;
+	g ^= g >>> 16;
+	i = Math.imul(i, PRIME2) >>> 0;
+	i ^= i >>> 16;
+	let hash = (g ^ i) >>> 0;
+	hash = Math.imul(hash, PRIME1) >>> 0;
+	hash ^= hash >>> 13;
+	hash = Math.imul(hash, PRIME2) >>> 0;
+	hash ^= hash >>> 16;
+	hash ^= t >>> 16;
+	return hash >>> 0;
 }
 
 // # hashTypeGroupInstance()
