@@ -176,7 +176,7 @@ const known = (x: uint32 | undefined): x is uint32 => x !== undefined;
 // # Index
 // Our actual index data structure. It's nothing more than a hash table 
 // basically.
-type IndexKey = string | number;
+type IndexKey = bigint;
 type IndexValue = number[];
 type IndexTuple = [IndexKey, IndexValue];
 type IndexMap = Map<IndexKey, IndexValue>;
@@ -228,9 +228,12 @@ export class Index<T extends TGILiteral> {
 }
 
 // The hash functions we use for one, two or three values.
-const h = (t: number) => t;
-const hh = (t: number, g: number) => `${t}-${g}`;
-const hhh = (t: number, g: number, i: number) => `${t}-${g}-${i}`;
+const h = (t: number) => BigInt(t);
+const hh = (t: number, g: number) => BigInt(t) << 32n | BigInt(g);
+const hhh = (t: number, g: number, i: number) =>
+	BigInt(t) << 64n |
+	BigInt(g) << 32n |
+	BigInt(i);
 
 // # get(arr, dict, key)
 // Accessor function for easily reading values from our maps.
