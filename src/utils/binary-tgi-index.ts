@@ -8,15 +8,11 @@ import { SmartBuffer } from 'smart-arraybuffer';
 // but not with 0x7ff, so that's what we'll use.
 const BUCKETS_TYPE = 0x800;
 const MAX_BUCKETS_TGI = 0x20000;
-
 type u32 = number;
-type u16 = number;
-type u8 = number;
 type Head = {
 	count: u32;
 	first: Node | null;
 	tail: Node | null;
-	hasCollision: u8;
 }
 
 type Node = {
@@ -28,7 +24,6 @@ function generateMap(
 	entries: Uint32Array,
 	size: u32,
 	hash: (entries: Uint32Array, index: u32) => number,
-	equals: (entries: Uint32Array, a: u32, b: u32) => boolean,
 	label = '',
 ) {
 
@@ -43,7 +38,6 @@ function generateMap(
 			count: 0,
 			first: null,
 			tail: null,
-			hasCollision: 0,
 		};
 	}
 	performance.mark(`${label}:buckets:end`);
@@ -64,20 +58,6 @@ function generateMap(
 		} else {
 			head.tail.next = node;
 			head.tail = node;
-
-			// We will keep track of whether there are any collisions in the 
-			// map. That's important so that when performing the final lookup, 
-			// we now if we can return the array "as is", or whether we have to 
-			// filter out the collissions. For this, we only register a 
-			// collision if the current value is **different** from the very 
-			// first value.
-			if (
-				head.hasCollision === 0 &&
-				!equals(entries, iii, 3*head.first!.index)
-			) {
-				head.hasCollision = 1;
-			}
-
 		}
 		head.count++;
 	}
@@ -108,7 +88,6 @@ function generateMap(
 		// Otherwise we'll write away the bucket data. Most importantly we have 
 		// to write in the lookup table where the information can be found.
 		buffer.writeUInt32LE(buffer.writeOffset, w);
-		buffer.writeUInt8(head.hasCollision);
 		buffer.writeUInt32LE(head.count);
 		let node = head.first;
 		while (node) {
@@ -132,7 +111,6 @@ function find(buffer: ArrayBuffer, hash: u32) {
 	const offset = reader.readUInt32LE(4+4*(hash & mask));
 	if (offset === 0) return [];
 	reader.readOffset = offset;
-	const collisions = reader.readUInt8();
 	const length = reader.readUInt32LE();
 	const pointers: number[] = new Array(length);
 	for (let i = 0; i < length; i++) {
@@ -185,7 +163,6 @@ export default class Index {
 			tgis,
 			BUCKETS_TYPE,
 			hashType,
-			equalsType,
 			getPerformanceLabel('t', instance),
 		);
 
@@ -198,7 +175,6 @@ export default class Index {
 			tgis,
 			buckets,
 			hashTypeGroupInstance,
-			equalsTypeGroupInstance,
 			getPerformanceLabel('tgi', instance),
 		);
 
@@ -207,7 +183,6 @@ export default class Index {
 			tgis,
 			buckets,
 			hashTypeInstance,
-			equalsTypeInstance,
 			getPerformanceLabel('ti', instance),
 		);
 		return new Index({ instance, tgis, t, ti, tgi });
@@ -219,9 +194,7 @@ export default class Index {
 	findType(type: u32) {
 		const hash = hash32to16(type);
 		const pointers = find(this.t, hash);
-		return pointers.filter(ptr => {
-			return this.tgis[3*ptr] === type;
-		});
+		return pointers.filter(ptr => equalsType(this.tgis, 3*ptr, type));
 	}
 
 	// ## findTGI(type, group, index)
@@ -229,14 +202,13 @@ export default class Index {
 	findTGI(type: u32, group: u32, instance: u32) {
 		const hash = hash96to32(type, group, instance);
 		const pointers = find(this.tgi, hash);
-		return pointers.filter(ptr => {
-			let iii = 3*ptr;
-			return (
-				this.tgis[iii+1] === group &&
-				this.tgis[iii+2] === instance &&
-				this.tgis[iii] === type
-			);
-		});
+		return pointers.filter(ptr => equalsTypeGroupInstance(
+			this.tgis,
+			3*ptr,
+			type,
+			group,
+			instance,
+		));
 	}
 
 	// ## findTI(type, index)
@@ -246,13 +218,12 @@ export default class Index {
 	findTI(type: u32, instance: u32) {
 		const hash = hash64to32(type, instance);
 		const pointers = find(this.ti, hash);
-		return pointers.filter(ptr => {
-			let iii = 3*ptr;
-			return (
-				this.tgis[iii+2] === instance &&
-				this.tgis[iii] === type
-			);
-		});
+		return pointers.filter(ptr => equalsTypeInstance(
+			this.tgis,
+			3*ptr,
+			type,
+			instance,
+		));
 	}
 
 	// ## getPerformanceLabel()
@@ -272,17 +243,9 @@ export default class Index {
 				const buckets = dv.getUint32(0, true);
 				const max = 4*buckets+1;
 				let empty = 0;
-				let collisions = 0;
 				for (let i = 4; i < max; i += 4) {
 					const offset = dv.getUint32(i, true);
-					if (offset === 0) {
-						empty++;
-						continue;
-					}
-					const hasCollision = dv.getUint8(offset) > 0;
-					if (hasCollision) {
-						collisions++;
-					}
+					if (offset === 0) empty++;
 				}
 				let label = this.getPerformanceLabel(name);
 				return {
@@ -290,7 +253,6 @@ export default class Index {
 					buckets,
 					byteLength: ab.byteLength,
 					fillingDegree: 1-empty/buckets,
-					collisions,
 					performance: [
 						measure('Total build time', label),
 						measure('Allocate buckets', label, 'buckets'),
@@ -321,7 +283,7 @@ function measure(name: string, label: string, sublabel?: string) {
 // # hash32to16(x)
 // Hashes a 32-bit integer to a 16-bit integer. The multiplier is carefully 
 // chosen to spread out the bits as much as possible.
-function hash32to16(x: u32): u16 {
+function hash32to16(x: u32): u32 {
     return ((x * 2654435761) >>> 16);
 }
 
@@ -334,8 +296,8 @@ function hashType(entries: Uint32Array, index: u32) {
 
 // # equalsType()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsType(entries: Uint32Array, a: u32, b: u32): boolean {
-	return entries[a] - entries[b] === 0;
+function equalsType(entries: Uint32Array, ptr: u32, type: u32): boolean {
+	return entries[ptr] === type;
 }
 
 // # hashTGI(t, g, i)
@@ -364,14 +326,20 @@ function hashTypeGroupInstance(entries: Uint32Array, index: u32) {
 
 // # equalsTypeGroupInstance()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsTypeGroupInstance(entries: Uint32Array, a: u32, b: u32): boolean {
+function equalsTypeGroupInstance(
+	entries: Uint32Array,
+	ptr: u32,
+	t: u32,
+	g: u32,
+	i: u32,
+): boolean {
 
 	// Note: groups are more likely to differ, so we use that first. Slight 
 	// performance optimization, lol.
 	return (
-		entries[a+1] - entries[b+1] === 0 &&
-		entries[a+2] - entries[b+2] === 0 &&
-		entries[a] - entries[b] === 0
+		entries[ptr+1] === g &&
+		entries[ptr+2] === i &&
+		entries[ptr] === t
 	);
 
 }
@@ -395,11 +363,13 @@ function hashTypeInstance(entries: Uint32Array, index: u32) {
 
 // # equalsTypeInstance()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsTypeInstance(entries: Uint32Array, a: u32, b: u32): boolean {
-	return (
-		entries[a+2] - entries[b+2] === 0 &&
-		entries[a] - entries[b] === 0
-	);
+function equalsTypeInstance(
+	entries: Uint32Array,
+	ptr: u32,
+	t: u32,
+	i: u32,
+): boolean {
+	return entries[ptr+2] === i && entries[ptr] === t;
 }
 
 // # nextPowerOf2(n)
