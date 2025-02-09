@@ -293,7 +293,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	) {
 		let label = getTypeLabel(this.type);
 		return 'DBPF Entry '+defaultInspect({
-			dbpf: this.dbpf.file,
+			dbpf: this.dbpf?.file,
 			type: inspect.type(label) ?? inspect.hex(this.type),
 			tgi: this.tgi,
 			size: this.size,
