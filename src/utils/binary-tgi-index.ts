@@ -145,6 +145,7 @@ export default class Index {
 	instance = instance++;
 	tgis: Uint32Array;
 	t: ArrayBuffer;
+	ti: ArrayBuffer;
 	tgi: ArrayBuffer;
 	constructor(tgis: Uint32Array) {
 		this.tgis = tgis;
@@ -168,7 +169,21 @@ export default class Index {
 			equalsTypeGroupInstance,
 			this.getPerformanceLabel('tgi'),
 		);
+
+		// Smae for ti.
+		this.ti = generateMap(
+			tgis,
+			bucket,
+			hashTypeInstance,
+			equalsTypeInstance,
+			this.getPerformanceLabel('ti'),
+		);
+
 	}
+
+	// ## findType()
+	// Finds the *pointers* - i.e. indices - to all entries with the given Type 
+	// ID.
 	findType(type: u32) {
 		const hash = hash32to16(type);
 		const { collisions, pointers } = find(this.t, hash);
@@ -179,6 +194,7 @@ export default class Index {
 	}
 
 	// ## findTGI(type, group, index)
+	// Finds the *pointers* - i.e. indices - to all entries with the given TGI.
 	findTGI(type: u32, group: u32, instance: u32) {
 		const hash = hash96to32(type, group, instance);
 		const { collisions, pointers } = find(this.tgi, hash);
@@ -187,6 +203,23 @@ export default class Index {
 			let iii = 3*ptr;
 			return (
 				this.tgis[iii+1] === group &&
+				this.tgis[iii+2] === instance &&
+				this.tgis[iii] === type
+			);
+		});
+	}
+
+	// ## findTI(type, index)
+	// Finds the *pointers* - i.e. indices - to all entries with the given TI.
+	// We're not sure whether we actually need this, as the game only seems to 
+	// look for stuff by TGI, so perhaps we can get rid of this.
+	findTI(type: u32, instance: u32) {
+		const hash = hash64to32(type, instance);
+		const { collisions, pointers } = find(this.ti, hash);
+		if (!collisions) return pointers;
+		return pointers.filter(ptr => {
+			let iii = 3*ptr;
+			return (
 				this.tgis[iii+2] === instance &&
 				this.tgis[iii] === type
 			);
@@ -202,7 +235,7 @@ export default class Index {
 	// Returns a bunch of stats about the index, useful for debugging & 
 	// profiling purposes.
 	getStats() {
-		const indices = { t: this.t, tgi: this.tgi };
+		const indices = { t: this.t, ti: this.ti, tgi: this.tgi };
 		return {
 			tgiCount: this.tgis.length/3,
 			indices: Object.entries(indices).map(([name, ab]) => {
@@ -312,6 +345,32 @@ function equalsTypeGroupInstance(entries: Uint32Array, a: u32, b: u32): boolean 
 		entries[a] - entries[b] === 0
 	);
 
+}
+
+// # hash64to32(t, g, i)
+// Hashes 2 32-bit integers to a 32-bit integer. Optimized for generating as 
+// much unique hashas as possible for TIs.
+function hash64to32(t: u32, i: u32) {
+	return ((Math.imul(t, 2654435761) ^ (t >> 5)) ^ i) >>> 0
+
+}
+
+// # hashTypeInstance()
+// Same as hashType, but now hashes the TGI.
+function hashTypeInstance(entries: Uint32Array, index: u32) {
+	return hash64to32(
+		entries[index],
+		entries[index+2],
+	);
+}
+
+// # equalsTypeInstance()
+// Checks whether the Type ID of two TGIs in the array are equal, by index.
+function equalsTypeInstance(entries: Uint32Array, a: u32, b: u32): boolean {
+	return (
+		entries[a+2] - entries[b+2] === 0 &&
+		entries[a] - entries[b] === 0
+	);
 }
 
 // # nextPowerOf2(n)
