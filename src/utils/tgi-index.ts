@@ -1,6 +1,8 @@
 // # tgi-index.ts
 import type { TGIQuery, TGILiteral, uint32, TGIArray } from 'sc4/types';
 import MappedIndex from './mapped-tgi-index.js';
+import BinaryIndex from './binary-tgi-index.js';
+export type { TGIIndexJSON } from './mapped-tgi-index.js';
 
 export type { TGIQuery, TGILiteral };
 export type SingleResult<T> = T | undefined;
@@ -20,7 +22,7 @@ export type FindParameters<T> =
 // A data structure that allows for efficiently querying objects by (type, 
 // group, instance).
 export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T> {
-	index: MappedIndex<T>;
+	index: MappedIndex<T> | BinaryIndex;
 	dirty = false;
 
 	// ## build()
@@ -28,7 +30,8 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// the build() is called. That way it becomes easy to use `.filter()` etc. 
 	// without automatically rebuilding the index.
 	build() {
-		let tree = new MappedIndex(this);
+		// let tree = new MappedIndex(this);
+		let tree = BinaryIndex.fromEntries(this as TGILiteral[]);
 		this.index = tree;
 		this.dirty = false;
 		return this;
@@ -111,8 +114,12 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// ## expand(pointers)
 	// Accepts an array of pointers - i.e. indices - that the index has found, 
 	// and then we fill in - we *expand* - the actual entries from our array.
-	private expand(pointers: number[]) {
-		return pointers.map(ptr => this[ptr]);
+	private expand(pointers: number[] | Uint32Array) {
+		let output = [];
+		for (let i = 0; i < pointers.length; i++) {
+			output[i] = this[pointers[i]];
+		}
+		return output;
 	}
 
 	// ## remove(query, g, i)

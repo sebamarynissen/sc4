@@ -145,6 +145,19 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 		});
 
+		it('a huge number of TGIs', function() {
+
+			let values: TGI[] = new Array(1e4);
+			for (let i = 0; i < values.length; i++) {
+				values[i] = TGI.random();
+			}
+			let index = create(values);
+			for (let tgi of values) {
+				expect(index.find(tgi)).to.equal(tgi);
+			}
+
+		});
+
 	});
 
 	describe('#add()', function() {

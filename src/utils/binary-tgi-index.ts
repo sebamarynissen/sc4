@@ -1,6 +1,5 @@
 // # binary-tgi-index.ts
 import type { TGILiteral } from 'sc4/types';
-import { SmartBuffer } from 'smart-arraybuffer';
 
 // Parameters below are tuned for optimal balance between the probability of 
 // hash collisions and memory consumption. For the type mask, it turns out that
@@ -9,16 +8,6 @@ import { SmartBuffer } from 'smart-arraybuffer';
 const BUCKETS_TYPE = 0x800;
 const MAX_BUCKETS_TGI = 0x20000;
 type u32 = number;
-type Head = {
-	count: u32;
-	first: Node | null;
-	tail: Node | null;
-}
-
-type Node = {
-	index: number;
-	next: Node | null;
-};
 
 function generateMap(
 	entries: Uint32Array,
@@ -27,96 +16,77 @@ function generateMap(
 	label = '',
 ) {
 
-	// Generate the buckets where we'll keep all the hashes. The amount of 
-	// buckets determines the memory consumption of the hash map.
-	performance.mark(`${label}:start`);
-	performance.mark(`${label}:buckets:start`);
-	const buckets: Head[] = new Array(size);
+	// We will first generate the hash for every TGI and then create the linked 
+	// lists for every bucket. We need two things for this:
+	// 1. A Uint32Array that contains a tuple of the pointer to the first and 
+	// last element of the linked list.
+	// 2. Another Uint32Array that contains every TGI pointer, and a pointer 
+	// to the next element in the linked list.
 	const mask = size-1;
-	for (let i = 0; i < size; i++) {
-		buckets[i] = {
-			count: 0,
-			first: null,
-			tail: null,
-		};
-	}
-	performance.mark(`${label}:buckets:end`);
-
-	// Now loop all the tgi's from the entries and add their hashes to the 
-	// buckets.
-	performance.mark(`${label}:hash:start`);
-	const length = entries.length/3;
-	for (let i = 0, iii = 0; i < length; i++, iii += 3) {
+	const nEntries = entries.length / 3;
+	const firstLastTuples = new Uint32Array(2*size).fill(0xffffffff);
+	const nextList = new Uint32Array(nEntries).fill(0xffffffff);
+	for (let i = 0, iii = 0; i < nEntries; i++, iii += 3) {
 		const hashValue = hash(entries, iii) & mask;
-		const head = buckets[hashValue];
-		const node: Node = {
-			index: i,
-			next: null,
-		};
-		if (head.tail === null) {
-			head.first = head.tail = node;
+		const bucketIndex = (hashValue << 1) >>> 0;
+		const first = firstLastTuples[bucketIndex];
+		if (first === 0xffffffff) {
+			firstLastTuples[bucketIndex] = i;
+			firstLastTuples[bucketIndex+1] = i;
 		} else {
-			head.tail.next = node;
-			head.tail = node;
+			const prevLast = firstLastTuples[bucketIndex+1];
+			nextList[prevLast] = i;
+			firstLastTuples[bucketIndex+1] = i;
 		}
-		head.count++;
 	}
-	performance.mark(`${label}:hash:end`);
 
-	// Now build up the index buffer. We will prepend it with the lookup table 
-	// that tells us where a hashed value can be found.
+	// Now build up the actual index. The size of it is known upfront:
+	// - "1" slot for the bucket size
+	// - "size" slots that points to the start of every bucket
+	// - "size" slots for the length value of every bucket
+	// - "entries" slots for every pointer to an entry
 	performance.mark(`${label}:serialize:start`);
-	const nBuckets = buckets.length;
-	const buffer = new SmartBuffer({ size: 8*nBuckets });
-	performance.mark('allocate');
-	buffer.writeUInt32LE(buckets.length);
-	buffer.writeArrayBuffer(new ArrayBuffer(4*nBuckets));
+	const output = new Uint32Array(1+2*size+nEntries);
+	output[0] = size;
+	const pointers = output.subarray(1, 1+size);
+	const buckets = output.subarray(1+size);
+	for (let i = 0, currentOffset = 0; i < size; i++) {
 
-	// Build up the index buffer.
-	for (let i = 0, w = 4; i < nBuckets; i++, w += 4) {
-
-		// If the bucket is empty, then we won't write it away, and instead just 
-		// write 0x00000000 which is a reserved value indicating that the bucket 
-		// is empty. We can do this because if there's an actual offset, it will 
-		// never be 0 as the lookup table comes first!
-		const head = buckets[i];
-		if (head.count === 0) {
-			buffer.writeUInt32LE(0, w);
-			continue;
+		// We will now fill up the bucket from the linked list that we've built 
+		// up.
+		const lengthOffset = currentOffset;
+		let count = 0;
+		let next = firstLastTuples[(i << 1) >>> 0];
+		let j = lengthOffset+1;
+		while (next !== 0xffffffff) {
+			// console.log('I', i, 'NEXT', next);
+			count++;
+			buckets[j++] = next;
+			next = nextList[next];
 		}
-
-		// Otherwise we'll write away the bucket data. Most importantly we have 
-		// to write in the lookup table where the information can be found.
-		buffer.writeUInt32LE(buffer.writeOffset, w);
-		buffer.writeUInt32LE(head.count);
-		let node = head.first;
-		while (node) {
-			buffer.writeUInt32LE(node.index);
-			node = node.next;
-		}
+		buckets[lengthOffset] = count;
+		pointers[i] = currentOffset;
+		currentOffset += count+1;
 
 	}
-	const ab = buffer.toArrayBuffer();
 	performance.mark(`${label}:serialize:end`);
 	performance.mark(`${label}:end`);
-	return ab;
+	return output;
 
 }
 
 // # find(buffer, hash)
 // Finds all pointers - with potential collisions - for the given hash.
-function find(buffer: ArrayBuffer, hash: u32) {
-	const reader = SmartBuffer.fromBuffer(buffer);
-	const mask = reader.readUInt32LE(0)-1;
-	const offset = reader.readUInt32LE(4+4*(hash & mask));
-	if (offset === 0) return [];
-	reader.readOffset = offset;
-	const length = reader.readUInt32LE();
-	const pointers: number[] = new Array(length);
-	for (let i = 0; i < length; i++) {
-		pointers[i] = reader.readUInt32LE();
-	}
-	return pointers;
+function find(index: Uint32Array, hash: u32): Uint32Array {
+	const size = index[0];
+	// const pointers = index.subarray(1, 1+size);
+	// const buckets = index.subarray(1+size);
+	const mask = size-1;
+	const bucketIndex = hash & mask;
+	const ptr = index[1+bucketIndex]
+	const length = index[1+size+ptr];
+	const start = ptr+1;
+	return index.subarray(start, start+length);
 }
 
 // # getPerformanceLabel(name)
@@ -129,18 +99,18 @@ function getPerformanceLabel(name: string, instance: number) {
 type IndexOptions = {
 	instance?: number;
 	tgis: Uint32Array;
-	t: ArrayBuffer;
-	ti: ArrayBuffer;
-	tgi: ArrayBuffer;
+	t: Uint32Array;
+	ti: Uint32Array;
+	tgi: Uint32Array;
 };
 
 // # Index
 export default class Index {
 	instance = 0;
 	tgis: Uint32Array;
-	t: ArrayBuffer;
-	ti: ArrayBuffer;
-	tgi: ArrayBuffer;
+	t: Uint32Array;
+	ti: Uint32Array;
+	tgi: Uint32Array;
 	private constructor(opts: IndexOptions) {
 		this.instance = opts.instance ?? 0;
 		this.tgis = opts.tgis;
@@ -191,39 +161,47 @@ export default class Index {
 	// ## findType()
 	// Finds the *pointers* - i.e. indices - to all entries with the given Type 
 	// ID.
-	findType(type: u32) {
+	findType(type: u32): u32[] {
 		const hash = hash32to16(type);
 		const pointers = find(this.t, hash);
-		return pointers.filter(ptr => equalsType(this.tgis, 3*ptr, type));
+		const filtered = [];
+		for (let i = 0; i < pointers.length; i++) {
+			const ptr = pointers[i];
+			if (equalsType(this.tgis, 3*ptr, type)) filtered.push(ptr);
+		}
+		return filtered;
 	}
 
 	// ## findTGI(type, group, index)
 	// Finds the *pointers* - i.e. indices - to all entries with the given TGI.
-	findTGI(type: u32, group: u32, instance: u32) {
+	findTGI(type: u32, group: u32, instance: u32): u32[] {
 		const hash = hash96to32(type, group, instance);
 		const pointers = find(this.tgi, hash);
-		return pointers.filter(ptr => equalsTypeGroupInstance(
-			this.tgis,
-			3*ptr,
-			type,
-			group,
-			instance,
-		));
+		const filtered = [];
+		for (let i = 0; i < pointers.length; i++) {
+			const ptr = pointers[i];
+			if (equalsTGI(this.tgis, 3*ptr, type, group, instance)) {
+				filtered.push(ptr);
+			}
+		}
+		return filtered;
 	}
 
 	// ## findTI(type, index)
 	// Finds the *pointers* - i.e. indices - to all entries with the given TI.
 	// We're not sure whether we actually need this, as the game only seems to 
 	// look for stuff by TGI, so perhaps we can get rid of this.
-	findTI(type: u32, instance: u32) {
+	findTI(type: u32, instance: u32): u32[] {
 		const hash = hash64to32(type, instance);
 		const pointers = find(this.ti, hash);
-		return pointers.filter(ptr => equalsTypeInstance(
-			this.tgis,
-			3*ptr,
-			type,
-			instance,
-		));
+		const filtered = [];
+		for (let i = 0; i < pointers.length; i++) {
+			const ptr = pointers[i];
+			if (equalsTI(this.tgis, 3*ptr, type, instance)) {
+				filtered.push(ptr);
+			}
+		}
+		return filtered;
 	}
 
 	// ## getPerformanceLabel()
@@ -237,22 +215,17 @@ export default class Index {
 	getStats() {
 		const indices = { t: this.t, ti: this.ti, tgi: this.tgi };
 		return {
-			tgiCount: this.tgis.length/3,
+			size: this.tgis.length/3,
 			indices: Object.entries(indices).map(([name, ab]) => {
-				const dv = new DataView(ab);
-				const buckets = dv.getUint32(0, true);
-				const max = 4*buckets+1;
-				let empty = 0;
-				for (let i = 4; i < max; i += 4) {
-					const offset = dv.getUint32(i, true);
-					if (offset === 0) empty++;
-				}
+				const view = new Uint32Array(ab);
+				const buckets = view[0];
+				const filled = view[buckets+1];
 				let label = this.getPerformanceLabel(name);
 				return {
 					name,
 					buckets,
 					byteLength: ab.byteLength,
-					fillingDegree: 1-empty/buckets,
+					fillingDegree: filled/buckets,
 					performance: [
 						measure('Total build time', label),
 						measure('Allocate buckets', label, 'buckets'),
@@ -326,7 +299,7 @@ function hashTypeGroupInstance(entries: Uint32Array, index: u32) {
 
 // # equalsTypeGroupInstance()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsTypeGroupInstance(
+function equalsTGI(
 	entries: Uint32Array,
 	ptr: u32,
 	t: u32,
@@ -363,7 +336,7 @@ function hashTypeInstance(entries: Uint32Array, index: u32) {
 
 // # equalsTypeInstance()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsTypeInstance(
+function equalsTI(
 	entries: Uint32Array,
 	ptr: u32,
 	t: u32,

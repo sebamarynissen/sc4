@@ -32,7 +32,7 @@ export default class MappedIndex<T extends TGILiteral> {
 	t: IndexMap = new Map();
 
 	// ## constructor()
-	constructor(entries: Array<T> = []) {
+	constructor(entries: T[] = []) {
 		for (let j = 0; j < entries.length; j++) {
 			let entry = entries[j];
 			let { type: t, group: g, instance: i } = entry;
