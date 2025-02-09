@@ -27,14 +27,12 @@ export type TGIIndexJSON = {
 
 // # MappedIndex()
 export default class MappedIndex<T extends TGILiteral> {
-	entries: Array<T>;
 	tgi: IndexMap = new Map();
 	ti: IndexMap = new Map();
 	t: IndexMap = new Map();
 
 	// ## constructor()
 	constructor(entries: Array<T> = []) {
-		this.entries = entries;
 		for (let j = 0; j < entries.length; j++) {
 			let entry = entries[j];
 			let { type: t, group: g, instance: i } = entry;
@@ -55,17 +53,17 @@ export default class MappedIndex<T extends TGILiteral> {
 
 	// ## findTGI()
 	findTGI(t: u32, g: u32, i: u32) {
-		return get(this.entries, this.tgi, hhh(t, g, i));
+		return get(this.tgi, hhh(t, g, i));
 	}
 
 	// ## findType()
 	findType(t: u32) {
-		return get(this.entries, this.t, h(t));
+		return get(this.t, h(t));
 	}
 
 	// ## findTI()
 	findTI(t: u32, i: u32) {
-		return get(this.entries, this.ti, hh(t, i));
+		return get(this.ti, hh(t, i));
 	}
 
 	// ## toJSON()
@@ -89,17 +87,15 @@ const hhh = (t: number, g: number, i: number) =>
 
 // # get(arr, dict, key)
 // Accessor function for easily reading values from our maps.
-function get<T extends TGILiteral>(
-	arr: Array<T>,
+function get(
 	dict: IndexMap,
 	key: IndexKey,
-) {
-	let ptrs = dict.get(key) ?? [];
-	return ptrs.map(ptr => arr[ptr]);
+): u32[] {
+	return dict.get(key) ?? [];
 }
 
 // # set(dict, key, value)
-function set(dict: IndexMap, key: IndexKey, value: number) {
+function set(dict: IndexMap, key: IndexKey, value: u32) {
 	let arr = dict.get(key);
 	if (arr) {
 		arr.push(value);

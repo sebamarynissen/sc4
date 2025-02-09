@@ -2,17 +2,7 @@
 import { expect } from 'chai';
 import Index, { type TGILiteral } from '../tgi-index.js';
 import { assertEqual } from '#test/types.js';
-
-class TGI {
-	type = 0;
-	group = 0;
-	instance = 0;
-	constructor(type: number, group: number, instance: number) {
-		this.type = type;
-		this.group = group;
-		this.instance = instance;
-	}
-}
+import { TGI } from 'sc4/core';
 
 const fn = (create: (arr: any[]) => Index) => () => {
 	describe('#find()', function() {

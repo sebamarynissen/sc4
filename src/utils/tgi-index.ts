@@ -87,15 +87,15 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		if (known(t)) {
 			if (known(i)) {
 				if (known(g)) {
-					return this.index.findTGI(t, g, i);
+					return this.expand(this.index.findTGI(t, g, i));
 				} else {
-					return this.index.findTI(t, i);
+					return this.expand(this.index.findTI(t, i));
 				}
 			}
 
 			// If we reach this point, the type is known, but the instance is 
 			// for sure *not known*.
-			let result = this.index.findType(t);
+			let result = this.expand(this.index.findType(t));
 			if (known(g)) {
 				return result.filter(createFilter(q));
 			} else {
@@ -106,6 +106,13 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		// If we reach this point, we can't use an index. Pity.
 		return this.filter(createFilter(q));
 
+	}
+
+	// ## expand(pointers)
+	// Accepts an array of pointers - i.e. indices - that the index has found, 
+	// and then we fill in - we *expand* - the actual entries from our array.
+	private expand(pointers: number[]) {
+		return pointers.map(ptr => this[ptr]);
 	}
 
 	// ## remove(query, g, i)
