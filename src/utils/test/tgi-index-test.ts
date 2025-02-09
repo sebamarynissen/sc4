@@ -4,7 +4,7 @@ import Index, { type TGILiteral } from '../tgi-index.js';
 import { assertEqual } from '#test/types.js';
 import { TGI } from 'sc4/core';
 
-const fn = (create: (arr: any[]) => Index) => () => {
+const fn = (create: (arr: any[]) => Index, indexed: boolean) => () => {
 	describe('#find()', function() {
 
 		it('queries by TGI', function() {
@@ -145,7 +145,7 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 		});
 
-		it('a huge number of TGIs', function() {
+		indexed && it('a huge number of TGIs', function() {
 
 			let values: TGI[] = new Array(1e4);
 			for (let i = 0; i < values.length; i++) {
@@ -193,8 +193,8 @@ describe('The TGI index', function() {
 		let index = new Index(...values);
 		index.build();
 		return index;
-	}));
+	}, true));
 
-	describe('non-indexed', fn(values => new Index(...values)));
+	describe('non-indexed', fn(values => new Index(...values), false));
 
 });

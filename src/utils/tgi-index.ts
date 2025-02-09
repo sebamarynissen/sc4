@@ -30,7 +30,6 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// the build() is called. That way it becomes easy to use `.filter()` etc. 
 	// without automatically rebuilding the index.
 	build() {
-		// let tree = new MappedIndex(this);
 		let tree = BinaryIndex.fromEntries(this as TGILiteral[]);
 		this.index = tree;
 		this.dirty = false;
