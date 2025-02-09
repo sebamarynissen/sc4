@@ -1,4 +1,5 @@
 // # binary-tgi-index.ts
+import type { TGILiteral } from 'sc4/types';
 import { SmartBuffer } from 'smart-arraybuffer';
 
 // Parameters below are tuned for optimal balance between the probability of 
@@ -129,7 +130,7 @@ function find(buffer: ArrayBuffer, hash: u32) {
 	const reader = SmartBuffer.fromBuffer(buffer);
 	const mask = reader.readUInt32LE(0)-1;
 	const offset = reader.readUInt32LE(4+4*(hash & mask));
-	if (offset === 0) return { pointers: [], collisions: false };
+	if (offset === 0) return [];
 	reader.readOffset = offset;
 	const collisions = reader.readUInt8();
 	const length = reader.readUInt32LE();
@@ -137,48 +138,79 @@ function find(buffer: ArrayBuffer, hash: u32) {
 	for (let i = 0; i < length; i++) {
 		pointers[i] = reader.readUInt32LE();
 	}
-	return { pointers, collisions: collisions > 0 };
+	return pointers;
 }
 
+// # getPerformanceLabel(name)
+// Helper for generting unique labels for measuring build performance.
 let instance = 0;
-export default class Index {
-	instance = instance++;
+function getPerformanceLabel(name: string, instance: number) {
+	return `${name}${instance}`;
+}
+
+type IndexOptions = {
+	instance?: number;
 	tgis: Uint32Array;
 	t: ArrayBuffer;
 	ti: ArrayBuffer;
 	tgi: ArrayBuffer;
-	constructor(tgis: Uint32Array) {
-		this.tgis = tgis;
-		this.t = generateMap(
+};
+
+// # Index
+export default class Index {
+	instance = 0;
+	tgis: Uint32Array;
+	t: ArrayBuffer;
+	ti: ArrayBuffer;
+	tgi: ArrayBuffer;
+	private constructor(opts: IndexOptions) {
+		this.instance = opts.instance ?? 0;
+		this.tgis = opts.tgis;
+		this.t = opts.t;
+		this.ti = opts.ti;
+		this.tgi = opts.tgi;
+	}
+
+	// # fromEntries()
+	static fromEntries(entries: TGILiteral[]) {
+		instance++;
+		let tgis = new Uint32Array(3*entries.length);
+		let offset = 0;
+		for (let tgi of entries) {
+			tgis[offset++] = tgi.type;
+			tgis[offset++] = tgi.group;
+			tgis[offset++] = tgi.instance;
+		}
+		let t = generateMap(
 			tgis,
 			BUCKETS_TYPE,
 			hashType,
 			equalsType,
-			this.getPerformanceLabel('t'),
+			getPerformanceLabel('t', instance),
 		);
 
 		// The bucket size for our TGI index depends on the size of the tgis, 
 		// with a maximum of 0x1ffff+1 because we noticed that about that the 
 		// index creation is getting too slow.
 		const amount = tgis.length/3;
-		const bucket = Math.min(MAX_BUCKETS_TGI, nextPowerOf2(amount/0.75));
-		this.tgi = generateMap(
+		const buckets = Math.min(MAX_BUCKETS_TGI, nextPowerOf2(amount/0.75));
+		let tgi = generateMap(
 			tgis,
-			bucket,
+			buckets,
 			hashTypeGroupInstance,
 			equalsTypeGroupInstance,
-			this.getPerformanceLabel('tgi'),
+			getPerformanceLabel('tgi', instance),
 		);
 
-		// Smae for ti.
-		this.ti = generateMap(
+		// Same for ti.
+		let ti = generateMap(
 			tgis,
-			bucket,
+			buckets,
 			hashTypeInstance,
 			equalsTypeInstance,
-			this.getPerformanceLabel('ti'),
+			getPerformanceLabel('ti', instance),
 		);
-
+		return new Index({ instance, tgis, t, ti, tgi });
 	}
 
 	// ## findType()
@@ -186,8 +218,7 @@ export default class Index {
 	// ID.
 	findType(type: u32) {
 		const hash = hash32to16(type);
-		const { collisions, pointers } = find(this.t, hash);
-		if (!collisions) return pointers;
+		const pointers = find(this.t, hash);
 		return pointers.filter(ptr => {
 			return this.tgis[3*ptr] === type;
 		});
@@ -197,8 +228,7 @@ export default class Index {
 	// Finds the *pointers* - i.e. indices - to all entries with the given TGI.
 	findTGI(type: u32, group: u32, instance: u32) {
 		const hash = hash96to32(type, group, instance);
-		const { collisions, pointers } = find(this.tgi, hash);
-		if (!collisions) return pointers;
+		const pointers = find(this.tgi, hash);
 		return pointers.filter(ptr => {
 			let iii = 3*ptr;
 			return (
@@ -215,8 +245,7 @@ export default class Index {
 	// look for stuff by TGI, so perhaps we can get rid of this.
 	findTI(type: u32, instance: u32) {
 		const hash = hash64to32(type, instance);
-		const { collisions, pointers } = find(this.ti, hash);
-		if (!collisions) return pointers;
+		const pointers = find(this.ti, hash);
 		return pointers.filter(ptr => {
 			let iii = 3*ptr;
 			return (
@@ -228,7 +257,7 @@ export default class Index {
 
 	// ## getPerformanceLabel()
 	getPerformanceLabel(name: string) {
-		return `${name}${this.instance}`;
+		return getPerformanceLabel(name, this.instance);
 	}
 
 	// ## getStats()
