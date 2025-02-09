@@ -5,17 +5,17 @@ import { SmartBuffer } from 'smart-arraybuffer';
 // hash collisions and memory consumption. For the type mask, it turns out that
 // if we go down to 0x3ff, then collisions appear in the TypeIDs used by SC4, 
 // but not with 0x7ff, so that's what we'll use.
-const HASH_MASK_TYPE = 0x7ff;
-const HASH_MASK_TGI = 0x1ffff;
+const BUCKETS_TYPE = 0x800;
+const MAX_BUCKETS_TGI = 0x20000;
 
-type i32 = number;
-type i16 = number;
-type i8 = number;
+type u32 = number;
+type u16 = number;
+type u8 = number;
 type Head = {
-	count: i32;
+	count: u32;
 	first: Node | null;
 	tail: Node | null;
-	hasCollision: i8;
+	hasCollision: u8;
 }
 
 type Node = {
@@ -25,15 +25,17 @@ type Node = {
 
 function generateMap(
 	entries: Uint32Array,
-	mask: i32,
-	hash: (entries: Uint32Array, index: i32) => number,
-	equals: (entries: Uint32Array, a: i32, b: i32) => boolean,
+	size: u32,
+	hash: (entries: Uint32Array, index: u32) => number,
+	equals: (entries: Uint32Array, a: u32, b: u32) => boolean,
 ) {
 
 	// Generate the buckets where we'll keep all the hashes. The amount of 
 	// buckets determines the memory consumption of the hash map.
-	let buckets: Head[] = new Array(mask+1);
-	for (let i = 0; i < buckets.length; i++) {
+	performance.mark('buckets:start');
+	const buckets: Head[] = new Array(size);
+	const mask = size-1;
+	for (let i = 0; i < size; i++) {
 		buckets[i] = {
 			count: 0,
 			first: null,
@@ -41,14 +43,16 @@ function generateMap(
 			hasCollision: 0,
 		};
 	}
+	performance.mark('buckets:end');
 
 	// Now loop all the tgi's from the entries and add their hashes to the 
 	// buckets.
-	let length = entries.length/3;
-	for (let i = 0; i < length; i++) {
-		let iii = 3*i;
-		let head = buckets[hash(entries, iii) & mask];
-		let node: Node = {
+	performance.mark('hash:start');
+	const length = entries.length/3;
+	for (let i = 0, iii = 0; i < length; i++, iii += 3) {
+		const hashValue = hash(entries, iii) & mask;
+		const head = buckets[hashValue];
+		const node: Node = {
 			index: i,
 			next: null,
 		};
@@ -74,28 +78,33 @@ function generateMap(
 		}
 		head.count++;
 	}
+	performance.mark('hash:end');
 
 	// Now build up the index buffer. We will prepend it with the lookup table 
 	// that tells us where a hashed value can be found.
-	let buffer = new SmartBuffer({ size: 8*buckets.length });
-	buffer.writeArrayBuffer(new ArrayBuffer(4*buckets.length));
+	performance.mark('serialize:start');
+	const nBuckets = buckets.length;
+	const buffer = new SmartBuffer({ size: 8*nBuckets });
+	performance.mark('allocate');
+	buffer.writeUInt32LE(buckets.length);
+	buffer.writeArrayBuffer(new ArrayBuffer(4*nBuckets));
 
 	// Build up the index buffer.
-	for (let i = 0; i < buckets.length; i++) {
+	for (let i = 0, w = 4; i < nBuckets; i++, w += 4) {
 
 		// If the bucket is empty, then we won't write it away, and instead just 
 		// write 0x00000000 which is a reserved value indicating that the bucket 
 		// is empty. We can do this because if there's an actual offset, it will 
 		// never be 0 as the lookup table comes first!
-		let head = buckets[i];
+		const head = buckets[i];
 		if (head.count === 0) {
-			buffer.writeUInt32LE(0, 4*i);
+			buffer.writeUInt32LE(0, w);
 			continue;
 		}
 
 		// Otherwise we'll write away the bucket data. Most importantly we have 
 		// to write in the lookup table where the information can be found.
-		buffer.writeUInt32LE(buffer.writeOffset, 4*i);
+		buffer.writeUInt32LE(buffer.writeOffset, w);
 		buffer.writeUInt8(head.hasCollision);
 		buffer.writeUInt32LE(head.count);
 		let node = head.first;
@@ -105,20 +114,23 @@ function generateMap(
 		}
 
 	}
-	return buffer.toArrayBuffer();
+	const ab = buffer.toArrayBuffer();
+	performance.mark('serialize:end');
+	return ab;
 
 }
 
 // # find(buffer, hash)
 // Finds all pointers - with potential collisions - for the given hash.
-function find(buffer: ArrayBuffer, hash: i32) {
-	let reader = SmartBuffer.fromBuffer(buffer);
-	let offset = reader.readUInt32LE(4*hash);
+function find(buffer: ArrayBuffer, hash: u32) {
+	const reader = SmartBuffer.fromBuffer(buffer);
+	const mask = reader.readUInt32LE(0)-1;
+	const offset = reader.readUInt32LE(4+4*(hash & mask));
 	if (offset === 0) return { pointers: [], collisions: false };
 	reader.readOffset = offset;
-	let collisions = reader.readUInt8();
-	let length = reader.readUInt32LE();
-	let pointers: number[] = new Array(length);
+	const collisions = reader.readUInt8();
+	const length = reader.readUInt32LE();
+	const pointers: number[] = new Array(length);
 	for (let i = 0; i < length; i++) {
 		pointers[i] = reader.readUInt32LE();
 	}
@@ -126,46 +138,50 @@ function find(buffer: ArrayBuffer, hash: i32) {
 }
 
 export default class Index {
-	entries: Uint32Array;
+	tgis: Uint32Array;
 	t: ArrayBuffer;
 	tgi: ArrayBuffer;
-	masks = {
-		t: HASH_MASK_TYPE,
-		tgi: HASH_MASK_TGI,
-	};
-	constructor(entries: Uint32Array) {
-		this.entries = entries;
+	constructor(tgis: Uint32Array) {
+		this.tgis = tgis;
 		this.t = generateMap(
-			entries,
-			this.masks.t,
+			tgis,
+			BUCKETS_TYPE,
 			hashType,
 			equalsType,
 		);
+
+		// The bucket size for our TGI index depends on the size of the tgis, 
+		// with a maximum of 0x1ffff+1 because we noticed that about that the 
+		// index creation is getting too slow.
+		const amount = tgis.length/3;
+		const bucket = Math.min(MAX_BUCKETS_TGI, nextPowerOf2(amount/0.75));
 		this.tgi = generateMap(
-			entries,
-			this.masks.tgi,
+			tgis,
+			bucket,
 			hashTypeGroupInstance,
 			equalsTypeGroupInstance,
 		);
+		const dv = new DataView(this.tgi);
+		console.log('bucket size:', dv.getUint32(0, true).toString(16).padStart(8, '0'));
 	}
-	findType(type: i32) {
-		const hash = hash32to16(type) & this.masks.t;
+	findType(type: u32) {
+		const hash = hash32to16(type);
 		const { collisions, pointers } = find(this.t, hash);
 		if (!collisions) return pointers;
 		return pointers.filter(ptr => {
-			return this.entries[3*ptr] === type;
+			return this.tgis[3*ptr] === type;
 		});
 	}
-	findTGI(type: i32, group: i32, instance: i32) {
-		const hash = hash96to32(type, group, instance) & this.masks.tgi;
+	findTGI(type: u32, group: u32, instance: u32) {
+		const hash = hash96to32(type, group, instance);
 		const { collisions, pointers } = find(this.tgi, hash);
 		if (!collisions) return pointers;
 		return pointers.filter(ptr => {
 			let iii = 3*ptr;
 			return (
-				this.entries[iii+1] === group &&
-				this.entries[iii+2] === instance &&
-				this.entries[iii] === type
+				this.tgis[iii+1] === group &&
+				this.tgis[iii+2] === instance &&
+				this.tgis[iii] === type
 			);
 		});
 	}
@@ -174,44 +190,40 @@ export default class Index {
 // # hash32to16(x)
 // Hashes a 32-bit integer to a 16-bit integer. The multiplier is carefully 
 // chosen to spread out the bits as much as possible.
-function hash32to16(x: i32): i16 {
+function hash32to16(x: u32): u16 {
     return ((x * 2654435761) >>> 16);
 }
 
 // # hashType()
 // The hash function for the type indexing, but which operates by accepting the 
 // TGI array and the index of the TGI in the index.
-function hashType(entries: Uint32Array, index: i32) {
+function hashType(entries: Uint32Array, index: u32) {
 	return hash32to16(entries[index]);
 }
 
 // # equalsType()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsType(entries: Uint32Array, a: i32, b: i32): boolean {
+function equalsType(entries: Uint32Array, a: u32, b: u32): boolean {
 	return entries[a] - entries[b] === 0;
 }
 
 // # hashTGI(t, g, i)
-// Hashes 3 32-bit integers to a 32-bit integer.
-function hash96to32(t: i32, g: i32, i: i32): i32 {
-	const PRIME1 = 0x85ebca6b;
-	const PRIME2 = 0xc2b2ae35;
-	g = Math.imul(g, PRIME1) >>> 0;
-	g ^= g >>> 16;
-	i = Math.imul(i, PRIME2) >>> 0;
-	i ^= i >>> 16;
-	let hash = (g ^ i) >>> 0;
-	hash = Math.imul(hash, PRIME1) >>> 0;
-	hash ^= hash >>> 13;
-	hash = Math.imul(hash, PRIME2) >>> 0;
-	hash ^= hash >>> 16;
-	hash ^= t >>> 16;
-	return hash >>> 0;
+// Hashes 3 32-bit integers to a 32-bit integer. Optimized for generating as 
+// mush unique hashas as possible for TGIs.
+function hash96to32(t: u32, g: u32, i: u32) {
+	t = Math.imul(t, 2654435761) ^ (t >> 5);
+	g ^= t; 
+	i ^= t;
+	g = Math.imul(g, 0x9E3779B9);
+	i = Math.imul(i, 0x85EBCA6B);
+	g ^= g >> 16;
+	i ^= i >> 13;
+	return (g ^ i) >>> 0;
 }
 
 // # hashTypeGroupInstance()
 // Same as hashType, but now hashes the TGI.
-function hashTypeGroupInstance(entries: Uint32Array, index: i32) {
+function hashTypeGroupInstance(entries: Uint32Array, index: u32) {
 	return hash96to32(
 		entries[index],
 		entries[index+1],
@@ -221,7 +233,7 @@ function hashTypeGroupInstance(entries: Uint32Array, index: i32) {
 
 // # equalsTypeGroupInstance()
 // Checks whether the Type ID of two TGIs in the array are equal, by index.
-function equalsTypeGroupInstance(entries: Uint32Array, a: i32, b: i32): boolean {
+function equalsTypeGroupInstance(entries: Uint32Array, a: u32, b: u32): boolean {
 
 	// Note: groups are more likely to differ, so we use that first. Slight 
 	// performance optimization, lol.
@@ -231,4 +243,17 @@ function equalsTypeGroupInstance(entries: Uint32Array, a: i32, b: i32): boolean 
 		entries[a] - entries[b] === 0
 	);
 
+}
+
+// # nextPowerOf2(n)
+// Finds the next power of 2 to automatically calculate the bucket size.
+function nextPowerOf2(n: u32): u32 {
+	if (n < 1) return 1;
+	n--;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	return n + 1;
 }
