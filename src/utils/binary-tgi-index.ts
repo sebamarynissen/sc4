@@ -6,7 +6,6 @@ import type { TGILiteral } from 'sc4/types';
 // if we go down to 0x3ff, then collisions appear in the TypeIDs used by SC4, 
 // but not with 0x7ff, so that's what we'll use.
 const BUCKETS_TYPE = 0x800;
-const MAX_BUCKETS_TGI = 0x20000;
 type u32 = number;
 
 function generateMap(
@@ -22,13 +21,15 @@ function generateMap(
 	// last element of the linked list.
 	// 2. Another Uint32Array that contains every TGI pointer, and a pointer 
 	// to the next element in the linked list.
+	performance.mark(`${label}:start`);
+	performance.mark(`${label}:hash:start`);
 	const mask = size-1;
 	const nEntries = entries.length / 3;
 	const firstLastTuples = new Uint32Array(2*size).fill(0xffffffff);
 	const nextList = new Uint32Array(nEntries).fill(0xffffffff);
 	for (let i = 0, iii = 0; i < nEntries; i++, iii += 3) {
 		const hashValue = hash(entries, iii) & mask;
-		const bucketIndex = (hashValue << 1) >>> 0;
+		const bucketIndex = (hashValue << 1) >>> 0;	
 		const first = firstLastTuples[bucketIndex];
 		if (first === 0xffffffff) {
 			firstLastTuples[bucketIndex] = i;
@@ -39,6 +40,7 @@ function generateMap(
 			firstLastTuples[bucketIndex+1] = i;
 		}
 	}
+	performance.mark(`${label}:hash:end`);
 
 	// Now build up the actual index. The size of it is known upfront:
 	// - "1" slot for the bucket size
@@ -59,7 +61,6 @@ function generateMap(
 		let next = firstLastTuples[(i << 1) >>> 0];
 		let j = lengthOffset+1;
 		while (next !== 0xffffffff) {
-			// console.log('I', i, 'NEXT', next);
 			count++;
 			buckets[j++] = next;
 			next = nextList[next];
@@ -79,12 +80,10 @@ function generateMap(
 // Finds all pointers - with potential collisions - for the given hash.
 function find(index: Uint32Array, hash: u32): Uint32Array {
 	const size = index[0];
-	// const pointers = index.subarray(1, 1+size);
-	// const buckets = index.subarray(1+size);
 	const mask = size-1;
 	const bucketIndex = hash & mask;
-	const ptr = index[1+bucketIndex]
-	const length = index[1+size+ptr];
+	const ptr = 1+size+index[1+bucketIndex]
+	const length = index[ptr];
 	const start = ptr+1;
 	return index.subarray(start, start+length);
 }
@@ -136,11 +135,10 @@ export default class Index {
 			getPerformanceLabel('t', instance),
 		);
 
-		// The bucket size for our TGI index depends on the size of the tgis, 
-		// with a maximum of 0x1ffff+1 because we noticed that about that the 
-		// index creation is getting too slow.
+		// The bucket size for our TGI index depends on the size of the tgis. We 
+		// aim for a filling degree of 0.75.
 		const amount = tgis.length/3;
-		const buckets = Math.min(MAX_BUCKETS_TGI, nextPowerOf2(amount/0.75));
+		const buckets = nextPowerOf2(amount/0.75);
 		let tgi = generateMap(
 			tgis,
 			buckets,
@@ -216,19 +214,22 @@ export default class Index {
 		const indices = { t: this.t, ti: this.ti, tgi: this.tgi };
 		return {
 			size: this.tgis.length/3,
-			indices: Object.entries(indices).map(([name, ab]) => {
-				const view = new Uint32Array(ab);
-				const buckets = view[0];
-				const filled = view[buckets+1];
-				let label = this.getPerformanceLabel(name);
+			indices: Object.entries(indices).map(([name, index]) => {
+				const size = index[0];
+				const pointers = index.subarray(1, 1+size);
+				const buckets = index.subarray(1+size);
+				const empty = pointers.reduce(
+					(mem, ptr) => mem + (buckets[ptr] === 0 ? 1 : 0),
+					0
+				);
+				const label = this.getPerformanceLabel(name);
 				return {
 					name,
-					buckets,
-					byteLength: ab.byteLength,
-					fillingDegree: filled/buckets,
+					buckets: size,
+					byteLength: index.byteLength,
+					fillingDegree: 1-empty/size,
 					performance: [
 						measure('Total build time', label),
-						measure('Allocate buckets', label, 'buckets'),
 						measure('Insert values', label, 'hash'),
 						measure('Serialize buffer', label, 'serialize'),
 					].map(measure => {
