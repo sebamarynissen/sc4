@@ -28,11 +28,13 @@ function generateMap(
 	size: u32,
 	hash: (entries: Uint32Array, index: u32) => number,
 	equals: (entries: Uint32Array, a: u32, b: u32) => boolean,
+	label = '',
 ) {
 
 	// Generate the buckets where we'll keep all the hashes. The amount of 
 	// buckets determines the memory consumption of the hash map.
-	performance.mark('buckets:start');
+	performance.mark(`${label}:start`);
+	performance.mark(`${label}:buckets:start`);
 	const buckets: Head[] = new Array(size);
 	const mask = size-1;
 	for (let i = 0; i < size; i++) {
@@ -43,11 +45,11 @@ function generateMap(
 			hasCollision: 0,
 		};
 	}
-	performance.mark('buckets:end');
+	performance.mark(`${label}:buckets:end`);
 
 	// Now loop all the tgi's from the entries and add their hashes to the 
 	// buckets.
-	performance.mark('hash:start');
+	performance.mark(`${label}:hash:start`);
 	const length = entries.length/3;
 	for (let i = 0, iii = 0; i < length; i++, iii += 3) {
 		const hashValue = hash(entries, iii) & mask;
@@ -78,11 +80,11 @@ function generateMap(
 		}
 		head.count++;
 	}
-	performance.mark('hash:end');
+	performance.mark(`${label}:hash:end`);
 
 	// Now build up the index buffer. We will prepend it with the lookup table 
 	// that tells us where a hashed value can be found.
-	performance.mark('serialize:start');
+	performance.mark(`${label}:serialize:start`);
 	const nBuckets = buckets.length;
 	const buffer = new SmartBuffer({ size: 8*nBuckets });
 	performance.mark('allocate');
@@ -115,7 +117,8 @@ function generateMap(
 
 	}
 	const ab = buffer.toArrayBuffer();
-	performance.mark('serialize:end');
+	performance.mark(`${label}:serialize:end`);
+	performance.mark(`${label}:end`);
 	return ab;
 
 }
@@ -137,7 +140,9 @@ function find(buffer: ArrayBuffer, hash: u32) {
 	return { pointers, collisions: collisions > 0 };
 }
 
+let instance = 0;
 export default class Index {
+	instance = instance++;
 	tgis: Uint32Array;
 	t: ArrayBuffer;
 	tgi: ArrayBuffer;
@@ -148,6 +153,7 @@ export default class Index {
 			BUCKETS_TYPE,
 			hashType,
 			equalsType,
+			this.getPerformanceLabel('t'),
 		);
 
 		// The bucket size for our TGI index depends on the size of the tgis, 
@@ -160,9 +166,8 @@ export default class Index {
 			bucket,
 			hashTypeGroupInstance,
 			equalsTypeGroupInstance,
+			this.getPerformanceLabel('tgi'),
 		);
-		const dv = new DataView(this.tgi);
-		console.log('bucket size:', dv.getUint32(0, true).toString(16).padStart(8, '0'));
 	}
 	findType(type: u32) {
 		const hash = hash32to16(type);
@@ -172,6 +177,8 @@ export default class Index {
 			return this.tgis[3*ptr] === type;
 		});
 	}
+
+	// ## findTGI(type, group, index)
 	findTGI(type: u32, group: u32, instance: u32) {
 		const hash = hash96to32(type, group, instance);
 		const { collisions, pointers } = find(this.tgi, hash);
@@ -185,6 +192,68 @@ export default class Index {
 			);
 		});
 	}
+
+	// ## getPerformanceLabel()
+	getPerformanceLabel(name: string) {
+		return `${name}${this.instance}`;
+	}
+
+	// ## getStats()
+	// Returns a bunch of stats about the index, useful for debugging & 
+	// profiling purposes.
+	getStats() {
+		const indices = { t: this.t, tgi: this.tgi };
+		return {
+			tgiCount: this.tgis.length/3,
+			indices: Object.entries(indices).map(([name, ab]) => {
+				const dv = new DataView(ab);
+				const buckets = dv.getUint32(0, true);
+				const max = 4*buckets+1;
+				let empty = 0;
+				let collisions = 0;
+				for (let i = 4; i < max; i += 4) {
+					const offset = dv.getUint32(i, true);
+					if (offset === 0) {
+						empty++;
+						continue;
+					}
+					const hasCollision = dv.getUint8(offset) > 0;
+					if (hasCollision) {
+						collisions++;
+					}
+				}
+				let label = this.getPerformanceLabel(name);
+				return {
+					name,
+					buckets,
+					byteLength: ab.byteLength,
+					fillingDegree: 1-empty/buckets,
+					collisions,
+					performance: [
+						measure('Total build time', label),
+						measure('Allocate buckets', label, 'buckets'),
+						measure('Insert values', label, 'hash'),
+						measure('Serialize buffer', label, 'serialize'),
+					].map(measure => {
+						return {
+							name: measure.name,
+							duration: measure.duration,
+						};
+					}),
+				};
+			}),
+		};
+	}
+
+}
+
+function measure(name: string, label: string, sublabel?: string) {
+	let sub = sublabel ? `:${sublabel}` : '';
+	return performance.measure(
+		name,
+		`${label}${sub}:start`,
+		`${label}${sub}:end`,
+	);
 }
 
 // # hash32to16(x)
