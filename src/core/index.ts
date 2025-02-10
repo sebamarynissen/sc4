@@ -26,8 +26,8 @@ export { NetworkIndexTile } from './network-index.js';
 
 // Export relevant types.
 export type { DBPFOptions, DBPFSaveOptions, DBPFJSON } from './dbpf.js';
+export { default as Entry } from './dbpf-entry.js';
 export type {
-	default as Entry,
 	EntryFromType,
 	EntryJSON,
 } from './dbpf-entry.js';

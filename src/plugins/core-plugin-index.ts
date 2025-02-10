@@ -4,7 +4,7 @@ import PQueue from 'p-queue';
 import {
     FileType,
 	DBPF,
-	type Entry,
+	Entry,
 	type EntryJSON,
 	type Exemplar,
 	ExemplarProperty,
@@ -16,10 +16,10 @@ import {
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import {
 	TGIIndex,
-	hex,
 	type TGIFindParameters,
 	type TGIIndexJSON,
 } from 'sc4/utils';
+import { SmartBuffer } from 'smart-arraybuffer';
 const Family = ExemplarProperty.BuildingpropFamily;
 
 type PluginIndexOptions = {
@@ -42,12 +42,7 @@ type CacheJSON = {
 // The hash function we use for type, group and instances. It's fastest to just 
 // use the identity function here, but for debugging purposes it can often be 
 // useful to see the hex values.
-const h = hex;
-
 type ExemplarEntry = Entry<Exemplar>;
-type FamilyIndex = {
-	[id: string]: TGI[];
-};
 
 // # CorePluginIndex
 // Contains the core functionality for a plugin index that is shared between 
@@ -56,8 +51,9 @@ type FamilyIndex = {
 // up an index of all the files in it by their TGI's.
 export default abstract class CorePluginIndex {
 	scan: string[] = [];
+	dbpfs: DBPF[] = [];
 	entries: TGIIndex<Entry> = new TGIIndex();
-	families: FamilyIndex = Object.create(null);
+	families = new Map<uint32, TGI[]>();
 	cache: LRUCache<string, Entry>;
 	constructor(opts: PluginIndexOptions) {
 
@@ -108,9 +104,12 @@ export default abstract class CorePluginIndex {
 					if (!families) return;
 					for (let family of families) {
 						if (family) {
-							let key = h(family as number);
-							this.families[key] ??= [];
-							this.families[key].push(new TGI(entry.tgi));
+							const arr = this.families.get(family);
+							if (!arr) {
+								this.families.set(family, [entry.tgi]);
+							} else {
+								arr.push(entry.tgi);
+							}
 						}
 					}
 				} catch (e) {
@@ -130,10 +129,9 @@ export default abstract class CorePluginIndex {
 		// We're not done yet. If a prop pack adds props to a Maxis family, then 
 		// multiple of the *same* tgi might be present in the family array. We 
 		// have to avoid this, so we need to filter the tgi's again to be unique.
-		for (let key of Object.keys(this.families)) {
-			let family = this.families[key];
+		for (let [family, tgis] of this.families) {
 			let had = new Set();
-			this.families[key] = family.filter(tgi => {
+			let filtered = tgis.filter(tgi => {
 				let id = hash(tgi);
 				if (!had.has(id)) {
 					had.add(id);
@@ -142,48 +140,81 @@ export default abstract class CorePluginIndex {
 					return false;
 				}
 			});
+			this.families.set(family, filtered);
 		}
 
 	}
 
-	// ## load(cache)
+	// ## load(buffer)
 	// Instead of building up an index, we can also read in a cache index. 
 	// That's useful if we're often running a script on a large plugins folder 
 	// where we're sure the folder doesn't change. We can gain a lot of precious 
 	// time by reading in a cached version in this case!
-	async load(cache: CacheJSON) {
+	async load(buffer: Uint8Array) {
 
-		// Create the new tgi collection.
-		const { dbpfs, files, families, entries: json } = cache;
-		this.entries = new TGIIndex(json.length);
-		for (let i = 0; i < dbpfs.length; i++) {
-			let file = files[i];
-			let pointers = dbpfs[i];
-			let dbpf = new DBPF({
-				file,
-				entries: pointers.map(ptr => json[ptr]),
-				parse: false,
+		// First we'll read in all the dbpfs.
+		const rs = SmartBuffer.fromBuffer(buffer);
+		this.dbpfs = new Array(rs.readUInt32LE());
+		for (let i = 0; i < this.dbpfs.length; i++) {
+			const file = rs.readStringNT();
+			this.dbpfs[i] = new DBPF({ file, parse: false });
+		}
+
+		// Next we'll restore all the entries.
+		this.entries = new TGIIndex(rs.readUInt32LE());
+		for (let i = 0; i < this.entries.length; i++) {
+			const type = rs.readUInt32LE();
+			const group = rs.readUInt32LE();
+			const instance = rs.readUInt32LE();
+			const offset = rs.readUInt32LE();
+			const size = rs.readUInt32LE();
+			const ptr = rs.readUInt32LE();
+			const dbpf = this.dbpfs[ptr];
+			const entry = this.entries[i] = new Entry({
+				tgi: [type, group, instance],
+				offset,
+				size,
 			});
-			for (let i = 0; i < dbpf.length; i++) {
-				this.entries[pointers[i]] = dbpf.entries[i];
-			}
+			dbpf.entries.push(entry);
 		}
 
-		// if the index was cached as well, load it, otherwise we have to 
-		// rebuild it manually - which might be done behind the scenes later on.
-		if (cache.index) {
-			this.entries.load(cache.index);
-		} else {
-			this.entries.build();
-		}
+		// Next we'll restore the index.
+		const size = rs.readUInt32LE(rs.readOffset);
+		const indexBuffer = rs.readBuffer(size);
+		this.entries.load(indexBuffer);
 
-		// At last rebuild the families as well.
-		this.families = Object.create(null);
-		for (let key of Object.keys(families)) {
-			let pointers = families[key];
-			this.families[key] = pointers.map(ptr => new TGI(...ptr));
-		}
-		return this;
+		// console.log(buffer);
+		// Create the new tgi collection.
+		// const { dbpfs, files, families, entries: json } = cache;
+		// this.entries = new TGIIndex(json.length);
+		// for (let i = 0; i < dbpfs.length; i++) {
+		// 	let file = files[i];
+		// 	let pointers = dbpfs[i];
+		// 	let dbpf = new DBPF({
+		// 		file,
+		// 		entries: pointers.map(ptr => json[ptr]),
+		// 		parse: false,
+		// 	});
+		// 	for (let i = 0; i < dbpf.length; i++) {
+		// 		this.entries[pointers[i]] = dbpf.entries[i];
+		// 	}
+		// }
+
+		// // if the index was cached as well, load it, otherwise we have to 
+		// // rebuild it manually - which might be done behind the scenes later on.
+		// if (cache.index) {
+		// 	this.entries.load(cache.index);
+		// } else {
+		// 	this.entries.build();
+		// }
+
+		// // At last rebuild the families as well.
+		// this.families = Object.create(null);
+		// for (let key of Object.keys(families)) {
+		// 	let pointers = families[key];
+		// 	this.families[key] = pointers.map(ptr => new TGI(...ptr));
+		// }
+		// return this;
 
 	}
 
@@ -220,7 +251,7 @@ export default abstract class CorePluginIndex {
 
 	// ## getFamilyTGIs(family)
 	getFamilyTGIs(family: uint32) {
-		return this.families[h(family)] ?? [];
+		return this.families.get(family) ?? [];
 	}
 
 	// ## family(id)
@@ -328,62 +359,55 @@ export default abstract class CorePluginIndex {
 		return prop ? prop.getSafeValue() : undefined;
 	}
 
-	// ## toJSON()
-	toJSON(): CacheJSON {
+	// ## toBuffer()
+	toBuffer() {
 
-		// First thing we'll do is getting all our entries and getting the dbpf 
-		// files from it.
-		let dbpfSet: Set<DBPF> = new Set();
-		let entryToKey: Map<Entry, number> = new Map();
-		let entries: EntryJSON[] = [];
-		let i = 0;
-		for (let entry of this.entries) {
-			let id = i++;
-			entryToKey.set(entry, id);
-			dbpfSet.add(entry.dbpf);
-			entries.push(entry.toJSON());
+		// The first thing we'll do is serialize the file paths for every dbpf.
+		const { dbpfs } = this;
+		const dbpfToIndex = new Map<DBPF, number>();
+		const ws = new SmartBuffer();
+		ws.writeUInt32LE(dbpfs.length);
+		for (let i = 0; i < dbpfs.length; i++) {
+			const dbpf = dbpfs[i];
+			dbpfToIndex.set(dbpf, i);
+			ws.writeStringNT(dbpf.file!);
 		}
 
-		// Fill up the files array containing all file paths, along with the 
-		// dbpfs array, that contains sub-arrays with pointers to the entries. 
-		// That way our json gzips nicely.
-		let files: string[] = [];
-		let dbpfs: number[][] = [];
-		for (let dbpf of dbpfSet) {
-			files.push(dbpf.file!);
-			let pointers: number[] = [];
-			for (let entry of dbpf.entries) {
-				let ptr = entryToKey.get(entry);
-				if (ptr === undefined) continue;
-				pointers.push(ptr);
+		// Next we'll serialize all the entries. This means we serialize the 
+		// TGI, followed by the offset and size, meaning that same structure as 
+		// a dbpf index table, and then followed by a pointer to the dbpf file 
+		// it's part of.
+		const { entries } = this;
+		ws.writeUInt32LE(entries.length);
+		for (let entry of entries) {
+			const { tgi, offset, size } = entry;
+			ws.writeUInt32LE(tgi.type);
+			ws.writeUInt32LE(tgi.group);
+			ws.writeUInt32LE(tgi.instance);
+			ws.writeUInt32LE(offset);
+			ws.writeUInt32LE(size);
+			const index = dbpfToIndex.get(entry.dbpf)!;
+			ws.writeUInt32LE(index);
+		}
+
+		// Next we serialize the actual TGI index. This is relatively easy now, 
+		// because we can simply re-use the underlying Uint32Arrays. Note that 
+		// this means it depends on the system endianness.
+		ws.writeBuffer(entries.index.serialize());
+
+		// At last we serialize the families as well.
+		const { families } = this;
+		ws.writeInt32LE(families.size);
+		for (let [family, tgis] of this.families) {
+			ws.writeUInt32LE(family);
+			ws.writeInt32LE(tgis.length);
+			for (let tgi of tgis) {
+				ws.writeUInt32LE(tgi.type);
+				ws.writeUInt32LE(tgi.group);
+				ws.writeUInt32LE(tgi.instance);
 			}
-			dbpfs.push(pointers);
 		}
-
-		// We'll also serialize the index on all our entries because that one is 
-		// expensive to build up as well.
-		let index = this.entries.index.toJSON();
-
-		// Serialize our built up families as well, as this one also takes a lot 
-		// of time to read.
-		let families: { [id: string]: TGIArray[] } = {};
-		for (let id of Object.keys(this.families)) {
-			let family = this.families[id];
-			let pointers = [];
-			for (let tgi of family) {
-				pointers.push([...tgi] as TGIArray);
-			}
-			families[id] = pointers;
-		}
-
-		// Return at last.
-		return {
-			files,
-			dbpfs,
-			entries,
-			index,
-			families,
-		};
+		return ws.toBuffer();
 
 	}
 
@@ -395,6 +419,6 @@ export default abstract class CorePluginIndex {
 }
 
 // # hash(tgi)
-function hash(tgi: TGI) {
-	return `${tgi.type},${tgi.group},${tgi.instance}`;
+function hash(tgi: TGI): bigint {
+	return tgi.toBigInt();
 }

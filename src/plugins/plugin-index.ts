@@ -138,6 +138,7 @@ export default class PluginIndex extends CorePluginIndex {
 		// here to maintain the sort order, so when a file is read in, we don't 
 		// just put it in the queue, but we put it in the queue *at the right 
 		// position*!
+		const dbpfs = this.dbpfs = new Array(files.length);
 		const queue: Entry[][] = new Array(files.length);
 		const pq = new PQueue({ concurrency: 4096 });
 		let tasks: Promise<any>[] = [];
@@ -145,6 +146,7 @@ export default class PluginIndex extends CorePluginIndex {
 			let file = files[i];
 			let arr: Entry[] = queue[i] = [];
 			let dbpf = new DBPF({ file, parse: false });
+			dbpfs[i] = dbpf;
 			let task = pq.add(async () => {
 				await dbpf.parseAsync();
 				for (let entry of dbpf) {

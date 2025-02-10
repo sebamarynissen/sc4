@@ -349,13 +349,13 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	toJSON(): EntryJSON {
 		let {
 			tgi,
-			size,
 			offset,
+			size,
 		} = this;
 		return {
 			tgi: [...tgi],
-			size,
 			offset,
+			size,
 		};
 	}
 

@@ -1,6 +1,5 @@
 // # tgi-index.ts
 import type { TGIQuery, TGILiteral, uint32, TGIArray } from 'sc4/types';
-import MappedIndex from './mapped-tgi-index.js';
 import BinaryIndex from './binary-tgi-index.js';
 export type { TGIIndexJSON } from './mapped-tgi-index.js';
 
@@ -22,7 +21,7 @@ export type FindParameters<T> =
 // A data structure that allows for efficiently querying objects by (type, 
 // group, instance).
 export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T> {
-	index: MappedIndex<T> | BinaryIndex;
+	index: BinaryIndex;
 	dirty = false;
 
 	// ## build()
@@ -38,11 +37,9 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 
 	// ## load(cache)
 	// Loads an index from a cache instead of building it up ourselves.
-	load(cache: any) {
+	load(buffer: Uint8Array) {
+		this.index = BinaryIndex.fromBuffer(buffer);
 		return this;
-		// this.index = new Index().load(cache);
-		// this.dirty = false;
-		// return this;
 	}
 
 	// ## find(type, group, instance)

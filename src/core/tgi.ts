@@ -40,12 +40,22 @@ export default class TGI<T extends uint32 = uint32> {
 		return `TGI(${str})`;
 	}
 
+	// ## toString()
 	toString() {
 		return [...this].map(nr => hex(nr)).join(',');
 	}
 
+	// ## toArray()
 	toArray(): TGIArray {
 		return [this.type, this.group, this.instance];
+	}
+
+	// ## toBigInt()
+	// Converts the TGI to a BigInt, which can be usful for hashing it.
+	toBigInt() {
+		return BigInt(this.type) << 64n
+			| BigInt(this.group) << 32n
+			| BigInt(this.instance);
 	}
 
 	// ## map()

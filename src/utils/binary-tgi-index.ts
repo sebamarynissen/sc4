@@ -243,6 +243,39 @@ export default class Index {
 		};
 	}
 
+	// ## serialize()
+	serialize(): Uint8Array {
+		const { t, ti, tgi } = this;
+		const output = new Uint32Array(t.length + ti.length + tgi.length + 4);
+		output[0] = output.byteLength;
+		output[1] = t.byteLength;
+		output.set(t, 2);
+		output[t.length+2] = ti.byteLength;
+		output.set(ti, t.length+3);
+		output[t.length+ti.length+3] = tgi.byteLength;
+		output.set(tgi, t.length+ti.length+4);
+		return new Uint8Array(output.buffer);
+	}
+
+	// ## fromBuffer()
+	static fromBuffer(buffer: Uint8Array) {
+		const input = new Uint32Array(
+			buffer.buffer,
+			buffer.byteOffset,
+			buffer.byteLength,
+		);
+		const tLength = input[1] / 4;
+		const t = input.slice(2, 2+tLength);
+		const tiLength = input[2+tLength] / 4;
+		const ti = input.slice(3 + tLength, 3 + tLength + tiLength);
+		const tgiLength = input[3 + tLength + tiLength] / 4;
+		const tgi = input.slice(
+			4 + tLength + tiLength,
+			4 + tLength + tiLength + tgiLength
+		);
+		return new Index({ t, ti, tgi });
+	}
+
 }
 
 function measure(name: string, label: string, sublabel?: string) {
