@@ -5,9 +5,8 @@ import Header, { type HeaderJSON, type HeaderOptions } from './dbpf-header.js';
 import Entry, { type EntryJSON, type EntryFromType } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
-import Stream from './stream.js';
 import { cClass, FileType } from './enums.js';
-import { fs, TGIIndex, duplicateAsync, getCompressionInfo } from 'sc4/utils';
+import { fs, TGIIndex, getCompressionInfo } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
@@ -282,10 +281,12 @@ export default class DBPF {
 	// testing stuff out, but for bulk reading you should use the async 
 	// reading.
 	parse() {
-		return parse.sync.call(
-			this,
-			(...args: Parameters<DBPF['readBytes']>) => this.readBytes(...args),
-		);
+		const header = dataView(this.readBytes(0, 96));
+		const offset = header.getUint32(40, true);
+		const size = header.getUint32(44, true);
+		const index = dataView(this.readBytes(offset, size));
+		this.entries = parseEntries(this, header, index);
+		return this;
 	}
 
 	// ## parseAsync()
@@ -293,25 +294,32 @@ export default class DBPF {
 	// the sync parse() method because this we can make things go 
 	// *significantly* faster this way.
 	async parseAsync() {
+		if (this.file) {
+			// First we'll read in the header, but crucially, we keep the file 
+			// handle open. That way we avoid the cost of having to close and 
+			// open it again in quick succession!
+			const handle = await fs.promises.open(this.file);
+			const header = new DataView(new ArrayBuffer(96));
+			await handle.read(new Uint8Array(header.buffer), 0, 96, 0);
+			const offset = header.getUint32(40, true);
+			const size = header.getUint32(44, true);
 
-		// First we'll read in the header, but crucially, we keep the file 
-		// handle open. That way we avoid the cost of having to close and open 
-		// it again in quick succession!
-		const handle = await fs.promises.open(this.file!);
-		const header = new DataView(new ArrayBuffer(96));
-		await handle.read(new Uint8Array(header.buffer), 0, 96, 0);
-		const offset = header.getUint32(40, true);
-		const size = header.getUint32(44, true);
-
-		// Now jump to reading the index with all the entry information. Once we 
-		// have that, we can close the file handle again.
-		const index = new DataView(new ArrayBuffer(size));
-		await handle.read(index, 0, size, offset);
-		const promise = handle.close();
-		this.entries = parseEntries(this, header, index);
-		await promise;
-		return this;
-
+			// Now jump to reading the index with all the entry information. 
+			// Once we have that, we can close the file handle again.
+			const index = new DataView(new ArrayBuffer(size));
+			await handle.read(index, 0, size, offset);
+			const promise = handle.close();
+			this.entries = parseEntries(this, header, index);
+			await promise;
+			return this;
+		} else if (this.fileObject) {
+			const header = dataView(await this.readBytesAsync(0, 96));
+			const offset = header.getUint32(40, true);
+			const size = header.getUint32(44, true);
+			const index = dataView(await this.readBytesAsync(offset, size));
+			this.entries = parseEntries(this, header, index);
+			return this;
+		}
 	}
 
 	// ## save(opts)
@@ -521,33 +529,9 @@ function parseEntries(dbpf: DBPF, header: DataView, index: DataView) {
 	return entries;
 }
 
-// # parse()
-// Parsing a DBPF can be done both in a sync and async way, but the underlying 
-// logic is the same.
-const parse = duplicateAsync(function* parse(read) {
-
-	// First of all we need to read the header, and only the header. From 
-	// this we can derive where to find the index so that we can parse the 
-	// entries from it.
-	let header = this.header = new Header();
-	let headerBytes = yield read(0, 96);
-	header.parse(new Stream(headerBytes as Uint8Array));
-
-	// Header is parsed which means we now know the offset of the index. 
-	// Read in the bytes of the index and then build up the index.
-	let index = yield read(header.indexOffset, header.indexSize);
-	fillIndex(this, index as Uint8Array);
-	return this;
-
-});
-
-// # fillIndex(dbpf, buffer)
-// Reads & parses the buffer containing the file index.
-function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
-	let rs = new Stream(buffer);
-	let index = dbpf.entries = new TGIIndex(dbpf.header.indexCount);
-	for (let i = 0; i < index.length; i++) {
-		let entry = index[i] = new Entry({ dbpf });
-		entry.parse(rs);
-	}
+// # dataView(arr)
+// Creates a DataView over the given Uint8Array. This takes into account that 
+// the Uint8Aray might be a view over the underlying arraybuffer itself.
+function dataView(arr: Uint8Array) {
+	return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
 }
