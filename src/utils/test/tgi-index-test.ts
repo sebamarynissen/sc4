@@ -160,6 +160,42 @@ const fn = (create: (arr: any[]) => Index, indexed: boolean) => () => {
 
 	});
 
+	indexed && it.only('looks for a perfect hash function', function() {
+
+		this.timeout(0);
+
+		for (let i = 0; i < 1e6; i++) {
+			const A = (0xffffffff+1)*Math.random() | 0;
+			for (let B = 1; B < 32; B++) {
+
+				function hash(x: number) {
+					return ((x * A) >>> B) & 0x1f;
+				}
+
+				const types = [
+					0x2026960b, 0x0a8b0e70, 0xa2e3d533,
+					0xe86b1eef, 0x856ddbac, 0x5ad0e817,
+					0x7ab50e44, 0xca63e2a3, 0x6534284a,
+					0x0b8d821a, 0x7b1acfcd, 0x9d796db4,
+					0x74807102, 0x74807101, 0x66778002,
+					0x66778001, 0x88777601, 0x296678f7,
+					0x29a5d1ec, 0x09adcd75, 0xea5118b0,
+					0x05342861, 0x0a5bcf4b, 0xaa5c3144,
+					0x00000000, 0x6a5b7bf5, 0x88777602,
+					0x6be74c60, 0x5d73a611
+				];
+				const set = new Set(types.map(x => hash(hash(x))));
+				if (set.size === types.length) {
+					console.log(A, B);
+					return;
+				}
+
+			}
+		}
+		console.log('nope');
+
+	});
+
 	describe('#add()', function() {
 
 		it('adds a new entry to the index', function() {
