@@ -33,8 +33,7 @@ export type DBPFJSON = {
 
 type FileAddOptions = {
 	compressed?: boolean;
-	compressedSize?: number;
-	fileSize?: number;
+	size?: number;
 };
 
 // Older Node version (which we don't actually officially support though) might 
@@ -185,8 +184,8 @@ export default class DBPF {
 		} else if (fileOrBuffer) {
 			entry.file = fileOrBuffer as any;
 		}
-		let { compressed = false, fileSize = 0, compressedSize = 0 } = opts;
-		Object.assign(entry, { compressed, fileSize, compressedSize });
+		let { compressed = false, size = 0 } = opts;
+		Object.assign(entry, { compressed, size});
 		return entry;
 	}
 
@@ -203,7 +202,7 @@ export default class DBPF {
 	// that case the cache can decide to free up the dbpf and only read it in 
 	// again upon the next read.
 	free() {
-		if (!this.file) {
+		if (!this.file && !this.fileObject) {
 			console.warn([
 				'No file is set.',
 				'This means you will no longer be able to use this DBPF!',
@@ -281,10 +280,9 @@ export default class DBPF {
 	// testing stuff out, but for bulk reading you should use the async 
 	// reading.
 	parse() {
-		const header = dataView(this.readBytes(0, 96));
-		const offset = header.getUint32(40, true);
-		const size = header.getUint32(44, true);
-		const index = dataView(this.readBytes(offset, size));
+		const header = this.header = new Header(this.readBytes(0, 96));
+		const { indexOffset, indexSize } = header;
+		const index = dataView(this.readBytes(indexOffset, indexSize));
 		this.entries = parseEntries(this, header, index);
 		return this;
 	}
@@ -299,24 +297,25 @@ export default class DBPF {
 			// handle open. That way we avoid the cost of having to close and 
 			// open it again in quick succession!
 			const handle = await fs.promises.open(this.file);
-			const header = new DataView(new ArrayBuffer(96));
-			await handle.read(new Uint8Array(header.buffer), 0, 96, 0);
-			const offset = header.getUint32(40, true);
-			const size = header.getUint32(44, true);
+			const headerBytes = new Uint8Array(96);
+			await handle.read(headerBytes, 0, 96, 0);
+			this.header = new Header(headerBytes);
+			const { indexOffset, indexSize } = this.header;
 
 			// Now jump to reading the index with all the entry information. 
 			// Once we have that, we can close the file handle again.
-			const index = new DataView(new ArrayBuffer(size));
-			await handle.read(index, 0, size, offset);
+			const index = new DataView(new ArrayBuffer(indexSize));
+			await handle.read(index, 0, indexSize, indexOffset);
 			const promise = handle.close();
-			this.entries = parseEntries(this, header, index);
+			this.entries = parseEntries(this, this.header, index);
 			await promise;
 			return this;
 		} else if (this.fileObject) {
-			const header = dataView(await this.readBytesAsync(0, 96));
-			const offset = header.getUint32(40, true);
-			const size = header.getUint32(44, true);
-			const index = dataView(await this.readBytesAsync(offset, size));
+			const header = new Header(await this.readBytesAsync(0, 96));
+			const { indexOffset, indexSize } = header;
+			const index = dataView(
+				await this.readBytesAsync(indexOffset, indexSize),
+			);
 			this.entries = parseEntries(this, header, index);
 			return this;
 		}
@@ -504,9 +503,9 @@ export default class DBPF {
 // # parseEntries(header, index)
 // The function that will actually parse all entries once we got the raw header 
 // & index buffers.
-function parseEntries(dbpf: DBPF, header: DataView, index: DataView) {
-	const count = header.getUint32(36, true);
-	const minor = header.getUint32(8, true);
+function parseEntries(dbpf: DBPF, header: Header, index: DataView) {
+	const count = header.indexCount;
+	const minor = header.indexMinor;
 	const locationOffset = 12 + (minor > 0 ? 4 : 0);
 	const sizeOffset = locationOffset + 4;
 	const rowSize = sizeOffset + 4;
