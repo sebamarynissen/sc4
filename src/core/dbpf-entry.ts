@@ -87,6 +87,9 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	buffer: Uint8Array | null = null;
 	file: ReadResult<T> | null = null;
 
+	// Internal promises where we store the read promise.
+	#readPromise: Promise<Uint8Array> | null = null;
+
 	// ## constructor(opts)
 	// Constructor for the entry. Note that we might have millions and millions 
 	// of entries in very large plugin folders, so we optimize this as much as 
@@ -220,7 +223,15 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// Asynchronously reads the entry's raw buffer and stores it in the raw 
 	// property.
 	async readRawAsync() {
-		return await this.dbpf.readBytesAsync(this.offset, this.size);
+		if (this.raw) return this.raw;
+		if (this.#readPromise) return await this.#readPromise;
+		this.#readPromise = this.dbpf.readBytesAsync(this.offset, this.size)
+			.then(raw => {
+				this.#readPromise = null;
+				this.raw = raw;
+				return raw;
+			});
+		return await this.#readPromise;
 	}
 
 	// ## decompressAsync()

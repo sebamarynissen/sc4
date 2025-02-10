@@ -201,6 +201,22 @@ describe('A DBPF file', function() {
 
 	});
 
+	it('does not perform simultaneous reads', async function() {
+
+		let dbpf = new DBPF(resource('cement.sc4lot'));
+		let entry = dbpf.find({ type: FileType.Exemplar })!;
+		
+		// Read the entry a ton of times. If the read call isn't cached, then 
+		// the os will complain about to many file handles.
+		let tasks = [];
+		for (let i = 0; i < 1e5; i++) {
+			tasks.push(entry.readRawAsync());
+		}
+		const [a, b] = await Promise.all(tasks);
+		expect(a).to.equal(b);
+
+	});
+
 	describe('#find()', function() {
 
 		it('finds entries by TGI', function() {
