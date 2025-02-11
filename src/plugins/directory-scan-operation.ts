@@ -1,7 +1,7 @@
 // # directory-scan-operation.ts
 import { DBPF, FileType, type Entry } from 'sc4/core';
 import createLoadComparator from './create-load-comparator.js';
-import type PluginIndex from './core-plugin-index.js';
+import type PluginIndex from './plugin-index.js';
 
 export type Glob = {
 	[Symbol.asyncIterator]: () => AsyncGenerator<File | string | Uint8Array, void, void>;

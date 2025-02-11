@@ -1,7 +1,7 @@
 // # file-index-test.js
 import path from 'node:path';
 import { expect } from 'chai';
-import Index from '../plugin-index.js';
+import Index from '../plugin-index.node.js';
 import { FileType } from 'sc4/core';
 import { resource } from '#test/files.js';
 

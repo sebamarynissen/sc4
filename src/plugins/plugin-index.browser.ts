@@ -1,5 +1,5 @@
 // # plugin-index.browser.ts
-import CorePluginIndex, { type PluginIndexOptions as CoreOptions } from './core-plugin-index.js';
+import CorePluginIndex, { type PluginIndexOptions as CoreOptions } from './plugin-index.js';
 import { Glob } from './glob.browser.js';
 
 type PluginIndexOptions = CoreOptions & {

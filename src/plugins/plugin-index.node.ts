@@ -1,7 +1,7 @@
 // # plugin-index.node.ts
 import os from 'node:os';
 import FileScanner from './file-scanner.js';
-import CorePluginIndex, { type PluginIndexOptions as CoreOptions } from './core-plugin-index.js';
+import CorePluginIndex, { type PluginIndexOptions as CoreOptions } from './plugin-index.js';
 
 type PluginIndexOptions = CoreOptions & {
 	installation?: string | undefined;

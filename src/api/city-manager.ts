@@ -12,19 +12,19 @@ import {
 	ExemplarProperty as Property,
 	Box3,
 	type Exemplar,
-    type ExemplarPropertyKey as Key,
-    type Entry,
-    type LotObject,
-    type SavegameObject,
-    type ArrayFileTypeId,
-    type SavegameFileTypeId,
-    type SavegameContext,
-    type ExemplarLike,
-    ExemplarProperty,
-    Vector3,
-    TGI,
+	type ExemplarPropertyKey as Key,
+	type Entry,
+	type LotObject,
+	type SavegameObject,
+	type ArrayFileTypeId,
+	type SavegameFileTypeId,
+	type SavegameContext,
+	type ExemplarLike,
+	ExemplarProperty,
+	Vector3,
+	TGI,
 } from 'sc4/core';
-import type { PluginIndex } from 'sc4/plugins';
+import type { BasePluginIndex } from 'sc4/plugins';
 import type { TGILike } from 'sc4/types';
 import getOrientedPosition from './get-oriented-position.js';
 
@@ -32,7 +32,7 @@ const INSET = 0.1;
 
 type CityManagerOptions = {
 	dbpf?: Savegame;
-	index?: PluginIndex;
+	index?: BasePluginIndex;
 };
 
 type Orientation = number;
@@ -90,7 +90,7 @@ type AddObjectOptions = {
 export default class CityManager {
 	dbpf: Savegame;
 	ctx: SavegameContext;
-	index: PluginIndex;
+	index: BasePluginIndex;
 
 	// ## constructor(opts)
 	// Sets up the city manager.
@@ -113,7 +113,7 @@ export default class CityManager {
 	// Stores the file index to be used for looking up TGI's etc. That's 
 	// required if you want to plop lot's etc. because in that case we need to 
 	// know where to look for the resources!
-	setFileIndex(index: PluginIndex) {
+	setFileIndex(index: BasePluginIndex) {
 		this.index = index;
 	}
 

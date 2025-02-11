@@ -1,6 +1,6 @@
 // # build-family-index.ts
 import PQueue from 'p-queue';
-import type CorePluginIndex from './core-plugin-index.js';
+import type PluginIndex from './plugin-index.js';
 import { type Cohort, type Exemplar, type Entry, FileType, TGI } from 'sc4/core';
 import { indexOf } from 'uint8array-extras';
 
@@ -16,7 +16,7 @@ const textSequence = new Uint8Array([48, 120, 50, 55, 56, 49, 50, 56, 55, 48]);
 // # buildFamilyIndex(index)
 // Builds up the index of all building & prop families, maximized for speed.
 export default async function buildFamilyIndex(
-	index: CorePluginIndex,
+	index: PluginIndex,
 	opts: BuildFamilyIndexOptions = {},
 ) {
 	const families = new Map<number, TGI[]>();
@@ -67,7 +67,7 @@ export default async function buildFamilyIndex(
 }
 
 async function getFamilies(
-	index: CorePluginIndex,
+	index: PluginIndex,
 	cache: Map<Entry, Promise<number[] | undefined>>,
 	entry: Entry<ExemplarLike>
 ): Promise<number[] | undefined> {

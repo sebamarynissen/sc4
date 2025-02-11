@@ -14,7 +14,7 @@ import {
 	LotObject,
 } from 'sc4/core';
 import { hex } from 'sc4/utils';
-import PluginIndex from './plugin-index.js';
+import PluginIndex from './plugin-index.node.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
