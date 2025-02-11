@@ -1,13 +1,10 @@
 // # core-plugin-index.ts
 import { LRUCache } from 'lru-cache';
-import PQueue from 'p-queue';
 import {
     FileType,
 	DBPF,
 	Entry,
-	type EntryJSON,
 	type Exemplar,
-	ExemplarProperty,
 	type ExemplarPropertyKey as Key,
 	TGI,
     type DecodedFileTypeId,
@@ -19,7 +16,7 @@ import {
 	type TGIFindParameters,
 } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
-const Family = ExemplarProperty.BuildingpropFamily;
+import buildFamilyIndex from './build-family-index.js';
 
 type PluginIndexOptions = {
 	scan?: string | string[];
@@ -78,62 +75,7 @@ export default abstract class CorePluginIndex {
 	// Builds up the index of all building & prop families by reading in all 
 	// exemplars.
 	async buildFamilies(opts: { concurrency?: number } = {}) {
-		let { concurrency = 4096 } = opts;
-		let exemplars = this.findAll({ type: FileType.Exemplar });
-		let queue = new PQueue({ concurrency });
-		let tasks: Promise<any>[] = new Array(exemplars.length);
-		let i = 0;
-		for (let entry of exemplars) {
-
-			// If the entry has group id 0xa8fbd372, then we can tell it's a lot 
-			// configurations exemplar, so no need to parse it in that case.
-			if (entry.group === 0xa8fbd372) continue;
-			let task = queue.add(async () => {
-				try {
-					let exemplar = await entry.readAsync();
-					let families = await this.getPropertyValueAsync(exemplar, Family);
-					if (!families) return;
-					for (let family of families) {
-						if (family) {
-							const arr = this.families.get(family);
-							if (!arr) {
-								this.families.set(family, [entry.tgi]);
-							} else {
-								arr.push(entry.tgi);
-							}
-						}
-					}
-				} catch (e) {
-
-					// Some exemplars fail to parse apparently, ignore this for 
-					// now.
-					console.warn(`Failed to parse exemplar ${entry.id}: ${e.message}`);
-					throw e;
-
-				}
-			});
-			tasks[i++] = task;
-		}
-		tasks.length = i;
-		await Promise.all(tasks);
-
-		// We're not done yet. If a prop pack adds props to a Maxis family, then 
-		// multiple of the *same* tgi might be present in the family array. We 
-		// have to avoid this, so we need to filter the tgi's again to be unique.
-		for (let [family, tgis] of this.families) {
-			let had = new Set();
-			let filtered = tgis.filter(tgi => {
-				let id = hash(tgi);
-				if (!had.has(id)) {
-					had.add(id);
-					return true;
-				} else {
-					return false;
-				}
-			});
-			this.families.set(family, filtered);
-		}
-
+		this.families = await buildFamilyIndex(this, opts);
 	}
 
 	// ## touch(entry)
@@ -394,9 +336,4 @@ export default abstract class CorePluginIndex {
 		yield* this.entries;
 	}
 
-}
-
-// # hash(tgi)
-function hash(tgi: TGI): bigint {
-	return tgi.toBigInt();
 }
