@@ -321,6 +321,14 @@ export default class DBPF {
 		}
 	}
 
+	// ## createIndex()
+	// We no longer automatically index all entries in the dbpf. Instead it 
+	// needs to be called manually. It's still advised to do on large dbpf files.
+	createIndex() {
+		this.entries.build();
+		return this;
+	}
+
 	// ## save(opts)
 	// Saves the DBPF to a file. Note: we're going to do this in a sync way, 
 	// it's just easier.
