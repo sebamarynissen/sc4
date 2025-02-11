@@ -1,49 +1,45 @@
 // # scan-for-menus-command.js
-import path from 'node:path';
-import { Glob } from 'glob';
-import ora from 'ora';
+import PQueue from 'p-queue';
+import ora, { type Ora } from 'ora';
 import chalk from 'chalk';
 import config from '#cli/config.js';
 import logger from '#cli/logger.js';
 import { getAllIds } from '#cli/data/standard-menus.js';
-import { DBPF } from 'sc4/core';
+import { DBPF, Exemplar, type Entry } from 'sc4/core';
+import { FileScanner } from 'sc4/plugins';
+import type { TGIArray } from 'sc4/types';
+import type LText from 'src/core/ltext.js';
 
-const Props = {
-	ExemplarType: 0x10,
-	ExemplarName: 0x20,
-	ItemIcon: 0x8A2602B8,
-	ItemOrder: 0x8A2602B9,
-	ItemButtonId: 0x8A2602BB,
-	ItemSubmenuParentId: 0x8A2602CA,
-	ItemButtonClass: 0x8A2602CC,
-	UserVisibleNameKey: 0x8A416A99,
-	ItemDescriptionKey: 0xCA416AB5,
+type Menu = {
+	id: number;
+	parent?: number;
+	name: string;
+	order?: number;
 };
 
 // # scanForMenus()
 // Performs a scan of the user's plugin folder and reports any submenus found in 
 // it.
-export async function scanForMenus(folder = process.env.SC4_PLUGINS, options) {
-	let glob = new Glob('**/*.dat', {
-		nodir: true,
-		cwd: folder,
-		nocase: true,
-	});
+export async function scanForMenus(folder = process.env.SC4_PLUGINS) {
+	const queue = new PQueue({ concurrency: 4096 });
+	let glob = new FileScanner('**/*', { cwd: folder });
 	let tasks = [];
 	const spinner = ora();
 	spinner.start();
-	let menus = [];
+	let menus: Menu[] = [];
 	for await (let file of glob) {
-		let fullPath = path.join(folder, file);
-		let dbpf = new DBPF({
-			file: fullPath,
-			parse: false,
+		let task = queue.add(async () => {
+			let dbpf = new DBPF({ file, parse: false });
+			await dbpf.parseAsync();
+			dbpf.createIndex();
+			let subtasks = [];
+			for (let entry of dbpf.exemplars) {
+				let subtask = queue.add(() => getMenu(entry, menus, spinner));
+				subtasks.push(subtask);
+			}
+			await Promise.allSettled(subtasks);
 		});
-		await dbpf.parseAsync();
-		spinner.text = `Scanning ${chalk.cyan(file)}`;
-		for (let entry of dbpf.exemplars) {
-			tasks.push(getMenu(entry, menus));
-		}
+		tasks.push(task);
 	}
 	await Promise.allSettled(tasks);
 	spinner.stop();
@@ -77,27 +73,29 @@ export async function scanForMenus(folder = process.env.SC4_PLUGINS, options) {
 
 }
 
-async function getMenu(entry, menus) {
+async function getMenu(entry: Entry<Exemplar>, menus: Menu[], spinner: Ora) {
+	spinner.text = `Scanning ${chalk.cyan(entry.dbpf.file)}`;
 	let exemplar;
 	try {
-		exemplar = entry.read();
+		exemplar = await entry.readAsync();
 	} catch {
 		return;
 	}
-	let parent = exemplar.value(Props.ItemSubmenuParentId);
+	let parent = exemplar.get('ItemSubmenuParentId');
 	if (!parent) return null;
 	let { instance: id } = entry;
-	let name = exemplar.value(Props.UserVisibleNameKey);
-	if (typeof name !== 'string') {
-		let ltext = entry.dbpf.find(name);
+	let uvnk = exemplar.get('UserVisibleNameKey');
+	let name = '';
+	if (uvnk) {
+		let ltext = entry.dbpf.find(uvnk as TGIArray);
 		if (!ltext) return;
-		({ value: name } = await ltext.readAsync());
+		({ value: name } = await ltext.readAsync() as LText);
 	}
 	menus.push({
 		id,
 		parent,
 		name: name.trim(),
-		order: exemplar.value(Props.ItemOrder),
+		order: exemplar.get('ItemOrder'),
 	});
 
 }
