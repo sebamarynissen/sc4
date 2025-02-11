@@ -17,10 +17,17 @@ type Menu = {
 	order?: number;
 };
 
+type ScanForMenusOptions = {
+	override?: boolean;
+};
+
 // # scanForMenus()
 // Performs a scan of the user's plugin folder and reports any submenus found in 
 // it.
-export async function scanForMenus(folder = process.env.SC4_PLUGINS) {
+export async function scanForMenus(
+	folder = process.env.SC4_PLUGINS,
+	opts: ScanForMenusOptions = {},
+) {
 	const queue = new PQueue({ concurrency: 4096 });
 	let glob = new FileScanner('**/*', { cwd: folder });
 	let tasks = [];
@@ -54,8 +61,10 @@ export async function scanForMenus(folder = process.env.SC4_PLUGINS) {
 	// to not override!
 	let configMenus = config.get('menus') || [];
 	let map = new Map();
-	for (let menu of configMenus) {
-		map.set(menu.id, menu);
+	if (!opts.override) {
+		for (let menu of configMenus) {
+			map.set(menu.id, menu);
+		}
 	}
 	let added = 0;
 	for (let menu of menus) {
@@ -69,7 +78,11 @@ export async function scanForMenus(folder = process.env.SC4_PLUGINS) {
 	} else {
 		config.delete('menus');
 	}
-	logger.ok(`Added ${added} new menus to your menu config`);
+	if (opts.override) {
+		logger.ok(`Added ${added} menus to your menu config`);
+	} else {
+		logger.ok(`Added ${added} new menus to your menu config`);
+	}
 
 }
 

@@ -16,5 +16,9 @@ export async function scanForMenus() {
 			filter: info => info.isDirectory(),
 		});
 	}
-	return [plugins];
+	let override = await prompts.confirm({
+		message: `Do you want to reset your current submenus configuration? If you choose "Yes", then only the submenus found by this command will be available when adding lots to a submenu.`,
+		default: false,
+	});
+	return [plugins, { override }];
 }
