@@ -3,9 +3,12 @@ import type { TGILiteral } from 'sc4/types';
 
 // Parameters below are tuned for optimal balance between the probability of 
 // hash collisions and memory consumption. For the type mask, it turns out that
-// if we go down to 0x3ff, then collisions appear in the TypeIDs used by SC4, 
-// but not with 0x7ff, so that's what we'll use.
-const BUCKETS_TYPE = 0x800;
+// with 256, we get a perfect hash function for all the types that are commonly 
+// found in game assets - i.e. *not* within savegames. We don't bother too much 
+// about collissions for savegames though, as there are only limited collissions 
+// in savegames. However, for stuff like plugin indexing for example, the amount 
+// of exemplars is huge, so there it's crucial to avoid the collision detection!
+const BUCKETS_TYPE = 0x100;
 type u32 = number;
 
 function generateMap(
@@ -300,9 +303,9 @@ function measure(name: string, label: string, sublabel?: string) {
 
 // # hash32to16(x)
 // Hashes a 32-bit integer to a 16-bit integer. The multiplier is carefully 
-// chosen to spread out the bits as much as possible.
+// chosen to spread out the bits as much as possible
 function hash32to16(x: u32): u32 {
-    return ((x * 2654435761) >>> 16);
+    return ((x * 2654435761) >>> 13);
 }
 
 // # hashType()
