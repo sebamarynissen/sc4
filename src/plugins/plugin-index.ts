@@ -1,14 +1,14 @@
-// # core-plugin-index.ts
+// # plugin-index.ts
 import { LRUCache } from 'lru-cache';
 import {
-    FileType,
+	FileType,
 	DBPF,
 	Entry,
 	type Exemplar,
 	type ExemplarPropertyKey as Key,
 	TGI,
-    type DecodedFileTypeId,
-    type EntryFromType,
+	type DecodedFileTypeId,
+	type EntryFromType,
 } from 'sc4/core';
 import type { TGIArray, TGIQuery, uint32 } from 'sc4/types';
 import {
@@ -27,7 +27,7 @@ export type PluginIndexOptions = {
 	threads?: number;
 };
 
-type BuildOptions<T extends CorePluginIndex> = {
+type BuildOptions<T extends PluginIndex> = {
 	installation?: T['installation'];
 	plugins?: T['plugins'];
 };
@@ -42,7 +42,7 @@ type ExemplarEntry = Entry<Exemplar>;
 // Node and the browser.
 // A plugin index is a data structure that scans a list of dbpf files and builds
 // up an index of all the files in it by their TGI's.
-export default abstract class CorePluginIndex {
+export default abstract class PluginIndex {
 	scan: string[] = [];
 	dbpfs: DBPF[] = [];
 	entries: TGIIndex<Entry> = new TGIIndex();
