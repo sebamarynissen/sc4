@@ -245,35 +245,46 @@ export default class Index {
 
 	// ## serialize()
 	serialize(): Uint8Array {
-		const { t, ti, tgi } = this;
-		const output = new Uint32Array(t.length + ti.length + tgi.length + 4);
-		output[0] = output.byteLength;
-		output[1] = t.byteLength;
-		output.set(t, 2);
-		output[t.length+2] = ti.byteLength;
-		output.set(ti, t.length+3);
-		output[t.length+ti.length+3] = tgi.byteLength;
-		output.set(tgi, t.length+ti.length+4);
-		return new Uint8Array(output.buffer);
+		const { tgis, t, ti, tgi } = this;
+		const output = new ArrayBuffer(Uint32Array.BYTES_PER_ELEMENT*(
+			tgis.length +
+			t.length +
+			ti.length +
+			tgi.length +
+			4
+		));
+		let i = 0;
+		const set = (arr: ArrayLike<number>) => {
+			const target = new Uint32Array(output, i, arr.length+1);
+			target[0] = arr.length;
+			target.set(arr, 1);
+			i += target.byteLength;
+		};
+		set(tgis);
+		set(t);
+		set(ti);
+		set(tgi);
+		return new Uint8Array(output);
 	}
 
 	// ## fromBuffer()
-	static fromBuffer(buffer: Uint8Array) {
-		const input = new Uint32Array(
-			buffer.buffer,
-			buffer.byteOffset,
-			buffer.byteLength,
-		);
-		const tLength = input[1] / 4;
-		const t = input.slice(2, 2+tLength);
-		const tiLength = input[2+tLength] / 4;
-		const ti = input.slice(3 + tLength, 3 + tLength + tiLength);
-		const tgiLength = input[3 + tLength + tiLength] / 4;
-		const tgi = input.slice(
-			4 + tLength + tiLength,
-			4 + tLength + tiLength + tgiLength
-		);
-		return new Index({ t, ti, tgi });
+	static fromBuffer({ buffer, byteOffset }: Uint8Array) {
+		let i = 0;
+		const get = () => {
+			const sizeof = Uint32Array.BYTES_PER_ELEMENT;
+			const start = byteOffset+i;
+			const length = new DataView(buffer, start).getUint32(0, true);
+			const copy = new Uint32Array(
+				buffer.slice(start+sizeof, start+sizeof*(1+length)),
+			);
+			i += sizeof*(length+1);
+			return copy;
+		};
+		const tgis = get();
+		const t = get();
+		const ti = get();
+		const tgi = get();
+		return new Index({ tgis, t, ti, tgi });
 	}
 
 }

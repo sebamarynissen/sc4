@@ -89,6 +89,10 @@ export default class Header {
 		};
 	}
 
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		return this.toJSON();
+	}
+
 }
 
 // # getDefaultHeader(opts)

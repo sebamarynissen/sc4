@@ -108,8 +108,7 @@ export default class DependencyTracker {
 
 			// If a cached file was found, read from there.
 			if (buffer) {
-				const json = JSON.parse(buffer.toString());
-				this.index = await new PluginIndex().load(json);
+				this.index = new PluginIndex().load(buffer);
 				logger?.progress.succeed('Plugin index built');
 				return;
 			}
@@ -133,7 +132,8 @@ export default class DependencyTracker {
 		// If the index needs to be cached, then do it now.
 		if (cache) {
 			logger?.progress.start('Saving index to cache');
-			await fs.promises.writeFile(cache, JSON.stringify(index.toJSON()));
+			const buffer = index.toBuffer();
+			await fs.promises.writeFile(cache, buffer);
 			logger?.progress.succeed();
 		}
 		debug('Index built');
