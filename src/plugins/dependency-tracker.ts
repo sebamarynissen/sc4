@@ -14,12 +14,12 @@ import {
 	LotObject,
 } from 'sc4/core';
 import { hex } from 'sc4/utils';
-import PluginIndex from './plugin-index.js';
+import PluginIndex from './plugin-index.node.js';
 import FileScanner from './file-scanner.js';
 import folderToPackageId from './folder-to-package-id.js';
 import * as Dep from './dependency-types.js';
 import type { Entry, TGI } from 'sc4/core';
-import type { Logger, TGIArray, TGIQuery } from 'sc4/types';
+import type { Logger, TGIQuery } from 'sc4/types';
 import PQueue from 'p-queue';
 import { styleText } from 'node:util';
 const debug = createDebug('sc4:plugins:tracker');
@@ -108,8 +108,7 @@ export default class DependencyTracker {
 
 			// If a cached file was found, read from there.
 			if (buffer) {
-				const json = JSON.parse(buffer.toString());
-				this.index = await new PluginIndex().load(json);
+				this.index = new PluginIndex().load(buffer);
 				logger?.progress.succeed('Plugin index built');
 				return;
 			}
@@ -133,7 +132,8 @@ export default class DependencyTracker {
 		// If the index needs to be cached, then do it now.
 		if (cache) {
 			logger?.progress.start('Saving index to cache');
-			await fs.promises.writeFile(cache, JSON.stringify(index.toJSON()));
+			const buffer = index.toBuffer();
+			await fs.promises.writeFile(cache, buffer);
 			logger?.progress.succeed();
 		}
 		debug('Index built');
@@ -734,7 +734,7 @@ class DependencyTrackingResult {
 	constructor(ctx: DependencyTrackingContext) {
 
 		// Report the installation & plugins folder that we scanned.
-		const { installation, plugins } = ctx.tracker.index.options;
+		const { installation, plugins } = ctx.tracker.index;
 		this.installation = installation as string;
 		this.plugins = plugins as string;
 

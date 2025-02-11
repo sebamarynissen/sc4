@@ -27,6 +27,7 @@
 
 		// AllowJs has to be true as long as we haven't migrated everything yet.
 		"allowJs": true,
+		"types": ["@types/wicg-file-system-access", "@types/mocha"],
 
 	},
 	"include": [

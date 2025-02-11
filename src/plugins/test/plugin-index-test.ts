@@ -1,7 +1,7 @@
 // # file-index-test.js
 import path from 'node:path';
 import { expect } from 'chai';
-import Index from '../plugin-index.js';
+import Index from '../plugin-index.node.js';
 import { FileType } from 'sc4/core';
 import { resource } from '#test/files.js';
 
@@ -73,13 +73,13 @@ describe('The plugin index', function() {
 		await index.build();
 		await index.buildFamilies();
 		let { families } = index;
-		expect(Object.values(families)).to.have.length(2);
+		expect(families).to.have.length(2);
 		expect(index.family(0x5484CA20)).to.have.length(4);
 		expect(index.family(0x5484CA1F)).to.have.length(4);
 
 	});
 
-	it('serializes & deserializes an index to JSON', async function() {
+	it('serializes & deserializes to a buffer', async function() {
 
 		let index = new Index({
 			plugins: resource('NYBT/Aaron Graham/NYBT Gracie Manor'),
@@ -91,18 +91,20 @@ describe('The plugin index', function() {
 		await index.build();
 		await index.buildFamilies();
 
-		let json = index.toJSON();
-		let clone = await new Index().load(json);
+		let buffer = index.toBuffer();
+		let clone = new Index().load(buffer);
+
 		expect(clone).to.have.length(index.length);
 		expect(clone.entries.index).to.be.ok;
-		expect(clone.entries.index).to.eql(index.entries.index);
 
 		for (let entry of index) {
 			let eq = clone.find(entry.type, entry.group, entry.instance)!;
+			expect(eq).to.be.ok;
 			expect(eq.type).to.equal(entry.type);
 			expect(eq.group).to.equal(entry.group);
 			expect(eq.instance).to.equal(entry.instance);
 		}
+		expect(clone.families).to.eql(index.families);
 
 	});
 

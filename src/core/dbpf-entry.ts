@@ -1,6 +1,6 @@
 // # dbpf-entry.ts
 import { decompress } from 'qfs-compression';
-import { tgi, inspect, duplicateAsync, getCompressionInfo } from 'sc4/utils';
+import { tgi, inspect, getCompressionInfo } from 'sc4/utils';
 import type { TGILike, uint32 } from 'sc4/types';
 import type { Class } from 'type-fest';
 import type { InspectOptions } from 'node:util';
@@ -34,8 +34,8 @@ export type EntryJSON = {
 };
 
 type EntryConstructorOptions = {
-	dbpf?: DBPF;
 	tgi?: TGILike;
+	dbpf?: DBPF;
 	size?: number;
 	offset?: number;
 	compressed?: boolean;
@@ -52,7 +52,7 @@ type EntryParseOptions = {
 // it will be parsed appropriately.
 type AllowedEntryType = DecodedFile | Uint8Array;
 export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
-	tgi: TGI = new TGI();
+	tgi: TGI;
 	size = 0;
 	offset = 0;
 
@@ -87,20 +87,21 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	buffer: Uint8Array | null = null;
 	file: ReadResult<T> | null = null;
 
+	// Internal promises where we store the read promise.
+	#readRawPromise: Promise<Uint8Array> | null = null;
+	#decompressPromise: Promise<Uint8Array> | null = null;
+	#readPromise: Promise<ReadResult<T>> | null = null;
+
 	// ## constructor(opts)
+	// Constructor for the entry. Note that we might have millions and millions 
+	// of entries in very large plugin folders, so we optimize this as much as 
+	// possible, which makes the code look a little bit uglier.
 	constructor(opts: EntryConstructorOptions = {}) {
-		let {
-			dbpf,
-			tgi,
-			...rest
-		} = opts;
-		Object.defineProperty(this, 'dbpf', {
-			value: dbpf,
-			enumerable: false,
-			writable: false,
-		});
-		if (tgi) this.tgi = new TGI(tgi);
-		Object.assign(this, rest);
+		this.tgi = opts.tgi ? new TGI(opts.tgi) : new TGI();
+		if (opts.dbpf) this.dbpf = opts.dbpf;
+		if (opts.offset) this.offset = opts.offset;
+		if (opts.size) this.size = opts.size;
+		if (opts.compressed !== undefined) this.compressed = opts.compressed;
 	}
 
 	// ## isType()
@@ -201,15 +202,33 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// ## readRaw()
 	// **Synchronously** reads the entry's raw buffer and stores it in the 
 	// "raw" property.
-	readRaw() {
-		return this.dbpf.readBytes(this.offset, this.size);
+	readRaw(): Uint8Array {
+		if (this.raw) return this.raw;
+		return this.raw = this.dbpf.readBytes(this.offset, this.size);
 	}
 
 	// ## decompress()
 	// Returns the decompressed raw entry buffer. If the entry is not 
 	// compressed, then the buffer is returned as is.
 	decompress(): Uint8Array {
-		return dual.decompress.sync.call(this, () => this.readRaw());
+		if (this.buffer) return this.buffer;
+		if (!this.raw) this.readRaw();
+		return this.#doDecompress();
+	}
+
+	// ## doDecompress()
+	// Contains the shared logic for decompressing.
+	#doDecompress() {
+		const { raw } = this as { raw: Uint8Array };
+		const info = getCompressionInfo(raw);
+		if (info.compressed) {
+			this.compressed = true;
+			this.buffer = decompress(raw.subarray(4));
+		} else {
+			this.compressed = false;
+			this.buffer = raw;
+		}
+		return this.buffer;
 	}
 
 	// ## read()
@@ -217,26 +236,79 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	// this fails, we'll simply return the raw buffer, but decompressed if the 
 	// entry was compressed.
 	read(): ReadResult<T> {
-		return dual.read.sync.call(this, () => this.decompress());
+		if (this.file) return this.file;
+		if (!this.buffer) this.decompress();
+		return this.#doRead(this.buffer!);
 	}
 
 	// ## readRawAsync()
 	// Asynchronously reads the entry's raw buffer and stores it in the raw 
 	// property.
 	async readRawAsync() {
-		return await this.dbpf.readBytesAsync(this.offset, this.size);
+		if (this.raw) return this.raw;
+		if (this.#readRawPromise) return await this.#readRawPromise;
+		this.#readRawPromise = this.dbpf.readBytesAsync(this.offset, this.size)
+			.then(raw => {
+				this.#readRawPromise = null;
+				this.raw = raw;
+				return raw;
+			});
+		return await this.#readRawPromise;
 	}
 
 	// ## decompressAsync()
 	// Same as decompress, but asynchronously.
 	async decompressAsync(): Promise<Uint8Array> {
-		return dual.decompress.async.call(this, () => this.readRawAsync());
+		if (this.buffer) return this.buffer;
+		if (this.#decompressPromise) return await this.#decompressPromise;
+		this.#decompressPromise = new Promise(async (resolve) => {
+			if (!this.raw) await this.readRawAsync();
+			resolve(this.#doDecompress());
+		});
+		return await this.#decompressPromise;
 	}
 
 	// ## readAsync()
 	// Same as read, but in an async way.
 	async readAsync(): Promise<ReadResult<T>> {
-		return dual.read.async.call(this, () => this.decompressAsync());
+		if (this.file) return this.file;
+		if (this.#readPromise) return await this.#readPromise;
+		this.#readPromise = (async () => {
+			if (!this.buffer) await this.decompressAsync();
+			return this.#doRead(this.buffer as Uint8Array);
+		})();
+		return await this.#readPromise;
+	}
+
+	// # doRead(buffer)
+	// The functionality that is shared between sync and async reading. This 
+	// will actually parse the file object from the raw buffer once we have it.
+	#doRead(buffer: Uint8Array): ReadResult<T> {
+
+		// If the entry does not contain a known file type, just return the 
+		// buffer as is.
+		if (!this.isKnownType()) return buffer as any;
+
+		// If the file type is actually an array file type, then it has been 
+		// registered as [Constructor], in which case we need to read the file 
+		// as an array. If nothing is found, just return the buffer. Third party 
+		// code might still know how to interpret the buffer.
+		if (this.isArrayType()) {
+			const Constructor = this.fileConstructor!;
+			this.file = readArrayFile(Constructor, buffer) as any;
+		} else {
+			const Constructor = this.fileConstructor!;
+			const file = this.file = new Constructor() as any;
+			try {
+				file.parse(new Stream(this.buffer!), { entry: this });
+			} catch (e) {
+				console.log(this);
+				console.log(this.buffer, this.raw);
+				throw e;
+			}
+		}
+		return this.file!;
+
 	}
 
 	// ## toBuffer()
@@ -277,13 +349,13 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	toJSON(): EntryJSON {
 		let {
 			tgi,
-			size,
 			offset,
+			size,
 		} = this;
 		return {
 			tgi: [...tgi],
-			size,
 			offset,
+			size,
 		};
 	}
 
@@ -297,7 +369,7 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	) {
 		let label = getTypeLabel(this.type);
 		return 'DBPF Entry '+defaultInspect({
-			dbpf: this.dbpf.file,
+			dbpf: this.dbpf?.file,
 			type: inspect.type(label) ?? inspect.hex(this.type),
 			tgi: this.tgi,
 			size: this.size,
@@ -310,85 +382,6 @@ export default class Entry<T extends AllowedEntryType = AllowedEntryType> {
 	}
 
 }
-
-// Typing the code below is extremely hard, lol. It shouldn't be, so we 
-// shamelessly use "any". It's internal code anyway.
-const dual = {
-
-	// # decompress()
-	// Decompressing an entry can be done in both a sync and asynchronous way, 
-	// so we use the async duplicator function.
-	decompress: duplicateAsync(function*(readRaw: any) {
-
-		// If we've already decompressed, just return the buffer as is.
-		if (this.buffer) return this.buffer;
-
-		// If we haven't read in the raw - potentially compressed - buffer, we 
-		// have to do this first. Can be done synchronously, or asynchronously.
-		if (!this.raw) {
-			this.raw = (yield readRaw()) as Uint8Array;
-		}
-
-		// IMPORTANT! We no longer rely on the DIR file to figure out whether 
-		// the entry is compressed, but we'll use the buffer *itself* for this 
-		// and check for the combination of magic number and size.
-		const { raw } = this;
-		const info = getCompressionInfo(raw);
-		if (info.compressed) {
-			this.compressed = true;
-			this.buffer = decompress(raw.subarray(4));
-		} else {
-			this.compressed = false;
-			this.buffer = raw;
-		}
-		return this.buffer;
-
-	}),
-
-	// # read()
-	// Same for actually reading an entry. Can be done both sync and async.
-	read: duplicateAsync(function*(decompress: any) {
-
-		// If the entry was already read, don't read it again. Note that it's 
-		// possible to dispose the entry to free up some memory if required.
-		if (this.file) {
-			return this.file;
-		}
-
-		// If we don't have the buffer yet, we might need to decompress the raw 
-		// contents first, meaning we might have to read the raw contents first 
-		// as well.
-		if (!this.buffer) {
-			yield decompress();
-		}
-
-		// If the entry does not contain a known file type, just return the 
-		// buffer as is.
-		if (!this.isKnownType()) return this.buffer;
-
-		// If the file type is actually an array file type, then it has been 
-		// registered as [Constructor], in which case we need to read the file 
-		// as an array. If nothing is found, just return the buffer. Third party 
-		// code might still know how to interpret the buffer.
-		if (this.isArrayType()) {
-			const Constructor = this.fileConstructor;
-			this.file = readArrayFile(Constructor, this.buffer);
-		} else {
-			const Constructor = this.fileConstructor;
-			let file = this.file = new Constructor();
-			try {
-				file.parse(new Stream(this.buffer!), { entry: this });
-			} catch (e) {
-				console.log(this);
-				console.log(this.buffer, this.raw);
-				throw e;
-			}
-		}
-		return this.file;
-
-	}),
-
-};
 
 // # isSerializableFile(file)
 // Figures out whether the file instance is serializable. During development 

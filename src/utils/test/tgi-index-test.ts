@@ -2,19 +2,9 @@
 import { expect } from 'chai';
 import Index, { type TGILiteral } from '../tgi-index.js';
 import { assertEqual } from '#test/types.js';
+import { TGI } from 'sc4/core';
 
-class TGI {
-	type = 0;
-	group = 0;
-	instance = 0;
-	constructor(type: number, group: number, instance: number) {
-		this.type = type;
-		this.group = group;
-		this.instance = instance;
-	}
-}
-
-const fn = (create: (arr: any[]) => Index) => () => {
+const fn = (create: (arr: any[]) => Index, indexed: boolean) => () => {
 	describe('#find()', function() {
 
 		it('queries by TGI', function() {
@@ -155,6 +145,19 @@ const fn = (create: (arr: any[]) => Index) => () => {
 
 		});
 
+		indexed && it('a huge number of TGIs', function() {
+
+			let values: TGI[] = new Array(1e4);
+			for (let i = 0; i < values.length; i++) {
+				values[i] = TGI.random();
+			}
+			let index = create(values);
+			for (let tgi of values) {
+				expect(index.find(tgi)).to.equal(tgi);
+			}
+
+		});
+
 	});
 
 	describe('#add()', function() {
@@ -190,8 +193,8 @@ describe('The TGI index', function() {
 		let index = new Index(...values);
 		index.build();
 		return index;
-	}));
+	}, true));
 
-	describe('non-indexed', fn(values => new Index(...values)));
+	describe('non-indexed', fn(values => new Index(...values), false));
 
 });

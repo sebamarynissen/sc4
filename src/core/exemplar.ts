@@ -304,7 +304,6 @@ abstract class BaseExemplar {
 		// Read all properties one by one.
 		const count = rs.uint32();
 		const props = this.properties = new Array(count);
-		this.#table = Object.create(null);
 		for (let i = 0; i < count; i++) {
 			let prop = props[i] = new Property();
 			prop.parse(rs);

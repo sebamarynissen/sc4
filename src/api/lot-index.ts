@@ -9,7 +9,7 @@ import {
     type ExemplarPropertyKey as Key,
     LotObject,
 } from 'sc4/core';
-import type { PluginIndex } from 'sc4/plugins';
+import type { BasePluginIndex } from 'sc4/plugins';
 import { hex } from 'sc4/utils';
 
 type ExemplarEntry = Entry<Exemplar | Cohort>;
@@ -20,13 +20,13 @@ type ExemplarEntry = Entry<Exemplar | Cohort>;
 // when filtering, you can rest assured that they remain sorted by height as 
 // well!
 export default class LotIndex {
-	fileIndex: PluginIndex;
+	fileIndex: BasePluginIndex;
 	lots: LotIndexEntry[] = [];
 	height: IndexedArray<LotIndexEntry>;
 
 	// ## constructor(index)
 	// Creates the lot index from the given file index.
-	constructor(index: PluginIndex) {
+	constructor(index: BasePluginIndex) {
 
 		// Store the file index, we'll still need it.
 		this.fileIndex = index;
@@ -121,13 +121,13 @@ export default class LotIndex {
 // the building! Hence we'll create an entry for each (lot, building) 
 // combination!
 class LotIndexEntry {
-	#fileIndex: PluginIndex;
+	#fileIndex: BasePluginIndex;
 	lot: ExemplarEntry;
 	building: ExemplarEntry;
 
 	// ## constructor(fileIndex, lot, building)
 	constructor(
-		fileIndex: PluginIndex,
+		fileIndex: BasePluginIndex,
 		lot: ExemplarEntry,
 		building: ExemplarEntry,
 	) {

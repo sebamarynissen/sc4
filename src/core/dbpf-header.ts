@@ -1,110 +1,130 @@
 // # dbpf-header.js
-import WriteBuffer from './write-buffer.js';
-import type Stream from './stream.js';
+import { SmartBuffer } from 'smart-arraybuffer';
+import Version from './version.js';
 
 export type HeaderOptions = {
 	id?: string;
-	majorVersion?: 1;
-	minorVersion?: 0;
-	created?: Date | string;
-	modified?: Date | string;
+	version?: string;
+	created?: Date | string | number;
+	modified?: Date | string | number;
 	indexMajor?: number;
+	indexMinor?: number;
 	indexCount?: number;
 	indexOffset?: number;
 	indexSize?: number;
-	holesCount?: number;
-	holesOffset?: number;
-	holesSize?: number;
-	indexMinor?: number;
 };
 export type HeaderJSON = Required<HeaderOptions>;
 
 // # Header
 export default class Header {
-	id = 'DBPF';
-	majorVersion = 1;
-	minorVersion = 0;
-	created = new Date();
-	modified = this.created;
-	indexMajor = 7;
-	indexCount = 0;
-	indexOffset = 0;
-	indexSize = 0;
-	holesCount = 0;
-	holesOffset = 0;
-	holesSize = 0;
-	indexMinor = 0;
+	buffer: Uint8Array;
 
 	// ## constructor(opts)
-	constructor(opts: HeaderOptions = {}) {
-		let { created, modified = created, ...rest } = opts;
-		Object.assign(this, rest);
-		if (created) this.created = new Date(created);
-		if (modified) this.modified = new Date(modified);
-	}
-
-	// ## parse(rs)
-	parse(rs: Stream) {
-
-		// if the DBPF file is not actually a DBPF file, we stop reading 
-		// immediately.
-		this.id = rs.string(4);
-		if (this.id !== 'DBPF') {
-			rs.skip(92);
-			return this;
+	constructor(opts?: Uint8Array | HeaderOptions) {
+		if (opts instanceof Uint8Array) {
+			this.buffer = opts;
+		} else {
+			this.buffer = getDefaultHeader(opts);
 		}
-
-		// Continue reading.
-		this.majorVersion = rs.uint32();
-		this.minorVersion = rs.uint32();
-		rs.skip(12);
-		this.created = new Date(1000*rs.uint32());
-		this.modified = new Date(1000*rs.uint32());
-		this.indexMajor = rs.uint32();
-
-		// Read in where we can find the file index and the holes.
-		this.indexCount = rs.uint32();
-		this.indexOffset = rs.uint32();
-		this.indexSize = rs.uint32();
-		this.holesCount = rs.uint32();
-		this.holesOffset = rs.uint32();
-		this.holesSize = rs.uint32();
-		this.indexMinor = rs.uint32();
-		rs.skip(4);
-		rs.skip(4);
-		rs.skip(24);
-		return this;
 	}
+
+	// ## get #reader()
+	get #reader() {
+		return SmartBuffer.fromBuffer(this.buffer);
+	}
+	get #writer() {
+		return SmartBuffer.fromBuffer(this.buffer);
+	}
+
+	// ## get id()
+	get id(): string {
+		return this.#reader.readString(4);
+	}
+
+	// ## get version()
+	get version(): string {
+		const rs = this.#reader;
+		const major = rs.readUInt32LE(4);
+		const minor = rs.readUInt32LE(8);
+		return [major, minor].join('.');
+	}
+	get created() { return new Date(1000*this.#reader.readUInt32LE(24)); }
+	set created(value: Date | string | number) {
+		this.#writer.writeUInt32LE(toUnixTimestamp(value), 24);
+	}
+	get modified() { return new Date(1000*this.#reader.readUInt32LE(28)); }
+	set modified(value: Date | string | number) {
+		this.#writer.writeUInt32LE(toUnixTimestamp(value), 28);
+	}
+	get indexMajor() { return this.#reader.readUInt32LE(32); }
+	get indexMinor() { return this.#reader.readUInt32LE(60); }
+	get indexCount() { return this.#reader.readUInt32LE(36); }
+	get indexOffset() { return this.#reader.readUInt32LE(40); }
+	get indexSize() { return this.#reader.readUInt32LE(44); }
 
 	// ## toBuffer()
-	toBuffer() {
-		let buffer = new WriteBuffer({ size: 96 });
-		buffer.writeString(this.id);
-		buffer.uint32(this.majorVersion);
-		buffer.uint32(this.minorVersion);
-		buffer.zeroes(12);
-		buffer.uint32(this.created.getTime()/1000);
-		buffer.uint32(this.modified.getTime()/1000);
-		buffer.uint32(this.indexMajor);
-
-		// Below we reserve 24 bytes for the index count, offset & size and the 
-		// hole count, offset & size. These will be filled in later by the DBPF 
-		// itself once their values are actually known.
-		buffer.uint32(this.indexCount);
-		buffer.uint32(this.indexOffset);
-		buffer.uint32(this.indexSize);
-		buffer.zeroes(12);
-		buffer.uint32(this.indexMinor);
-		buffer.uint32(0);
-		buffer.zeroes(4);
-		buffer.zeroes(24);
-		return buffer.toUint8Array();
-
-	}
+	toBuffer() { return this.buffer; }
 
 	// ## toJSON()
 	toJSON() {
-		return { ...this };
+		const {
+			version,
+			created,
+			modified,
+			indexMajor,
+			indexMinor,
+			indexCount,
+			indexOffset,
+			indexSize,
+		} = this;
+		return {
+			version,
+			created,
+			modified,
+			indexMajor,
+			indexMinor,
+			indexCount,
+			indexOffset,
+			indexSize,
+		};
 	}
 
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		return this.toJSON();
+	}
+
+}
+
+// # getDefaultHeader(opts)
+function getDefaultHeader(opts: HeaderOptions = {}) {
+	const {
+		version = '1.0',
+		created = Date.now(),
+		modified = Date.now(),
+		indexMajor = 7,
+		indexMinor = 0,
+		indexCount = 0,
+		indexOffset = 0,
+		indexSize = 0,
+	} = opts;
+	const buffer = new SmartBuffer({ size: 96 });
+	buffer.writeString('DBPF');
+	const [major, minor] = new Version(version);
+	buffer.writeUInt32LE(major);
+	buffer.writeUInt32LE(minor);
+	buffer.writeUInt32LE(toUnixTimestamp(created), 24);
+	buffer.writeUInt32LE(toUnixTimestamp(modified), 28);
+	buffer.writeUInt32LE(indexMajor, 32);
+	buffer.writeUInt32LE(indexCount, 36);
+	buffer.writeUInt32LE(indexOffset, 40);
+	buffer.writeUInt32LE(indexSize, 44);
+	buffer.writeUInt32LE(indexMinor, 60);
+	return buffer.internalUint8Array;
+}
+
+// # toUnixTimestamp(date)
+function toUnixTimestamp(date: Date | number | string): number {
+	if (typeof date === 'number') return date / 1000;
+	else if (typeof date === 'string') return Date.parse(date) / 1000;
+	else return date.getTime() / 1000;
 }

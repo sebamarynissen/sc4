@@ -1,5 +1,7 @@
 // # tgi-index.ts
 import type { TGIQuery, TGILiteral, uint32, TGIArray } from 'sc4/types';
+import BinaryIndex from './binary-tgi-index.js';
+export type { TGIIndexJSON } from './mapped-tgi-index.js';
 
 export type { TGIQuery, TGILiteral };
 export type SingleResult<T> = T | undefined;
@@ -15,18 +17,11 @@ export type FindParameters<T> =
 	| [query: TGIArray]
 	| [predicate: TGIPredicate<T>, thisArg?: any];
 
-export type TGIIndexJSON = {
-	tgi: [IndexKey, IndexValue][];
-	ti: [IndexKey, IndexValue][];
-	t: [IndexKey, IndexValue][];
-	i: [IndexKey, IndexValue][];
-};
-
 // # TGIIndex
 // A data structure that allows for efficiently querying objects by (type, 
 // group, instance).
 export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T> {
-	index: Index<T>;
+	index: BinaryIndex;
 	dirty = false;
 
 	// ## build()
@@ -34,7 +29,7 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 	// the build() is called. That way it becomes easy to use `.filter()` etc. 
 	// without automatically rebuilding the index.
 	build() {
-		let tree = new Index(this);
+		let tree = BinaryIndex.fromEntries(this as TGILiteral[]);
 		this.index = tree;
 		this.dirty = false;
 		return this;
@@ -42,9 +37,8 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 
 	// ## load(cache)
 	// Loads an index from a cache instead of building it up ourselves.
-	load(cache: IndexCache) {
-		this.index = new Index().load(cache);
-		this.dirty = false;
+	load(buffer: Uint8Array) {
+		this.index = BinaryIndex.fromBuffer(buffer);
 		return this;
 	}
 
@@ -92,27 +86,36 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 		if (known(t)) {
 			if (known(i)) {
 				if (known(g)) {
-					return get(this, this.index.tgi, hhh(t, g, i));
+					return this.expand(this.index.findTGI(t, g, i));
 				} else {
-					return get(this, this.index.ti, hh(t, i));
+					return this.expand(this.index.findTI(t, i));
 				}
 			}
 
 			// If we reach this point, the type is known, but the instance is 
 			// for sure *not known*.
-			let result = get(this, this.index.t, h(t));
+			let result = this.expand(this.index.findType(t));
 			if (known(g)) {
 				return result.filter(createFilter(q));
 			} else {
 				return result;
 			}
-		} else if (known(i)) {
-			return get(this, this.index.i, h(i));
 		}
 
 		// If we reach this point, we can't use an index. Pity.
 		return this.filter(createFilter(q));
 
+	}
+
+	// ## expand(pointers)
+	// Accepts an array of pointers - i.e. indices - that the index has found, 
+	// and then we fill in - we *expand* - the actual entries from our array.
+	private expand(pointers: number[] | Uint32Array) {
+		let output = [];
+		for (let i = 0; i < pointers.length; i++) {
+			output[i] = this[pointers[i]];
+		}
+		return output;
 	}
 
 	// ## remove(query, g, i)
@@ -172,86 +175,6 @@ export default class TGIIndex<T extends TGILiteral = TGILiteral> extends Array<T
 }
 
 const known = (x: uint32 | undefined): x is uint32 => x !== undefined;
-
-// # Index
-// Our actual index data structure. It's nothing more than a hash table 
-// basically.
-type IndexKey = string | number;
-type IndexValue = number[];
-type IndexTuple = [IndexKey, IndexValue];
-type IndexMap = Map<IndexKey, IndexValue>;
-type IndexCache = {
-	tgi: IndexTuple[];
-	ti: IndexTuple[];
-	t: IndexTuple[];
-	i: IndexTuple[];
-};
-export class Index<T extends TGILiteral> {
-
-	tgi: IndexMap = new Map();
-	ti: IndexMap = new Map();
-	i: IndexMap = new Map();
-	t: IndexMap = new Map();
-
-	// ## constructor()
-	constructor(entries: TGIIndex<T> | [] = []) {
-		for (let j = 0; j < entries.length; j++) {
-			let entry = entries[j];
-			let { type: t, group: g, instance: i } = entry;
-			set(this.tgi, hhh(t, g, i), j);
-			set(this.ti, hh(t, i), j);
-			set(this.i, h(i), j);
-			set(this.t, h(t), j);
-		}
-	}
-
-	// ## load(cache)
-	// Loads an index from cache.
-	load(cache: IndexCache) {
-		this.tgi = new Map(cache.tgi);
-		this.ti = new Map(cache.ti);
-		this.t = new Map(cache.t);
-		this.i = new Map(cache.i);
-		return this;
-	}
-
-	// ## toJSON()
-	toJSON(): TGIIndexJSON {
-		return {
-			tgi: [...this.tgi.entries()],
-			ti: [...this.ti.entries()],
-			t: [...this.t.entries()],
-			i: [...this.i.entries()],
-		};
-	}
-
-}
-
-// The hash functions we use for one, two or three values.
-const h = (t: number) => t;
-const hh = (t: number, g: number) => `${t}-${g}`;
-const hhh = (t: number, g: number, i: number) => `${t}-${g}-${i}`;
-
-// # get(arr, dict, key)
-// Accessor function for easily reading values from our maps.
-function get<T extends TGILiteral>(
-	arr: TGIIndex<T>,
-	dict: IndexMap,
-	key: IndexKey,
-) {
-	let ptrs = dict.get(key) ?? [];
-	return ptrs.map(ptr => arr[ptr]);
-}
-
-// # set(dict, key, value)
-function set(dict: IndexMap, key: IndexKey, value: number) {
-	let arr = dict.get(key);
-	if (arr) {
-		arr.push(value);
-	} else {
-		dict.set(key, [value]);
-	}
-}
 
 // # normalize(query, g, i)
 function normalize(

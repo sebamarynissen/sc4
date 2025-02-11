@@ -5,9 +5,8 @@ import Header, { type HeaderJSON, type HeaderOptions } from './dbpf-header.js';
 import Entry, { type EntryJSON, type EntryFromType } from './dbpf-entry.js';
 import DIR from './dir.js';
 import WriteBuffer from './write-buffer.js';
-import Stream from './stream.js';
 import { cClass, FileType } from './enums.js';
-import { fs, TGIIndex, duplicateAsync, getCompressionInfo } from 'sc4/utils';
+import { fs, TGIIndex, getCompressionInfo } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 import type { TGIArray, TGILiteral, TGIQuery, uint32 } from 'sc4/types';
 import type { FindParameters } from 'src/utils/tgi-index.js';
@@ -15,7 +14,7 @@ import type { DBPFFile, DecodedFileTypeId, FileTypeId } from './types.js';
 import TGI from './tgi.js';
 
 export type DBPFOptions = {
-	file?: string;
+	file?: string | File;
 	buffer?: Uint8Array;
 	parse?: boolean;
 	header?: HeaderOptions;
@@ -34,9 +33,15 @@ export type DBPFJSON = {
 
 type FileAddOptions = {
 	compressed?: boolean;
-	compressedSize?: number;
-	fileSize?: number;
+	size?: number;
 };
+
+// Older Node version (which we don't actually officially support though) might 
+// not have a file global available.
+const hasGlobalFileClass = typeof File === 'function';
+function isFileObject(file: any): file is File {
+	return hasGlobalFileClass && file instanceof File;
+}
 
 // # DBPF()
 // A class that represents a DBPF file. A DBPF file is basically just a custom 
@@ -44,6 +49,7 @@ type FileAddOptions = {
 // might be compressed etc.
 export default class DBPF {
 	file: string | null = null;
+	fileObject: File | null = null;
 	buffer: Uint8Array | null = null;
 	header: Header;
 	entries: TGIIndex<Entry>;
@@ -56,7 +62,7 @@ export default class DBPF {
 	// from files, **not** from buffers. As such we don't have to keep the 
 	// entire buffer in memory and we can read the required parts of the file 
 	// "on the fly". That's what the DBPF format was designed for!
-	constructor(opts: DBPFOptions | string | Uint8Array = {}) {
+	constructor(opts: DBPFOptions | string | Uint8Array | File = {}) {
 
 		// If the file specified is actually a buffer, store that we don't 
 		// have a file. Note that this is not recommended: we need to be able 
@@ -70,10 +76,19 @@ export default class DBPF {
 			this.file = opts;
 			this.buffer = null;
 			opts = {};
+		} else if (isFileObject(opts)) {
+			this.fileObject = opts;
+			opts = {};
 		} else {
 			let { file = null, buffer = null } = opts;
-			this.file = file;
 			this.buffer = buffer;
+			if (hasGlobalFileClass && file instanceof File) {
+				this.file = null;
+				this.fileObject = file;
+			} else if (typeof file === 'string') {
+				this.file = file;
+				this.fileObject = null;
+			}
 		}
 
 		// Create an empty header.
@@ -93,7 +108,7 @@ export default class DBPF {
 
 		// If the user initialize the DBPF with either a file or a buffer, then 
 		// parse immediately.
-		let { parse = true } = opts;
+		let { parse = this.fileObject ? false : true } = opts;
 		if (parse && (this.buffer || this.file)) {
 			this.parse();
 		}
@@ -111,6 +126,16 @@ export default class DBPF {
 	get dir() {
 		let entry = this.find({ type: FileType.DIR });
 		return entry ? entry.read() : null;
+	}
+
+	// ## get filename()
+	// Looks up the filename of the dbpf in an agnostic way - meaning that we 
+	// don't care about whether it's a file object dbpf or no. We just always 
+	// return a string, which is useful for sorting.
+	get filename(): string {
+		if (this.file) return this.file;
+		else if (this.fileObject) return this.fileObject.name;
+		else return '';
 	}
 
 	// ## find(...args)
@@ -159,8 +184,8 @@ export default class DBPF {
 		} else if (fileOrBuffer) {
 			entry.file = fileOrBuffer as any;
 		}
-		let { compressed = false, fileSize = 0, compressedSize = 0 } = opts;
-		Object.assign(entry, { compressed, fileSize, compressedSize });
+		let { compressed = false, size = 0 } = opts;
+		Object.assign(entry, { compressed, size});
 		return entry;
 	}
 
@@ -177,7 +202,7 @@ export default class DBPF {
 	// that case the cache can decide to free up the dbpf and only read it in 
 	// again upon the next read.
 	free() {
-		if (!this.file) {
+		if (!this.file && !this.fileObject) {
 			console.warn([
 				'No file is set.',
 				'This means you will no longer be able to use this DBPF!',
@@ -216,6 +241,15 @@ export default class DBPF {
 			return buffer;
 		}
 
+		// If we don't have a file, neither a buffer, but we *do* have a HTML5 
+		// file object, we'll notify the user that a file object is set, but 
+		// that reading synchronously is not possible.
+		if (this.fileObject) {
+			throw new Error(
+				`DBPF file has a HTML5 file object set, which only allows async reading. Either user async reading, or read in the full buffer instead.`,
+			);
+		}
+
 		// No file or buffer set? Then we can't read.
 		throw new Error(`DBPF file has no buffer, neither file set.`);
 
@@ -227,7 +261,11 @@ export default class DBPF {
 	// parallel.
 	async readBytesAsync(offset: number, length: number) {
 		if (this.buffer) return this.buffer.subarray(offset, offset+length);
-		else if (this.file) {
+		else if (this.fileObject) {
+			let slice = this.fileObject.slice(offset, offset+length);
+			let arrayBuffer = await slice.arrayBuffer();
+			return new Uint8Array(arrayBuffer);
+		} else if (this.file) {
 			let buffer = new Uint8Array(length);
 			let fh = await fs!.promises.open(this.file);
 			await fh.read(buffer, 0, length, offset);
@@ -242,24 +280,45 @@ export default class DBPF {
 	// testing stuff out, but for bulk reading you should use the async 
 	// reading.
 	parse() {
-		return parse.sync.call(
-			this,
-			(...args: Parameters<DBPF['readBytes']>) => this.readBytes(...args),
-		);
+		const header = this.header = new Header(this.readBytes(0, 96));
+		const { indexOffset, indexSize } = header;
+		const index = dataView(this.readBytes(indexOffset, indexSize));
+		this.entries = parseEntries(this, header, index);
+		return this;
 	}
 
 	// ## parseAsync()
-	// Same as parse, but in an async way.
+	// Parses the DBPF in an async way. Note that we no longer share logic with 
+	// the sync parse() method because this we can make things go 
+	// *significantly* faster this way.
 	async parseAsync() {
-		const dirs = async (fn: DirCallback) => await Promise.all(
-			this.findAll({ type: FileType.DIR }).map(async entry => {
-				fn(await entry.readAsync());
-			}),
-		);
-		return await parse.async.call(
-			this,
-			(...args: Parameters<DBPF['readBytesAsync']>) => this.readBytesAsync(...args),
-		);
+		if (this.file) {
+			// First we'll read in the header, but crucially, we keep the file 
+			// handle open. That way we avoid the cost of having to close and 
+			// open it again in quick succession!
+			const handle = await fs.promises.open(this.file);
+			const headerBytes = new Uint8Array(96);
+			await handle.read(headerBytes, 0, 96, 0);
+			this.header = new Header(headerBytes);
+			const { indexOffset, indexSize } = this.header;
+
+			// Now jump to reading the index with all the entry information. 
+			// Once we have that, we can close the file handle again.
+			const index = new DataView(new ArrayBuffer(indexSize));
+			await handle.read(index, 0, indexSize, indexOffset);
+			const promise = handle.close();
+			this.entries = parseEntries(this, this.header, index);
+			await promise;
+			return this;
+		} else if (this.fileObject) {
+			const header = new Header(await this.readBytesAsync(0, 96));
+			const { indexOffset, indexSize } = header;
+			const index = dataView(
+				await this.readBytesAsync(indexOffset, indexSize),
+			);
+			this.entries = parseEntries(this, header, index);
+			return this;
+		}
 	}
 
 	// ## save(opts)
@@ -441,34 +500,37 @@ export default class DBPF {
 
 }
 
-// # parse()
-// Parsing a DBPF can be done both in a sync and async way, but the underlying 
-// logic is the same.
-type DirCallback = (dir: DIR) => void;
-const parse = duplicateAsync(function* parse(read) {
-
-	// First of all we need to read the header, and only the header. From 
-	// this we can derive where to find the index so that we can parse the 
-	// entries from it.
-	let header = this.header = new Header();
-	header.parse(new Stream(this.readBytes(0, 96)));
-
-	// Header is parsed which means we now know the offset of the index. 
-	// Read in the bytes of the index and then build up the index.
-	let index = yield read(header.indexOffset, header.indexSize);
-	fillIndex(this, index as Uint8Array);
-	return this;
-
-});
-
-// # fillIndex(dbpf, buffer)
-// Reads & parses the buffer containing the file index.
-function fillIndex(dbpf: DBPF, buffer: Uint8Array) {
-	let rs = new Stream(buffer);
-	let index = dbpf.entries = new TGIIndex(dbpf.header.indexCount);
-	for (let i = 0; i < index.length; i++) {
-		let entry = index[i] = new Entry({ dbpf });
-		entry.parse(rs);
+// # parseEntries(header, index)
+// The function that will actually parse all entries once we got the raw header 
+// & index buffers.
+function parseEntries(dbpf: DBPF, header: Header, index: DataView) {
+	const count = header.indexCount;
+	const minor = header.indexMinor;
+	const locationOffset = 12 + (minor > 0 ? 4 : 0);
+	const sizeOffset = locationOffset + 4;
+	const rowSize = sizeOffset + 4;
+	const entries = new TGIIndex<Entry>(count);
+	for (let i = 0, di = 0; i < count; i++) {
+		const type = index.getUint32(di, true);
+		const group = index.getUint32(di+4, true);
+		const instance = index.getUint32(di+8, true);
+		const offset = index.getUint32(di+locationOffset, true);
+		const size = index.getUint32(di+sizeOffset, true);
+		const entry = new Entry({
+			dbpf,
+			tgi: [type, group, instance],
+			offset,
+			size,
+		});
+		entries[i] = entry;
+		di += rowSize;
 	}
-	index.build();
+	return entries;
+}
+
+// # dataView(arr)
+// Creates a DataView over the given Uint8Array. This takes into account that 
+// the Uint8Aray might be a view over the underlying arraybuffer itself.
+function dataView(arr: Uint8Array) {
+	return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
 }

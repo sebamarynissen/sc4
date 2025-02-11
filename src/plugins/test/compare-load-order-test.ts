@@ -48,12 +48,14 @@ describe('#createLoadComparator()', function() {
 			'B/file.SC4Lot',
 			'a/nested/file.dat',
 			'a/file.dat',
+			'B/file.dat',
 		];
 		files.sort(compare);
 		expect(files).to.eql([
+			'B/file.SC4Lot',
 			'a/file.dat',
 			'a/nested/file.dat',
-			'B/file.SC4Lot',
+			'B/file.dat',
 			'B/nested/file.dat',
 		]);
 
@@ -63,6 +65,7 @@ describe('#createLoadComparator()', function() {
 
 		const files = [
 			'z.SC4Lot',
+			'B/subfolder/lot.SC4Lot',
 			'k.dat',
 			'L.dat',
 			'a/file.dat',

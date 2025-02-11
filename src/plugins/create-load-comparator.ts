@@ -5,6 +5,14 @@ export default function createLoadComparator() {
 	return function compare(a: string, b: string): number {
 		let ha = table.getHash(a);
 		let hb = table.getHash(b);
+
+		// .sc4* always get loaded before .dat
+		let ea = ha.at(-1)!.endsWith('.DAT') ? 1 : -1;
+		let eb = hb.at(-1)!.endsWith('.DAT') ? 1 : -1;
+		let diff = ea - eb;
+		if (diff !== 0) return diff;
+
+		// Next we'll look at the folder structure.
 		let min = Math.min(ha.length, hb.length)-1;
 		let i = 0;
 		for (; i < min; i++) {

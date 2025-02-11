@@ -5,7 +5,7 @@ import os from 'node:os';
 import { FileType, LTEXT, type Exemplar } from 'sc4/core';
 import type { TGIArray, TGILiteral } from 'sc4/types';
 import { Document, parse, Scalar  } from 'yaml';
-import PluginIndex from './plugin-index.js';
+import PluginIndex from './plugin-index.node.js';
 import { hex } from 'sc4/utils';
 import { Glob } from 'glob';
 
