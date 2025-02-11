@@ -1,5 +1,5 @@
 // # plugin-index.browser.ts
-import { DBPF, type Entry } from 'sc4/core';
+import { DBPF, FileType, type Entry } from 'sc4/core';
 import CorePluginIndex from './core-plugin-index.js';
 import { Glob } from './glob.browser.js';
 import createLoadComparator from './create-load-comparator.js';
@@ -93,7 +93,9 @@ class DirectoryScanOperation {
 			this.queue.push(item);
 			const task = dbpf.parseAsync().then(() => {
 				for (let entry of dbpf) {
-					item.entries.push(entry);
+					if (entry.type !== FileType.DIR) {
+						item.entries.push(entry);
+					}
 				}
 			});
 			tasks.push(task);

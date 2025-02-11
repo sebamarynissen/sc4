@@ -6,7 +6,6 @@ import FileScanner from './file-scanner.js';
 import type { Entry } from 'sc4/core';
 import createLoadComparator from './create-load-comparator.js';
 import CorePluginIndex from './core-plugin-index.js';
-import PQueue from 'p-queue';
 
 type folder = string;
 type PluginIndexOptions = {
@@ -18,11 +17,8 @@ type PluginIndexOptions = {
 	threads?: number;
 };
 
-type GeneralBuildOptions = {
-	concurrency?: number;
-};
-
-type BuildOptions = GeneralBuildOptions & {
+type BuildOptions = {
+	installation?: string;
 	plugins?: string;
 };
 
@@ -73,104 +69,111 @@ export default class PluginIndex extends CorePluginIndex {
 
 	}
 
-	// ## async getFilesToScan()
-	// Returns the array of files to scan, properly sorted in the order that we 
-	// will read them in.
-	async getFilesToScan(opts: BuildOptions = {}) {
+	// ## async build(opts)
+	// Asynchronously builds up the file index in the same way that SimCity 4 
+	// does. This means that the *load order* of the files is important!
+	async build(opts: BuildOptions = {}) {
+		const all = [];
+		const ops = [];
 
-		// Get all files to scan. Note that we do this separately for the core 
-		// files and the plugins because plugins *always* need to override core 
-		// files.
-		let coreFiles: string[] = [];
-		let sourceFiles: string[] = [];
-		let tasks = [];
-		if (this.options.core && this.options.installation) {
-			let task = new FileScanner(this.options.installation)
-				.walk()
-				.then(files => coreFiles = files);
-			tasks.push(task);
+		// If the installation folder is specified, read it in.
+		const {
+			plugins = this.options.plugins,
+			installation = this.options.installation,
+		} = opts;
+		if (this.options.core && installation) {
+			let op = new DirectoryScanOperation(this, installation);
+			all.push(op.start());
+			ops.push(op);
 		}
 
-		// IMPORTANT! If the plugins folder is not specified - nor as an option 
-		// to the build() function, nor to the constructor and neither in 
-		// process.env.SC4_PLUGINS we **MUST NOT** default to the cwd as that 
-		// might cause an enormous amount of files to be scanned when running 
-		// inside the user's homedir or something. In that case, we simply don't 
-		// scan any plugins!
-		let { plugins = this.options.plugins } = opts;
+		// Same for the user plugins folder.
 		if (plugins) {
-			let task = new FileScanner(this.scan, { cwd: plugins })
-				.walk()
-				.then(files => files.filter(file => {
-					return !file.includes('staging-process');
-				}))
-				.then(files => sourceFiles = files);
-			tasks.push(task);
+			let op = new DirectoryScanOperation(this, plugins);
+			all.push(op.start());
+			ops.push(op);
 		}
-		await Promise.all(tasks);
 
-		// Sort both the core files and the plugins, but do it separately so 
-		// that the plugins *always* override the core files.
-		coreFiles.sort(createLoadComparator());
-		sourceFiles.sort(createLoadComparator());
-		return [...coreFiles, ...sourceFiles];
+		// Start logging the progress now.
+		await Promise.all(ops.map(op => op.filesPromise.promise));
 
+		// Wait for everything to be read, and then build up the actual index.
+		const results = await Promise.all(all);
+		const flat = results.flat();
+		const entries = this.entries = new TGIIndex(flat.length);
+		for (let i = 0; i < entries.length; i++) {
+			entries[i] = flat[i];
+		}
+		entries.build();
+		return this;
 	}
 
-	// ## async build(opts)
-	// Asyncrhonously builds up the file index in the same way that SimCity 4 
-	// does. This means that the *load order* of the files is important! We also 
-	// need to do some gymnastics to ensure the order is kept when parsing all 
-	// the DBPF files in parallel because
-	async build(opts: BuildOptions = {}) {
+}
 
-		// Open a new worker pool because we'll be parsing all dbpf files in 
-		// separate threads that report to the main thread. However, note that 
-		// actual multithreading is only useful when we have a ton of files. 
-		// We're already reading in the files itself asynchronously, so even 
-		// without multithreading we make use of multiple cores. Starting the 
-		// threads has an overhead, so we'll only use multithreading with a very 
-		// large amount of files.
-		const { plugins = this.options.plugins } = opts;
-		const files = await this.getFilesToScan({ plugins });
+type QueueItem = {
+	dbpf: DBPF;
+	entries: Entry[];
+};
 
-		// Loop all files and then parse them one by one. Note that it's crucial 
-		// here to maintain the sort order, so when a file is read in, we don't 
-		// just put it in the queue, but we put it in the queue *at the right 
-		// position*!
-		const dbpfs = this.dbpfs = new Array(files.length);
-		const queue: Entry[][] = new Array(files.length);
-		const pq = new PQueue({ concurrency: 4096 });
-		let tasks: Promise<any>[] = [];
-		for (let i = 0; i < files.length; i++) {
-			let file = files[i];
-			let arr: Entry[] = queue[i] = [];
-			let dbpf = new DBPF({ file, parse: false });
-			dbpfs[i] = dbpf;
-			let task = pq.add(async () => {
-				await dbpf.parseAsync();
+class DirectoryScanOperation {
+	index: PluginIndex;
+	path: string;
+	dbpfs: DBPF[] = [];
+	queue: QueueItem[] = [];
+	filesPromise = Promise.withResolvers<DBPF[]>();
+	entriesPromise = Promise.withResolvers<Entry[]>();
+	constructor(index: PluginIndex, path: string) {
+		this.index = index;
+		this.path = path;
+	}
+	async start() {
+
+		// First we'll look up all the dbpf files in this folder. Once we have 
+		// the files, we can already resolve this promise so that a progress 
+		// indicator might show how many files we have found in total, while 
+		// being non-blocking to wait for it.
+		const glob = new FileScanner(this.index.scan, { cwd: this.path });
+		const tasks: Promise<any>[] = [];
+		for await (let file of glob) {
+			const dbpf = new DBPF(file);
+			this.dbpfs.push(dbpf);
+
+			// Immediately start reading in the DBPF.
+			const item: QueueItem = { dbpf, entries: [] };
+			this.queue.push(item);
+			const task = dbpf.parseAsync().then(() => {
 				for (let entry of dbpf) {
 					if (entry.type !== FileType.DIR) {
-						arr.push(entry);
+						item.entries.push(entry);
 					}
 				}
 			});
 			tasks.push(task);
-		}
-		await Promise.all(tasks);
 
-		// Get all entries again in a flat array and then create our index from 
-		// it. **IMPORTANT**! We can't create the index with new 
-		// TGIIndex(...values) because there might be a *ton* of entries, 
-		// causing a stack overflow - JS can only handle that many function 
-		// arguments!
-		let flat = queue.flat();
-		let entries = this.entries = new TGIIndex(flat.length);
-		for (let i = 0; i < flat.length; i++) {
-			entries[i] = flat[i];
 		}
-		entries.build();
+		this.filesPromise.resolve(this.dbpfs);
+
+		// If we reach this point, all dbpfs have been added to the queue and 
+		// they have started loading. This means that we can sort them now based 
+		// on the load order that is required!
+		const compare = createLoadComparator();
+		this.queue.sort((a, b) => compare(a.dbpf.filename, b.dbpf.filename));
+
+		// Cool, now wait for the entries to be finished parsing as well. Once 
+		// that's done, the queue is properly sorted and contain all entries. 
+		// The last thing we have to do hence is flatten the entries. Note that 
+		// internally, DBPF's don't use LIFO, but FIFO, meaning that TGI's that 
+		// appear *first* in the dbpf actually get preference, so we need to 
+		// take this into account!
+		await Promise.all(tasks);
+		const flat = [];
+		for (let { entries } of this.queue) {
+			for (let i = entries.length-1; i >= 0; i--) {
+				flat.push(entries[i]);
+			}
+		}
+		this.entriesPromise.resolve(flat);
+		return flat;
 
 	}
-
 }
