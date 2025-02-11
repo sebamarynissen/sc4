@@ -17,14 +17,19 @@ import {
 } from 'sc4/utils';
 import { SmartBuffer } from 'smart-arraybuffer';
 import buildFamilyIndex from './build-family-index.js';
+import type { Glob } from './directory-scan-operation.js';
+import DirectoryScanOperation from './directory-scan-operation.js';
 
-type PluginIndexOptions = {
+export type PluginIndexOptions = {
 	scan?: string | string[];
 	core?: boolean;
-	installation?: string;
-	plugins?: string;
 	mem?: number;
 	threads?: number;
+};
+
+type BuildOptions<T extends CorePluginIndex> = {
+	installation?: T['installation'];
+	plugins?: T['plugins'];
 };
 
 // The hash function we use for type, group and instances. It's fastest to just 
@@ -43,16 +48,23 @@ export default abstract class CorePluginIndex {
 	entries: TGIIndex<Entry> = new TGIIndex();
 	families = new Map<uint32, TGI[]>();
 	cache: LRUCache<string, Entry>;
+	core: boolean = true;
+	abstract installation?: unknown;
+	abstract plugins?: unknown;
 	constructor(opts: PluginIndexOptions) {
 
 		// By default we will look for .dat and .sc4* files. Nothing else need 
 		// to be handled.
-		const { scan = '**/*.{dat,sc4model,sc4desc,sc4lot}' } = opts;
+		const {
+			scan = '**/*.{dat,sc4model,sc4desc,sc4lot}',
+			core = true,
+			mem = 4*1024**3,
+		} = opts;
 		this.scan = [scan].flat();
+		this.core = core;
 
 		// Set up the cache that we'll use to free up memory of DBPF files 
 		// that are not read often.
-		const { mem = 4*1024**3 } = opts;
 		this.cache = new LRUCache({
 			maxSize: 0.5*mem,
 			sizeCalculation(entry) {
@@ -69,6 +81,54 @@ export default abstract class CorePluginIndex {
 	// ## get length()
 	get length(): number {
 		return this.entries?.length ?? 0;
+	}
+
+	// ## createGlob()
+	// This method must be implemented when extending a core plugin index. It 
+	// should return an async iterable that traverses all dbpfs in a directory 
+	// and yields the proper dbpf constructor options - a buffer, a file path or 
+	// a File object.
+	abstract createGlob(pattern: string | string[], cwd: unknown): Glob;
+
+	// ## async build(opts)
+	// Asynchronously builds up the file index in the same way that SimCity 4 
+	// does. This means that the *load order* of the files is important!
+	async build(opts: BuildOptions<typeof this> = {}) {
+		const all = [];
+		const ops = [];
+
+		// If the installation folder is specified, read it in.
+		const {
+			plugins = this.plugins,
+			installation = this.installation,
+		} = opts;
+		if (this.core && installation) {
+			const glob = this.createGlob(this.scan, installation);
+			const op = new DirectoryScanOperation(this, glob);
+			all.push(op.start());
+			ops.push(op);
+		}
+
+		// Same for the user plugins folder.
+		if (plugins) {
+			const glob = this.createGlob(this.scan, plugins);
+			const op = new DirectoryScanOperation(this, glob);
+			all.push(op.start());
+			ops.push(op);
+		}
+
+		// Start logging the progress now.
+		await Promise.all(ops.map(op => op.filesPromise.promise));
+
+		// Wait for everything to be read, and then build up the actual index.
+		const results = await Promise.all(all);
+		const flat = results.flat();
+		const entries = this.entries = new TGIIndex(flat.length);
+		for (let i = 0; i < entries.length; i++) {
+			entries[i] = flat[i];
+		}
+		entries.build();
+		return this;
 	}
 
 	// ## buildFamilies()

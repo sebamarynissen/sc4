@@ -734,7 +734,7 @@ class DependencyTrackingResult {
 	constructor(ctx: DependencyTrackingContext) {
 
 		// Report the installation & plugins folder that we scanned.
-		const { installation, plugins } = ctx.tracker.index.options;
+		const { installation, plugins } = ctx.tracker.index;
 		this.installation = installation as string;
 		this.plugins = plugins as string;
 

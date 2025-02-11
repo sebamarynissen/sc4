@@ -3,8 +3,8 @@ import { DBPF, FileType, type Entry } from 'sc4/core';
 import createLoadComparator from './create-load-comparator.js';
 import type PluginIndex from './core-plugin-index.js';
 
-interface Glob<T extends File | string | Uint8Array> {
-	[Symbol.asyncIterator]: () => AsyncGenerator<T, void, void>;
+export type Glob = {
+	[Symbol.asyncIterator]: () => AsyncGenerator<File | string | Uint8Array, void, void>;
 }
 
 type QueueItem = {
@@ -12,14 +12,14 @@ type QueueItem = {
 	entries: Entry[];
 };
 
-export default class DirectoryScanOperation<T extends File | string | Uint8Array> {
+export default class DirectoryScanOperation {
 	index: PluginIndex;
-	glob: Glob<T>;
+	glob: Glob;
 	dbpfs: DBPF[] = [];
 	queue: QueueItem[] = [];
 	filesPromise = Promise.withResolvers<DBPF[]>();
 	entriesPromise = Promise.withResolvers<Entry[]>();
-	constructor(index: PluginIndex, glob: Glob<T>) {
+	constructor(index: PluginIndex, glob: Glob) {
 		this.index = index;
 		this.glob = glob;
 	}
