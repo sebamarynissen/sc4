@@ -1,6 +1,7 @@
 // # new-submenu-flow.ts
 import * as prompts from '../prompts/index.js';
-import { type newSubmenu as command } from '#cli/commands';
+import { type newSubmenu as command } from '../commands/index.js';
+import { randomId } from 'sc4/utils';
 
 // # newSubmenu()
 // The flow for getting the input needed for creating a new submenu button.
@@ -22,6 +23,10 @@ export async function newSubmenu(): Promise<Parameters<typeof command>> {
 	let parent = await prompts.menu({
 		message: 'Select the parent menu',
 	});
+	let buttonId = await prompts.hex({
+		message: 'Enter the button id, or hit enter to use a randomly generated one',
+		default: randomId(),
+	});
 	let icon = await prompts.menuIcon({
 		message: 'Select the icon to be used for the button:',
 	});
@@ -29,6 +34,6 @@ export async function newSubmenu(): Promise<Parameters<typeof command>> {
 		message: 'Enter the item order: (number between -2,147,483,648 and 2,147,483,647):',
 		default: 0,
 	});
-	return [icon, { name, description, parent, order }];
+	return [icon, { name, description, parent, buttonId, order }];
 
 }
