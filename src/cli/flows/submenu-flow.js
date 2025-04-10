@@ -9,9 +9,8 @@ export async function submenu() {
 
 	// If the exe was called with a bunch of files, we're going to use those 
 	// files.
-	let directory = await prompts.files({
+	let directory = await prompts.file({
 		argv: true,
-		multi: false,
 		basePath: process.cwd(),
 		message: 'Select the directory to scan',
 		type: 'directory',

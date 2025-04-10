@@ -85,13 +85,12 @@ export async function city(opts: any = {}) {
 
 type FilePromptOptions = {
 	argv?: string[];
-	message: string;
 	multi?: boolean;
 } & Parameters<typeof fileSelector>[0];
 
-// # files(opts)
+// # selectFiles(opts)
 // Helper prompt for selecting multiple files or directories.
-export async function files(opts: FilePromptOptions) {
+async function selectFiles(opts: FilePromptOptions) {
 
 	// First of all, if it's possible that the files have been specified in the 
 	// arguments, if that's the case, no need to select files, but we'll show 
@@ -123,11 +122,20 @@ export async function files(opts: FilePromptOptions) {
 
 }
 
+// # files(opts)
+// Helper prompt for selecting multiple files or directories.
+export async function files(opts: Omit<FilePromptOptions, 'multi'>) {
+	return await selectFiles({
+		multi: true,
+		...opts,
+	}) as string[];
+}
+
 // # file(opts)
 // Same as files, but for a single file.
 export async function file(opts: Omit<FilePromptOptions, 'multi'>) {
-	return files({
+	return await selectFiles({
 		multi: false,
 		...opts,
-	});
+	}) as string;
 }
