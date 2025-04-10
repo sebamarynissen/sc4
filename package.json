@@ -18,10 +18,22 @@
     "./submenus": "./lib/submenus/index.js"
   },
   "imports": {
-    "#cli/*": "./lib/cli/*",
-    "#cli/prompts": "./lib/cli/prompts/index.js",
-    "#cli/commands": "./lib/cli/commands/index.js",
-    "#cli/flows": "./lib/cli/flows/index.js",
+    "#cli/*": {
+      "@sc4/dev": "./src/cli/*",
+      "default": "./lib/cli/*"
+    },
+    "#cli/prompts": {
+      "@sc4/dev": "./src/cli/prompts/index.ts",
+      "default": "./lib/cli/prompts/index.js"
+    },
+    "#cli/commands": {
+      "@sc4/dev": "./src/cli/commands/index.ts",
+      "default": "./lib/cli/commands/index.js"
+    },
+    "#cli/flows": {
+      "@sc4/dev": "./src/cli/flows/index.ts",
+      "default": "./lib/cli/flows/index.js"
+    },
     "#test/*": "./test/*"
   },
   "engines": {

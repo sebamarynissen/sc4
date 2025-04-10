@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"baseUrl": "./",
+		"customConditions": ["@sc4/dev"],
 		"paths": {
 			"sc4/core": ["src/core/index.ts"],
 			"sc4/utils": ["src/utils/index.ts"],

@@ -1,6 +1,6 @@
 // # new-submenu-flow.ts
-import * as prompts from '../prompts/index.js';
-import { type newSubmenu as command } from '../commands/index.js';
+import * as prompts from '#cli/prompts';
+import { newSubmenu as command } from '#cli/commands';
 import { randomId } from 'sc4/utils';
 
 // # newSubmenu()
