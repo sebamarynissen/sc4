@@ -102,6 +102,26 @@ export default class Savegame extends DBPF {
 		return 64*this.regionView.zSize;
 	}
 
+	// ## get tileWidth()
+	get tileWidth() {
+		return this.width;
+	}
+
+	// ## get tileDepth()
+	get tileDepth() {
+		return this.depth;
+	}
+
+	// ## get metricWidth()
+	get metricWidth() {
+		return 16*this.tileWidth;
+	}
+
+	// ## get tileDepth()
+	get metricDepth() {
+		return 16*this.tileDepth;
+	}
+
 	// ## createContext()
 	// Returns a Savegame context object that allows us to dereference pointers, 
 	// as well as generate new unique pointer addresses.
