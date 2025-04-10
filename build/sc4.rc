@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION     0,2,18,0
-PRODUCTVERSION  0,2,18,0
+FILEVERSION     %COMMA_VERSION%
+PRODUCTVERSION  %COMMA_VERSION%
 FILEOS          0x40004
 FILETYPE        0x1
 {
@@ -8,12 +8,13 @@ FILETYPE        0x1
   {
     BLOCK "040904b0"
     {
+      VALUE "CompanyName", "smf_16"
       VALUE "FileDescription", "sc4 cli tool"
-      VALUE "FileVersion", "0.2.18"
+      VALUE "FileVersion", "%SEMVER_VERSION%"
       VALUE "InternalName", "sc4"
       VALUE "OriginalFilename", "sc4.exe"
       VALUE "ProductName", "sc4 cli tool"
-      VALUE "ProductVersion", "0.2.18"
+      VALUE "ProductVersion", "%SEMVER_VERSION%"
     }
   }
   BLOCK "VarFileInfo"
