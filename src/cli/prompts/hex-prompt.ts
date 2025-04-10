@@ -4,8 +4,8 @@ import input from '@inquirer/input';
 // # hex(opts)
 // Helper function for requesting a single hexadecimal number as input, with 
 // validation.
-export function hex(opts) {
-	return input({
+export async function hex(opts: Omit<Parameters<typeof input>[0], 'validate'>) {
+	return +await input({
 		validate(input) {
 			if (!input.startsWith('0x')) {
 				return 'Please input a valid hexadecimal number';
