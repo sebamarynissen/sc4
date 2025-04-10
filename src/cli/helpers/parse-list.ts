@@ -1,8 +1,8 @@
 // # parse-list.js
 // Helper function that parses a list from an input string based on spaces or 
 // commas as separators.
-export default function parseStringToArray(input) {
-	const result = [];
+export default function parseStringToArray(input: string) {
+	const result: string[] = [];
 	let current = '';
 	let inQuotes = false;
 	let escapeNext = false;

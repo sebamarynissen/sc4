@@ -7,6 +7,7 @@ type NewSubmenuOptions = {
 	description?: string;
 	parent: number;
 	order: number;
+	buttonId: number;
 };
 
 // # newSubmenu(icon, options)
