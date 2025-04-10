@@ -2,5 +2,6 @@
 *.sublime-workspace
 dist/**
 lib/**
+.env
 
 test/output/**
