@@ -15,6 +15,8 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    env:
+      RESOURCE_HACKER_EXECUTABLE: .\reshack\ResourceHacker.exe
     outputs:
       url: ${{ steps.gh-release.outputs.upload_url }}
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release'))
@@ -52,6 +54,14 @@ jobs:
       # Push the version bump
       - name: Push version bump
         run: git push origin main
+
+      # Inject the icons & update the exe information with ResourceHacker.
+      - name: Install ResourceHacker
+        run: |
+          Invoke-WebRequest -Uri "http://www.angusj.com/resourcehacker/resource_hacker.zip" -OutFile "resource_hacker.zip"
+          Expand-Archive -Path "resource_hacker.zip" -DestinationPath "$PWD\reshack"
+      - name: Inject icons
+        run: npm run build:icons
 
       # Release baby
       - name: Create release
