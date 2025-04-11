@@ -370,10 +370,21 @@ export default class CityManager {
 		// the lot, orienting it and then adding the city offset to it.
 		let position = getOrientedPosition({ lot, lotObject })
 			.add([16*lot.minX, 0, 16*lot.minZ]);
-		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
+
+		// There are cases apparently where a prop has been misplaced, causing 
+		// it to fall outside the city. Props like these won't be added 
+		// obviously.
+		const { metricWidth, metricDepth } = this.city;
+		if (
+			position.x < 0 ||
+			position.y < 0 ||
+			position.x > metricWidth ||
+			position.z > metricDepth
+		) return false;
 
 		// At last insert the prop as well.
-		return this.createProp({
+		let exemplar = this.index.getHierarchicExemplar(exemplarEntry.read());
+		this.createProp({
 			exemplar,
 			tgi: new TGI(exemplarEntry.tgi),
 			position,
@@ -381,6 +392,7 @@ export default class CityManager {
 			OID,
 			lotType: 0x02,
 		});
+		return true;
 
 	}
 
