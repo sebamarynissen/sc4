@@ -120,6 +120,12 @@ async function start(n) {
 				await commands.plopAll(...args);
 			},
 		},
+		{
+			name: 'Edit sc4 configuration file',
+			async value() {
+				await commands.config();
+			},
+		},
 	];
 
 	// If the program was called with an existing SimCity 4 savegame, we'll 
