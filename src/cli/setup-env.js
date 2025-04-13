@@ -132,8 +132,19 @@ async function findResourceFile() {
 // # ensureFolder(name, paths)
 async function ensureFolder(name, paths) {
 	let folder = config.get(`folders.${name}`);
-	if (folder) return folder;
-	else if (folder === false) return process.cwd();
+
+	// If a folder was specified, but it does no longer exist, then we have to 
+	// look for it again, so don't return early.
+	if (folder) {
+		try {
+			await fs.promises.stat(folder);
+			return folder;
+		} catch (e) {
+			if (e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+	} else if (folder === false) return process.cwd();
 
 	// If the folder has not been set in the config, search for it in the 
 	// filesystem.
