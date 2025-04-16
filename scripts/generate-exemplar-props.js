@@ -91,6 +91,17 @@ obj.BuildingSubmenus = {
 	count: -1,
 	description: 'For use with Submenus DLL: the Button IDs of the submenus this building appears in if the DLL is loaded',
 };
+obj.BuildingStyles = {
+	id: 0xAA1DD400,
+	type: 'Uint32',
+	count: -1,
+	description: 'This property allows the building styles that are active when the Additional Building Styles DLL is installed to be specified separately from the Maxis building styles in the Occupant Groups property (0xAA1DD396).',
+};
+obj.BuildingIsWallToWall = {
+	id: 0xAA1DD401,
+	type: 'Boolean',
+	description: 'A value of true indicates that a building is W2W. If set to false or absent, a building is not considered W2W',
+};
 
 // Serialize to yaml, but make sure to transform to an *array*.
 let array = Object.entries(obj).map(([name, obj]) => {

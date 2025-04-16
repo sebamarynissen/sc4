@@ -12623,6 +12623,28 @@ export const ExemplarProperty = {
 		[kPropertyType]: [Uint32],
 		[kInspect]: inspector,
 	},
+	/**
+	 * This property allows the building styles that are active when the
+	 * Additional Building Styles DLL is installed to be specified separately
+	 * from the Maxis building styles in the Occupant Groups property
+	 * (0xAA1DD396).
+	 */
+	BuildingStyles: {
+		[kToPrimitive]: () => 0xaa1dd400,
+		[kPropertyId]: 0xaa1dd400,
+		[kPropertyType]: [Uint32],
+		[kInspect]: inspector,
+	},
+	/**
+	 * A value of true indicates that a building is W2W. If set to false or
+	 * absent, a building is not considered W2W
+	 */
+	BuildingIsWallToWall: {
+		[kToPrimitive]: () => 0xaa1dd401,
+		[kPropertyId]: 0xaa1dd401,
+		[kPropertyType]: Boolean,
+		[kInspect]: inspector,
+	},
 } as const;
 export default ExemplarProperty;
 
@@ -13946,7 +13968,8 @@ type StringKeys_08 =
 	| 'AuxiliaryModel3Key'
 	| 'SchoolCapacityChunkSize'
 	| 'ExemplarPatchTargets'
-	| 'BuildingSubmenus';
+	| 'BuildingSubmenus'
+	| 'BuildingStyles';
 
 type StringKeys_09 =
 	| 'IgnoreLotStateEffects'
@@ -14009,7 +14032,8 @@ type StringKeys_09 =
 	| 'ConditionalBuilding'
 	| 'NoShadows'
 	| 'KPropertyID_WaterFlora'
-	| 'RequiresPowerToAnimate';
+	| 'RequiresPowerToAnimate'
+	| 'BuildingIsWallToWall';
 
 type StringKeys_10 =
 	| 'PollutionAtCenter'
@@ -15362,6 +15386,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xec43826b
 		| 0x0062e78a
 		| 0xaa1dd399
+		| 0xaa1dd400
 		| StringKeys_08
 		? uint32[] :
 	T extends
@@ -15426,6 +15451,7 @@ export type ExemplarPropertyIdLikeToValueType<T, R = unknown> =
 		| 0xea3209f9
 		| 0xea346888
 		| 0xea5393ed
+		| 0xaa1dd401
 		| StringKeys_09
 		? boolean :
 	T extends
