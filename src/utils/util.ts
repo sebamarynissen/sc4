@@ -87,6 +87,13 @@ export const inspect = {
 			},
 		};
 	},
+	bigint(value: bigint) {
+		return {
+			[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: InspectOptionsStylized) {
+				return opts.stylize(`${value}n`, 'bigint');
+			},
+		};
+	},
 	tgi(object: Partial<TGILiteral>, label?: string) {
 		return {
 			[Symbol.for('nodejs.util.inspect.custom')](_depth: number, opts: InspectOptionsStylized, nodeInspect: Function) {
