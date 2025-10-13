@@ -8,7 +8,7 @@ import { program as commander, Command } from 'commander';
 import * as commands from '#cli/commands';
 import { DBPF, FileType } from 'sc4/core';
 import * as api from 'sc4/api';
-import { hex } from 'sc4/utils';
+import { hex, inspect } from 'sc4/utils';
 import * as parsers from './parsers.js';
 import version from './version.js';
 
@@ -235,20 +235,25 @@ export function factory(program) {
 			let byte = 'flag1 flag2 flag3 zoneType zoneWealth unknown5 orientation type debug'.split(' ');
 			function replacer(name, val) {
 				if (name === 'commuteBuffer') return val ? '...' : null;
-				else if (dword.includes(name)) return hex(val);
-				else if (byte.includes(name)) return hex(val, 2);
-				else if (word.includes(name)) return hex(val, 4);
+				else if (dword.includes(name)) return inspect.hex(val);
+				else if (byte.includes(name)) return inspect.hex(val, 2);
+				else if (word.includes(name)) return inspect.hex(val, 4);
+				else if (typeof val === 'bigint') return inspect.bigint(val);
 				else return val;
+			}
+			function transform(obj) {
+				const out = {};
+				for (let [key, value] of Object.entries(obj)) {
+					out[key] = replacer(key, value);
+				}
+				return out;
 			}
 
 			let dbpf = new DBPF(buff);
 			let lots = dbpf.find({ type: FileType.Lot }).read();
-			let all = [];
 			for (let lot of lots) {
-				let str = JSON.stringify(lot, replacer, 2);
-				all.push(str);
+				console.log(transform(lot));
 			}
-			console.log(all.join('\n\n-----------------\n\n'));
 
 		});
 
