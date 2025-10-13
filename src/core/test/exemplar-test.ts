@@ -92,6 +92,15 @@ describe('The Exemplar file', function() {
 
 	});
 
+	it('handles an exemplar where the property count is incorrect', function() {
+
+		let dbpf = new DBPF(resource('Escola primaria.dat'));
+		let entry = dbpf.find(0x6534284a, 0x33f97f68, 0x147ada3c)!;
+		let exemplar = entry.read();
+		expect(exemplar.properties).to.have.length(35);
+
+	});
+
 	it('reads & serializes LotObjects', function() {
 
 		let dbpf = new DBPF(resource('cement.SC4Lot'));
