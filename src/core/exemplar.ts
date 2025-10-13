@@ -301,10 +301,18 @@ abstract class BaseExemplar {
 		// Get the parent cohort TGI. Set to 0 in case of no parent.
 		this.parent = rs.tgi();
 
-		// Read all properties one by one.
+		// Read all properties one by one. Note: apparently it's possible that 
+		// an exemplar contains an incorrect "count". If that's the case, we 
+		// should handle this gracefully, so we always check for any remaining 
+		// bytes first.
 		const count = rs.uint32();
 		const props = this.properties = new Array(count);
 		for (let i = 0; i < count; i++) {
+			if (rs.remaining() < 4) {
+				console.warn(`Corrupt examplar detected! Property count of the exemplar is larger than the actual amount!`);
+				props.length = i;
+				break;
+			}
 			let prop = props[i] = new Property();
 			prop.parse(rs);
 		}
