@@ -11,6 +11,7 @@ import {
 	usePagination,
 	usePrefix,
 	useState,
+	type Theme,
 } from '@inquirer/core';
 import figures from '@inquirer/figures';
 import config from '#cli/config.js';
@@ -22,7 +23,7 @@ import { hex } from './hex-prompt.js';
 // A custom prompt that allows the user to select a certain menu. This is useful 
 // when adding lots to a menu, or when creating new submenus. Note that we will 
 // parse the existing menu items from the config as well!
-export async function menu(opts: { message: string }) {
+export async function menu(opts: { message: string }): Promise<number> {
 	const { message } = opts;
 	let menu = await menuPrompt({
 		message,
@@ -47,7 +48,7 @@ const menuTheme = {
 const CURSOR_HIDE = '\x1B[?25l';
 
 type Menu = {
-	[K: string]: Menu | string | number;
+	[K: string]: Menu | number | 'custom';
 };
 
 type MenuPromptConfig = {
@@ -55,11 +56,11 @@ type MenuPromptConfig = {
 	pageSize?: number;
 	loop?: boolean;
 	menu: Menu;
-	theme?: any;
+	theme?: Theme;
 };
 
 // # menuPrompt()
-const menuPrompt = createPrompt((config: MenuPromptConfig, done) => {
+const menuPrompt = createPrompt<number | 'custom', MenuPromptConfig>((config, done) => {
 
 	// Default config.
 	const {
