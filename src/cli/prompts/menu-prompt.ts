@@ -22,7 +22,7 @@ import { hex } from './hex-prompt.js';
 // A custom prompt that allows the user to select a certain menu. This is useful 
 // when adding lots to a menu, or when creating new submenus. Note that we will 
 // parse the existing menu items from the config as well!
-export async function menu(opts = {}) {
+export async function menu(opts: { message: string }) {
 	const { message } = opts;
 	let menu = await menuPrompt({
 		message,
@@ -46,8 +46,20 @@ const menuTheme = {
 };
 const CURSOR_HIDE = '\x1B[?25l';
 
+type Menu = {
+	[K: string]: Menu | string | number;
+};
+
+type MenuPromptConfig = {
+	message: string;
+	pageSize?: number;
+	loop?: boolean;
+	menu: Menu;
+	theme?: any;
+};
+
 // # menuPrompt()
-const menuPrompt = createPrompt((config, done) => {
+const menuPrompt = createPrompt((config: MenuPromptConfig, done) => {
 
 	// Default config.
 	const {
@@ -60,8 +72,8 @@ const menuPrompt = createPrompt((config, done) => {
 	const [status, setStatus] = useState('idle');
 	const prefix = usePrefix({ status, theme });
 	const [active, setActive] = useState(0);
-	const [path, setPath] = useState([]);
-	const [activePath, setActivePath] = useState([]);
+	const [path, setPath] = useState<string[]>([]);
+	const [activePath, setActivePath] = useState<number[]>([]);
 	let obj = getCurrentObject(menu, path);
 
 	// The `usePagination` hook can be used to easily render only a part of a 
@@ -77,7 +89,7 @@ const menuPrompt = createPrompt((config, done) => {
 			if (typeof value === 'object') {
 				line += '...';
 			}
-			const color = isActive ? theme.style.highlight : x => x;
+			const color = isActive ? theme.style.highlight : (x: any) => x;
 			const cursor = isActive ? theme.icon.cursor : ` `;
 			return color(`${cursor} ${line}`);
 		},
@@ -110,7 +122,7 @@ const menuPrompt = createPrompt((config, done) => {
 				let newPath = [...path];
 				newPath.pop();
 				let newActivePath = [...activePath];
-				setActive(newActivePath.pop());
+				setActive(newActivePath.pop()!);
 				setPath(newPath);
 				setActivePath(newActivePath);
 			}
@@ -139,10 +151,10 @@ const menuPrompt = createPrompt((config, done) => {
 
 });
 
-function getCurrentObject(items, path) {
+function getCurrentObject(items: Menu, path: string[]) {
 	let pivot = items;
 	for (let key of path) {
-		pivot = pivot[key];
+		pivot = pivot[key] as Menu;
 	}
 	return pivot;
 }
@@ -150,7 +162,7 @@ function getCurrentObject(items, path) {
 // # buildMenuOptions()
 // Merges the custom menus that we have stored with the well-known submenus (as 
 // defined here: https://github.com/memo33/submenus-dll#standard-submenus
-function buildMenuOptions() {
+function buildMenuOptions(): Menu {
 
 	// First we'll flatten the standard submenus into a format our tree build 
 	// function understands. Note that we use a dummy so that we can properly 
@@ -158,26 +170,27 @@ function buildMenuOptions() {
 	const dummy = { [kId]: Symbol(), rooted: Menu };
 	let flat = [...flatten(dummy), ...config.get('menus') || []];
 	let [rooted, ...orphans] = buildMenuTree(flat);
-	return convert([
-		...rooted.children,
-		orphans.length > 0 && {
+	const arr = [...rooted.children];
+	if (orphans.length > 0) {
+		arr.push({
 			item: {
 				id: Symbol(),
 				name: '(Orphaned menus)',
-			},
+			} as any,
 			children: orphans,
-		},
-	].filter(Boolean));
+		});
+	}
+	return convert(arr);
 
 }
 
-function convert(arr) {
+function convert(arr: ReturnType<typeof buildMenuTree>): Menu {
 	return Object.fromEntries(arr.map(node => {
 		let { item, children } = node;
 		if (children.length === 0) {
 			return [item.name, item.id];
 		}
-		let object = {};
+		let object: Menu = {};
 		if (typeof item.id !== 'symbol') {
 			object[rootKey] = item.id;
 		}
@@ -188,11 +201,11 @@ function convert(arr) {
 
 // # flatten(node)
 // Flattens a menu tree so that it can be parsed using our tree builder function.
-function flatten(node) {
+function flatten(node: any) {
 	let queue = [{ node, parent: null }];
 	let flat = [];
 	while (queue.length > 0) {
-		let { node, parent } = queue.shift();
+		let { node, parent } = queue.shift()!;
 		for (let key of Object.keys(node)) {
 			let value = node[key];
 			if (typeof value === 'object') {
