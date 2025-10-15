@@ -5,10 +5,9 @@ import PipeManager from 'sc4/api/pipe-manager.js';
 import verify from './verify-savegame.js';
 import logger from '#cli/logger.js';
 import backup from '#cli/backup.js';
-import 'sc4/utils/register';
 
 // # pipes(city)
-export async function pipes(city) {
+export async function pipes(city: string) {
 
 	// Verify that the city is a valid savegame.
 	let file = path.resolve(process.cwd(), city);

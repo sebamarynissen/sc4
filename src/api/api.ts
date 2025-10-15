@@ -12,7 +12,7 @@ type SaveOptions = {
 	output?: string;
 };
 
-type HistoricalOptions = {
+export type HistoricalOptions = {
 	dbpf: Savegame | string;
 	all?: boolean;
 	residential?: boolean;
@@ -74,7 +74,7 @@ export async function historical(opts: HistoricalOptions) {
 
 }
 
-type GrowifyOptions = {
+export type GrowifyOptions = {
 	dbpf: Savegame | string;
 	historical?: boolean;
 	residential?: number;

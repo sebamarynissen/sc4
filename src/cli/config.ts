@@ -2,7 +2,7 @@
 import Conf from 'conf';
 import { parse, Document, type YAMLSeq, type YAMLMap } from 'yaml';
 
-type MenuConfig = {
+export type MenuConfig = {
 	id: number;
 	parent: number;
 	name: string;

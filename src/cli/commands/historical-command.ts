@@ -5,8 +5,16 @@ import * as api from 'sc4/api';
 import logger from '#cli/logger.js';
 import backup from '#cli/backup.js';
 
+type HistoricalCommandOptions = {
+	all?: boolean;
+	residential?: boolean;
+	commercial?: boolean;
+	industrial?: boolean;
+	agricultural?: boolean;
+};
+
 // # historical(options)
-export async function historical(city, options) {
+export async function historical(city: string, options: HistoricalCommandOptions) {
 
 	// Verify that the city is a valid savegame.
 	let file = path.resolve(process.cwd(), city);
@@ -17,7 +25,7 @@ export async function historical(city, options) {
 	}
 
 	// Extract the api options.
-	const apiOptions = {
+	const apiOptions: api.HistoricalOptions = {
 		dbpf: file,
 		residential: options.residential || options.all,
 		commercial: options.commercial || options.all,

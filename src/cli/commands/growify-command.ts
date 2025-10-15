@@ -6,7 +6,16 @@ import * as api from 'sc4/api';
 import logger from '#cli/logger.js';
 import backup from '#cli/backup.js';
 
-export async function growify(city, options) {
+type GrowifyCommandOptions = {
+	output: string;
+	historical?: boolean;
+	residential?: true | string;
+	commercial?: true | string;
+	industrial?: true | string;
+	agricultural?: true | string;
+};
+
+export async function growify(city: string, options: GrowifyCommandOptions) {
 
 	// Ensure that the city is a valid savegame.
 	let file = path.resolve(process.cwd(), city);
@@ -16,7 +25,7 @@ export async function growify(city, options) {
 	}
 
 	// Convert the command options to options that the api accepts.
-	let apiOptions = {
+	let apiOptions: api.GrowifyOptions = {
 		logger,
 		dbpf: file,
 		output: options.output,
@@ -49,11 +58,17 @@ export async function growify(city, options) {
 
 }
 
-function getZoneType(types, density) {
+type ZoneTypes = {
+	l?: number;
+	m: number;
+	h: number;
+};
+
+function getZoneType(types: ZoneTypes, density: true | string) {
 	if (density === true) return types.m;
-	let type = types[density[0].toLowerCase()];
-	if (!type) {
+	let key = density[0].toLowerCase();
+	if (!(key in types)) {
 		throw new Error(`Unknown zone density ${density}!`);
 	}
-	return type;
+	return types[key as keyof ZoneTypes];
 }

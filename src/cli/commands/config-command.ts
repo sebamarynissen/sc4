@@ -1,7 +1,7 @@
-// # config-command.js
+// # config-command.ts
 import fs from 'node:fs';
 import { parse } from 'yaml';
-import configModule from '#cli/config.js';
+import configModule, { type Config } from '#cli/config.js';
 import * as prompts from '#cli/prompts';
 
 // # config()
@@ -9,7 +9,7 @@ import * as prompts from '#cli/prompts';
 export async function config() {
 	let modifiedConfig = await prompts.editor({
 		message: 'Modify, save and close the file to edit the config.',
-		default: fs.readFileSync(configModule.path),
+		default: String(fs.readFileSync(configModule.path)),
 		postfix: 'yaml',
 		validate(config) {
 			try {
@@ -20,7 +20,7 @@ export async function config() {
 			return true;
 		},
 	});
-	let parsed = parse(modifiedConfig);
+	let parsed = parse(modifiedConfig) as Config;
 	configModule.clear();
 	if (parsed) {
 		configModule.set(parsed);
