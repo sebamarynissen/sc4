@@ -3,11 +3,37 @@
 // api does the actual job, while the cli is merely responsible for the 
 // options parsing.
 import { fs } from 'sc4/utils';
-import { Savegame, SimGrid } from 'sc4/core';
+import { type Lot, Savegame, SimGrid } from 'sc4/core';
+
+type LogFunction = (str: string) => void;
+
+type Logger = {
+	ok: LogFunction;
+	info: LogFunction;
+	warn: LogFunction;
+	error: LogFunction;
+	log: LogFunction;
+};
+
+type SaveOptions = {
+	save?: boolean;
+	backup?: (dbpf: string, opts: any) => Promise<void>;
+	output?: string;
+};
+
+type HistoricalOptions = {
+	dbpf: Savegame | string;
+	all?: boolean;
+	residential?: boolean;
+	commercial?: boolean;
+	agricultural?: boolean;
+	industrial?: boolean;
+	logger?: Logger;
+} & SaveOptions;
 
 // # historical(opts)
 // The api function that makes buildings historical within a savegame.
-export async function historical(opts = {}) {
+export async function historical(opts: HistoricalOptions) {
 	
 	// Defaultize options.
 	const { logger = defaultLogger } = opts;
@@ -49,7 +75,7 @@ export async function historical(opts = {}) {
 		}
 		let { output = opts.dbpf } = opts;
 		logger.info(`Saving to ${output}`);
-		await dbpf.save({ file: output });
+		await dbpf.save({ file: output as string });
 	}
 
 	logger.ok('Done');
@@ -57,8 +83,18 @@ export async function historical(opts = {}) {
 
 }
 
+type GrowifyOptions = {
+	dbpf: Savegame | string;
+	historical?: boolean;
+	residential?: number;
+	commercial?: number;
+	industrial?: number;
+	agricultural?: number;
+	logger?: Logger;
+} & SaveOptions;
+
 // # growify(opts)
-export async function growify(opts = {}) {
+export async function growify(opts: GrowifyOptions) {
 	
 	// Defaultize options.
 	const { logger = defaultLogger } = opts;
@@ -66,12 +102,12 @@ export async function growify(opts = {}) {
 
 	// Get the SimGrid with the ZoneData information because that needs to be 
 	// updated as well.
-	let grid = dbpf.getSimGrid(SimGrid.ZoneData);
+	let grid = dbpf.getSimGrid(SimGrid.ZoneData)!;
 
 	// Helper function that will update the zoneType in the SimGrid as well 
 	// when growifying.
 	const { historical } = opts;
-	function setType(lot, zoneType) {
+	function setType(lot: Lot, zoneType: number) {
 		lot.zoneType = zoneType;
 		for (let x = lot.minX; x <= lot.maxX; x++) {
 			for (let z = lot.minZ; z <= lot.maxZ; z++) {
@@ -120,7 +156,7 @@ export async function growify(opts = {}) {
 		}
 		let { output = opts.dbpf } = opts;
 		logger.info(`Saving to ${output}`);
-		await dbpf.save({ file: output });
+		await dbpf.save({ file: output as string });
 	}
 
 	logger.ok('Done');
@@ -131,7 +167,7 @@ export async function growify(opts = {}) {
 
 // An object containing some default options, such as the logging functions 
 // etc.
-const defaultLogger = {
+const defaultLogger: Logger = {
 	ok: noop,
 	info: noop,
 	warn: noop,
@@ -141,7 +177,7 @@ const defaultLogger = {
 
 // # open(dbpf)
 // Helper function that opens up a savegame file.
-function open(dbpf) {
+function open(dbpf: Savegame | string): Savegame {
 	if (typeof dbpf === 'string') {
 		dbpf = new Savegame(fs.readFileSync(dbpf));
 	}
@@ -150,4 +186,4 @@ function open(dbpf) {
 
 // # noop()
 // Does nothing.
-function noop() {}
+function noop(_str: string) {}

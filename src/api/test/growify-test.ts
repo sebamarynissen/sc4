@@ -1,4 +1,4 @@
-// # growify-test.js
+// # growify-test.ts
 import { expect } from 'chai';
 import { growify } from '../api.js';
 import { resource } from '#test/files.js';

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import fs from 'node:fs';
 import * as api from '../api.js';
 import { resource } from '#test/files.js';
-import { Savegame, ZoneType } from 'sc4/core';
+import { type Lot, Savegame, ZoneType } from 'sc4/core';
 const { historical, growify } = api;
 
 describe('#historical()', function() {
@@ -78,7 +78,7 @@ describe('#growify', function() {
 
 		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
-		let plopped = new Set();
+		let plopped = new Set<Lot>();
 		for (let lot of dbpf.lots) {
 			if (lot.isPloppedResidential) plopped.add(lot);
 		}
@@ -102,7 +102,7 @@ describe('#growify', function() {
 
 		let buff = fs.readFileSync(resource('City - labP01.sc4'));
 		let dbpf = new Savegame(buff);
-		let plopped = new Set();
+		let plopped = new Set<Lot>();
 		for (let lot of dbpf.lots) {
 			if (lot.isPloppedIndustrial) plopped.add(lot);
 		}
@@ -126,7 +126,7 @@ describe('#growify', function() {
 
 		let buff = fs.readFileSync(resource('City - RCI.sc4'));
 		let dbpf = new Savegame(buff);
-		let plopped = new Set();
+		let plopped = new Set<Lot>();
 		for (let lot of dbpf.lots) {
 			if (lot.isPloppedAgricultural) plopped.add(lot);
 		}
