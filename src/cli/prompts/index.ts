@@ -12,7 +12,6 @@ export { default as number } from '@inquirer/number';
 export { default as select } from '@inquirer/select';
 export { default as editor } from '@inquirer/editor';
 export { default as checkbox, Separator } from '@inquirer/checkbox';
-export { default as nestedList } from './nested-list.js';
 export * from './hex-prompt.js';
 export * from './menu-prompt.js';
 export { menuIcon } from './menu-icon-prompt.js';
