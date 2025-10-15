@@ -1,3 +1,6 @@
+// IMPORTANT: this file is directly used in the browser without a build script, 
+// so it can't use TypeScript!
+
 // ## loadImage(url)
 // Loads an image object from the given url.
 function loadImage(url) {
