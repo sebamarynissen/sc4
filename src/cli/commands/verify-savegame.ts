@@ -1,8 +1,13 @@
-// # verify-savegame.js
+// # verify-savegame.ts
 import path from 'node:path';
 import fs from 'node:fs';
+import type { Logger } from 'sc4/types';
 
-export default function verifySavegame(city, opts) {
+type VerifySavegameOptions = {
+	logger: Logger;
+};
+
+export default function verifySavegame(city: string, opts: VerifySavegameOptions) {
 	let { logger } = opts;
 	let file = path.resolve(process.cwd(), city);
 	let ext = path.extname(file);

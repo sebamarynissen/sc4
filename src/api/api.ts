@@ -4,16 +4,7 @@
 // options parsing.
 import { fs } from 'sc4/utils';
 import { type Lot, Savegame, SimGrid } from 'sc4/core';
-
-type LogFunction = (str: string) => void;
-
-type Logger = {
-	ok: LogFunction;
-	info: LogFunction;
-	warn: LogFunction;
-	error: LogFunction;
-	log: LogFunction;
-};
+import type { Logger } from 'sc4/types';
 
 type SaveOptions = {
 	save?: boolean;
@@ -173,6 +164,13 @@ const defaultLogger: Logger = {
 	warn: noop,
 	error: noop,
 	log: noop,
+	progress: {
+		start: noop,
+		update: noop,
+		succeed: noop,
+		fail: noop,
+		warn: noop,
+	},
 };
 
 // # open(dbpf)
