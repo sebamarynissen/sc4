@@ -239,11 +239,25 @@ abstract class BaseExemplar {
 	}
 
 	// ## set(key, value)
-	// Updates the value of a rop by key.
-	set<K extends Key>(key: K, value: Value<K>): this {
+	// Updates the value of a prop by key.
+	set<K extends Key>(key: K, value: Value<K>, typeHint?: PropertyValueType): this {
 		let prop = this.prop(key);
 		if (prop) {
 			prop.value = value;
+		} else {
+			this.addProperty(key, value, typeHint);
+		}
+		return this;
+	}
+
+	// ## unset(key)
+	// Removes the given property again, if it exists.
+	unset<K extends Key>(key: K) {
+		const prop = this.prop(key);
+		if (prop) {
+			const index = this.properties.indexOf(prop);
+			this.properties.splice(index, 1);
+			this.#table.delete(prop.id);
 		}
 		return this;
 	}

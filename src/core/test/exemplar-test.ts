@@ -237,6 +237,64 @@ describe('The Exemplar file', function() {
 
 	});
 
+	describe('#addProperty()', function() {
+
+		it('automatically sets the correct type for a known property', function() {
+
+			const exemplar = new Exemplar();
+			exemplar.addProperty('Purpose', ExemplarProperty.Purpose.Manufacturing);
+
+			const prop = exemplar.prop('Purpose')!;
+			expect(prop.type).to.equal('Uint8');
+
+		});
+
+	});
+
+	describe('#set()', function() {
+
+		it('modifies an existing property', function() {
+
+			const exemplar = new Exemplar();
+			const prop = exemplar.addProperty('AllowJointOccupancy', true);
+			expect(prop.value).to.be.true;
+			exemplar.set('AllowJointOccupancy', false);
+			expect(prop.value).to.be.false;
+			expect(exemplar.properties).to.have.length(1);
+
+		});
+
+		it('adds the property if it does not exist yet', function() {
+
+			const exemplar = new Exemplar();
+			exemplar.set('Purpose', ExemplarProperty.Purpose.HighTech);
+
+			const prop = exemplar.prop('Purpose')!;
+			expect(prop).to.be.ok;
+			expect(prop.value).to.equal(ExemplarProperty.Purpose.HighTech);
+			expect(prop.type).to.equal('Uint8');
+
+		});
+
+	});
+
+	describe('#unset()', function() {
+
+		it('removes an existing property', function() {
+
+			const exemplar = new Exemplar();
+			exemplar.addProperty('LotResourceKey', 0x01234567);
+			expect(exemplar.properties).to.have.length(1);
+			expect(exemplar.get('LotResourceKey')).to.be.ok;
+
+			exemplar.unset('LotResourceKey');
+			expect(exemplar.properties).to.have.length(0);
+			expect(exemplar.prop('LotResourceKey')).to.be.undefined;
+
+		});
+
+	});
+
 	describe('#clone()', function() {
 
 		this.slow(200);
