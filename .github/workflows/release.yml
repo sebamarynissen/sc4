@@ -134,9 +134,7 @@ jobs:
         name: Read version
         uses: ./.github/actions/get-version
       - name: Publish
-        run: npm publish --provenance --tag ${{ steps.read-version.outputs.npm-tag }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        run: npm publish --tag ${{ steps.read-version.outputs.npm-tag }}
       - name: Remove latest tag
         if: steps.read-version.outputs.npm-tag == 'latest'
         continue-on-error: true
