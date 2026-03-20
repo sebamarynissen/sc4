@@ -33,6 +33,6 @@ export async function pluginsTrack(
 	let result = await tracker.track(patterns, {
 		dependencies,
 	});
-	result.dump({ format: options.tree ? 'tree' : 'sc4pac' });
+	await result.dump({ format: options.tree ? 'tree' : 'sc4pac' });
 
 }

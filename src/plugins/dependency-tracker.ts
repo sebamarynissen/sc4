@@ -771,15 +771,18 @@ class DependencyTrackingResult {
 		this.packages = [...new Set(packages)].sort() as string[];
 
 		// Filter out the missing dependencies so that we can easily list them 
-		// as well.
-		this.missing = ctx.missing;
+		// as well. Exclude anything included in a game resource file.
+		this.missing = ctx.missing.filter(dep => {
+			let file = dep.parent?.dbpf?.file ?? '';
+			return !file.match(/SimCity_\d\.dat/i);
+		});
 
 	}
 
 	// ## dump(opts)
 	// Creates a nice human-readable dump of the result. Various formats are 
 	// possible.
-	dump({ format = 'sc4pac' }: DependencyTrackingResultDumpOptions = {}) {
+	async dump({ format = 'sc4pac' }: DependencyTrackingResultDumpOptions = {}) {
 
 		// Show the installation and plugins folder.
 		const { bold, cyan, red, green } = chalk;
@@ -824,6 +827,37 @@ class DependencyTrackingResult {
 		// Always report any missing dependencies.
 		if (format === 'sc4pac' && this.missing.length > 0) {
 			console.log(red('The following dependencies were not found:'));
+
+			// Query the prop texture catalog API for any missing instance IIDs.
+			let uniqueIIDs = [...new Set(
+				this.missing
+					.filter(dep => dep.entry.instance !== undefined && dep.entry.instance !== 0)
+					.map(dep => hex(dep.entry.instance!)),
+			)];
+			let catalogPackages = new Map<string, string>();
+			if (uniqueIIDs.length > 0) {
+				try {
+					let url = `https://sc4proptexturecatalog-production.up.railway.app/api/iid?value=${uniqueIIDs.join(',')}`;
+					let response = await fetch(url);
+					if (response.ok) {
+						let results = await response.json() as Array<{
+							Package: string;
+							TGI: string;
+							Category: string;
+							ExemplarName: string | null;
+						}>;
+						for (let result of results) {
+							let parts = result.TGI.split(',').map((s: string) => s.trim());
+							let instance = parts[2]?.toLowerCase();
+							if (instance) {
+								catalogPackages.set(instance, result.Package);
+							}
+						}
+					}
+				} catch {
+					// Silently ignore API errors
+				}
+			}
 
 			// We'll filter out duplicate missing dependencies based on a hash. 
 			// That way, if a lot uses a missing prop 500 times, you won't get 
@@ -871,6 +905,10 @@ class DependencyTrackingResult {
 						entry.type !== u && (row.type = new Hex(entry.type));
 						entry.group !== u && (row.group = new Hex(entry.group));
 						entry.instance !== u && (row.instance = new Hex(entry.instance));
+						if (entry.instance !== u) {
+							let pkg = catalogPackages.get(hex(entry.instance!).toLowerCase());
+							if (pkg) row['sc4pac package'] = new CatalogPackage(pkg);
+						}
 					}
 					row['referenced by'] = new TableTGI(missing.parent.tgi);
 					if (missing.parent.dbpf.file) row.file = new File(missing.parent.dbpf.file);
@@ -937,5 +975,10 @@ class TableTGI {
 class Resource extends String {
 	[Symbol.for('nodejs.util.inspect.custom')]() {
 		return styleText('green', String(this));
+	}
+}
+class CatalogPackage extends String {
+	[Symbol.for('nodejs.util.inspect.custom')]() {
+		return styleText('cyan', String(this));
 	}
 }

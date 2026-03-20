@@ -24,7 +24,7 @@ export async function pluginsTrack() {
 		'simfox:day-and-nite-mod',
 	]);
 	result.packages = result.packages.filter(pkg => !exclude.has(pkg));
-	result.dump({ format: 'sc4pac' });
+	await result.dump({ format: 'sc4pac' });
 	console.log('\n');
 
 	// Ask whether we should show the dependency tree as well.
@@ -33,7 +33,7 @@ export async function pluginsTrack() {
 		default: false,
 	});
 	if (confirm) {
-		result.dump({ format: 'tree' });
+		await result.dump({ format: 'tree' });
 		console.log('\n');
 	}
 
