@@ -771,8 +771,11 @@ class DependencyTrackingResult {
 		this.packages = [...new Set(packages)].sort() as string[];
 
 		// Filter out the missing dependencies so that we can easily list them 
-		// as well.
-		this.missing = ctx.missing;
+		// as well. Exclude anything included in a game resource file.
+		this.missing = ctx.missing.filter(dep => {
+			let file = dep.parent?.dbpf?.file ?? '';
+			return !file.match(/SimCity_\d\.dat/i);
+		});
 
 	}
 
